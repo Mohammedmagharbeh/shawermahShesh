@@ -7,7 +7,7 @@ const {postEat,updatedfood,deletefood}=require('../controller/admincontroller')
 
 routes.post('/postfood',postEat)
 routes.put('/updatefood/:id',updatedfood)
-routes.delete('/deletefood/:id',deletefood)``
+routes.delete('/deletefood/:id',deletefood)
 
 
 
