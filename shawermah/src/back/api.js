@@ -4,3 +4,9 @@ const API=axios.create({
 })
 
 export const postregiter=(user)=>API.post('users/postuser',user)
+
+// for admin crud
+
+export const postNewfood=(food)=>API.post('/users/postuser',food)
+export const updateNewfood=(id,foodform)=>API.put(`/updatefood/:id/${id}`,foodform)
+export const deleteLastfood=(id)=>API.delete(`/deletefood/:id/${id}`)

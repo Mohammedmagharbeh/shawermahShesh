@@ -11,4 +11,4 @@ roul:{type:String,default:'user',required:true}
 })
 
 const user=moongoose.model('users',userShcsema)
-module.exports=user
+module.exports=user;

@@ -5,7 +5,7 @@ const dotenv=require('dotenv')
 const connectDB=require('./config/db')
 
 const userroutes=require('./routes/userroutes')
-
+const adminroutes=require('./routes/adminroutes')
 dotenv.config()
 const app=express();
 connectDB();
@@ -13,6 +13,10 @@ connectDB();
 app.use(bodyParse.json())
 app.use(cors());
 app.use('/api',userroutes)
+app.use('/api',adminroutes)
+
+
+
 
 
 module.exports=app; 

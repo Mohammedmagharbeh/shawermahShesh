@@ -22,6 +22,7 @@ function getStrengthColor(strength) {
     case 3: return '#ffdb4d';
     case 4: return '#a3ff4d';
     case 5: return '#4dff4d';
+    
     default: return '#ddd';
   }
 }
