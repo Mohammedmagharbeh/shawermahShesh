@@ -9,6 +9,5 @@ password2:{type:String,required:true},
 roul:{type:String,default:'user',required:true}
 
 })
-
 const user=moongoose.model('users',userShcsema)
 module.exports=user;
