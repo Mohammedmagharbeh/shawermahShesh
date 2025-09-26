@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const orders = require("../controller/orderController.js");
+
 const {
   createOrder,
   deleteOrder,
@@ -22,4 +22,4 @@ router.post("/post", createOrder);
 router.put("/:id", updateOrder);
 router.delete("/:id", deleteOrder);
 
-module.exports = router; 
+module.exports = router;
