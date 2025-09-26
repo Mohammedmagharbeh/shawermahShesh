@@ -90,9 +90,7 @@ exports.getAllProducts = async (req, res) => {
 
   const result = await products.find(query);
 
-  res
-    .status(200)
-    .json({ message: "products fetched successfully", data: result });
+  res.status(200).json({ message: "products fetched successfully", data: result });
 };
 
 exports.getSingleProduct = async (req, res) => {

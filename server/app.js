@@ -16,6 +16,8 @@ app.use(bodyParse.json());
 app.use(cors());
 app.use("/api", userroutes);
 app.use("/api/admin", adminroutes);
-app.use("/api/order", orderRoutes);
+
+app.use("/api/order",orderRoutes)
+
 
 module.exports = app;
