@@ -3,15 +3,7 @@ const cors = require("cors");
 const routes = express.Router();
 require("dotenv").config();
 
-const {
-  getuser,
-  postuser,
-  userLogin,
-  verify,
-  home,
-  getAllProducts,
-  getSingleProduct,
-} = require("../controller/usercontroller");
+const { getuser,postuser,userLogin,verify,home,getAllProducts, getSingleProduct,} = require("../controller/usercontroller");
 
 routes.get("/users", getuser);
 routes.post("/users/postuser", postuser);

@@ -1,31 +1,39 @@
-import { Schema, model } from "mongoose";
+const moongoose = require("mongoose");
 
-const orderssShcsema = new Schema(
+// القيم المسموح بها
+const ORDER_STATUSES = ["pending", "completed", "cancelled"];
+const PAYMENT_METHODS = ["cash", "card", "online"];
+const PAYMENT_STATUSES = ["unpaid", "paid"];
+
+const ordersSchema = new moongoose.Schema(
   {
     products: [
       {
-        productId: { type: Schema.Types.ObjectId, ref: "product" },
-        quantity: { type: Number, require: true, default: 1 },
+        productId: { type: moongoose.Schema.Types.ObjectId, ref: "product" },
+        quantity: { type: Number, required: true, default: 1 },
       },
     ],
-    totalPrice: { type: Number, require: true },
-    userId: { type: Schema.Types.ObjectId, ref: "users" },
+    totalPrice: { type: Number, required: true },
+    userId: { type: moongoose.Schema.Types.ObjectId, ref: "users" },
     status: {
       type: String,
       enum: ORDER_STATUSES,
       default: "pending",
     },
-    shippingAddress: { type: String, require: true },
+    shippingAddress: { type: String, required: true },
     paymentMethod: {
       type: String,
       enum: PAYMENT_METHODS,
-      require: true,
+      required: true,
     },
-    paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: "unpaid" },
+    paymentStatus: {
+      type: String,
+      enum: PAYMENT_STATUSES,
+      default: "unpaid",
+    },
   },
   { timestamps: true }
 );
 
-const orders = model("orders", orderssShcsema);
-
-export default orders;
+const orders = moongoose.model("orders", ordersSchema);
+module.exports = orders;

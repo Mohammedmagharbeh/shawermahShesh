@@ -10,3 +10,9 @@ export const postregiter=(user)=>API.post('users/postuser',user)
 export const postNewfood=(food)=>API.post('/users/postuser',food)
 export const updateNewfood=(id,foodform)=>API.put(`/updatefood/:id/${id}`,foodform)
 export const deleteLastfood=(id)=>API.delete(`/deletefood/:id/${id}`)
+
+
+// for order
+export const postNeworder=(order)=>API.post('/post',order)
+export const updateOrder=(id,order)=>API.put(`/:id/${id}`,order)
+export const deleteOrder=(id)=>API.delete(`/:id/${id}`)

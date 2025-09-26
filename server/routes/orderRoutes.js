@@ -1,18 +1,25 @@
-import express from "express";
-import {
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const orders = require("../controller/orderController.js");
+const {
   createOrder,
   deleteOrder,
   getAllOrders,
   getOrderById,
   getOrdersByUserId,
   updateOrder,
-} from "../controller/orderController";
+} = require("../controller/orderController.js");
+
+dotenv.config();
 
 const router = express.Router();
 
 router.get("/", getAllOrders);
 router.get("/:id", getOrderById);
 router.get("/user/:userId", getOrdersByUserId);
-router.post("/", createOrder);
+router.post("/post", createOrder);
 router.put("/:id", updateOrder);
 router.delete("/:id", deleteOrder);
+
+module.exports = router; 
