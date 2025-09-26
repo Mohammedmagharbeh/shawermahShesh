@@ -9,6 +9,7 @@ const productShcsema = new moongoose.Schema({
   description: { type: String, require: true },
 });
 
-const products = moongoose.model("product", productShcsema);
 
+
+const products = moongoose.model("product", productShcsema);
 module.exports = products;
