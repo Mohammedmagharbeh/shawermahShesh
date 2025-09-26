@@ -15,7 +15,7 @@ dotenv.config();
 
 const router = express.Router();
 
-router.get("/", getAllOrders);
+router.get("/get", getAllOrders);
 router.get("/:id", getOrderById);
 router.get("/user/:userId", getOrdersByUserId);
 router.post("/post", createOrder);
