@@ -5,6 +5,7 @@ const userShcsema = new moongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   password2: { type: String, required: true },
+  phone:{type:String , required:true, unique:true},
   role: { type: String, default: "user", required: true },
 });
 
