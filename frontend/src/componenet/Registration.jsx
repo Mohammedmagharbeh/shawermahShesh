@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { postregiter } from "../back/api";
-import '../css/register.css';
+import { postregiter } from "../../../shawermah/src/back/api";
 
 // دوال قوة كلمة المرور
 function calculatePasswordStrength(password) {

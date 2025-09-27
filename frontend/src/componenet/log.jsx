@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
-import '../css/log.css'; // تأكد من استيراد ملف الـ CSS
 
 function Login() {
   const [username, setsusername] = useState("");
