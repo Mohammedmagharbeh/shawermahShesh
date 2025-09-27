@@ -1,4 +1,4 @@
-const moongoose=require("moongoose");
+const moongoose = require("mongoose");
 
 const cartSchema=new moongoose.Schema({
     userId:{type:moongoose.Schema.Types.ObjectId,ref:"user",require:true},
