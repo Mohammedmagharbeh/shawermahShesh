@@ -21,7 +21,4 @@ app.use("/api/order",orderRoutes)
 app.use("/api/cart",cartRoutes)
 
 
-
-
-
 module.exports = app;
