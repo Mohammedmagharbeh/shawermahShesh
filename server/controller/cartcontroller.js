@@ -1,4 +1,6 @@
 const cart=require("../models/cart")
+const productsModel = require("../models/products");
+const userModel = require("../models/user");
 // for add to cart
 exports.addToCart=async(req,res)=>{
     const {userId,productId,quantity}=req.body;
@@ -95,9 +97,7 @@ exports.updatecart = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: error.message });
     }}
-const cart = require("../models/cart");
-const productsModel = require("../models/products");
-const userModel = require("../models/user");
+
 
 exports.addToCart = async (req, res) => {
   try {
