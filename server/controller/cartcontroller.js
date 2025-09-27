@@ -1,10 +1,20 @@
 const cart = require("../models/cart");
+const productsModel = require("../models/products");
 const userModel = require("../models/user");
 
 exports.addToCart = async (req, res) => {
-  const userId = req.params.userId;
-  const { productId, quantity } = req.body;
   try {
+    const userId = req.params.userId;
+    const { productId, quantity } = req.body;
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    const product = await productsModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "product not found" });
+    }
+
     let userCart = await cart.findOne({ userId });
     if (userCart) {
       const productIndex = userCart.products.findIndex(
@@ -30,8 +40,8 @@ exports.addToCart = async (req, res) => {
 };
 
 exports.getCart = async (req, res) => {
-  const userId = req.params.userId;
   try {
+    const userId = req.params.userId;
     const user = await userModel.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "user not found" });
@@ -51,8 +61,8 @@ exports.getCart = async (req, res) => {
 };
 
 exports.removeFromCart = async (req, res) => {
-  const { userId, productId } = req.body;
   try {
+    const { userId, productId } = req.body;
     const userCart = await cart.findOne({ userId });
     if (!userCart) {
       return res.status(404).json({ message: "cart not found" });
@@ -73,8 +83,8 @@ exports.removeFromCart = async (req, res) => {
 };
 
 exports.clearCart = async (req, res) => {
-  const userId = req.params.userId;
   try {
+    const userId = req.params.userId;
     const userCart = await cart.findOne({ userId });
     if (!userCart) {
       return res.status(404).json({ message: "cart not found" });
