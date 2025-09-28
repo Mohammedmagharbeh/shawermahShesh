@@ -16,8 +16,8 @@ const {
 const { generateOTP, sendOTP } = require("../utils/otp");
 const userModel = require("../models/user");
 
-// routes.get("/users", getuser);
-// routes.post("/users/postuser", postuser);
+routes.get("/users", getuser);
+routes.post("/users/postuser", postuser);
 
 routes.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -75,5 +75,9 @@ routes.post("/verify-otp", async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 });
+
+routes.get("/home", verify, home);
+routes.get("/products", getAllProducts);
+routes.get("/products/:id", getSingleProduct);
 
 module.exports = routes;
