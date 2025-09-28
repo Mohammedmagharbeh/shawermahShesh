@@ -36,11 +36,8 @@ const Cart = () => {
   return (
     <div className="w-full flex justify-center">
       <div className="w-full max-sm:max-w-full lg:max-w-[calc(100%-270px)] max-sm:mx-10">
-        <p className="text-start mb-20">
-          <span className="text-gray-400">Home /</span> Cart
-        </p>
         <div className="flex flex-col gap-10 p-4">
-          <div className="grid grid-cols-4 font-semibold text-gray-700 py-4 shadow-md border-gray-300 max-sm:hidden lg:grid">
+          <div className="grid grid-cols-4 font-semibold text-gray-700 py-4 shadow-md border-gray-300 max-sm:hidden ">
             <span>Product</span>
             <span className="text-center">Price</span>
             <span className="text-center">Quantity</span>

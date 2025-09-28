@@ -1,5 +1,3 @@
-import { useContext } from "react";
-
 function CartCard({ product }) {
   //   const handleQuantityChange = (e) => {
   //     const newQuantity = parseInt(e.target.value, 10) || 1;
@@ -16,7 +14,7 @@ function CartCard({ product }) {
   ).toFixed(2);
 
   return (
-    <div className="items-center p-4 shadow-md border-gray-200 max-sm:flex-col lg:grid max-sm:grid-cols-1 lg:grid-cols-4">
+    <div className="items-center p-4 shadow-md border-gray-200 grid max-sm:grid-cols-1 lg:grid-cols-4">
       <div className="flex items-center space-x-4">
         <button
           className="text-red-500 text-xl"
