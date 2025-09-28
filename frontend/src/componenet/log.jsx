@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
-
+  
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
