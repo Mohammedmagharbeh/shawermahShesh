@@ -1,31 +1,24 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import Home from './componenet/Home';
-import Login from './componenet/log';
-import Registration from './componenet/Registration';
+import Login from "./componenet/log";
+import Home from "./pages/Home";
+import Registration from "./componenet/Registration";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Cart from "./pages/Cart/Cart";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
- <div className="App">
-      
-      <BrowserRouter>
-      <Routes>
-
-        <Route path="/" element={<Home/>} />
-        <Route path="/Login" element={<Login />} />
-        <Route path="/Registration" element={<Registration />} />
-
-      </Routes>      
-      </BrowserRouter>
-
-
-    </div>    </>
-  )
+      <div className="App">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/Login" element={<Login />} />
+            <Route path="/Registration" element={<Registration />} />
+            <Route path="/cart" element={<Cart />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
+    </>
+  );
 }
 
-export default App
+export default App;

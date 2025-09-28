@@ -20,7 +20,11 @@ const ordersSchema = new moongoose.Schema(
       enum: ORDER_STATUSES,
       default: "pending",
     },
-    shippingAddress: { type: String, required: true },
+    shippingAddress: {
+      type: moongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "locations",
+    },
     paymentMethod: {
       type: String,
       enum: PAYMENT_METHODS,
