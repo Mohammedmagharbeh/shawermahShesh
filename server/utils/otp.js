@@ -1,4 +1,7 @@
 // utils/otp.js
+
+require("dotenv").config();
+
 const twilio = require("twilio");
 const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
@@ -6,10 +9,15 @@ const client = twilio(
 );
 
 function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000); // 6-digit
+  const random = Math.floor(100000 + Math.random() * 900000);
+  console.log(random);
+
+  return random; // 6-digit
 }
 
 async function sendOTP(phone, otp) {
+  console.log(otp);
+
   return client.messages.create({
     body: `Your Shawarma Sheesh OTP code is: ${otp}`,
     from: process.env.TWILIO_PHONE_NUMBER,

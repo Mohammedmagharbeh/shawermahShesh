@@ -15,6 +15,7 @@ const app = express();
 connectDB();
 
 app.use(bodyParse.json());
+app.use(bodyParse.urlencoded({ extended: true }));
 app.use(cors());
 app.use("/api", userroutes);
 app.use("/api/admin", adminroutes);

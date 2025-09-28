@@ -53,17 +53,20 @@ exports.userLogin = async (req, res) => {
   }
 };
 
-exports.verify = async (req, res, next) => {
+exports.verify = (req, res, next) => {
   try {
-    const token = req.header("Auth").replace("Baerer ", "");
-    if (!token) {
-      res.status(401).json({ message: "token not found" });
+    const authHeader = req.header("Authorization");
+    if (!authHeader) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
     }
-    const Varfied = jwt.verify(token, "goback");
-    req.user = Varfied.userId;
+
+    const token = authHeader.replace("Bearer ", "");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = decoded.id;
     next();
   } catch (error) {
-    res.status(401).json({ error: error.message });
+    res.status(401).json({ msg: "Token is not valid" });
   }
 };
 
@@ -90,7 +93,9 @@ exports.getAllProducts = async (req, res) => {
 
   const result = await products.find(query);
 
-  res.status(200).json({ message: "products fetched successfully", data: result });
+  res
+    .status(200)
+    .json({ message: "products fetched successfully", data: result });
 };
 
 exports.getSingleProduct = async (req, res) => {

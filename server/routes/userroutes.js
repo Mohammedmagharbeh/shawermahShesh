@@ -16,8 +16,8 @@ const {
 const { generateOTP, sendOTP } = require("../utils/otp");
 const userModel = require("../models/user");
 
-routes.get("/users", getuser);
-routes.post("/users/postuser", postuser);
+// routes.get("/users", getuser);
+// routes.post("/users/postuser", postuser);
 
 routes.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -44,7 +44,7 @@ routes.post("/login", async (req, res) => {
   }
 });
 
-// routes/auth.js
+// Verify OTP → issue JWT
 routes.post("/verify-otp", async (req, res) => {
   const { userId, otp } = req.body;
 
@@ -61,23 +61,19 @@ routes.post("/verify-otp", async (req, res) => {
     user.otpExpires = null;
     await user.save();
 
-    // issue JWT token for session
-    const jwt = require("jsonwebtoken");
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    // issue JWT token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET || "goback",
+      {
+        expiresIn: "7d",
+      }
+    );
 
     res.status(200).json({ msg: "Login successful", token });
-  } catch (error) {
-    res.status(500).json({ msg: error.message });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
   }
 });
-
-routes.get("/jwt", verify);
-routes.get("/home", verify, home);
-
-// Products routes
-routes.get("/", getAllProducts);
-routes.get("/:id", getSingleProduct);
 
 module.exports = routes;
