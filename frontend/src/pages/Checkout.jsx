@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCart } from "@/contexts/CartContext";
 
 const DETAILS = [
   { name: "First Name", label: "name", required: true, type: "text" },
@@ -15,35 +15,12 @@ const DETAILS = [
 ];
 
 function Checkout() {
-  const [cart, setCart] = useState([]);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("success");
-  const [total, setTotal] = useState(0);
-
-  const setOrdersItems = (order) => {
-    // Mock function for now
-    console.log("Order placed:", order);
-  };
+  const { cart, total } = useCart();
 
   const handlePlaceOrder = () => {
-    if (cart.length === 0) {
-      setShowAlert(true);
-      setAlertMessage("Cart is empty");
-      setAlertSeverity("error");
+    if (cart.products.length === 0) {
       return;
     }
-    const newOrder = {
-      items: cart,
-      total,
-      date: new Date().toISOString(),
-    };
-
-    setOrdersItems(newOrder);
-    setShowAlert(true);
-    setAlertMessage("Order Placed Successfully");
-    setAlertSeverity("success");
-    setCart([]);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -117,27 +94,30 @@ function Checkout() {
             </h2>
 
             <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                      🍕
+              {cart.products.map((product) => (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {product.productId.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Large • Qty: {product.quantity}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        Margherita Pizza
-                      </p>
-                      <p className="text-sm text-gray-500">Large • Qty: 1</p>
-                    </div>
+                    <span className="font-bold text-gray-900">
+                      ${product.productId.price}
+                    </span>
                   </div>
-                  <span className="font-bold text-gray-900">$24.99</span>
                 </div>
-              </div>
+              ))}
 
               <div className="space-y-3 pt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Subtotal:</span>
-                  <span className="font-semibold">$24.99</span>
+                  <span className="font-semibold">${total}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Delivery:</span>
@@ -145,7 +125,7 @@ function Checkout() {
                 </div>
                 <div className="flex justify-between items-center text-lg font-bold pt-3 border-t border-gray-200">
                   <span>Total:</span>
-                  <span className="text-red-600">$24.99</span>
+                  <span className="text-red-600">${total}</span>
                 </div>
               </div>
 
@@ -199,7 +179,7 @@ function Checkout() {
                 className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-red-600 hover:to-red-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
                 onClick={handlePlaceOrder}
               >
-                🍽️ Place Order - 24.99 JOD
+                🍽️ Place Order - {total} JOD
               </button>
 
               <p className="text-center text-sm text-gray-500 mt-4">
