@@ -107,7 +107,7 @@ export default function Home() {
                 size="sm"
                 className="relative border-red-700 text-red-700 hover:bg-red-50 bg-transparent"
               >
-                <Link to={"/cart"}>
+                <Link navigate to="/cart" className="flex items-center gap-1">
                   <ShoppingCart className="h-4 w-4" />
                   {cart.products.length > 0 && (
                     <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-700">
