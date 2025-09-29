@@ -79,23 +79,16 @@ exports.home = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
+// for home page to get all products
 exports.getAllProducts = async (req, res) => {
   const { category } = req.query;
-
   const normalizedCategory = category ? category.toLowerCase() : null;
-
   if (category && !CATEGORIES.includes(normalizedCategory)) {
     return res.status(400).json({ message: "Invalid category" });
   }
-
   const query = normalizedCategory ? { category: normalizedCategory } : {};
-
   const result = await products.find(query);
-
-  res
-    .status(200)
-    .json({ message: "products fetched successfully", data: result });
+  res.status(200).json({ message: "products fetched successfully", data: result });
 };
 
 exports.getSingleProduct = async (req, res) => {
@@ -105,9 +98,7 @@ exports.getSingleProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res
-      .status(200)
-      .json({ message: "Product fetched successfully", data: product });
+    res.status(200).json({ message: "Product fetched successfully", data: product });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
