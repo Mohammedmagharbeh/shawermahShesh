@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const DETAILS = [
   { name: "First Name", label: "name", required: true, type: "text" },
   { name: "Company Name", label: "company", required: false, type: "text" },
@@ -14,7 +16,16 @@ const DETAILS = [
 ];
 
 function Checkout() {
-  //   const { setOrdersItems } = useContext(OrdersContext);
+  const [cart, setCart] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState("success");
+  const [total, setTotal] = useState(0);
+
+  const setOrdersItems = (order) => {
+    // Mock function for now
+    console.log("Order placed:", order);
+  };
 
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
@@ -39,93 +50,164 @@ function Checkout() {
   };
 
   return (
-    <div className="max-sm:mx-20 md:mx-[135px] text-start py-20">
-      <h2 className="text-4xl mb-12">Billing Details</h2>
-
-      <div className="flex max-sm:flex-col max-sm:justify-center md:justify-between md:flex-row">
-        <div className="max-sm:w-full md:w-[500px]">
-          {DETAILS.map((detail, index) => (
-            <div key={index} className="flex flex-col">
-              <label htmlFor={detail.label}>
-                {detail.name}
-                <span className="text-button2">
-                  {detail.required ? "*" : ""}
-                </span>
-              </label>
-              <input
-                className="bg-secondary py-4 px-4 rounded-md mb-8"
-                id={detail.label}
-                type={detail.type}
-                required={detail.required}
-              />
-            </div>
-          ))}
-          <div className="flex gap-4 mb-10">
-            <input className="w-6 h-6" type="checkbox" name="save" id="save" />
-            <p>Save this information for faster check-out next time</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Complete Your Order
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Just a few more details and your delicious meal will be on its way!
+          </p>
         </div>
-        <div className="flex flex-col gap-8">
-          {/* {cart.map((product, index) => (
-            <div className="flex justify-between items-center" key={index}>
-              <div className="flex gap-6 items-center">
-                <img src={product.images[0]} alt="" width={70} />
-                <p>{product.title}</p>
+
+        <div className="grid lg:grid-cols-2 gap-12">
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-red-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+              <span className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                1
+              </span>
+              Delivery Details
+            </h2>
+
+            <div className="space-y-6">
+              {DETAILS.map((detail, index) => (
+                <div key={index} className="space-y-2">
+                  <label
+                    htmlFor={detail.label}
+                    className="block text-sm font-semibold text-gray-700"
+                  >
+                    {detail.name}
+                    {detail.required && (
+                      <span className="text-red-500 ml-1">*</span>
+                    )}
+                  </label>
+                  <input
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-gray-50 hover:bg-white"
+                    id={detail.label}
+                    type={detail.type}
+                    required={detail.required}
+                    placeholder={`Enter your ${detail.name.toLowerCase()}`}
+                  />
+                </div>
+              ))}
+
+              <div className="flex items-start gap-3 pt-4">
+                <input
+                  className="w-5 h-5 text-red-500 border-gray-300 rounded focus:ring-red-500 mt-0.5"
+                  type="checkbox"
+                  name="save"
+                  id="save"
+                />
+                <label
+                  htmlFor="save"
+                  className="text-sm text-gray-600 leading-relaxed"
+                >
+                  Save this information for faster checkout next time
+                </label>
               </div>
-              <span>${product.price * product.quantity}</span>
             </div>
-          ))} */}
-          <div className="flex justify-between items-center">
-            <span>Subtotal:</span>
-            {/* <span>${total}</span> */}
           </div>
-          <div className="w-full border-t border-black" />
-          <div className="flex justify-between items-center">
-            <span>Shipping:</span>
-            <span>Free</span>
-          </div>
-          <div className="w-full border-t border-black" />
-          <div className="flex justify-between items-center">
-            <span>Total:</span>
-            {/* <span>${total}</span> */}
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex gap-4">
-              <input
-                className="w-6 h-6 text-black"
-                id="bank"
-                name="PaymentMethod"
-                type="radio"
-              />
-              <label htmlFor="bank">Bank</label>
+
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-red-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+              <span className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                2
+              </span>
+              Order Summary
+            </h2>
+
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                      🍕
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        Margherita Pizza
+                      </p>
+                      <p className="text-sm text-gray-500">Large • Qty: 1</p>
+                    </div>
+                  </div>
+                  <span className="font-bold text-gray-900">$24.99</span>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-gray-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Subtotal:</span>
+                  <span className="font-semibold">$24.99</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Delivery:</span>
+                  <span className="font-semibold text-green-600">Free</span>
+                </div>
+                <div className="flex justify-between items-center text-lg font-bold pt-3 border-t border-gray-200">
+                  <span>Total:</span>
+                  <span className="text-red-600">$24.99</span>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-gray-200">
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Payment Method
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-red-300 transition-colors">
+                    <input
+                      className="w-4 h-4 text-red-500 border-gray-300 focus:ring-red-500"
+                      id="bank"
+                      name="PaymentMethod"
+                      type="radio"
+                      defaultChecked
+                    />
+                    <label
+                      htmlFor="bank"
+                      className="flex-1 font-medium text-gray-700"
+                    >
+                      Credit/Debit Card
+                    </label>
+                    <div className="flex gap-1">
+                      <div className="w-8 h-5 bg-blue-600 rounded text-white text-xs flex items-center justify-center font-bold">
+                        V
+                      </div>
+                      <div className="w-8 h-5 bg-red-600 rounded text-white text-xs flex items-center justify-center font-bold">
+                        M
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-red-300 transition-colors">
+                    <input
+                      className="w-4 h-4 text-red-500 border-gray-300 focus:ring-red-500"
+                      id="cash"
+                      name="PaymentMethod"
+                      type="radio"
+                    />
+                    <label
+                      htmlFor="cash"
+                      className="flex-1 font-medium text-gray-700"
+                    >
+                      Cash on Delivery
+                    </label>
+                    <span className="text-2xl">💵</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-red-600 hover:to-red-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
+                onClick={handlePlaceOrder}
+              >
+                🍽️ Place Order - 24.99 JOD
+              </button>
+
+              <p className="text-center text-sm text-gray-500 mt-4">
+                Your order will be prepared fresh and delivered in 25-35 minutes
+              </p>
             </div>
-            {/* <img src={payment} alt="" width={192} /> */}
           </div>
-          <div className="flex gap-4">
-            <input
-              className="w-6 h-6 text-black"
-              id="cash"
-              name="PaymentMethod"
-              type="radio"
-            />
-            <label htmlFor="cash">Cash On Delivery</label>
-          </div>
-          <div className="flex gap-4  max-sm:flex-col md:flex-row">
-            <input
-              className="py-4 px-6 bg-secondary rounded-md border border-black"
-              type="text"
-              placeholder="Coupon Code"
-            />
-            <button className="bg-button2 py-4 px-12 rounded-md text-white hover:bg-secondary hover:text-black hover:border hover:border-black transition-colors">
-              Apply Coupon
-            </button>
-          </div>
-          <button
-            className="bg-button2 py-4 px-12 rounded-md text-white hover:bg-secondary hover:text-black hover:border hover:border-black transition-colors"
-            onClick={handlePlaceOrder}
-          >
-            Place Order
-          </button>
         </div>
       </div>
     </div>

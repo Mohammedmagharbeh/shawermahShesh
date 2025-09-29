@@ -1,140 +1,10 @@
-// import { useParams } from "react-router-dom";
-// import { useEffect, useState } from "react";
-// import Loading from "../componenet/common/Loading";
-
-// function ProductView() {
-//   const { id } = useParams();
-//   const [product, setProduct] = useState({
-//     _id: "",
-//     name: "",
-//     price: 0,
-//     image: "",
-//     category: "",
-//     description: "",
-//   });
-//   const [quantity, setQuantity] = useState(1);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchProductDetails = async () => {
-//       try {
-//         setLoading(true);
-//         const response = await fetch(
-//           `http://localhost:5000/api/products/${id}`
-//         );
-//         if (!response.ok) {
-//           throw new Error("Failed to fetch product details");
-//         }
-//         const data = await response.json();
-//         setProduct(data.data);
-//       } catch (error) {
-//         console.error("Error fetching product details:", error);
-//         setProduct({
-//           _id: "",
-//           name: "",
-//           price: 0,
-//           image: "",
-//           category: "",
-//           description: "",
-//         });
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchProductDetails();
-
-//     window.scrollTo({ top: 0, behavior: "smooth" });
-//   }, [id]);
-
-//   const handleQuantityChange = (increment) => {
-//     setQuantity((prev) => Math.max(1, prev + increment));
-//   };
-
-//   if (loading) return <Loading />;
-
-//   return (
-//     <div className="flex flex-col max-sm:px-[72px] mx-[135px] py-20">
-//       <div className="flex gap-[30px] max-sm:flex-col md:flex-col lg:flex-row max-sm:items-center">
-//         <div className="min-w-[500px] min-h-[600px] max-w-[500px] max-h-[600px] bg-secondary overflow-hidden px-10">
-//           <img src={"src"} alt={product.name} className="" />
-//         </div>
-//         <div className="flex flex-col gap-4 text-start mx-[70px]">
-//           <h1 className="text-2xl font-semibold">{product.name}</h1>
-
-//           <p className="text-2xl">${product.price.toFixed(2)}</p>
-//           <p className="text-sm">{product.description}</p>
-//           <hr className="border-t border-gray-300 my-4" />
-
-//           {/* Color and Size Selection */}
-//           <div className="flex gap-4 items-center mb-10">
-//             <div className="flex items-center border">
-//               <button
-//                 className="border w-10 h-11 hover:bg-button2 hover:text-white transition-colors"
-//                 onClick={() => handleQuantityChange(-1)}
-//               >
-//                 <span className="text-xl">-</span>
-//               </button>
-//               <span className="w-20 text-center">{quantity}</span>
-//               <button
-//                 className="border w-10 h-11 hover:bg-button2 hover:text-white transition-colors"
-//                 onClick={() => handleQuantityChange(1)}
-//               >
-//                 <span className="text-xl">+</span>
-//               </button>
-//             </div>
-//             <button className="bg-button2 py-3 text-white rounded-md w-[165px] hover:bg-secondary hover:text-black border hover:border-black transition-colors">
-//               Add To Cart
-//             </button>
-//             <button
-//               className="border w-[40px] h-[40px] py-1 px-1 rounded-md"
-//               onClick={() => setWishListItems(product)}
-//             >
-//               <svg
-//                 width="22"
-//                 height="20"
-//                 viewBox="0 0 22 20"
-//                 // fill={`${
-//                 //   wishList.some((item) => item?.id === parseInt(id))
-//                 //     ? "#DB4444"
-//                 //     : "none"
-//                 // }`}
-//                 xmlns="http://www.w3.org/2000/svg"
-//                 className="hover:fill-button2 ml-1"
-//               >
-//                 <path
-//                   d="M6 1C3.239 1 1 3.216 1 5.95C1 8.157 1.875 13.395 10.488 18.69C10.6423 18.7839 10.8194 18.8335 11 18.8335C11.1806 18.8335 11.3577 18.7839 11.512 18.69C20.125 13.395 21 8.157 21 5.95C21 3.216 18.761 1 16 1C13.239 1 11 4 11 4C11 4 8.761 1 6 1Z"
-//                   stroke="black"
-//                   strokeWidth="1.5"
-//                   strokeLinecap="round"
-//                   strokeLinejoin="round"
-//                 />
-//               </svg>
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default ProductView;
-
 import { useEffect, useState } from "react";
-import {
-  Star,
-  Clock,
-  Flame,
-  Leaf,
-  Heart,
-  Plus,
-  Minus,
-  ShoppingCart,
-} from "lucide-react";
+import { Plus, Minus, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useParams } from "react-router-dom";
 import pizza from "../assets/pizza.jpg";
+import Loading from "@/componenet/common/Loading";
 
 function ProductView() {
   const { id } = useParams();
@@ -204,13 +74,7 @@ function ProductView() {
   //   ));
   // };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-      </div>
-    );
-  }
+  if (loading) return <Loading />;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 lg:px-8">

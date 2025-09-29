@@ -1,39 +1,68 @@
+import pizza from "../../assets/pizza.jpg";
+
 function CartCard({ product, handleQuantityChange, removeCartItem }) {
   return (
-    <div className="items-center p-4 shadow-md border-gray-200 grid max-sm:grid-cols-1 lg:grid-cols-4">
-      <div className="flex items-center space-x-4">
-        <button
-          className="text-red-500 text-xl"
-          onClick={() => removeCartItem(product.productId._id)}
-        >
-          ❌
-        </button>
-        <img
-          src={product?.images?.[0]}
-          alt={product.name}
-          className="w-12 h-12 object-cover"
-        />
-        <span>{product.productId.name}</span>
-      </div>
-      <div className="flex justify-between gap-4">
-        <span className="max-sm:block lg:hidden">Price:</span>
-        <span className="text-center">${product.productId.price}</span>
-      </div>
-      <div className="flex justify-between gap-4">
-        <span className="max-sm:block lg:hidden">Quantity:</span>
-        <input
-          type="number"
-          value={product.quantity}
-          onChange={(e) => handleQuantityChange(e, product.productId._id)}
-          className="w-16 px-2 py-1 border rounded text-center"
-          min="1"
-        />
-      </div>
-      <div className="flex justify-between gap-4">
-        <span className="max-sm:block lg:hidden">Total:</span>
-        <span className="text-center">
-          ${(product.productId.price * product.quantity).toFixed(2)}
-        </span>
+    <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
+        {/* Product Info */}
+        <div className="flex items-center space-x-4">
+          <button
+            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors duration-200"
+            onClick={() => removeCartItem(product.productId._id)}
+            aria-label="Remove item"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+          <div className="size-16 rounded-lg overflow-hidden bg-gray-100">
+            <img
+              src={product?.images?.[0] || pizza}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800 text-lg">
+              {product.productId.name}
+            </h3>
+            <p className="text-sm text-gray-500">Restaurant Special</p>
+          </div>
+        </div>
+
+        {/* Price */}
+        <div className="flex justify-between lg:justify-center items-center">
+          <span className="lg:hidden font-medium text-gray-600">Price:</span>
+          <span className="text-xl font-bold text-red-600">
+            {product.productId.price} JOD
+          </span>
+        </div>
+
+        {/* Quantity */}
+        <div className="flex justify-between lg:justify-center items-center">
+          <span className="lg:hidden font-medium text-gray-600">Quantity:</span>
+          <div className="flex items-center space-x-2">
+            <input
+              type="number"
+              value={product.quantity}
+              onChange={(e) => handleQuantityChange(e, product.productId._id)}
+              className="w-20 px-3 py-2 border-2 border-red-200 rounded-lg text-center font-semibold focus:border-red-500 focus:outline-none transition-colors"
+              min="1"
+            />
+          </div>
+        </div>
+
+        {/* Total */}
+        <div className="flex justify-between lg:justify-center items-center">
+          <span className="lg:hidden font-medium text-gray-600">Total:</span>
+          <span className="text-xl font-bold text-red-700">
+            {(product.productId.price * product.quantity).toFixed(2)} JOD
+          </span>
+        </div>
       </div>
     </div>
   );
