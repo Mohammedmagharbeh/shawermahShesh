@@ -34,9 +34,9 @@ exports.postuser = async (req, res) => {
 };
 
 exports.userLogin = async (req, res) => {
-  const { username, password } = req.body;
+  const { phone } = req.body;
   try {
-    const userLog = await user.findOne({ username });
+    const userLog = await user.findOne({ phone });
     if (!userLog) {
       return res.status(400).json({ message: "user not found" });
     }

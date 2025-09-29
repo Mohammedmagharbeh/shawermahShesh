@@ -19,7 +19,7 @@ export default function Home() {
     fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
       .then((data) => {
-        setProducts(data.data)
+        setProducts(data.data)  
         setFilteredProducts(data.data)
         const cats = ["الكل", ...new Set(data.data.map((p) => p.category))]
         setCategories(cats)
