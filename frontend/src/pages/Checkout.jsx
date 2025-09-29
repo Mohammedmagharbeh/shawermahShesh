@@ -2,7 +2,6 @@ import { useState } from "react";
 
 const DETAILS = [
   { name: "First Name", label: "name", required: true, type: "text" },
-  { name: "Company Name", label: "company", required: false, type: "text" },
   { name: "Street Address", label: "address", required: true, type: "text" },
   {
     name: "Apartment, floor, etc. (optional)",
@@ -10,7 +9,7 @@ const DETAILS = [
     required: false,
     type: "text",
   },
-  { name: "Town / City", label: "city", required: true, type: "text" },
+  { name: "Area", label: "area", required: true, type: "text" },
   { name: "Phone Number", label: "phone", required: true, type: "text" },
   { name: "Email Address", label: "email", required: true, type: "email" },
 ];

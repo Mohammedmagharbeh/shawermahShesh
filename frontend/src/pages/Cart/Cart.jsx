@@ -29,7 +29,7 @@ const Cart = () => {
       }
     };
     fetchCart();
-  }, [total]);
+  }, []);
 
   const handleQuantityChange = async (e, productId) => {
     try {
@@ -68,7 +68,7 @@ const Cart = () => {
       },
       body: JSON.stringify({
         userId: cart.userId,
-        productId: "68d780ffaf6e8cdb0b932f2f",
+        productId: productId,
       }),
     });
     if (!response.ok) {
@@ -76,23 +76,42 @@ const Cart = () => {
       return;
     }
     const data = await response.json();
-    setCart((prev) => ({
-      ...prev,
-      products: prev.products.filter((p) => p.productId._id !== productId),
-    }));
+    setCart(data.cart);
 
     console.log("Cart item removed:", data);
   };
 
   useEffect(() => {
-    const newTotal = cart.products.reduce((acc, product) => {
-      const price = product.productId.price;
-      return acc + price * product.quantity;
+    const subtotal = cart.products.reduce((sum, item) => {
+      const price = item.productId?.price || 0;
+      const qty = Number(item.quantity) || 0;
+      return sum + price * qty;
     }, 0);
-    setTotal(newTotal.toFixed(2));
+
+    setTotal(subtotal);
   }, [cart]);
 
   if (loading) return <Loading />;
+
+  if (cart.products.length === 0)
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 py-12 px-4">
+        <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            Your Cart is Empty
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Looks like you haven't added any items to your cart yet.
+          </p>
+          <Link
+            to="/"
+            className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
+            Start Shopping
+          </Link>
+        </div>
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 py-12">
@@ -119,10 +138,10 @@ const Cart = () => {
 
             {/* Cart Items */}
             <div className="space-y-4">
-              {cart.products.map((product, index) => (
+              {cart.products.map((product) => (
                 <CartCard
                   product={product}
-                  key={index}
+                  key={product.productId._id}
                   handleQuantityChange={handleQuantityChange}
                   removeCartItem={removeCartItem}
                 />
