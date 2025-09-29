@@ -2,94 +2,44 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CartCard from "./CartCard";
 import Loading from "../../componenet/common/Loading";
+import { useCart } from "@/contexts/CartContext";
 
 const Cart = () => {
-  const [total, setTotal] = useState(0);
-  const [cart, setCart] = useState({ _id: "", userId: "", products: [] });
+  const { cart, total } = useCart();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/cart/68d53731440f4c97ce2c036f`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch cart data");
-        }
-        const data = await response.json();
+  // useEffect(() => {
+  //   const fetchCart = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch(
+  //         `http://localhost:5000/api/cart/68d53731440f4c97ce2c036f`
+  //       );
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch cart data");
+  //       }
+  //       const data = await response.json();
 
-        setCart(data);
-      } catch (error) {
-        console.error("Error fetching cart data:", error);
-        setCart({ _id: "", userId: "", products: [] });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCart();
-  }, []);
+  //       setCart(data);
+  //     } catch (error) {
+  //       console.error("Error fetching cart data:", error);
+  //       setCart({ _id: "", userId: "", products: [] });
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchCart();
+  // }, []);
 
-  const handleQuantityChange = async (e, productId) => {
-    try {
-      const newQuantity = Number.parseInt(e.target.value, 10);
-      if (newQuantity >= 1) {
-        const response = await fetch(
-          `http://localhost:5000/api/cart/update/${cart._id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              productId: productId,
-              quantity: newQuantity,
-            }),
-          }
-        );
-        if (!response.ok) {
-          console.error("Failed to update cart item quantity");
-          return;
-        }
-        const data = await response.json();
-        setCart(data.cart);
-      }
-    } catch (error) {
-      console.error("Error updating cart item quantity:", error);
-    }
-  };
+  // useEffect(() => {
+  //   const subtotal = cart.products.reduce((sum, item) => {
+  //     const price = item.productId?.price || 0;
+  //     const qty = Number(item.quantity) || 0;
+  //     return sum + price * qty;
+  //   }, 0);
 
-  const removeCartItem = async (productId) => {
-    const response = await fetch(`http://localhost:5000/api/cart/remove`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: cart.userId,
-        productId: productId,
-      }),
-    });
-    if (!response.ok) {
-      console.error("Failed to remove cart item");
-      return;
-    }
-    const data = await response.json();
-    setCart(data.cart);
-
-    console.log("Cart item removed:", data);
-  };
-
-  useEffect(() => {
-    const subtotal = cart.products.reduce((sum, item) => {
-      const price = item.productId?.price || 0;
-      const qty = Number(item.quantity) || 0;
-      return sum + price * qty;
-    }, 0);
-
-    setTotal(subtotal);
-  }, [cart]);
+  //   setTotal(subtotal);
+  // }, [cart]);
 
   if (loading) return <Loading />;
 
@@ -139,12 +89,7 @@ const Cart = () => {
             {/* Cart Items */}
             <div className="space-y-4">
               {cart.products.map((product) => (
-                <CartCard
-                  product={product}
-                  key={product.productId._id}
-                  handleQuantityChange={handleQuantityChange}
-                  removeCartItem={removeCartItem}
-                />
+                <CartCard product={product} key={product.productId._id} />
               ))}
             </div>
           </div>

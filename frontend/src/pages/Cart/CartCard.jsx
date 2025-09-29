@@ -1,6 +1,8 @@
+import { useCart } from "@/contexts/CartContext";
 import pizza from "../../assets/pizza.jpg";
 
-function CartCard({ product, handleQuantityChange, removeCartItem }) {
+function CartCard({ product }) {
+  const { updateQuantity, removeFromCart } = useCart();
   return (
     <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
@@ -8,7 +10,7 @@ function CartCard({ product, handleQuantityChange, removeCartItem }) {
         <div className="flex items-center space-x-4">
           <button
             className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors duration-200"
-            onClick={() => removeCartItem(product.productId._id)}
+            onClick={() => removeFromCart(product.productId._id)}
             aria-label="Remove item"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -49,7 +51,12 @@ function CartCard({ product, handleQuantityChange, removeCartItem }) {
             <input
               type="number"
               value={product.quantity}
-              onChange={(e) => handleQuantityChange(e, product.productId._id)}
+              onChange={(e) =>
+                updateQuantity(
+                  product.productId._id,
+                  Number.parseInt(e.target.value, 10)
+                )
+              }
               className="w-20 px-3 py-2 border-2 border-red-200 rounded-lg text-center font-semibold focus:border-red-500 focus:outline-none transition-colors"
               min="1"
             />

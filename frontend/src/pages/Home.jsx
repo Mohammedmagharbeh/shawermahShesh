@@ -16,6 +16,7 @@ import {
   Heart,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCart } from "../contexts/CartContext";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -24,9 +25,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("الكل");
   const [searchTerm, setSearchTerm] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-
-  const userId = "68d53731440f4c97ce2c036f"; // بدّلها بالـ userId الحقيقي (ممكن تجيبها من localStorage بعد تسجيل الدخول)
+  const { addToCart, cart } = useCart();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
@@ -56,36 +55,6 @@ export default function Home() {
     }
     setFilteredProducts(filtered);
   }, [products, searchTerm, selectedCategory]);
-
-  const addToCart = async (productId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/cart/${userId}/add`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ productId, quantity: 1 }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setCartCount((prev) => prev + 1);
-        alert("تمت الإضافة إلى السلة ✅");
-        console.log("Cart updated:", data);
-      } else {
-        alert("خطأ: " + data.message);
-      }
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      // في حالة فشل الاتصال، أضف للعداد المحلي فقط
-      setCartCount((prev) => prev + 1);
-      alert("تمت الإضافة إلى السلة ✅");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background arabic-font">
@@ -137,9 +106,9 @@ export default function Home() {
               >
                 <Link to={"/cart"}>
                   <ShoppingCart className="h-4 w-4" />
-                  {cartCount > 0 && (
+                  {cart.products.length > 0 && (
                     <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-700">
-                      {cartCount}
+                      {cart.products.length}
                     </Badge>
                   )}
                 </Link>

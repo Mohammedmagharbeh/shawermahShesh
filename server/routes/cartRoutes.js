@@ -12,7 +12,7 @@ const {
 } = require("../controller/cartcontroller");
 
 routes.get("/:userId", getCart);
-routes.post("/:userId/add", addToCart);
+routes.post("/add/:userId", addToCart);
 routes.put("/update/:id", updateCart);
 routes.delete("/remove", removeFromCart);
 routes.delete("/clear/:userId", clearCart);

@@ -29,11 +29,13 @@ exports.addToCart = async (req, res) => {
     );
 
     if (!updatedCart) {
-      updatedCart = await cart.findOneAndUpdate(
-        { userId },
-        { $push: { products: { productId, quantity } } },
-        { upsert: true, new: true }
-      );
+      updatedCart = await cart
+        .findOneAndUpdate(
+          { userId },
+          { $push: { products: { productId, quantity } } },
+          { upsert: true, new: true }
+        )
+        .populate("products.productId");
     }
 
     return res.status(200).json({
