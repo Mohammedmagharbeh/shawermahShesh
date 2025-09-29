@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const {
   removeFromCart,
-  updatecart,
+  updateCart,
   clearCart,
   getCart,
   addToCart,
@@ -13,8 +13,8 @@ const {
 
 routes.get("/:userId", getCart);
 routes.post("/:userId/add", addToCart);
-routes.put("/updatecart/:id", updatecart);
-routes.delete("/deletecart", removeFromCart);
-routes.delete("/clearcart/:userId", clearCart);
+routes.put("/update/:id", updateCart);
+routes.delete("/remove", removeFromCart);
+routes.delete("/clear/:userId", clearCart);
 
 module.exports = routes;
