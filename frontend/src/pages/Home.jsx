@@ -449,7 +449,7 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [cartCount, setCartCount] = useState(0)
 
-  const userId = "67000e7f1234567890abcd12" // بدّلها بالـ userId الحقيقي (ممكن تجيبها من localStorage بعد تسجيل الدخول)
+  const userId = "68d53731440f4c97ce2c036f" // بدّلها بالـ userId الحقيقي (ممكن تجيبها من localStorage بعد تسجيل الدخول)
 
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
@@ -600,24 +600,10 @@ export default function Home() {
                   اطلب الآن
                   <ShoppingCart className="mr-2 h-5 w-5" />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-red-700 text-red-700 hover:bg-red-50 px-8 py-3 bg-transparent"
-                >
-                  <Heart className="ml-2 h-5 w-5" />
-                  تصفح القائمة
-                </Button>
+
               </div>
 
-              <div className="flex items-center justify-center lg:justify-start gap-4 mt-8">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600">4.9 من 5 (1,200+ تقييم)</span>
-              </div>
+              
             </div>
 
             <div className="relative">
@@ -651,7 +637,8 @@ export default function Home() {
             </div>
             <div>
               <div className="text-3xl font-bold mb-2">
-03:00صباحاً - 02:00بعد منتصف الليل
+
+                    09:00Am  -  03:00Am
 
               </div>
               <div className="text-red-100">خدمة التوصيل</div>
@@ -758,7 +745,7 @@ export default function Home() {
               </Badge>
               <h2 className="text-4xl font-bold mb-6 text-gray-900">تراث من النكهات الأصيلة</h2>
              <p className="text-lg text-gray-600 mb-8">
-  منذ 2021، نحرص على تقديم برغر وشاورما طازجة ولذيذة تجمع بين النكهة الأصيلة والجودة الممتازة 
+   نحرص على تقديم برغر وشاورما طازجة ولذيذة تجمع بين النكهة الأصيلة والجودة الممتازة 
 </p>
 
 
