@@ -35,6 +35,8 @@ export default function Home() {
         setFilteredProducts(data.data);
         const cats = ["الكل", ...new Set(data.data.map((p) => p.category))];
         setCategories(cats);
+        setProducts(data.data);
+        setFilteredProducts(data.data);
       })
       .catch((err) => {
         console.log("Error fetching products:", err);

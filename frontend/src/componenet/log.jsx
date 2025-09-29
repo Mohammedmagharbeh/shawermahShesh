@@ -85,12 +85,24 @@ function Login() {
             className="p-3 border border-gray-300 rounded-lg text-base focus:border-red-600 focus:outline-none focus:shadow-md placeholder:text-gray-500 text-right"
           />
 
-          <button
-            type="submit"
-            className="bg-red-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-red-700 transition"
-          >
-            تسجيل الدخول
-          </button>
+          <div className="flex gap-2 mt-4">
+            <button
+              type="submit"
+              className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold text-lg transition-transform hover:bg-red-700 hover:-translate-y-0.5"
+            >
+              تسجيل الدخول
+            </button>
+
+            {/* <motion.button
+              type="button"
+              onClick={() => navigate("/Registration")}
+              className="flex-1 bg-gray-600 text-white py-3 rounded-lg font-bold text-lg transition-transform hover:bg-gray-700 hover:-translate-y-0.5"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              انشاء حساب
+            </motion.button> */}
+          </div>
         </form>
       </div>
     </div>
