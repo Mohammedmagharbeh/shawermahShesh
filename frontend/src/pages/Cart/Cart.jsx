@@ -1,59 +1,119 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CartCard from "./CartCard";
+import Loading from "../../componenet/common/Loading";
 
 const Cart = () => {
   const [total, setTotal] = useState(0);
-
-  const cart = [
-    {
-      id: 1,
-      name: "Product 1",
-      price: 100,
-      discountPercentage: 10,
-      quantity: 2,
-      images: ["https://via.placeholder.com/150"],
-    },
-    {
-      id: 2,
-      name: "Product 2",
-      price: 200,
-      discountPercentage: 20,
-      quantity: 1,
-      images: ["https://via.placeholder.com/150"],
-    },
-  ];
+  const [cart, setCart] = useState({ _id: "", userId: "", products: [] });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const newTotal = cart.reduce((acc, product) => {
-      const discountPrice =
-        product.price - (product.price * product.discountPercentage) / 100;
-      return acc + discountPrice * product.quantity;
+    const fetchCart = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/cart/68d53731440f4c97ce2c036f`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch cart data");
+        }
+        const data = await response.json();
+
+        setCart(data);
+      } catch (error) {
+        console.error("Error fetching cart data:", error);
+        setCart({ _id: "", userId: "", products: [] });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCart();
+  }, [total]);
+
+  const handleQuantityChange = async (e, productId) => {
+    try {
+      const newQuantity = parseInt(e.target.value, 10);
+      if (newQuantity >= 1) {
+        const response = await fetch(
+          `http://localhost:5000/api/cart/update/${cart._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              productId: productId,
+              quantity: newQuantity,
+            }),
+          }
+        );
+        if (!response.ok) {
+          console.error("Failed to update cart item quantity");
+          return;
+        }
+        const data = await response.json();
+        setCart(data.cart);
+        // console.log("Cart item quantity updated:", data);
+      }
+    } catch (error) {
+      console.error("Error updating cart item quantity:", error);
+    }
+  };
+
+  const removeCartItem = async (productId) => {
+    const response = await fetch(`http://localhost:5000/api/cart/remove`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: cart.userId,
+        productId: "68d780ffaf6e8cdb0b932f2f",
+      }),
+    });
+    if (!response.ok) {
+      console.error("Failed to remove cart item");
+      return;
+    }
+    const data = await response.json();
+    // After removing item
+    setCart((prev) => ({
+      ...prev,
+      products: prev.products.filter((p) => p.productId._id !== productId),
+    }));
+
+    console.log("Cart item removed:", data);
+  };
+
+  useEffect(() => {
+    const newTotal = cart.products.reduce((acc, product) => {
+      const price = product.productId.price;
+      return acc + price * product.quantity;
     }, 0);
     setTotal(newTotal.toFixed(2));
-  }, [cart, setTotal]);
+  }, [cart]);
+
+  if (loading) return <Loading />;
 
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full flex justify-center py-20">
       <div className="w-full max-sm:max-w-full lg:max-w-[calc(100%-270px)] max-sm:mx-10">
-        <div className="flex flex-col gap-10 p-4">
+        <div className="flex flex-col gap-10 p-4 py-10">
           <div className="grid grid-cols-4 font-semibold text-gray-700 py-4 shadow-md border-gray-300 max-sm:hidden ">
             <span>Product</span>
             <span className="text-center">Price</span>
             <span className="text-center">Quantity</span>
             <span className="text-center">Subtotal</span>
           </div>
-          {cart.map((product, index) => (
-            <CartCard product={product} key={index} />
+          {cart.products.map((product, index) => (
+            <CartCard
+              product={product}
+              key={index}
+              handleQuantityChange={handleQuantityChange}
+              removeCartItem={removeCartItem}
+            />
           ))}
-        </div>
-        <div className="flex justify-between mb-20 gap-4 max-sm:flex-col lg:flex-row">
-          <button className="px-12 py-4 border border-black rounded-md hover:bg-button2 hover:text-white transition-colors">
-            Return To Shop
-          </button>
-          <button className="px-12 py-4 border border-black rounded-md hover:bg-button2 hover:text-white transition-colors">
-            Update Cart
-          </button>
         </div>
 
         <div className="flex justify-between mb-20 max-sm:flex-col lg:flex-row">

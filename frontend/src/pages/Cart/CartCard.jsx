@@ -1,24 +1,10 @@
-function CartCard({ product }) {
-  //   const handleQuantityChange = (e) => {
-  //     const newQuantity = parseInt(e.target.value, 10) || 1;
-  //     setCart((prevCart) =>
-  //       prevCart.map((item) =>
-  //         item.id === product.id ? { ...item, quantity: newQuantity } : item
-  //       )
-  //     );
-  //   };
-
-  const discountPrice = (
-    product.price -
-    (product.price * product.discountPercentage) / 100
-  ).toFixed(2);
-
+function CartCard({ product, handleQuantityChange, removeCartItem }) {
   return (
     <div className="items-center p-4 shadow-md border-gray-200 grid max-sm:grid-cols-1 lg:grid-cols-4">
       <div className="flex items-center space-x-4">
         <button
           className="text-red-500 text-xl"
-          //   onClick={() => removeCartItem(product.id)}
+          onClick={() => removeCartItem(product.productId._id)}
         >
           ❌
         </button>
@@ -27,18 +13,18 @@ function CartCard({ product }) {
           alt={product.name}
           className="w-12 h-12 object-cover"
         />
-        <span>{product.name}</span>
+        <span>{product.productId.name}</span>
       </div>
       <div className="flex justify-between gap-4">
         <span className="max-sm:block lg:hidden">Price:</span>
-        <span className="text-center">${discountPrice}</span>
+        <span className="text-center">${product.productId.price}</span>
       </div>
       <div className="flex justify-between gap-4">
         <span className="max-sm:block lg:hidden">Quantity:</span>
         <input
           type="number"
           value={product.quantity}
-          //   onChange={handleQuantityChange}
+          onChange={(e) => handleQuantityChange(e, product.productId._id)}
           className="w-16 px-2 py-1 border rounded text-center"
           min="1"
         />
@@ -46,7 +32,7 @@ function CartCard({ product }) {
       <div className="flex justify-between gap-4">
         <span className="max-sm:block lg:hidden">Total:</span>
         <span className="text-center">
-          ${(discountPrice * product.quantity).toFixed(2)}
+          ${(product.productId.price * product.quantity).toFixed(2)}
         </span>
       </div>
     </div>
