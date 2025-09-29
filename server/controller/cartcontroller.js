@@ -22,11 +22,13 @@ exports.addToCart = async (req, res) => {
       return res.status(400).json({ message: "Not enough stock available" });
     }
 
-    let updatedCart = await cart.findOneAndUpdate(
-      { userId, "products.productId": productId },
-      { $inc: { "products.$.quantity": quantity } },
-      { new: true }
-    );
+    let updatedCart = await cart
+      .findOneAndUpdate(
+        { userId, "products.productId": productId },
+        { $inc: { "products.$.quantity": quantity } },
+        { new: true }
+      )
+      .populate("products.productId");
 
     if (!updatedCart) {
       updatedCart = await cart
