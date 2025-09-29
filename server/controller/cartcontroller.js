@@ -8,7 +8,7 @@ exports.addToCart = async (req, res) => {
     const userId = req.params.userId;
     const { productId, quantity } = req.body;
 
-    if (!productId || !quantity || quantity <= 0) {
+    if (!productId || !quantity || isNaN(quantity) || quantity <= 0) {
       return res.status(400).json({ message: "Invalid productId or quantity" });
     }
 
@@ -22,18 +22,22 @@ exports.addToCart = async (req, res) => {
       return res.status(400).json({ message: "Not enough stock available" });
     }
 
-    let updatedCart = await cart.findOneAndUpdate(
-      { userId, "products.productId": productId },
-      { $inc: { "products.$.quantity": quantity } },
-      { new: true }
-    );
+    let updatedCart = await cart
+      .findOneAndUpdate(
+        { userId, "products.productId": productId },
+        { $inc: { "products.$.quantity": quantity } },
+        { new: true }
+      )
+      .populate("products.productId");
 
     if (!updatedCart) {
-      updatedCart = await cart.findOneAndUpdate(
-        { userId },
-        { $push: { products: { productId, quantity } } },
-        { upsert: true, new: true }
-      );
+      updatedCart = await cart
+        .findOneAndUpdate(
+          { userId },
+          { $push: { products: { productId, quantity } } },
+          { upsert: true, new: true }
+        )
+        .populate("products.productId");
     }
 
     return res.status(200).json({
@@ -52,7 +56,7 @@ exports.updateCart = async (req, res) => {
   const { productId, quantity } = req.body;
 
   try {
-    if (!productId || quantity == null) {
+    if (!productId || quantity == null || isNaN(quantity) || quantity <= 0) {
       return res
         .status(400)
         .json({ message: "productId and quantity are required" });
@@ -64,21 +68,19 @@ exports.updateCart = async (req, res) => {
     const productIndex = userCart.products.findIndex(
       (p) => p.productId.toString() === productId
     );
-    if (productIndex === -1) {
+    if (productIndex === -1)
       return res.status(404).json({ message: "Product not found in cart" });
-    }
 
-    if (quantity <= 0) {
-      userCart.products.splice(productIndex, 1);
-    } else {
-      userCart.products[productIndex].quantity = quantity;
-    }
+    userCart.products[productIndex].quantity = quantity;
 
-    const updatedCart = await userCart.save();
+    await userCart.save();
+
+    // populate productId before sending
+    await userCart.populate("products.productId");
 
     return res.status(200).json({
       message: "Cart updated successfully",
-      cart: updatedCart,
+      cart: userCart,
     });
   } catch (error) {
     console.error("Error in updateCart:", error);
@@ -107,8 +109,12 @@ exports.removeFromCart = async (req, res) => {
       return res.status(404).json({ message: "Product not found in cart" });
     }
 
+    // remove the product
     userCart.products.splice(productIndex, 1);
     await userCart.save();
+
+    // populate productId before sending
+    await userCart.populate("products.productId");
 
     return res.status(200).json({
       message: "Product removed from cart",

@@ -1,19 +1,31 @@
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Star, ShoppingCart, Clock, MapPin, Phone, Menu, X, ChefHat, Award, Users, Heart } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Star,
+  ShoppingCart,
+  Clock,
+  MapPin,
+  Phone,
+  Menu,
+  X,
+  ChefHat,
+  Award,
+  Users,
+  Heart,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { useCart } from "../contexts/CartContext";
 
 export default function Home() {
-  const [products, setProducts] = useState([])
-  const [filteredProducts, setFilteredProducts] = useState([])
-  const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState("الكل")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [cartCount, setCartCount] = useState(0)
-
-  const userId = "68d53731440f4c97ce2c036f" // بدّلها بالـ userId الحقيقي (ممكن تجيبها من localStorage بعد تسجيل الدخول)
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("الكل");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { addToCart, cart } = useCart();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
@@ -23,51 +35,29 @@ export default function Home() {
         setFilteredProducts(data.data)
         const cats = ["الكل", ...new Set(data.data.map((p) => p.category))]
         setCategories(cats)
+        setProducts(data.data);
+        setFilteredProducts(data.data);
+      
       })
       .catch((err) => {
-        console.log("Error fetching products:", err)
-        alert("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.")        
-      })
-  }, [])
+        console.log("Error fetching products:", err);
+        alert("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
+      });
+  }, []);
 
   useEffect(() => {
-    let filtered = products
+    let filtered = products;
 
     if (searchTerm.trim() !== "") {
-      filtered = filtered.filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter((p) =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
     if (selectedCategory !== "الكل") {
-      filtered = filtered.filter((p) => p.category === selectedCategory)
+      filtered = filtered.filter((p) => p.category === selectedCategory);
     }
-    setFilteredProducts(filtered)
-  }, [products, searchTerm, selectedCategory])
-
-  const addToCart = async (productId) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/cart/${userId}/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ productId, quantity: 1 }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setCartCount((prev) => prev + 1)
-        alert("تمت الإضافة إلى السلة ✅")
-        console.log("Cart updated:", data)
-      } else {
-        alert("خطأ: " + data.message)
-      }
-    } catch (error) {
-      console.error("Error adding to cart:", error)
-      // في حالة فشل الاتصال، أضف للعداد المحلي فقط
-      setCartCount((prev) => prev + 1)
-      alert("تمت الإضافة إلى السلة ✅")
-    }
-  }
+    setFilteredProducts(filtered);
+  }, [products, searchTerm, selectedCategory]);
 
   return (
     <div className="min-h-screen bg-background arabic-font">
@@ -85,16 +75,28 @@ export default function Home() {
             </div>
 
             <div className="hidden md:flex items-center gap-6">
-              <a href="#home" className="text-gray-700 hover:text-red-700 font-medium transition-colors">
+              <a
+                href="#home"
+                className="text-gray-700 hover:text-red-700 font-medium transition-colors"
+              >
                 الرئيسية
               </a>
-              <a href="#menu" className="text-gray-700 hover:text-red-700 font-medium transition-colors">
+              <a
+                href="#menu"
+                className="text-gray-700 hover:text-red-700 font-medium transition-colors"
+              >
                 القائمة
               </a>
-              <a href="#about" className="text-gray-700 hover:text-red-700 font-medium transition-colors">
+              <a
+                href="#about"
+                className="text-gray-700 hover:text-red-700 font-medium transition-colors"
+              >
                 من نحن
               </a>
-              <a href="#contact" className="text-gray-700 hover:text-red-700 font-medium transition-colors">
+              <a
+                href="#contact"
+                className="text-gray-700 hover:text-red-700 font-medium transition-colors"
+              >
                 اتصل بنا
               </a>
             </div>
@@ -105,16 +107,27 @@ export default function Home() {
                 size="sm"
                 className="relative border-red-700 text-red-700 hover:bg-red-50 bg-transparent"
               >
-                <ShoppingCart className="h-4 w-4" />
-                {cartCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-700">
-                    {cartCount}
-                  </Badge>
-                )}
+                <Link to={"/cart"}>
+                  <ShoppingCart className="h-4 w-4" />
+                  {cart.products.length > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-700">
+                      {cart.products.length}
+                    </Badge>
+                  )}
+                </Link>
               </Button>
 
-              <Button variant="ghost" size="sm" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="md:hidden"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
               </Button>
             </div>
           </div>
@@ -122,16 +135,28 @@ export default function Home() {
           {isMenuOpen && (
             <div className="md:hidden mt-4 pb-4 border-t border-gray-200">
               <div className="flex flex-col gap-4 pt-4">
-                <a href="#home" className="text-gray-700 hover:text-red-700 font-medium">
+                <a
+                  href="#home"
+                  className="text-gray-700 hover:text-red-700 font-medium"
+                >
                   الرئيسية
                 </a>
-                <a href="#menu" className="text-gray-700 hover:text-red-700 font-medium">
+                <a
+                  href="#menu"
+                  className="text-gray-700 hover:text-red-700 font-medium"
+                >
                   القائمة
                 </a>
-                <a href="#about" className="text-gray-700 hover:text-red-700 font-medium">
+                <a
+                  href="#about"
+                  className="text-gray-700 hover:text-red-700 font-medium"
+                >
                   من نحن
                 </a>
-                <a href="#contact" className="text-gray-700 hover:text-red-700 font-medium">
+                <a
+                  href="#contact"
+                  className="text-gray-700 hover:text-red-700 font-medium"
+                >
                   اتصل بنا
                 </a>
               </div>
@@ -140,7 +165,10 @@ export default function Home() {
         </div>
       </nav>
 
-      <section id="home" className="pt-24 pb-16 bg-gradient-to-br from-red-50 to-white">
+      <section
+        id="home"
+        className="pt-24 pb-16 bg-gradient-to-br from-red-50 to-white"
+      >
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[70vh]">
             <div className="text-center lg:text-right">
@@ -156,18 +184,19 @@ export default function Home() {
               </h1>
 
               <p className="text-lg text-gray-600 mb-8 max-w-lg mx-auto lg:mx-0">
-                نقدم لكم أشهى أنواع الشاورما والشيش المحضرة بأجود المكونات وأفضل الطرق التقليدية
+                نقدم لكم أشهى أنواع الشاورما والشيش المحضرة بأجود المكونات وأفضل
+                الطرق التقليدية
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button size="lg" className="bg-red-700 hover:bg-red-800 text-white px-8 py-3">
+                <Button
+                  size="lg"
+                  className="bg-red-700 hover:bg-red-800 text-white px-8 py-3"
+                >
                   اطلب الآن
                   <ShoppingCart className="mr-2 h-5 w-5" />
                 </Button>
-
               </div>
-
-              
             </div>
 
             <div className="relative">
@@ -177,7 +206,9 @@ export default function Home() {
                 className="rounded-2xl shadow-xl w-full h-auto"
               />
               <div className="absolute top-4 right-4">
-                <Badge className="bg-red-700 text-white px-3 py-1">طازج يومياً</Badge>
+                <Badge className="bg-red-700 text-white px-3 py-1">
+                  طازج يومياً
+                </Badge>
               </div>
             </div>
           </div>
@@ -200,11 +231,7 @@ export default function Home() {
               <div className="text-red-100">مكونات طازجة</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">
-
-                    09:00Am  -  03:00Am
-
-              </div>
+              <div className="text-3xl font-bold mb-2">09:00Am - 03:00Am</div>
               <div className="text-red-100">خدمة التوصيل</div>
             </div>
           </div>
@@ -218,7 +245,9 @@ export default function Home() {
               <ChefHat className="h-4 w-4 ml-2" />
               قائمة الطعام
             </Badge>
-            <h2 className="text-4xl font-bold mb-4 text-gray-900">تشكيلتنا المميزة</h2>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">
+              تشكيلتنا المميزة
+            </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               اختر من تشكيلة واسعة من أشهى الأطباق المحضرة بعناية فائقة
             </p>
@@ -267,16 +296,24 @@ export default function Home() {
                       className="w-full h-48 object-cover"
                     />
                     <div className="absolute top-3 right-3">
-                      <Badge className="bg-red-700 text-white">{product.category}</Badge>
+                      <Badge className="bg-red-700 text-white">
+                        {product.category}
+                      </Badge>
                     </div>
                   </div>
 
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2 text-gray-900">{product.name}</h3>
-                    <p className="text-gray-600 mb-4 text-sm">{product.description}</p>
+                    <h3 className="text-xl font-bold mb-2 text-gray-900">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 mb-4 text-sm">
+                      {product.description}
+                    </p>
 
                     <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold text-red-700">{product.price} د.أ</div>
+                      <div className="text-2xl font-bold text-red-700">
+                        {product.price} د.أ
+                      </div>
                       <Button
                         onClick={() => addToCart(product._id)}
                         className="bg-red-700 hover:bg-red-800 text-white px-6 py-2"
@@ -293,7 +330,9 @@ export default function Home() {
             <div className="text-center py-16">
               <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-2xl font-bold mb-2">لا توجد نتائج</h3>
-              <p className="text-gray-600">جرب البحث بكلمات أخرى أو اختر تصنيف مختلف</p>
+              <p className="text-gray-600">
+                جرب البحث بكلمات أخرى أو اختر تصنيف مختلف
+              </p>
             </div>
           )}
         </div>
@@ -307,11 +346,13 @@ export default function Home() {
                 <Heart className="h-4 w-4 ml-2" />
                 قصتنا
               </Badge>
-              <h2 className="text-4xl font-bold mb-6 text-gray-900">تراث من النكهات الأصيلة</h2>
-             <p className="text-lg text-gray-600 mb-8">
-   نحرص على تقديم برغر وشاورما طازجة ولذيذة تجمع بين النكهة الأصيلة والجودة الممتازة 
-</p>
-
+              <h2 className="text-4xl font-bold mb-6 text-gray-900">
+                تراث من النكهات الأصيلة
+              </h2>
+              <p className="text-lg text-gray-600 mb-8">
+                نحرص على تقديم برغر وشاورما طازجة ولذيذة تجمع بين النكهة الأصيلة
+                والجودة الممتازة
+              </p>
 
               <div className="grid grid-cols-3 gap-6 mb-8">
                 <div className="text-center">
@@ -357,44 +398,44 @@ export default function Home() {
               <Phone className="h-4 w-4 ml-2" />
               تواصل معنا
             </Badge>
-            <h2 className="text-4xl font-bold mb-4 text-gray-900">نحن في خدمتكم</h2>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">
+              نحن في خدمتكم
+            </h2>
             <p className="text-lg text-gray-600">فريقنا جاهز لخدمتكم</p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-           <Card className="text-center p-8 border-0 shadow-lg bg-white">
-  <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-    <a
-      href="https://maps.app.goo.gl/krQ9B5eYkjgVz9es6?g_st=iw"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <MapPin className="h-8 w-8 text-red-700 cursor-pointer hover:scale-110 transition" />
-    </a>
-  </div>
-  <h3 className="text-xl font-bold mb-4">موقعنا</h3>
-  <p className="text-gray-600">
-    العقبة، سوق الثامنة
-    <br />
-    شارع الملك فيصل
-  </p>
-</Card>
-
+            <Card className="text-center p-8 border-0 shadow-lg bg-white">
+              <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <a
+                  href="https://maps.app.goo.gl/krQ9B5eYkjgVz9es6?g_st=iw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MapPin className="h-8 w-8 text-red-700 cursor-pointer hover:scale-110 transition" />
+                </a>
+              </div>
+              <h3 className="text-xl font-bold mb-4">موقعنا</h3>
+              <p className="text-gray-600">
+                العقبة، سوق الثامنة
+                <br />
+                شارع الملك فيصل
+              </p>
+            </Card>
 
             <a href="tel:+96332019099">
-  <Card className="text-center p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition">
-    <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-      <Phone className="h-8 w-8 text-red-700" />
-    </div>
-    <h3 className="text-xl font-bold mb-4">اتصل بنا</h3>
-    <p className="text-gray-600">
-      (03) 201 9099
-      <br />
-      للطلبات والاستفسارات
-    </p>
-  </Card>
-</a>
-
+              <Card className="text-center p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition">
+                <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <Phone className="h-8 w-8 text-red-700" />
+                </div>
+                <h3 className="text-xl font-bold mb-4">اتصل بنا</h3>
+                <p className="text-gray-600">
+                  (03) 201 9099
+                  <br />
+                  للطلبات والاستفسارات
+                </p>
+              </Card>
+            </a>
 
             <Card className="text-center p-8 border-0 shadow-lg bg-white">
               <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -430,20 +471,24 @@ export default function Home() {
               <div className="flex items-center gap-2">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                    <Star
+                      key={i}
+                      className="h-5 w-5 text-yellow-400 fill-current"
+                    />
                   ))}
                 </div>
                 <span className="text-gray-400">4.9 من 5 نجوم</span>
               </div>
-             
             </div>
 
             <div className="border-t border-gray-800 pt-6">
-              <p className="text-gray-500 text-sm">© 2025 شاورما شيش. جميع الحقوق محفوظة.</p>
+              <p className="text-gray-500 text-sm">
+                © 2025 شاورما شيش. جميع الحقوق محفوظة.
+              </p>
             </div>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }
