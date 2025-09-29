@@ -2,23 +2,54 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
-  
+import { useUser } from "@/contexts/UserContext";
+import toast from "react-hot-toast";
+
 function Login() {
   const [phone, setphone] = useState("");
   const navigate = useNavigate();
+  const { login } = useUser();
+
+  const formatPhone = (phone) => {
+    let cleaned = phone.trim();
+    if (cleaned.startsWith("0")) {
+      cleaned = cleaned.slice(1);
+    }
+    return `+962${cleaned}`;
+  };
 
   const Loginhandler = async (e) => {
     e.preventDefault();
+
+    const formattedPhone = formatPhone(phone);
     try {
+      const token = sessionStorage.getItem("jwt"); // get token if exists
+
       const res = await axios.post("http://127.0.0.1:5000/api/login", {
-        phone
+        phone: formattedPhone,
+        token,
       });
-      sessionStorage.setItem("jwt", res.data.token);
-      sessionStorage.setItem("phone", phone);
-      alert("تم تسجيل الدخول بنجاح");
-      navigate("/");
+
+      // If token valid → login directly
+      if (res.data.token) {
+        login({
+          _id: res.data._id,
+          phone: formattedPhone,
+          token: res.data.token,
+        });
+        toast.success("تم تسجيل الدخول بنجاح");
+        navigate("/");
+        return;
+      }
+
+      // If OTP required
+      if (res.data.msg === "OTP sent to your phone") {
+        toast.success("تم إرسال رمز التحقق 📲");
+        navigate("/otp-verification", { state: { phone: formattedPhone } });
+      }
     } catch (error) {
       console.error(error);
+      toast.error("حدث خطأ أثناء تسجيل الدخول ❌");
     }
   };
 
@@ -39,13 +70,13 @@ function Login() {
           }}
         />
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 relative after:content-[''] after:block after:w-16 after:h-[3px] after:bg-red-600 after:mx-auto after:mt-2 rounded">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">
           Welcome to شاورما شيش
         </h1>
 
         <form onSubmit={Loginhandler} className="flex flex-col gap-4">
           <input
-            type="phone"
+            type="tel"
             placeholder=" رقم الهاتف"
             value={phone}
             maxLength={10}
@@ -54,25 +85,12 @@ function Login() {
             className="p-3 border border-gray-300 rounded-lg text-base focus:border-red-600 focus:outline-none focus:shadow-md placeholder:text-gray-500 text-right"
           />
 
-
-          <div className="flex gap-2 mt-4">
-            <button
-              type="submit"
-              className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold text-lg transition-transform hover:bg-red-700 hover:-translate-y-0.5"
-            >
-              تسجيل الدخول
-            </button>
-
-            {/* <motion.button
-              type="button"
-              onClick={() => navigate("/Registration")}
-              className="flex-1 bg-gray-600 text-white py-3 rounded-lg font-bold text-lg transition-transform hover:bg-gray-700 hover:-translate-y-0.5"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              انشاء حساب
-            </motion.button> */}
-          </div>
+          <button
+            type="submit"
+            className="bg-red-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-red-700 transition"
+          >
+            تسجيل الدخول
+          </button>
         </form>
       </div>
     </div>

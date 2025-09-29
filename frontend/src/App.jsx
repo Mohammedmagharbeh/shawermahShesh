@@ -5,23 +5,29 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Cart from "./pages/Cart/Cart";
 import Checkout from "./pages/Checkout";
 import ProductView from "./pages/ProductView";
+import OtpVerification from "./componenet/OtpVerification";
+import { Toaster } from "react-hot-toast";
+import Header from "./componenet/Header";
 
 function App() {
   return (
-    <>
-      <div className="App">
-        <BrowserRouter>
+    <div className="App">
+      <BrowserRouter>
+        <Header />
+        <main className="pt-14">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/Login" element={<Login />} />
+            <Route path="/otp-verification" element={<OtpVerification />} />
             <Route path="/Registration" element={<Registration />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/product/:id" element={<ProductView />} />
           </Routes>
-        </BrowserRouter>
-      </div>
-    </>
+        </main>
+      </BrowserRouter>
+      <Toaster />
+    </div>
   );
 }
 
