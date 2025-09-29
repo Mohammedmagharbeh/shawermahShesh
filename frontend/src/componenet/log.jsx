@@ -4,19 +4,17 @@ import axios from "axios";
 import { motion } from "framer-motion";
   
 function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [phone, setphone] = useState("");
   const navigate = useNavigate();
 
   const Loginhandler = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post("http://127.0.0.1:5000/api/login", {
-        username,
-        password,
+        phone
       });
       sessionStorage.setItem("jwt", res.data.token);
-      sessionStorage.setItem("username", username);
+      sessionStorage.setItem("phone", phone);
       alert("تم تسجيل الدخول بنجاح");
       navigate("/");
     } catch (error) {
@@ -47,21 +45,15 @@ function Login() {
 
         <form onSubmit={Loginhandler} className="flex flex-col gap-4">
           <input
-            type="text"
-            placeholder="اسم المستخدم"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="phone"
+            placeholder=" رقم الهاتف"
+            value={phone}
+            maxLength={10}
+            onChange={(e) => setphone(e.target.value)}
             required
             className="p-3 border border-gray-300 rounded-lg text-base focus:border-red-600 focus:outline-none focus:shadow-md placeholder:text-gray-500 text-right"
           />
-          <input
-            type="password"
-            placeholder="كلمة المرور"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="p-3 border border-gray-300 rounded-lg text-base focus:border-red-600 focus:outline-none focus:shadow-md placeholder:text-gray-500 text-right"
-          />
+
 
           <div className="flex gap-2 mt-4">
             <button
@@ -71,7 +63,7 @@ function Login() {
               تسجيل الدخول
             </button>
 
-            <motion.button
+            {/* <motion.button
               type="button"
               onClick={() => navigate("/Registration")}
               className="flex-1 bg-gray-600 text-white py-3 rounded-lg font-bold text-lg transition-transform hover:bg-gray-700 hover:-translate-y-0.5"
@@ -79,7 +71,7 @@ function Login() {
               whileTap={{ scale: 0.95 }}
             >
               انشاء حساب
-            </motion.button>
+            </motion.button> */}
           </div>
         </form>
       </div>

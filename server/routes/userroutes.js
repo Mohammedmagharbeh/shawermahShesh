@@ -20,14 +20,14 @@ routes.get("/users", getuser);
 routes.post("/users/postuser", postuser);
 
 routes.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { phone} = req.body;
 
   try {
-    const user = await userModel.findOne({ email });
+    const user = await userModel.findOne({ phone });
     if (!user) return res.status(400).json({ msg: "User not found" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
+    // const isMatch = await bcrypt.compare(password, user.password);
+    // if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
     // generate OTP
     const otp = generateOTP();
@@ -66,7 +66,7 @@ routes.post("/verify-otp", async (req, res) => {
       { id: user._id },
       process.env.JWT_SECRET || "goback",
       {
-        expiresIn: "7d",
+        expiresIn: "1h",
       }
     );
 
