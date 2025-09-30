@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom"; // ✨ استيراد useLocation
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,13 +9,11 @@ import {
   Clock,
   MapPin,
   Phone,
-  Menu,
-  X,
   ChefHat,
   Award,
   Users,
   Heart,
-  Loader2, // إضافة Loader2 لاستخدامه عند التحميل
+  Loader2,
 } from "lucide-react";
 
 import { useCart } from "../contexts/CartContext";
@@ -28,10 +27,11 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("الكل");
   const [searchTerm, setSearchTerm] = useState("");
-  const [productsToShow, setProductsToShow] = useState(PRODUCTS_PER_PAGE); // الحالة الجديدة لعدد المنتجات المعروضة
-  const [isLoading, setIsLoading] = useState(true); // حالة للتحميل
+  const [productsToShow, setProductsToShow] = useState(PRODUCTS_PER_PAGE);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { addToCart, cart } = useCart();
+  const { addToCart } = useCart();
+  const location = useLocation(); // ✨ استخدام useLocation لقراءة الهاش
 
   // جلب البيانات وتعيين حالة المنتجات الأساسية
   useEffect(() => {
@@ -52,6 +52,27 @@ export default function Home() {
         setIsLoading(false);
       });
   }, []);
+
+  // ✨ منطق التمرير السلس عند العودة من صفحة أخرى
+  useEffect(() => {
+    // التأكد من أن جميع المكونات قد تم تحميلها والـ products قد تم جلبها
+    if (location.hash && !isLoading) {
+      const id = location.hash.substring(1); // إزالة رمز #
+      const element = document.getElementById(id);
+
+      // تأخير بسيط لضمان انتهاء تحديث الـ DOM والتمرير بسلاسة
+      const timer = setTimeout(() => {
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+
+      return () => clearTimeout(timer); // تنظيف المؤقت
+    } else if (!location.hash) {
+      // إذا لا يوجد هاش، تأكد من أن الصفحة تبدأ من الأعلى عند التحميل العادي
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [location.hash, isLoading]); // يعتمد على تغير الهاش وحالة التحميل
 
   // فلترة المنتجات عند تغير البحث أو التصنيف
   useEffect(() => {
@@ -80,9 +101,8 @@ export default function Home() {
   const hasMoreProducts = filteredProducts.length > productsToShow;
 
   return (
-    <div className="min-h-screen bg-background arabic-font">
-      {/* ... باقي الأقسام مثل الهيدر، الإحصائيات، ومن نحن ... */}
-
+    <div className="min-h-screen bg-background arabic-font" dir="rtl">
+      {/* قسم الرئيسية - تأكد من وجود id="home" */}
       <section
         id="home"
         className="pt-24 pb-16 bg-gradient-to-br from-red-50 to-white"
@@ -133,6 +153,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* قسم الإحصائيات (لم يتم تغيير ID) */}
       <section className="py-16 bg-red-700 text-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
@@ -156,6 +177,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* قسم القائمة - تأكد من وجود id="menu" */}
       <section id="menu" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -208,7 +230,7 @@ export default function Home() {
             </div>
           ) : filteredProducts.length > 0 ? (
             <>
-              {/* عرض المنتجات - تم استبدال filteredProducts بـ displayedProducts */}
+              {/* عرض المنتجات */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {displayedProducts.map((product) => (
                   <Card
@@ -279,7 +301,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ... باقي الأقسام مثل عنّا والاتصال والفوتر ... */}
+      {/* قسم من نحن - تأكد من وجود id="about" */}
       <section id="about" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -316,10 +338,6 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-
-              {/* <Button size="lg" className="bg-red-700 hover:bg-red-800 text-white px-8 py-3">
-                اعرف المزيد
-              </Button> */}
             </div>
 
             <div>
@@ -333,6 +351,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* قسم اتصل بنا - تأكد من وجود id="contact" */}
       <section id="contact" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">

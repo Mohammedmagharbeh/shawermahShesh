@@ -12,7 +12,7 @@ exports.postEat = async (req, res) => {
     if (!CATEGORIES.includes(category)) {
       return res.status(400).json({ message: "Invalid category" });
     }
-
+    
     const creatfood = await products.create({
       name: name,
       price: price,
