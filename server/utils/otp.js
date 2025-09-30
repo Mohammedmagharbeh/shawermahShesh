@@ -10,13 +10,13 @@ const client = twilio(
 
 function generateOTP() {
   const random = Math.floor(100000 + Math.random() * 900000);
-  console.log(random);
 
   return random; // 6-digit
 }
 
 async function sendOTP(phone, otp) {
   console.log(otp);
+  console.log("phone: ", phone);
 
   return client.messages.create({
     body: `Your Shawarma Sheesh OTP code is: ${otp}`,

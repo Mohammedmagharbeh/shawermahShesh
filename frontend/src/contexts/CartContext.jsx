@@ -1,31 +1,33 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useUser } from "./UserContext";
 
 const CartContext = createContext();
 
-export const CartProvider = ({ children, userId }) => {
+export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ _id: "", userId: "", products: [] });
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const { user } = useUser();
 
   // Fetch cart on mount
   useEffect(() => {
     const fetchCart = async () => {
-      if (!userId) return;
+      if (!user._id) return;
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/cart/${userId}`);
+        const res = await fetch(`http://localhost:5000/api/cart/${user._id}`);
         if (!res.ok) throw new Error("Failed to fetch cart");
         const data = await res.json();
         setCart(data);
       } catch (error) {
         console.error(error);
-        setCart({ _id: "", userId: userId, products: [] });
+        setCart({ _id: "", userId: user._id, products: [] });
       } finally {
         setLoading(false);
       }
     };
     fetchCart();
-  }, [userId]);
+  }, [user]);
 
   // Calculate total whenever cart changes
   useEffect(() => {
@@ -40,11 +42,14 @@ export const CartProvider = ({ children, userId }) => {
   // Add product to cart
   const addToCart = async (productId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/cart/add/${userId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, quantity: 1 }),
-      });
+      const res = await fetch(
+        `http://localhost:5000/api/cart/add/${user._id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId, quantity: 1 }),
+        }
+      );
       if (!res.ok) throw new Error("Failed to add to cart");
       const data = await res.json();
       setCart(data.cart);
@@ -78,7 +83,7 @@ export const CartProvider = ({ children, userId }) => {
       const res = await fetch(`http://localhost:5000/api/cart/remove`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, productId }),
+        body: JSON.stringify({ userId: user._id, productId }),
       });
       if (!res.ok) throw new Error("Failed to remove item");
       const data = await res.json();
@@ -92,7 +97,7 @@ export const CartProvider = ({ children, userId }) => {
   const clearCart = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/cart/clear/${userId}`,
+        `http://localhost:5000/api/cart/clear/${user._id}`,
         {
           method: "DELETE",
         }
