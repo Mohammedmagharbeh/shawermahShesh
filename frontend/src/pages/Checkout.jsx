@@ -1,21 +1,29 @@
 import { useCart } from "@/contexts/CartContext";
-
-const DETAILS = [
-  { name: "First Name", label: "name", required: true, type: "text" },
-  { name: "Street Address", label: "address", required: true, type: "text" },
-  {
-    name: "Apartment, floor, etc. (optional)",
-    label: "apartment",
-    required: false,
-    type: "text",
-  },
-  { name: "Area", label: "area", required: true, type: "text" },
-  { name: "Phone Number", label: "phone", required: true, type: "text" },
-  { name: "Email Address", label: "email", required: true, type: "email" },
-];
+import { useUser } from "@/contexts/UserContext";
 
 function Checkout() {
   const { cart, total } = useCart();
+  const { user } = useUser();
+
+  const DETAILS = [
+    { name: "First Name", label: "name", required: true, type: "text" },
+
+    {
+      name: "Apartment, floor, etc. (optional)",
+      label: "apartment",
+      required: false,
+      type: "text",
+    },
+    { name: "Area", label: "area", required: true, type: "text" },
+    {
+      name: "Phone Number",
+      label: "phone",
+      required: true,
+      type: "text",
+      defaultValue: user.phone,
+      readonly: true,
+    },
+  ];
 
   const handlePlaceOrder = () => {
     if (cart.products.length === 0) {
@@ -64,6 +72,8 @@ function Checkout() {
                     type={detail.type}
                     required={detail.required}
                     placeholder={`Enter your ${detail.name.toLowerCase()}`}
+                    defaultValue={detail.defaultValue || ""}
+                    readOnly={detail.readonly || false}
                   />
                 </div>
               ))}
