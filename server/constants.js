@@ -1,15 +1,23 @@
 // product Constants
 export const CATEGORIES = [
-  "burger",
-  "snacks",
+  "Burgers",
+  "Snacks",
   "drinks",
-  "shawarma",
+  "Shawarma",
   "box",
   "dishes",
   "appetizers",
+  "Salads",
+  "Kids",
+  "Sauces",
+  "Sides",
 ];
 
 // Order Constants
-export const ORDER_STATUSES = ["pending", "shipped", "delivered"];
-export const PAYMENT_METHODS = ["credit card", "paypal", "cash on delivery"];
-export const PAYMENT_STATUSES = ["paid", "unpaid"];
+export const ORDER_STATUSES = Object.freeze([
+  "pending",
+  "completed",
+  "cancelled",
+]);
+export const PAYMENT_METHODS = Object.freeze(["cash", "card"]);
+export const PAYMENT_STATUSES = Object.freeze(["unpaid", "paid"]);

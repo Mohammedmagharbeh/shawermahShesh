@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { useParams } from "react-router-dom";
 import pizza from "../assets/pizza.jpg";
 import Loading from "@/componenet/common/Loading";
+import toast from "react-hot-toast";
+import { useCart } from "@/contexts/CartContext";
 
 function ProductView() {
   const { id } = useParams();
@@ -19,13 +21,14 @@ function ProductView() {
     category: "",
     description: "",
   });
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:5000/api/products/${id}`
+          `${import.meta.env.VITE_BASE_URL}/products/${id}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch product details");
@@ -58,7 +61,8 @@ function ProductView() {
 
   const handleAddToCart = () => {
     // Add to cart logic here
-    console.log(`Added ${quantity} ${product.name} to cart`);
+    addToCart(product._id, quantity);
+    toast.success(`Added ${quantity} ${product.name} to cart`);
   };
 
   // const toggleFavorite = () => {

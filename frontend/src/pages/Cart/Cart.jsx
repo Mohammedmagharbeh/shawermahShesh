@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CartCard from "./CartCard";
 import Loading from "../../componenet/common/Loading";
@@ -70,7 +69,9 @@ const Cart = () => {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center py-2">
                   <span className="text-gray-600">Subtotal:</span>
-                  <span className="text-lg font-semibold">{total} JOD</span>
+                  <span className="text-lg font-semibold">
+                    {total.toFixed(2)} JOD
+                  </span>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
@@ -88,7 +89,7 @@ const Cart = () => {
                       Total:
                     </span>
                     <span className="text-2xl font-bold text-red-600">
-                      {total} JOD
+                      {total.toFixed(2)} JOD
                     </span>
                   </div>
                 </div>

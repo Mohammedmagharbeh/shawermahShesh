@@ -25,7 +25,7 @@ function Login() {
     try {
       const token = sessionStorage.getItem("jwt"); // get token if exists
 
-      const res = await axios.post("http://127.0.0.1:5000/api/login", {
+      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, {
         phone: formattedPhone,
         token,
       });

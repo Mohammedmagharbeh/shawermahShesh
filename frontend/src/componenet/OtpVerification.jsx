@@ -13,10 +13,13 @@ function OtpVerification() {
   const verifyOtp = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://127.0.0.1:5000/api/verify-otp", {
-        phone,
-        otp,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/verify-otp`,
+        {
+          phone,
+          otp,
+        }
+      );
 
       // ✅ Save user to context
       login({

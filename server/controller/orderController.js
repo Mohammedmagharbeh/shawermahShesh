@@ -1,14 +1,20 @@
 const Order = require("../models/orders");
 const User = require("../models/user");
 const productsModel = require("../models/products");
+const locationsModel = require("../models/locations");
 
 // get all orders
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find();
-    res.status(200).json(orders);
+    const orders = await Order.find()
+      .populate("products.productId")
+      .populate("userId")
+      .populate("shippingAddress");
+
+    res.status(200).json({ data: orders });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error in getAllOrders:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -17,15 +23,26 @@ exports.getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ message: "Order ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Order ID is required" });
     }
-    const order = await Order.findById(id);
+
+    const order = await Order.findById(id)
+      .populate("products.productId")
+      .populate("userId")
+      .populate("shippingAddress");
+
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
-    res.status(200).json(order);
+
+    res.status(200).json({ success: true, data: order });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error in getOrderById:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -34,42 +51,34 @@ exports.getOrdersByUserId = async (req, res) => {
   try {
     const { userId } = req.params;
     if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID is required" });
     }
 
     const foundUser = await User.findById(userId);
     if (!foundUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
-    const userOrders = await Order.find({ userId });
+    const userOrders = await Order.find({ userId })
+      .populate("products.productId")
+      .populate("shippingAddress");
+
     if (!userOrders.length) {
-      return res.status(404).json({ message: "No orders found for this user" });
+      return res
+        .status(404)
+        .json({ success: false, message: "No orders found for this user" });
     }
 
-    res.status(200).json(userOrders);
+    res.status(200).json({ success: true, data: userOrders });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error in getOrdersByUserId:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-async function calculateTotalPrice(products) {
-  const productIds = products.map((p) => p.productId);
-
-  const dbProducts = await productsModel.find({ _id: { $in: productIds } });
-
-  const priceMap = {};
-  dbProducts.forEach((p) => {
-    priceMap[p._id] = p.price;
-  });
-
-  const totalPrice = products.reduce((total, product) => {
-    const price = priceMap[product.productId] || 0;
-    return total + price * product.quantity;
-  }, 0);
-
-  return totalPrice;
-}
 
 // create new order
 exports.createOrder = async (req, res) => {
@@ -81,58 +90,84 @@ exports.createOrder = async (req, res) => {
       shippingAddress,
       paymentMethod,
       paymentStatus,
+      transactionId,
+      paidAt,
     } = req.body;
 
-    if (!userId || !products || !shippingAddress || !paymentMethod) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    if (!Array.isArray(products) || products.length === 0) {
+    if (!userId || !products?.length || !shippingAddress || !paymentMethod) {
       return res
         .status(400)
-        .json({ message: "Products must be a non-empty array" });
+        .json({ success: false, message: "Missing required fields" });
     }
 
-    if (!products.every((p) => p.productId && p.quantity && p.quantity > 0)) {
-      return res.status(400).json({
-        message:
-          "Each product must have a valid productId and quantity greater than 0",
-      });
+    // validate shipping address
+    const address = await locationsModel.findById(shippingAddress);
+    if (!address) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid shipping address" });
     }
 
-    products.forEach((p) => {
-      const product = productsModel.findById(p.productId);
-      if (!product) {
-        return res
-          .status(400)
-          .json({ message: `Product with ID ${p.productId} not found` });
-      }
-    });
-
+    // validate user
     const foundUser = await User.findById(userId);
     if (!foundUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
-    const totalPrice = await calculateTotalPrice(products);
-
-    if (totalPrice <= 0) {
-      return res.status(400).json({ message: "Invalid product prices" });
+    // validate products
+    const dbProducts = await productsModel.find({
+      _id: { $in: products.map((p) => p.productId) },
+    });
+    if (dbProducts.length !== products.length) {
+      return res
+        .status(400)
+        .json({ success: false, message: "One or more products not found" });
     }
+
+    // enrich products
+    const enrichedProducts = products.map((p) => {
+      const matched = dbProducts.find(
+        (dp) => dp._id.toString() === p.productId
+      );
+      return {
+        productId: p.productId,
+        quantity: p.quantity,
+        priceAtPurchase: matched.price,
+      };
+    });
+
+    // calculate total price
+    const totalPrice = enrichedProducts.reduce(
+      (sum, p) => sum + p.quantity * p.priceAtPurchase,
+      0
+    );
 
     const newOrder = await Order.create({
       userId,
-      products,
+      products: enrichedProducts,
       totalPrice,
       status: status || "pending",
       shippingAddress,
-      paymentMethod,
-      paymentStatus: paymentStatus || "unpaid",
+      payment: {
+        method: paymentMethod,
+        status: paymentStatus || "unpaid",
+        transactionId: transactionId || null,
+        paidAt: paidAt || null,
+      },
     });
 
-    res.status(201).json(newOrder);
+    const populatedOrder = await newOrder.populate([
+      { path: "products.productId" },
+      { path: "userId" },
+      { path: "shippingAddress" },
+    ]);
+
+    res.status(201).json({ success: true, data: populatedOrder });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error in createOrder:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -141,7 +176,22 @@ exports.updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const body = req.body;
-    const updatedOrder = await Order.findByIdAndUpdate(id, body, { new: true });
+    const allowedUpdates = ["status", "shippingAddress", "payment"];
+    const updates = {};
+    allowedUpdates.forEach((field) => {
+      if (body[field] !== undefined) updates[field] = body[field];
+    });
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "No valid fields to update" });
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
+      new: true,
+    })
+      .populate("products.productId")
+      .populate("userId")
+      .populate("shippingAddress");
 
     if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found" });

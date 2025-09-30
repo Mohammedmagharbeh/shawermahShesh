@@ -15,8 +15,9 @@ import {
   Users,
   Heart,
 } from "lucide-react";
-
+import burger from "../assets/burger.jpg";
 import { useCart } from "../contexts/CartContext";
+import toast from "react-hot-toast";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -25,10 +26,10 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("الكل");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { addToCart, cart } = useCart();
+  const { addToCart } = useCart();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/products")
+    fetch(`${import.meta.env.VITE_BASE_URL}/products`)
       .then((res) => res.json())
       .then((data) => {
         setProducts(data.data);
@@ -40,7 +41,7 @@ export default function Home() {
       })
       .catch((err) => {
         console.log("Error fetching products:", err);
-        alert("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
+        toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
       });
   }, []);
 
@@ -152,8 +153,8 @@ export default function Home() {
             <div className="w-full lg:w-80">
               <input
                 type="text"
-                placeholder="ابحث عن طبقك المفضل..."
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent"
+                placeholder="...ابحث عن طبقك المفضل"
+                className="w-full text-end px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -186,7 +187,7 @@ export default function Home() {
                 >
                   <div className="relative">
                     <img
-                      src={product.image || "/placeholder.svg"}
+                      src={product.image || burger}
                       alt={product.name}
                       className="w-full h-48 object-cover"
                     />

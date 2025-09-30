@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useUser } from "./UserContext";
+import toast from "react-hot-toast";
 
 const CartContext = createContext();
 
@@ -12,16 +13,25 @@ export const CartProvider = ({ children }) => {
   // Fetch cart on mount
   useEffect(() => {
     const fetchCart = async () => {
-      if (!user._id) return;
+      if (!user._id) {
+        toast.error("Please log in to view your cart");
+        // return; To-Do: Redirect to login and uncomment return statement
+      }
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/cart/${user._id}`);
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/cart/${user._id || "68d9398a70a8e8192f31a643"}` // To-Do: remove the hardcoded userId
+        );
         if (!res.ok) throw new Error("Failed to fetch cart");
         const data = await res.json();
         setCart(data);
       } catch (error) {
         console.error(error);
-        setCart({ _id: "", userId: user._id, products: [] });
+        setCart({
+          _id: "",
+          userId: user._id || "68d9398a70a8e8192f31a643",
+          products: [],
+        });
       } finally {
         setLoading(false);
       }
@@ -41,9 +51,13 @@ export const CartProvider = ({ children }) => {
 
   // Add product to cart
   const addToCart = async (productId) => {
+    if (!user._id) {
+      toast.error("Please log in to add items to your cart");
+      // return; To-Do: Redirect to login and uncomment return statement
+    }
     try {
       const res = await fetch(
-        `http://localhost:5000/api/cart/add/${user._id}`,
+        `${import.meta.env.VITE_BASE_URL}/cart/add/${user._id || "68d9398a70a8e8192f31a643"}`, // To-Do: remove the hardcoded userId
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -62,7 +76,7 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = async (productId, quantity) => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/cart/update/${cart._id}`,
+        `${import.meta.env.VITE_BASE_URL}/cart/update/${cart._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -80,10 +94,13 @@ export const CartProvider = ({ children }) => {
   // Remove product
   const removeFromCart = async (productId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/cart/remove`, {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/cart/remove`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user._id, productId }),
+        body: JSON.stringify({
+          userId: user._id || "68d9398a70a8e8192f31a643", // To-Do: remove the hardcoded userId
+          productId,
+        }),
       });
       if (!res.ok) throw new Error("Failed to remove item");
       const data = await res.json();
@@ -97,7 +114,7 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/cart/clear/${user._id}`,
+        `${import.meta.env.VITE_BASE_URL}/cart/clear/${user._id || "68d9398a70a8e8192f31a643"}`, // To-Do: remove the hardcoded userId
         {
           method: "DELETE",
         }

@@ -8,6 +8,7 @@ import ProductView from "./pages/ProductView";
 import OtpVerification from "./componenet/OtpVerification";
 import { Toaster } from "react-hot-toast";
 import Header from "./componenet/Header";
+import Orders from "./pages/Orders";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/otp-verification" element={<OtpVerification />} />
             <Route path="/Registration" element={<Registration />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/orders" element={<Orders />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/product/:id" element={<ProductView />} />
           </Routes>
