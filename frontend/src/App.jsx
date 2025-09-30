@@ -9,6 +9,7 @@ import OtpVerification from "./componenet/OtpVerification";
 import { Toaster } from "react-hot-toast";
 import Header from "./componenet/Header";
 import Orders from "./pages/Orders";
+import AdminProductPanel from "./pages/Cart/adminremot";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/orders" element={<Orders />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/product/:id" element={<ProductView />} />
+            <Route path="/admin" element={<AdminProductPanel />} />
           </Routes>
         </main>
       </BrowserRouter>

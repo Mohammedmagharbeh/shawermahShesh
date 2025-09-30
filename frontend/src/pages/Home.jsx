@@ -14,10 +14,14 @@ import {
   Award,
   Users,
   Heart,
+  Loader2, // إضافة Loader2 لاستخدامه عند التحميل
 } from "lucide-react";
 import burger from "../assets/burger.jpg";
 import { useCart } from "../contexts/CartContext";
 import toast from "react-hot-toast";
+
+// عدد المنتجات التي ستظهر مبدئيًا
+const PRODUCTS_PER_PAGE = 6;
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -25,26 +29,36 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("الكل");
   const [searchTerm, setSearchTerm] = useState("");
+  const [productsToShow, setProductsToShow] = useState(PRODUCTS_PER_PAGE); // الحالة الجديدة لعدد المنتجات المعروضة
+  const [isLoading, setIsLoading] = useState(true); // حالة للتحميل
 
   const { addToCart } = useCart();
 
+  // جلب البيانات وتعيين حالة المنتجات الأساسية
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BASE_URL}/products`)
+    fetch(`${import.meta.env.VITE_BASE_URL}/products`);
+
+    setIsLoading(true);
+    fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
       .then((data) => {
-        setProducts(data.data);
-        setFilteredProducts(data.data);
-        const cats = ["الكل", ...new Set(data.data.map((p) => p.category))];
+        const allProducts = data.data || [];
+        setProducts(allProducts);
+        setFilteredProducts(allProducts);
+        const cats = ["الكل", ...new Set(allProducts.map((p) => p.category))];
         setCategories(cats);
-        setProducts(data.data);
-        setFilteredProducts(data.data);
+        setIsLoading(false);
       })
       .catch((err) => {
         console.log("Error fetching products:", err);
+
         toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
+
+        setIsLoading(false);
       });
   }, []);
 
+  // فلترة المنتجات عند تغير البحث أو التصنيف
   useEffect(() => {
     let filtered = products;
 
@@ -57,10 +71,23 @@ export default function Home() {
       filtered = filtered.filter((p) => p.category === selectedCategory);
     }
     setFilteredProducts(filtered);
+    setProductsToShow(PRODUCTS_PER_PAGE); // إعادة تعيين العدد المعروض عند كل فلترة
   }, [products, searchTerm, selectedCategory]);
+
+  // دالة لإظهار جميع المنتجات
+  const handleShowMore = () => {
+    setProductsToShow(filteredProducts.length);
+  };
+
+  // المنتجات التي سيتم عرضها فعلياً (تستخدم في JSX)
+  const displayedProducts = filteredProducts.slice(0, productsToShow);
+  // هل مازال هناك منتجات لإظهارها؟ (تستخدم في منطق زر "إظهار المزيد")
+  const hasMoreProducts = filteredProducts.length > productsToShow;
 
   return (
     <div className="min-h-screen bg-background arabic-font">
+      {/* ... باقي الأقسام مثل الهيدر، الإحصائيات، ومن نحن ... */}
+
       <section
         id="home"
         className="pt-24 pb-16 bg-gradient-to-br from-red-50 to-white"
@@ -223,6 +250,76 @@ export default function Home() {
               ))}
             </div>
           ) : (
+            <div></div>
+          )}
+          {/* حالة التحميل */}
+          {isLoading ? (
+            <div className="text-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-red-700 mx-auto mb-4" />
+              <p className="text-gray-600">جاري تحميل المنتجات...</p>
+            </div>
+          ) : filteredProducts.length > 0 ? (
+            <>
+              {/* عرض المنتجات - تم استبدال filteredProducts بـ displayedProducts */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {displayedProducts.map((product) => (
+                  <Card
+                    key={product._id}
+                    className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow bg-white"
+                  >
+                    <div className="relative">
+                      <img
+                        src={product.image || "/placeholder.svg"}
+                        alt={product.name}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="absolute top-3 right-3">
+                        <Badge className="bg-red-700 text-white">
+                          {product.category}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold mb-2 text-gray-900">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-600 mb-4 text-sm">
+                        {product.description}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-2xl font-bold text-red-700">
+                          {product.price} د.أ
+                        </div>
+                        <Button
+                          onClick={() => addToCart(product._id)}
+                          className="bg-red-700 hover:bg-red-800 text-white px-6 py-2"
+                        >
+                          أضف للسلة
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* زر "إظهار المزيد" يظهر فقط إذا كان هناك المزيد من المنتجات */}
+              {hasMoreProducts && (
+                <div className="text-center mt-12">
+                  <Button
+                    onClick={handleShowMore}
+                    size="lg"
+                    className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-3"
+                  >
+                    إظهار المزيد من المنتجات (
+                    {filteredProducts.length - productsToShow} منتج)
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-2xl font-bold mb-2">لا توجد نتائج</h3>
@@ -234,6 +331,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ... باقي الأقسام مثل عنّا والاتصال والفوتر ... */}
       <section id="about" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -254,20 +352,20 @@ export default function Home() {
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-4 mb-3">
                     <Award className="h-8 w-8 text-red-700 mx-auto" />
+                    <h4 className="font-bold text-sm">جودة عالية</h4>
                   </div>
-                  <h4 className="font-bold text-sm">جودة عالية</h4>
                 </div>
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-4 mb-3">
                     <Users className="h-8 w-8 text-red-700 mx-auto" />
+                    <h4 className="font-bold text-sm">فريق محترف</h4>
                   </div>
-                  <h4 className="font-bold text-sm">فريق محترف</h4>
                 </div>
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-4 mb-3">
                     <Clock className="h-8 w-8 text-red-700 mx-auto" />
+                    <h4 className="font-bold text-sm">خدمة سريعة</h4>
                   </div>
-                  <h4 className="font-bold text-sm">خدمة سريعة</h4>
                 </div>
               </div>
 

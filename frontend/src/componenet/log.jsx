@@ -88,10 +88,11 @@ function Login() {
           <div className="flex gap-2 mt-4">
             <button
               type="submit"
-              className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold text-lg transition-transform hover:bg-red-700 hover:-translate-y-0.5"
-            >
+              className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold text-lg transition-transform hover:bg-red-700 hover:-translate-y-0.5">
               تسجيل الدخول
             </button>
+
+            
 
             {/* <motion.button
               type="button"
@@ -105,8 +106,7 @@ function Login() {
           </div>
         </form>
       </div>
-    </div>
-  );
+    </div>);
 }
 
 export default Login;
