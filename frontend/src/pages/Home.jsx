@@ -16,9 +16,8 @@ import {
   Heart,
   Loader2, // إضافة Loader2 لاستخدامه عند التحميل
 } from "lucide-react";
-import burger from "../assets/burger.jpg";
+
 import { useCart } from "../contexts/CartContext";
-import toast from "react-hot-toast";
 
 // عدد المنتجات التي ستظهر مبدئيًا
 const PRODUCTS_PER_PAGE = 6;
@@ -32,12 +31,10 @@ export default function Home() {
   const [productsToShow, setProductsToShow] = useState(PRODUCTS_PER_PAGE); // الحالة الجديدة لعدد المنتجات المعروضة
   const [isLoading, setIsLoading] = useState(true); // حالة للتحميل
 
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
 
   // جلب البيانات وتعيين حالة المنتجات الأساسية
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BASE_URL}/products`);
-
     setIsLoading(true);
     fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
@@ -51,9 +48,7 @@ export default function Home() {
       })
       .catch((err) => {
         console.log("Error fetching products:", err);
-
-        toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
-
+        alert("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
         setIsLoading(false);
       });
   }, []);
@@ -180,8 +175,8 @@ export default function Home() {
             <div className="w-full lg:w-80">
               <input
                 type="text"
-                placeholder="...ابحث عن طبقك المفضل"
-                className="w-full text-end px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent"
+                placeholder="ابحث عن طبقك المفضل..."
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -205,53 +200,6 @@ export default function Home() {
             </div>
           </div>
 
-          {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProducts.map((product) => (
-                <Card
-                  key={product._id}
-                  className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow bg-white"
-                >
-                  <div className="relative">
-                    <img
-                      src={product.image || burger}
-                      alt={product.name}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-3 right-3">
-                      <Badge className="bg-red-700 text-white">
-                        {product.category}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2 text-gray-900">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-600 mb-4 text-sm">
-                      {product.description}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold text-red-700">
-                        {product.price} د.أ
-                      </div>
-                      <Button
-                        onClick={() => addToCart(product._id)}
-                        className="bg-red-700 hover:bg-red-800 text-white px-6 py-2"
-                      >
-                        أضف للسلة
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div></div>
-          )}
           {/* حالة التحميل */}
           {isLoading ? (
             <div className="text-center py-16">
