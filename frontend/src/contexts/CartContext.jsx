@@ -14,7 +14,7 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const fetchCart = async () => {
       if (!user._id) {
-        toast.error("Please log in to view your cart");
+        // toast.error("Please log in to view your cart");
         // return; To-Do: Redirect to login and uncomment return statement
       }
       setLoading(true);
@@ -52,7 +52,7 @@ export const CartProvider = ({ children }) => {
   // Add product to cart
   const addToCart = async (productId) => {
     if (!user._id) {
-      toast.error("Please log in to add items to your cart");
+      // toast.error("Please log in to add items to your cart");
       // return; To-Do: Redirect to login and uncomment return statement
     }
     try {
