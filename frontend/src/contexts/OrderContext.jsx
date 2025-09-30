@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const OrderContext = createContext();
 
@@ -64,6 +65,7 @@ export const OrderProvider = ({ children }) => {
       return res.data.data;
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create order");
+      toast.error(err.response?.data?.message || "Failed to create order");
     } finally {
       setLoading(false);
     }
