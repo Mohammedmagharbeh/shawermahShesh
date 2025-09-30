@@ -32,11 +32,7 @@ function Orders() {
               <div key={index} className="flex flex-col">
                 <div className="flex justify-between items-center gap-2 xs2:flex-col md:flex-row">
                   <div className="flex gap-4 items-center xs2:flex-col md:flex-row">
-                    <img
-                      src={item.productId.image || burger}
-                      alt="product image"
-                      width={70}
-                    />
+                    <img src={burger} alt="product image" width={70} />
                     <p className="font-semibold">{item.productId.name}</p>
                   </div>
                   <p className="font-medium">${item.productId.price}</p>

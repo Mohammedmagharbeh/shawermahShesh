@@ -1,9 +1,13 @@
 import { useCart } from "@/contexts/CartContext";
 import { useUser } from "@/contexts/UserContext";
+import axios from "axios";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 function Checkout() {
   const { cart, total } = useCart();
   const { user } = useUser();
+  const [PaymentMethod, setPaymentMethod] = useState(null);
 
   const DETAILS = [
     { name: "First Name", label: "name", required: true, type: "text" },
@@ -25,13 +29,49 @@ function Checkout() {
     },
   ];
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (cart.products.length === 0) {
+      toast.error("Your cart is empty!");
       return;
+    }
+    if (!PaymentMethod) {
+      toast.error("Please select a payment method.");
+      return;
+    }
+    if (PaymentMethod === "card") {
+      try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/myfatoorah/execute`,
+          {
+            paymentMethodId: 2,
+            amount: total || 0.1,
+            customerName: "Ahmad",
+            customerEmail: "ahmadjkff1@gmail.com",
+            customerMobile: "0799635582",
+            callbackUrl: `${window.location.origin}/payment-success`,
+            errorUrl: `${window.location.origin}/payment-success`,
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        if (!res.data?.IsSuccess) {
+          toast.error("Payment initiation failed. Please try again.");
+          return;
+        }
+
+        window.location.href = res.data.Data.PaymentURL;
+      } catch (error) {
+        toast.error("Something went wrong. Please try again later.");
+        console.error(error);
+      }
     }
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  console.log(PaymentMethod);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
@@ -150,7 +190,7 @@ function Checkout() {
                       id="bank"
                       name="PaymentMethod"
                       type="radio"
-                      defaultChecked
+                      onClick={() => setPaymentMethod("card")}
                     />
                     <label
                       htmlFor="bank"
@@ -173,6 +213,7 @@ function Checkout() {
                       id="cash"
                       name="PaymentMethod"
                       type="radio"
+                      onClick={() => setPaymentMethod("cash")}
                     />
                     <label
                       htmlFor="cash"

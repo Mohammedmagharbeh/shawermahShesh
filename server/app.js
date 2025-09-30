@@ -9,6 +9,7 @@ const userroutes = require("./routes/userroutes");
 const adminroutes = require("./routes/adminroutes");
 const cartRoutes = require("./routes/cartRoutes");
 const locationsRoute = require("./routes/locationsRoute");
+const myfatoorah = require("./routes/myfatoorah");
 
 dotenv.config();
 const app = express();
@@ -22,5 +23,6 @@ app.use("/api/admin", adminroutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/locations", locationsRoute);
+app.use("/api/myfatoorah", myfatoorah);
 
 module.exports = app;
