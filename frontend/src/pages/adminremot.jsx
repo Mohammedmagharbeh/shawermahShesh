@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react"
-import axios from "axios"
-import { Button } from "@/components/ui/button"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
-import { Textarea } from "../components/ui/textarea"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Plus,
   Search,
@@ -22,12 +22,12 @@ import {
   ImageIcon,
   Tag,
   Loader2,
-} from "lucide-react"
+} from "lucide-react";
 
-const PRODUCTS_PER_PAGE = 20
+const PRODUCTS_PER_PAGE = 20;
 
 export default function AdminProductPanel() {
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -35,43 +35,47 @@ export default function AdminProductPanel() {
     description: "",
     image: "",
     category: "",
-  })
-  const [editingId, setEditingId] = useState(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState("الكل")
-  const [displayedCount, setDisplayedCount] = useState(PRODUCTS_PER_PAGE)
-  const [loading, setLoading] = useState(true)
+  });
+  const [editingId, setEditingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("الكل");
+  const [displayedCount, setDisplayedCount] = useState(PRODUCTS_PER_PAGE);
+  const [loading, setLoading] = useState(true);
 
   // جلب المنتجات
   useEffect(() => {
     const fetchProducts = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
-        const res = await axios.get("http://localhost:5000/api/products")
-        const allProducts = res.data.data || []
-        setProducts(allProducts)
-        const uniqueCategories = [...new Set(allProducts.map((p) => p.category))]
-        setCategories(["الكل", ...uniqueCategories])
-        setSelectedCategory("الكل")
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/products`
+        );
+        const allProducts = res.data.data || [];
+        setProducts(allProducts);
+        const uniqueCategories = [
+          ...new Set(allProducts.map((p) => p.category)),
+        ];
+        setCategories(["الكل", ...uniqueCategories]);
+        setSelectedCategory("الكل");
       } catch (err) {
-        console.error("Error fetching products:", err)
-        alert("خطأ في جلب المنتجات.")
+        console.error("Error fetching products:", err);
+        alert("خطأ في جلب المنتجات.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchProducts()
-  }, [])
+    };
+    fetchProducts();
+  }, []);
 
   const handleInputChange = (e) => {
-    const { id, value } = e.target
-    setFormData({ ...formData, [id]: value })
-  }
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
 
   // إضافة أو تعديل
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       if (editingId) {
         const res = await axios.put(
@@ -81,9 +85,9 @@ export default function AdminProductPanel() {
             price: Number(formData.price),
             discount: formData.discount ? Number(formData.discount) : 0,
           }
-        )
-        setProducts(products.map((p) => (p._id === editingId ? res.data : p)))
-        setEditingId(null)
+        );
+        setProducts(products.map((p) => (p._id === editingId ? res.data : p)));
+        setEditingId(null);
       } else {
         const res = await axios.post(
           "http://127.0.0.1:5000/api/admin/postfood",
@@ -92,8 +96,8 @@ export default function AdminProductPanel() {
             price: Number(formData.price),
             discount: formData.discount ? Number(formData.discount) : 0,
           }
-        )
-        setProducts([res.data, ...products])
+        );
+        setProducts([res.data, ...products]);
       }
 
       setFormData({
@@ -103,17 +107,17 @@ export default function AdminProductPanel() {
         description: "",
         image: "",
         category: "",
-      })
+      });
 
-      const res = await axios.get("http://localhost:5000/api/products")
-      const allProducts = res.data.data || []
-      const uniqueCategories = [...new Set(allProducts.map((p) => p.category))]
-      setCategories(["الكل", ...uniqueCategories])
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`);
+      const allProducts = res.data.data || [];
+      const uniqueCategories = [...new Set(allProducts.map((p) => p.category))];
+      setCategories(["الكل", ...uniqueCategories]);
     } catch (error) {
-      console.error("خطأ في الإرسال:", error.response?.data || error.message)
-      alert("حدث خطأ أثناء الإرسال.")
+      console.error("خطأ في الإرسال:", error.response?.data || error.message);
+      alert("حدث خطأ أثناء الإرسال.");
     }
-  }
+  };
 
   const handleEdit = (product) => {
     setFormData({
@@ -123,37 +127,37 @@ export default function AdminProductPanel() {
       description: product.description,
       image: product.image,
       category: product.category,
-    })
-    setEditingId(product._id)
-  }
+    });
+    setEditingId(product._id);
+  };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("هل أنت متأكد من الحذف؟")) return
+    if (!window.confirm("هل أنت متأكد من الحذف؟")) return;
     try {
-      await axios.delete(`http://127.0.0.1:5000/api/admin/deletefood/${id}`)
-      setProducts(products.filter((p) => p._id !== id))
+      await axios.delete(`http://127.0.0.1:5000/api/admin/deletefood/${id}`);
+      setProducts(products.filter((p) => p._id !== id));
     } catch (error) {
-      console.error("خطأ في الحذف:", error.response?.data || error.message)
-      alert("حدث خطأ أثناء الحذف.")
+      console.error("خطأ في الحذف:", error.response?.data || error.message);
+      alert("حدث خطأ أثناء الحذف.");
     }
-  }
+  };
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchTerm.toLowerCase())
+      p.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
-      selectedCategory === "الكل" || p.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+      selectedCategory === "الكل" || p.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
-  const displayedProducts = filteredProducts.slice(0, displayedCount)
-  const hasMoreProducts = filteredProducts.length > displayedCount
+  const displayedProducts = filteredProducts.slice(0, displayedCount);
+  const hasMoreProducts = filteredProducts.length > displayedCount;
 
   const handleCategoryChange = (cat) => {
-    setSelectedCategory(cat)
-    setDisplayedCount(PRODUCTS_PER_PAGE)
-  }
+    setSelectedCategory(cat);
+    setDisplayedCount(PRODUCTS_PER_PAGE);
+  };
 
   return (
     <div
@@ -271,7 +275,7 @@ export default function AdminProductPanel() {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        setEditingId(null)
+                        setEditingId(null);
                         setFormData({
                           name: "",
                           price: "",
@@ -279,7 +283,7 @@ export default function AdminProductPanel() {
                           description: "",
                           image: "",
                           category: "",
-                        })
+                        });
                       }}
                       className="w-full"
                     >
@@ -328,7 +332,9 @@ export default function AdminProductPanel() {
               <Card className="border-dashed border-2">
                 <CardContent className="flex flex-col items-center justify-center py-16">
                   <Package className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                  <p className="text-lg text-muted-foreground">لا توجد منتجات</p>
+                  <p className="text-lg text-muted-foreground">
+                    لا توجد منتجات
+                  </p>
                 </CardContent>
               </Card>
             ) : (
@@ -397,5 +403,5 @@ export default function AdminProductPanel() {
         </div>
       </div>
     </div>
-  )
+  );
 }
