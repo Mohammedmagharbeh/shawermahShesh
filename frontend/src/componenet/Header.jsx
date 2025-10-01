@@ -157,7 +157,7 @@
 // }
 
 // export default Header;
-   
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 // افتراض أن useCart و useUser موجودان ولديهما دالة logout
@@ -171,42 +171,42 @@ function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cart } = useCart();
   // افتراض أن userContext يوفر دالة logout
-  const { user, logout } = useUser(); 
+  const { user, logout } = useUser();
 
   // دالة بسيطة لإغلاق القائمة في الجوال عند النقر على رابط
   const handleLinkClick = () => {
-    setIsMenuOpen(false); 
+    setIsMenuOpen(false);
   };
-  
+
   // دالة تسجيل الخروج (يمكنك تخصيصها بناءً على منطقك)
   const handleLogout = () => {
-    logout(); 
+    logout();
     setIsMenuOpen(false);
-  }
+  };
 
   return (
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50 shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          
           {/* الشعار والاسم */}
           <div className="flex items-center gap-3">
-<Link to="/"> 
-  <div className="flex items-center gap-3">
-    <div className="w-12 h-12 rounded-full overflow-hidden bg-red-700 flex items-center justify-center">
-      <img
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDzGI9tRqzIVulcl3ghkfQ61TOgQmkuOt3gg&s"
-        alt="شاورما شيش"
-        className="w-full h-full object-cover"
-      />
-    </div>
-    <div>
-      <h1 className="text-2xl font-bold text-red-700">شاورما شيش</h1>
-      <p className="text-xs text-gray-600">طعم أصيل ولذيذ</p>
-    </div>
-  </div>
-</Link>
-
+            <Link to="/">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-red-700 flex items-center justify-center">
+                  <img
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDzGI9tRqzIVulcl3ghkfQ61TOgQmkuOt3gg&s"
+                    alt="شاورما شيش"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-red-700">
+                    شاورما شيش
+                  </h1>
+                  <p className="text-xs text-gray-600">طعم أصيل ولذيذ</p>
+                </div>
+              </div>
+            </Link>
           </div>
 
           {/* روابط التصفح للشاشات الكبيرة */}
@@ -259,18 +259,27 @@ function Header() {
                 )}
               </Button>
             </Link>
-            
+
             {/* زر تسجيل الدخول/الخروج */}
             {user?._id ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="bg-transparent border-red-700 text-red-700 hover:bg-red-50"
-              >
-                تسجيل خروج
-                <LogOut className="ml-2 size-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="bg-transparent border-red-700 text-red-700 hover:bg-red-50"
+                >
+                  تسجيل خروج
+                  <LogOut className="ml-2 size-4" />
+                </Button>
+                <Button
+                  variant={"outline"}
+                  size="sm"
+                  className="bg-transparent border-red-700 text-red-700 hover:bg-red-50"
+                >
+                  <Link to="/admin/dashboard">Dashboard</Link>
+                </Button>
+              </div>
             ) : (
               <Link to={"/login"}>
                 <Button
