@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useUser } from "./UserContext";
 
 const OrderContext = createContext();
 
@@ -10,6 +11,7 @@ export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useUser();
 
   const API_URL = `${import.meta.env.VITE_BASE_URL}/order`; // change to your backend URL
 
@@ -28,10 +30,15 @@ export const OrderProvider = ({ children }) => {
   };
 
   // 🔹 Get orders by userId
-  const getOrdersByUserId = async (userId) => {
+  const getOrdersByUserId = async () => {
+    if (!user || !user?._id) {
+      setError("User not logged in");
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/user/${userId}`);
+      const res = await axios.get(`${API_URL}/user/${user._id}`);
       setOrders(res.data.data);
       setError(null);
     } catch (err) {

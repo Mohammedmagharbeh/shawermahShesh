@@ -1,13 +1,17 @@
 import { useOrder } from "@/contexts/OrderContext";
-import { useEffect } from "react";
-import burger from "@/assets/burger.jpg";
+import { useUser } from "@/contexts/UserContext";
+import React, { useEffect } from "react";
+import burger from "../assets/burger.jpg";
 
-function Orders() {
-  const { orders, getAllOrders } = useOrder();
+function MyOrders() {
+  const { orders, getOrdersByUserId } = useOrder();
+  const { user } = useUser();
 
   useEffect(() => {
-    getAllOrders();
-  }, []);
+    if (user?._id) {
+      getOrdersByUserId();
+    }
+  }, [user]);
 
   return (
     <div className="flex flex-col items-center xs2:mx-20 md:mx-[135px] gap-5 my-20 text-start">
@@ -54,4 +58,4 @@ function Orders() {
   );
 }
 
-export default Orders;
+export default MyOrders;

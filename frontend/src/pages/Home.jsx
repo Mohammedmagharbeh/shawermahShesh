@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom"; // ✨ استيراد useLocation
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import burger from "../assets/burger.jpg";
+import toast from "react-hot-toast";
 // عدد المنتجات التي ستظهر مبدئيًا
 const PRODUCTS_PER_PAGE = 6;
 
@@ -46,8 +47,7 @@ export default function Home() {
         setIsLoading(false);
       })
       .catch((err) => {
-        console.log("Error fetching products:", err);
-        alert("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
+        toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
         setIsLoading(false);
       });
   }, []);

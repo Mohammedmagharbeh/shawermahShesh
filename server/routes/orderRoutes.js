@@ -16,7 +16,7 @@ dotenv.config();
 const router = express.Router();
 
 router.get("/get", getAllOrders);
-router.get("/user/:userId", getOrdersByUserId);
+router.get("/user/:userId", getOrdersByUserId); // must come BEFORE /:id
 router.get("/:id", getOrderById);
 router.post("/post", createOrder);
 router.put("/:id", updateOrder);

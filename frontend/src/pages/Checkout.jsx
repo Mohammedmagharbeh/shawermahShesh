@@ -27,7 +27,6 @@ function Checkout() {
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        console.log("locations", data.locations);
 
         setAreas(data.locations);
       } catch (e) {
@@ -40,8 +39,6 @@ function Checkout() {
 
     fetchAreas();
   }, []);
-
-  console.log(areas);
 
   const DETAILS = [
     { name: "First Name", label: "name", required: true, type: "text" },

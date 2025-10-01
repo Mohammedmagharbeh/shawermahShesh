@@ -3,6 +3,7 @@ const User = require("../models/user");
 const productsModel = require("../models/products");
 const locationsModel = require("../models/locations");
 const locations = require("../models/locations");
+const { default: mongoose } = require("mongoose");
 
 // get all orders
 exports.getAllOrders = async (req, res) => {
@@ -51,10 +52,18 @@ exports.getOrderById = async (req, res) => {
 exports.getOrdersByUserId = async (req, res) => {
   try {
     const { userId } = req.params;
+
     if (!userId) {
       return res
         .status(400)
         .json({ success: false, message: "User ID is required" });
+    }
+
+    // ✅ Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid User ID" });
     }
 
     const foundUser = await User.findById(userId);

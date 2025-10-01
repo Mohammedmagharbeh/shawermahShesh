@@ -14,13 +14,12 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const fetchCart = async () => {
       if (!user._id) {
-        // toast.error("Please log in to view your cart");
-        // return; To-Do: Redirect to login and uncomment return statement
+        return;
       }
       setLoading(true);
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/cart/${user._id || "68d9398a70a8e8192f31a643"}` // To-Do: remove the hardcoded userId
+          `${import.meta.env.VITE_BASE_URL}/cart/${user._id}`
         );
         if (!res.ok) throw new Error("Failed to fetch cart");
         const data = await res.json();
@@ -29,7 +28,7 @@ export const CartProvider = ({ children }) => {
         console.error(error);
         setCart({
           _id: "",
-          userId: user._id || "68d9398a70a8e8192f31a643",
+          userId: user._id,
           products: [],
         });
       } finally {
@@ -52,12 +51,12 @@ export const CartProvider = ({ children }) => {
   // Add product to cart
   const addToCart = async (productId) => {
     if (!user._id) {
-      // toast.error("Please log in to add items to your cart");
-      // return; To-Do: Redirect to login and uncomment return statement
+      toast.error("Please log in to add items to your cart");
+      return;
     }
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/cart/add/${user._id || "68d9398a70a8e8192f31a643"}`, // To-Do: remove the hardcoded userId
+        `${import.meta.env.VITE_BASE_URL}/cart/add/${user._id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -98,7 +97,7 @@ export const CartProvider = ({ children }) => {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user._id || "68d9398a70a8e8192f31a643", // To-Do: remove the hardcoded userId
+          userId: user._id,
           productId,
         }),
       });
@@ -114,7 +113,7 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/cart/clear/${user._id || "68d9398a70a8e8192f31a643"}`, // To-Do: remove the hardcoded userId
+        `${import.meta.env.VITE_BASE_URL}/cart/clear/${user._id}`,
         {
           method: "DELETE",
         }

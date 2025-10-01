@@ -1,10 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CartCard from "./CartCard";
 import Loading from "../../componenet/common/Loading";
 import { useCart } from "@/contexts/CartContext";
+import { useUser } from "@/contexts/UserContext";
+import toast from "react-hot-toast";
 
 const Cart = () => {
   const { cart, total, loading } = useCart();
+  const { user } = useUser();
+
+  if (!user || !user._id) {
+    toast.error("Please log in to view your cart");
+    window.location.href = "/login";
+    return;
+  }
 
   if (loading) return <Loading />;
 
@@ -53,12 +62,9 @@ const Cart = () => {
 
             {/* Cart Items */}
             <div className="space-y-4">
-              {cart.products.map(
-                (product) => (
-                  console.log(product),
-                  (<CartCard product={product} key={product.productId._id} />)
-                )
-              )}
+              {cart.products.map((product) => (
+                <CartCard product={product} key={product.productId._id} />
+              ))}
             </div>
           </div>
 

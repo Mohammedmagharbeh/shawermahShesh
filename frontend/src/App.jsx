@@ -11,6 +11,7 @@ import Header from "./componenet/Header";
 import Orders from "./pages/Orders";
 import AdminProductPanel from "./pages/adminremot";
 import PaymentFailed from "./pages/PaymentFailed";
+import MyOrders from "./pages/MyOrders";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/otp-verification" element={<OtpVerification />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/my-orders" element={<MyOrders />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
