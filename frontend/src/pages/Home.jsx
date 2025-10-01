@@ -249,27 +249,49 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <CardContent className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-gray-900">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-600 mb-4 text-sm">
-                        {product.description}
-                      </p>
+<CardContent className="p-6">
+  <h3 className="text-xl font-bold mb-2 text-gray-900">
+    {product.name}
+  </h3>
+  <p className="text-gray-600 mb-4 text-sm">{product.description}</p>
 
-                      <div className="flex items-center justify-between">
-                        <div className="text-2xl font-bold text-red-700">
-                          {product.price} د.أ
-                        </div>
-                        <Button
-                          onClick={() => addToCart(product._id)}
-                          className="bg-red-700 hover:bg-red-800 text-white px-6 py-2"
-                        >
-                          أضف للسلة
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
+  <div className="flex items-center justify-between">
+    <div>
+      {product.discount > 0 ? (
+        <>
+          {/* السعر الأصلي مع خط */}
+          <p className="text-gray-500 line-through text-sm">
+            {product.price} د.أ
+          </p>
+
+          {/* السعر بعد الخصم */}
+          <p className="text-2xl font-bold text-red-700">
+            {product.discountedPrice
+              ? product.discountedPrice
+              : product.price - (product.price * product.discount) / 100}{" "}
+            د.أ
+          </p>
+
+          {/* نسبة الخصم */}
+          <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
+            خصم {product.discount}%
+          </span>
+        </>
+      ) : (
+        <p className="text-2xl font-bold text-red-700">{product.price} د.أ</p>
+      )}
+    </div>
+
+    <Button
+      onClick={() => addToCart(product._id)}
+      className="bg-red-700 hover:bg-red-800 text-white px-6 py-2"
+    >
+      أضف للسلة
+      <ShoppingCart className="mr-2 h-4 w-4" />
+    </Button>
+  </div>
+</CardContent>
+
                   </Card>
                 ))}
               </div>
