@@ -2,12 +2,6 @@
 
 require("dotenv").config();
 
-const twilio = require("twilio");
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
 function generateOTP() {
   const random = Math.floor(100000 + Math.random() * 900000);
 
@@ -15,9 +9,7 @@ function generateOTP() {
 }
 
 async function sendOTP(phone, otp) {
-  console.log(otp);
-  console.log("phone: ", phone);
-
+  
   const senderid = "Sh.Sheesh";
   const accname = "highfit";
   const accpass = "RwQ$$8P_m@RA!Dsd88";
