@@ -2,6 +2,7 @@ const Order = require("../models/orders");
 const User = require("../models/user");
 const productsModel = require("../models/products");
 const locationsModel = require("../models/locations");
+const locations = require("../models/locations");
 
 // get all orders
 exports.getAllOrders = async (req, res) => {
@@ -95,14 +96,15 @@ exports.createOrder = async (req, res) => {
     } = req.body;
 
     if (!userId || !products?.length || !shippingAddress || !paymentMethod) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing required fields" });
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
     }
 
-    // validate shipping address
-    const address = await locationsModel.findById(shippingAddress);
-    if (!address) {
+    // validate shipping address & get delivery fee
+    const location = await locationsModel.findById(shippingAddress);
+    if (!location) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid shipping address" });
@@ -121,12 +123,13 @@ exports.createOrder = async (req, res) => {
       _id: { $in: products.map((p) => p.productId) },
     });
     if (dbProducts.length !== products.length) {
-      return res
-        .status(400)
-        .json({ success: false, message: "One or more products not found" });
+      return res.status(400).json({
+        success: false,
+        message: "One or more products not found",
+      });
     }
 
-    // enrich products
+    // enrich products with price at purchase
     const enrichedProducts = products.map((p) => {
       const matched = dbProducts.find(
         (dp) => dp._id.toString() === p.productId
@@ -138,12 +141,14 @@ exports.createOrder = async (req, res) => {
       };
     });
 
-    // calculate total price
-    const totalPrice = enrichedProducts.reduce(
+    // calculate total price (products + delivery fee)
+    const productsTotal = enrichedProducts.reduce(
       (sum, p) => sum + p.quantity * p.priceAtPurchase,
       0
     );
+    const totalPrice = productsTotal + location.deliveryCost;
 
+    // create order
     const newOrder = await Order.create({
       userId,
       products: enrichedProducts,
@@ -158,6 +163,7 @@ exports.createOrder = async (req, res) => {
       },
     });
 
+    // populate related fields
     const populatedOrder = await newOrder.populate([
       { path: "products.productId" },
       { path: "userId" },
@@ -167,7 +173,10 @@ exports.createOrder = async (req, res) => {
     res.status(201).json({ success: true, data: populatedOrder });
   } catch (error) {
     console.error("Error in createOrder:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server error",
+    });
   }
 };
 

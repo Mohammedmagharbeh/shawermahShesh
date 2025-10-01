@@ -11,6 +11,7 @@ import { Toaster } from "react-hot-toast";
 import Header from "./componenet/Header";
 import Orders from "./pages/Orders";
 import AdminProductPanel from "./pages/adminremot";
+import PaymentFailed from "./pages/PaymentFailed";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/orders" element={<Orders />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/payment-failed" element={<PaymentFailed />} />
             <Route path="/product/:id" element={<ProductView />} />
             <Route path="/admin" element={<AdminProductPanel />} />
           </Routes>

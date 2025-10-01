@@ -10,11 +10,15 @@ function Checkout() {
   const { createOrder } = useOrder();
   const { user } = useUser();
   const [areas, setAreas] = useState([]);
-  const [selectedArea, setSelectedArea] = useState("");
-  const [deliveryCost, setDeliveryCost] = useState(0);
+  const [selectedArea, setSelectedArea] = useState({
+    name: "",
+    deliveryCost: 0,
+    _id: "",
+  });
+  // const [deliveryCost, setDeliveryCost] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [PaymentMethod, setPaymentMethod] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState(null);
 
   useEffect(() => {
     async function fetchAreas() {
@@ -23,25 +27,9 @@ function Checkout() {
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
+        console.log("locations", data.locations);
 
-        let areasArray = [];
-        if (Array.isArray(data)) {
-          areasArray = data.map((a) => ({
-            name: a.name,
-            deliveryCost: a.deliveryCost || 0,
-            _id: a._id,
-          }));
-        } else if (data.locations && Array.isArray(data.locations)) {
-          areasArray = data.locations.map((loc) => ({
-            name: loc.name,
-            deliveryCost: loc.deliveryCost || 0,
-            _id: loc._id,
-          }));
-        } else {
-          console.warn("Unexpected data format for locations:", data);
-        }
-
-        setAreas(areasArray);
+        setAreas(data.locations);
       } catch (e) {
         console.error("Failed to fetch locations:", e);
         setError("فشل في جلب المناطق. يرجى المحاولة مرة أخرى.");
@@ -52,6 +40,8 @@ function Checkout() {
 
     fetchAreas();
   }, []);
+
+  console.log(areas);
 
   const DETAILS = [
     { name: "First Name", label: "name", required: true, type: "text" },
@@ -74,7 +64,7 @@ function Checkout() {
       required: true,
       type: "text",
       defaultValue: user?.phone || "",
-      readonly: true,
+      readOnly: true,
     },
   ];
 
@@ -83,11 +73,15 @@ function Checkout() {
       toast.error("Your cart is empty!");
       return;
     }
-    if (!PaymentMethod) {
+    if (!paymentMethod) {
       toast.error("Please select a payment method.");
       return;
     }
-    if (PaymentMethod === "card") {
+    if (!selectedArea._id) {
+      toast.error("Please select a delivery area.");
+      return;
+    }
+    if (paymentMethod === "card") {
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/myfatoorah/execute`,
@@ -100,37 +94,36 @@ function Checkout() {
             callbackUrl: `${window.location.origin}/payment-success`,
             errorUrl: `${window.location.origin}/payment-success`,
           },
-          {
-            headers: { "Content-Type": "application/json" },
-          }
+          { headers: { "Content-Type": "application/json" } }
         );
-
         if (!res.data?.IsSuccess) {
           toast.error("Payment initiation failed. Please try again.");
           return;
         }
-
         window.location.href = res.data.Data.PaymentURL;
       } catch (error) {
         toast.error("Something went wrong. Please try again later.");
         console.error(error);
       }
     }
-
-    await createOrder({
-      products: cart.products.map((p) => ({
-        productId: p.productId._id,
-        quantity: p.quantity,
-      })),
-      userId: user?._id,
-      shippingAddress: "68d860d988e6a681633f513b", // To-do: create address and get its ID
-      paymentMethod: PaymentMethod,
-    });
-    toast.success("Order placed successfully!");
-    clearCart();
+    try {
+      await createOrder({
+        products: cart.products.map((p) => ({
+          productId: p.productId._id,
+          quantity: p.quantity,
+        })),
+        userId: user?._id,
+        shippingAddress: selectedArea._id, // To-do: create address and get its ID
+        paymentMethod: paymentMethod,
+      });
+      toast.success("Order placed successfully!");
+      clearCart();
+    } catch (error) {
+      toast.error("Failed to place order. Try again later.");
+    }
   };
 
-  const totalWithDelivery = total + deliveryCost;
+  const totalWithDelivery = total + (selectedArea?.deliveryCost || 0);
 
   if (isLoading)
     return (
@@ -185,14 +178,13 @@ function Checkout() {
                         const selected = areas.find(
                           (a) => a.name === e.target.value
                         );
-                        setSelectedArea(e.target.value);
-                        setDeliveryCost(selected?.deliveryCost || 0);
+                        setSelectedArea(selected);
                       }}
                     >
                       <option value="">اختر المنطقة...</option>
-                      {detail.options?.map((option, i) => (
-                        <option key={i} value={option.name}>
-                          {option.name} - {option.deliveryCost.toFixed(2)} JOD
+                      {areas?.map((area, i) => (
+                        <option key={i} value={area.name}>
+                          {area.name} - {area.deliveryCost.toFixed(2)} JOD
                         </option>
                       ))}
                     </select>
@@ -204,7 +196,7 @@ function Checkout() {
                       required={detail.required}
                       placeholder={`Enter your ${detail.name.toLowerCase()}`}
                       defaultValue={detail.defaultValue || ""}
-                      readOnly={detail.readonly || false}
+                      readOnly={detail.readOnly || false}
                     />
                   )}
                 </div>
@@ -264,7 +256,7 @@ function Checkout() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Delivery:</span>
                   <span className="font-semibold text-green-600">
-                    {deliveryCost.toFixed(2)} JOD
+                    {selectedArea.deliveryCost.toFixed(2)} JOD
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-lg font-bold pt-3 border-t border-gray-200">
@@ -287,7 +279,7 @@ function Checkout() {
                       id="bank"
                       name="PaymentMethod"
                       type="radio"
-                      onClick={() => setPaymentMethod("card")}
+                      onChange={() => setPaymentMethod("card")}
                     />
                     <label
                       htmlFor="bank"
@@ -310,7 +302,7 @@ function Checkout() {
                       id="cash"
                       name="PaymentMethod"
                       type="radio"
-                      onClick={() => setPaymentMethod("cash")}
+                      onChange={() => setPaymentMethod("cash")}
                     />
                     <label
                       htmlFor="cash"
