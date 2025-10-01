@@ -12,6 +12,7 @@ import Orders from "./pages/Orders";
 import AdminProductPanel from "./pages/adminremot";
 import PaymentFailed from "./pages/PaymentFailed";
 import MyOrders from "./pages/MyOrders";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="/payment-failed" element={<PaymentFailed />} />
             <Route path="/product/:id" element={<ProductView />} />
             <Route path="/admin/add-product" element={<AdminProductPanel />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>
         </main>
       </BrowserRouter>

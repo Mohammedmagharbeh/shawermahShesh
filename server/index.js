@@ -1,5 +1,6 @@
-const app=require('../server/app')
-const PORT =process.env.PORT||5000
-app.listen(PORT,()=>{
-    console.log(`server running ${PORT}`)
-})
+const server = require("./app"); // note: fixed path
+const PORT = process.env.PORT || 5000;
+
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

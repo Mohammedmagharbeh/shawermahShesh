@@ -179,6 +179,11 @@ exports.createOrder = async (req, res) => {
       { path: "shippingAddress" },
     ]);
 
+    // Emit event to admins
+    const io = req.app.get("io");
+    io.emit("newOrder", newOrder); // 🔥 broadcast order to all connected admins
+    console.log("Emitted newOrder event:", newOrder._id);
+
     res.status(201).json({ success: true, data: populatedOrder });
   } catch (error) {
     console.error("Error in createOrder:", error);
