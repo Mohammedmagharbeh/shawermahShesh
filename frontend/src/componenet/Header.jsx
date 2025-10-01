@@ -191,17 +191,22 @@ function Header() {
           
           {/* الشعار والاسم */}
           <div className="flex items-center gap-3">
-            <Link to="/"> 
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-red-700 rounded-full flex items-center justify-center">
-                  <ChefHat className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-red-700">شاورما شيش</h1>
-                  <p className="text-xs text-gray-600">طعم أصيل ولذيذ</p>
-                </div>
-              </div>
-            </Link>
+<Link to="/"> 
+  <div className="flex items-center gap-3">
+    <div className="w-12 h-12 rounded-full overflow-hidden bg-red-700 flex items-center justify-center">
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDzGI9tRqzIVulcl3ghkfQ61TOgQmkuOt3gg&s"
+        alt="شاورما شيش"
+        className="w-full h-full object-cover"
+      />
+    </div>
+    <div>
+      <h1 className="text-2xl font-bold text-red-700">شاورما شيش</h1>
+      <p className="text-xs text-gray-600">طعم أصيل ولذيذ</p>
+    </div>
+  </div>
+</Link>
+
           </div>
 
           {/* روابط التصفح للشاشات الكبيرة */}

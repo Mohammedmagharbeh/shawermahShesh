@@ -24,7 +24,6 @@ import {
   Loader2,
 } from "lucide-react"
 
-// عدد المنتجات المعروضة افتراضياً أو عند الضغط على "إظهار المزيد"
 const PRODUCTS_PER_PAGE = 20
 
 export default function AdminProductPanel() {
@@ -32,6 +31,7 @@ export default function AdminProductPanel() {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
+    discount: "",
     description: "",
     image: "",
     category: "",
@@ -40,10 +40,10 @@ export default function AdminProductPanel() {
   const [searchTerm, setSearchTerm] = useState("")
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState("الكل")
-  const [displayedCount, setDisplayedCount] = useState(PRODUCTS_PER_PAGE) // يمثل عدد المنتجات التي سيتم عرضها حاليًا
+  const [displayedCount, setDisplayedCount] = useState(PRODUCTS_PER_PAGE)
   const [loading, setLoading] = useState(true)
 
-  // جلب البيانات من الباك اند
+  // جلب المنتجات
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true)
@@ -51,14 +51,12 @@ export default function AdminProductPanel() {
         const res = await axios.get("http://localhost:5000/api/products")
         const allProducts = res.data.data || []
         setProducts(allProducts)
-
-        // استخراج الفئات الفريدة
         const uniqueCategories = [...new Set(allProducts.map((p) => p.category))]
         setCategories(["الكل", ...uniqueCategories])
-        setSelectedCategory("الكل") // تأكد من إعادة تعيين الفئة المحددة بعد جلب المنتجات
+        setSelectedCategory("الكل")
       } catch (err) {
         console.error("Error fetching products:", err)
-        alert("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.")
+        alert("خطأ في جلب المنتجات.")
       } finally {
         setLoading(false)
       }
@@ -66,66 +64,62 @@ export default function AdminProductPanel() {
     fetchProducts()
   }, [])
 
-  // تحديث حالة حقول الإدخال
   const handleInputChange = (e) => {
     const { id, value } = e.target
     setFormData({ ...formData, [id]: value })
   }
 
-  // إضافة أو تعديل منتج
+  // إضافة أو تعديل
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       if (editingId) {
-        // تحديث منتج
         const res = await axios.put(
           `http://127.0.0.1:5000/api/admin/updatefood/${editingId}`,
           {
             ...formData,
             price: Number(formData.price),
+            discount: formData.discount ? Number(formData.discount) : 0,
           }
         )
         setProducts(products.map((p) => (p._id === editingId ? res.data : p)))
         setEditingId(null)
       } else {
-        // إضافة منتج جديد
         const res = await axios.post(
           "http://127.0.0.1:5000/api/admin/postfood",
           {
             ...formData,
             price: Number(formData.price),
+            discount: formData.discount ? Number(formData.discount) : 0,
           }
         )
-        setProducts([res.data, ...products]) // إضافة المنتج الجديد في البداية
+        setProducts([res.data, ...products])
       }
 
-      // مسح النموذج
       setFormData({
         name: "",
         price: "",
+        discount: "",
         description: "",
         image: "",
         category: "",
       })
 
-      // إعادة جلب المنتجات لتحديث قائمة الفئات إذا لزم الأمر
-      // يمكن تحسين هذا بدمج منطق تحديث الفئات هنا بدلاً من جلب القائمة بأكملها
       const res = await axios.get("http://localhost:5000/api/products")
       const allProducts = res.data.data || []
       const uniqueCategories = [...new Set(allProducts.map((p) => p.category))]
       setCategories(["الكل", ...uniqueCategories])
-
     } catch (error) {
       console.error("خطأ في الإرسال:", error.response?.data || error.message)
-      alert("حدث خطأ أثناء الإرسال. تأكد من صحة البيانات.")
+      alert("حدث خطأ أثناء الإرسال.")
     }
   }
 
-  // تفعيل وضع التعديل
   const handleEdit = (product) => {
     setFormData({
       name: product.name,
       price: product.price.toString(),
+      discount: product.discount?.toString() || "",
       description: product.description,
       image: product.image,
       category: product.category,
@@ -133,9 +127,8 @@ export default function AdminProductPanel() {
     setEditingId(product._id)
   }
 
-  // حذف المنتج
   const handleDelete = async (id) => {
-    if (!window.confirm("هل أنت متأكد من حذف هذا المنتج؟")) return
+    if (!window.confirm("هل أنت متأكد من الحذف؟")) return
     try {
       await axios.delete(`http://127.0.0.1:5000/api/admin/deletefood/${id}`)
       setProducts(products.filter((p) => p._id !== id))
@@ -145,23 +138,18 @@ export default function AdminProductPanel() {
     }
   }
 
-  // فلترة المنتجات
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.category.toLowerCase().includes(searchTerm.toLowerCase())
-
     const matchesCategory =
       selectedCategory === "الكل" || p.category === selectedCategory
-
     return matchesSearch && matchesCategory
   })
 
-  // المنتجات التي سيتم عرضها (أول displayedCount عنصر)
   const displayedProducts = filteredProducts.slice(0, displayedCount)
   const hasMoreProducts = filteredProducts.length > displayedCount
 
-  // عند تغيير الفئة المحددة، قم بإعادة تعيين عدد المنتجات المعروضة
   const handleCategoryChange = (cat) => {
     setSelectedCategory(cat)
     setDisplayedCount(PRODUCTS_PER_PAGE)
@@ -180,9 +168,7 @@ export default function AdminProductPanel() {
               <Package className="h-8 w-8 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                لوحة إدارة المنتجات 🍔
-              </h1>
+              <h1 className="text-3xl font-bold">لوحة إدارة المنتجات 🍔</h1>
               <p className="text-muted-foreground text-sm mt-1">
                 إدارة قائمة الطعام والمنتجات
               </p>
@@ -191,20 +177,14 @@ export default function AdminProductPanel() {
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Form Section */}
+          {/* Form */}
           <div className="lg:col-span-1">
-            <Card className="border-border/50 shadow-xl sticky top-24">
-              <CardHeader className="space-y-1 pb-4">
-                <CardTitle className="text-2xl flex items-center gap-2">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    {editingId ? (
-                      <Edit2 className="h-5 w-5 text-primary" />
-                    ) : (
-                      <Plus className="h-5 w-5 text-primary" />
-                    )}
-                  </div>
+            <Card className="shadow-xl sticky top-24">
+              <CardHeader>
+                <CardTitle>
                   {editingId ? "تعديل المنتج" : "إضافة منتج جديد"}
                 </CardTitle>
                 <CardDescription>
@@ -215,108 +195,75 @@ export default function AdminProductPanel() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="name"
-                      className="text-sm font-medium flex items-center gap-2"
-                    >
-                      <Package className="h-4 w-4 text-primary" /> اسم المنتج
-                    </Label>
+                  <div>
+                    <Label htmlFor="name">اسم المنتج</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="مثال: برجر كلاسيك"
                       required
-                      className="h-11"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="price"
-                      className="text-sm font-medium flex items-center gap-2"
-                    >
-                      <DollarSign className="h-4 w-4 text-primary" /> السعر (دينار)
-                    </Label>
+                  <div>
+                    <Label htmlFor="price">السعر (دينار)</Label>
                     <Input
                       id="price"
                       type="number"
                       value={formData.price}
                       onChange={handleInputChange}
-                      placeholder="45"
                       required
-                      className="h-11"
                       min="0"
                       step="0.01"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="category"
-                      className="text-sm font-medium flex items-center gap-2"
-                    >
-                      <Tag className="h-4 w-4 text-primary" /> الفئة
-                    </Label>
+                  <div>
+                    <Label htmlFor="discount">نسبة الخصم (%)</Label>
+                    <Input
+                      id="discount"
+                      type="number"
+                      value={formData.discount}
+                      onChange={handleInputChange}
+                      placeholder="مثال: 10"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="category">الفئة</Label>
                     <Input
                       id="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      placeholder="مثال: برجر، بيتزا، مشروبات"
                       required
-                      className="h-11"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="image"
-                      className="text-sm font-medium flex items-center gap-2"
-                    >
-                      <ImageIcon className="h-4 w-4 text-primary" /> رابط الصورة
-                    </Label>
+                  <div>
+                    <Label htmlFor="image">رابط الصورة</Label>
                     <Input
                       id="image"
                       value={formData.image}
                       onChange={handleInputChange}
-                      placeholder="https://example.com/image.jpg"
                       required
-                      className="h-11"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="description"
-                      className="text-sm font-medium"
-                    >
-                      الوصف
-                    </Label>
+                  <div>
+                    <Label htmlFor="description">الوصف</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      placeholder="وصف تفصيلي للمنتج..."
                       required
                       rows={4}
-                      className="resize-none"
                     />
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all"
-                  >
-                    {editingId ? (
-                      <>
-                        <Edit2 className="ml-2 h-5 w-5" /> حفظ التعديلات
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="ml-2 h-5 w-5" /> إضافة المنتج
-                      </>
-                    )}
+                  <Button type="submit" className="w-full">
+                    {editingId ? "حفظ التعديلات" : "إضافة المنتج"}
                   </Button>
 
                   {editingId && (
@@ -328,12 +275,13 @@ export default function AdminProductPanel() {
                         setFormData({
                           name: "",
                           price: "",
+                          discount: "",
                           description: "",
                           image: "",
                           category: "",
                         })
                       }}
-                      className="w-full h-11"
+                      className="w-full"
                     >
                       إلغاء التعديل
                     </Button>
@@ -343,18 +291,17 @@ export default function AdminProductPanel() {
             </Card>
           </div>
 
-          {/* Products List Section */}
+          {/* Products List */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Search & Filter */}
-            <Card className="border-border/50 shadow-lg">
+            <Card>
               <CardContent className="pt-6">
                 <div className="relative mb-4">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5" />
                   <Input
                     placeholder="ابحث عن منتج..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pr-10 h-11"
+                    className="pr-10"
                   />
                 </div>
 
@@ -364,11 +311,6 @@ export default function AdminProductPanel() {
                       key={i}
                       variant={selectedCategory === cat ? "default" : "outline"}
                       onClick={() => handleCategoryChange(cat)}
-                      className={`rounded-full px-4 py-2 ${
-                        selectedCategory === cat
-                          ? "bg-primary text-white"
-                          : "border border-primary text-primary hover:bg-primary/10"
-                      }`}
                     >
                       {cat}
                     </Button>
@@ -377,111 +319,80 @@ export default function AdminProductPanel() {
               </CardContent>
             </Card>
 
-            {/* Products Grid Header */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-foreground">
-                  المنتجات ({filteredProducts.length})
-                </h2>
-                <Badge variant="secondary" className="px-4 py-2 text-sm">
-                  إجمالي: {products.length} منتج
-                </Badge>
+            {/* Products Grid */}
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <Loader2 className="animate-spin h-10 w-10 text-primary" />
               </div>
-
-              {/* Products Grid */}
-              {loading ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="animate-spin h-10 w-10 text-primary" />
-                </div>
-              ) : displayedProducts.length === 0 ? (
-                <Card className="border-dashed border-2">
-                  <CardContent className="flex flex-col items-center justify-center py-16">
-                    <Package className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                    <p className="text-lg text-muted-foreground">
-                      لا توجد منتجات
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {filteredProducts.length === 0 && (searchTerm || selectedCategory !== "الكل")
-                        ? "تأكد من شروط البحث أو الفلترة"
-                        : "ابدأ بإضافة منتج جديد"}
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-6">
-                  {displayedProducts.map((product) => (
-                    <Card
-                      key={product._id}
-                      className="group hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-border/50 overflow-hidden"
-                    >
-                      <div className="relative h-48 overflow-hidden bg-muted">
-                        <img
-                          src={product.image || "/placeholder.svg"}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                        <div className="absolute top-3 left-3">
-                          <Badge className="bg-primary text-primary-foreground shadow-lg">
-                            {product.category}
-                          </Badge>
-                        </div>
+            ) : displayedProducts.length === 0 ? (
+              <Card className="border-dashed border-2">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <Package className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                  <p className="text-lg text-muted-foreground">لا توجد منتجات</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6">
+                {displayedProducts.map((product) => (
+                  <Card key={product._id} className="overflow-hidden">
+                    <div className="relative h-48 bg-muted">
+                      <img
+                        src={product.image || "/placeholder.svg"}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-3 left-3">
+                        <Badge>{product.category}</Badge>
                       </div>
-                      <CardContent className="p-5 space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex items-start justify-between gap-3">
-                            <h3 className="text-xl font-bold text-foreground leading-tight">
-                              {product.name}
-                            </h3>
-                            <div className="flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-lg shrink-0">
-                              <span className="text-lg font-bold text-primary">
-                                {product.price}
-                              </span>
-                              <span className="text-sm text-primary">
-                                دينار
-                              </span>
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                            {product.description}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 pt-2">
-                          <Button
-                            onClick={() => handleEdit(product)}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 h-10 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
-                          >
-                            <Edit2 className="ml-2 h-4 w-4" /> تعديل
-                          </Button>
-                          <Button
-                            onClick={() => handleDelete(product._id)}
-                            variant="destructive"
-                            size="sm"
-                            className="flex-1 h-10 shadow-md hover:shadow-lg transition-shadow"
-                          >
-                            <Trash2 className="ml-2 h-4 w-4" /> حذف
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+                    </div>
+                    <CardContent className="p-5">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-bold">{product.name}</h3>
+                        <span className="font-semibold text-primary">
+                          {product.price} د
+                        </span>
+                      </div>
+                      {product.discount > 0 && (
+                        <p className="text-sm text-red-500">
+                          خصم: {product.discount}%
+                        </p>
+                      )}
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {product.description}
+                      </p>
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          onClick={() => handleEdit(product)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Edit2 className="ml-2 h-4 w-4" /> تعديل
+                        </Button>
+                        <Button
+                          onClick={() => handleDelete(product._id)}
+                          variant="destructive"
+                          size="sm"
+                        >
+                          <Trash2 className="ml-2 h-4 w-4" /> حذف
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
 
-              {/* زر عرض المزيد */}
-              {hasMoreProducts && (
-                <div className="flex justify-center mt-4">
-                  <Button
-                    onClick={() =>
-                      setDisplayedCount(displayedCount + PRODUCTS_PER_PAGE)
-                    }
-                  >
-                    إظهار المزيد
-                  </Button>
-                </div>
-              )}
-            </div>
+            {hasMoreProducts && (
+              <div className="flex justify-center mt-4">
+                <Button
+                  onClick={() =>
+                    setDisplayedCount(displayedCount + PRODUCTS_PER_PAGE)
+                  }
+                >
+                  إظهار المزيد
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
