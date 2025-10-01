@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
+import toast from "react-hot-toast";
 
 function OtpVerification() {
   const [otp, setOtp] = useState("");
@@ -28,10 +29,10 @@ function OtpVerification() {
         token: res.data.token,
       });
 
-      alert("تم التحقق من OTP بنجاح 🎉");
+      toast.success("تم التحقق من OTP بنجاح");
       navigate("/");
     } catch (error) {
-      alert("OTP غير صحيح ❌");
+      toast.error("OTP غير صحيح");
       console.error(error);
     }
   };

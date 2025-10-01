@@ -1,6 +1,5 @@
 import Login from "./componenet/log";
 import Home from "./pages/Home";
-import Registration from "./componenet/Registration";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Cart from "./pages/Cart/Cart";
 import Checkout from "./pages/Checkout";
@@ -23,7 +22,6 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/Login" element={<Login />} />
             <Route path="/otp-verification" element={<OtpVerification />} />
-            <Route path="/Registration" element={<Registration />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/checkout" element={<Checkout />} />

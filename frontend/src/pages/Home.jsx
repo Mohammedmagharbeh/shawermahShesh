@@ -15,9 +15,8 @@ import {
   Heart,
   Loader2,
 } from "lucide-react";
-
 import { useCart } from "../contexts/CartContext";
-
+import burger from "../assets/burger.jpg";
 // عدد المنتجات التي ستظهر مبدئيًا
 const PRODUCTS_PER_PAGE = 6;
 
@@ -239,7 +238,7 @@ export default function Home() {
                   >
                     <div className="relative">
                       <img
-                        src={product.image || "/placeholder.svg"}
+                        src={burger}
                         alt={product.name}
                         className="w-full h-48 object-cover"
                       />

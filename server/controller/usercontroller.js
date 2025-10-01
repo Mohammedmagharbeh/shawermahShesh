@@ -15,23 +15,23 @@ exports.getuser = async (req, res) => {
 };
 
 // postEndpoint
-exports.postuser = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+// exports.postuser = async (req, res) => {
+//   try {
+//     const { username, email, password } = req.body;
 
-    const hashedpassword = await bcrypt.hash(password, 10);
-    const userwithhash = {
-      username: username,
-      email: email,
-      password: hashedpassword,
-      password2: hashedpassword,
-    };
-    const newuser = await user.create(userwithhash);
-    res.status(200).json(newuser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+//     const hashedpassword = await bcrypt.hash(password, 10);
+//     const userwithhash = {
+//       username: username,
+//       email: email,
+//       password: hashedpassword,
+//       password2: hashedpassword,
+//     };
+//     const newuser = await user.create(userwithhash);
+//     res.status(200).json(newuser);
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 
 exports.userLogin = async (req, res) => {
   const { phone } = req.body;
@@ -88,7 +88,9 @@ exports.getAllProducts = async (req, res) => {
   }
   const query = normalizedCategory ? { category: normalizedCategory } : {};
   const result = await products.find(query);
-  res.status(200).json({ message: "products fetched successfully", data: result });
+  res
+    .status(200)
+    .json({ message: "products fetched successfully", data: result });
 };
 
 exports.getSingleProduct = async (req, res) => {
@@ -98,7 +100,9 @@ exports.getSingleProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res.status(200).json({ message: "Product fetched successfully", data: product });
+    res
+      .status(200)
+      .json({ message: "Product fetched successfully", data: product });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

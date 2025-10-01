@@ -16,48 +16,29 @@ const { generateOTP, sendOTP } = require("../utils/otp");
 const userModel = require("../models/user");
 
 routes.get("/users", getuser);
-routes.post("/users/postuser", postuser);
+// routes.post("/users/postuser", postuser);
 
 routes.post("/login", async (req, res) => {
-  const { phone, token } = req.body; // ✅ client should send token if they have one
+  const { phone } = req.body; // ✅ client should send token if they have one
 
   try {
     let user = await userModel.findOne({ phone });
 
     // ✅ Case 1: user exists
-    if (user) {
-      // check if token was sent
-      if (token) {
-        try {
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!user) {
+      // const otp = generateOTP();
+      // user.otp = otp;
+      // user.otpExpires = Date.now() + 5 * 60 * 1000;
+      // await user.save();
 
-          // if token belongs to this user -> login directly
-          if (decoded.id.toString() === user._id.toString()) {
-            return res.status(200).json({
-              msg: "Already logged in",
-              token,
-              _id: user._id,
-              phone: user.phone,
-            });
-          }
-        } catch (err) {
-          // token invalid → ignore and continue to send OTP
-        }
-      }
+      // await sendOTP(user.phone, otp);
 
-      // token missing/invalid → send OTP
-      const otp = generateOTP();
-      user.otp = otp;
-      user.otpExpires = Date.now() + 5 * 60 * 1000;
-      await user.save();
-
-      await sendOTP(user.phone, otp);
-
-      return res.status(200).json({ msg: "OTP sent to your phone" });
+      // return res.status(200).json({ msg: "OTP sent to your phone" });
+      user = new userModel({ phone });
     }
 
     // ✅ Case 2: user not found → create new user & send OTP
-    user = new userModel({ phone });
+
     const otp = generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 5 * 60 * 1000;

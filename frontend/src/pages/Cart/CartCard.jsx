@@ -1,5 +1,5 @@
 import { useCart } from "@/contexts/CartContext";
-import pizza from "../../assets/pizza.jpg";
+import burger from "../../assets/burger.jpg";
 
 function CartCard({ product }) {
   const { updateQuantity, removeFromCart } = useCart();
@@ -23,7 +23,7 @@ function CartCard({ product }) {
           </button>
           <div className="size-16 rounded-lg overflow-hidden bg-gray-100">
             <img
-              src={product?.images?.[0] || pizza}
+              src={product?.images?.[0] || burger}
               alt={product.name}
               className="w-full h-full object-cover"
             />
