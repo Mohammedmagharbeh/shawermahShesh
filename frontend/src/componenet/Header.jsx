@@ -185,7 +185,7 @@ function Header() {
   }
 
   return (
-    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50 shadow-sm">
+    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-yellow-200 z-50 shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           
@@ -201,7 +201,9 @@ function Header() {
       />
     </div>
     <div>
-      <h1 className="text-2xl font-bold text-red-700">شاورما شيش</h1>
+<h1 className="text-2xl font-bold text-red-700 text-shadow-yellow">
+  شاورما شيش
+</h1>
       <p className="text-xs text-gray-600">طعم أصيل ولذيذ</p>
     </div>
   </div>

@@ -24,6 +24,7 @@ function ProductView() {
   const { addToCart } = useCart();
 
   useEffect(() => {
+    
     const fetchProductDetails = async () => {
       try {
         setLoading(true);
