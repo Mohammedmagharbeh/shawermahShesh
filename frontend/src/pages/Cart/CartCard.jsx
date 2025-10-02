@@ -30,7 +30,7 @@ function CartCard({ product }) {
           </div>
           <div>
             <h3 className="font-semibold text-gray-800 text-lg">
-              {product.productId.name}
+              {product?.productId?.name ?? "Product Name"}
             </h3>
             <p className="text-sm text-gray-500">Restaurant Special</p>
           </div>
@@ -40,7 +40,7 @@ function CartCard({ product }) {
         <div className="flex justify-between lg:justify-center items-center">
           <span className="lg:hidden font-medium text-gray-600">Price:</span>
           <span className="text-xl font-bold text-red-600">
-            {product.productId.price} JOD
+            {product?.productId?.price ?? "Price Unavailable"} JOD
           </span>
         </div>
 
@@ -67,7 +67,10 @@ function CartCard({ product }) {
         <div className="flex justify-between lg:justify-center items-center">
           <span className="lg:hidden font-medium text-gray-600">Total:</span>
           <span className="text-xl font-bold text-red-700">
-            {(product.productId.price * product.quantity).toFixed(2)} JOD
+            {(product?.productId?.price ?? 0 * product?.quantity ?? 0).toFixed(
+              2
+            )}{" "}
+            JOD
           </span>
         </div>
       </div>

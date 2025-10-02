@@ -15,9 +15,11 @@ export const CATEGORIES = [
 
 // Order Constants
 export const ORDER_STATUSES = Object.freeze([
-  "pending",
-  "completed",
-  "cancelled",
+  "Processing",
+  "Confirmed",
+  "Shipped",
+  "Delivered",
+  "Cancelled",
 ]);
 export const PAYMENT_METHODS = Object.freeze(["cash", "card"]);
 export const PAYMENT_STATUSES = Object.freeze(["unpaid", "paid"]);
