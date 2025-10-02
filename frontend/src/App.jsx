@@ -13,6 +13,7 @@ import AdminProductPanel from "./pages/adminremot";
 import PaymentFailed from "./pages/PaymentFailed";
 import MyOrders from "./pages/MyOrders";
 import AdminDashboard from "./pages/AdminDashboard";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   return (
@@ -21,7 +22,14 @@ function App() {
         <Header />
         <main className="pt-14">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/Login" element={<Login />} />
             <Route path="/otp-verification" element={<OtpVerification />} />
             <Route path="/cart" element={<Cart />} />
@@ -31,7 +39,15 @@ function App() {
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
             <Route path="/product/:id" element={<ProductView />} />
-            <Route path="/admin/add-product" element={<AdminProductPanel />} />
+            <Route
+              path="/admin/add-product"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminProductPanel />
+                </ProtectedRoute>
+              }
+            />
+            {/* <Route path="/admin/add-product" element={<AdminProductPanel />} /> */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>
         </main>

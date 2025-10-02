@@ -5,7 +5,11 @@ import toast from "react-hot-toast";
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState({ _id: "", userId: "", products: [] });
+  const [cart, setCart] = useState({
+    _id: "",
+    userId: "",
+    products: [],
+  });
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
@@ -13,7 +17,7 @@ export const CartProvider = ({ children }) => {
   // Fetch cart on mount
   useEffect(() => {
     const fetchCart = async () => {
-      if (!user._id) {
+      if (!user?._id) {
         return;
       }
       setLoading(true);

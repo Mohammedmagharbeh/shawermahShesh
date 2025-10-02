@@ -6,9 +6,9 @@ import { useUser } from "@/contexts/UserContext";
 import toast from "react-hot-toast";
 
 function Login() {
-  const [phone, setphone] = useState("");
+  const [phone, setPhone] = useState("");
   const navigate = useNavigate();
-  const { login } = useUser();
+  const { login, user } = useUser();
 
   const formatPhone = (phone) => {
     let cleaned = phone.trim();
@@ -18,13 +18,11 @@ function Login() {
     return `+962${cleaned}`;
   };
 
-  const Loginhandler = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     const formattedPhone = formatPhone(phone);
     try {
-      const token = sessionStorage.getItem("jwt");
-
       const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, {
         phone: formattedPhone,
       });
@@ -33,7 +31,10 @@ function Login() {
         login({
           _id: res.data._id,
           phone: formattedPhone,
+          token: res.data.token,
+          role: res.data.role,
         });
+
         toast.success("تم تسجيل الدخول بنجاح");
         navigate("/");
         return;
@@ -45,7 +46,7 @@ function Login() {
       }
     } catch (error) {
       console.error(error);
-      toast.error("حدث خطأ أثناء تسجيل الدخول ❌");
+      toast.error("حدث خطأ أثناء تسجيل الدخول");
     }
   };
 
@@ -81,7 +82,7 @@ function Login() {
         </h1>
         <p className="text-gray-500 text-sm mb-8">أدخل رقم هاتفك للمتابعة</p>
 
-        <form onSubmit={Loginhandler} className="flex flex-col gap-5">
+        <form onSubmit={handleLogin} className="flex flex-col gap-5">
           <motion.div whileFocus={{ scale: 1.02 }} className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
               <svg
@@ -104,7 +105,7 @@ function Login() {
               placeholder="رقم الهاتف"
               value={phone}
               maxLength={10}
-              onChange={(e) => setphone(e.target.value)}
+              onChange={(e) => setPhone(e.target.value)}
               required
               className="w-full p-4 pr-4 pl-12 border-2 border-gray-200 rounded-xl text-base focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/10 placeholder:text-gray-400 text-right transition-all duration-200 bg-gray-50/50"
             />

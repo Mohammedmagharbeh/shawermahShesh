@@ -6,13 +6,35 @@ const socket = io("http://localhost:5000");
 
 function AdminDashboard() {
   const [orders, setOrders] = useState([]);
-  const [audio, setAudio] = useState(null);
-  const [isUnlocked, setIsUnlocked] = useState(false);
 
+  // Ask for notification permission
+  useEffect(() => {
+    if ("Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission().then((permission) => {
+          console.log("Notification permission:", permission);
+        });
+      }
+    }
+  }, []);
+
+  // Handle new orders
   useEffect(() => {
     socket.on("newOrder", (order) => {
       console.log("New order received:", order);
       setOrders((prev) => [order, ...prev]);
+
+      // Show system notification
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("📦 New Order!", {
+          body: `${order.userId.phone} ordered for ${order.totalPrice} JOD`,
+          icon: "/order-icon.png",
+        });
+      }
+
+      // Play sound
+      const sound = new Audio(newOrderSound);
+      sound.play().catch((err) => console.log("Play blocked:", err));
     });
 
     return () => {
@@ -20,35 +42,8 @@ function AdminDashboard() {
     };
   }, []);
 
-  // Preload audio
-  useEffect(() => {
-    const sound = new Audio(newOrderSound);
-    setAudio(sound);
-  }, []);
-
-  // Play sound when new orders arrive (only if unlocked)
-  useEffect(() => {
-    if (orders.length > 0 && audio && isUnlocked) {
-      audio.currentTime = 0;
-      audio.play().catch((err) => console.log("Play blocked:", err));
-    }
-  }, [orders]);
-
-  // Unlock audio on first user click
-  const unlockAudio = () => {
-    if (audio) {
-      audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        setIsUnlocked(true);
-        console.log("🔓 Audio unlocked");
-      });
-    }
-  };
-
   return (
-    <div onClick={!isUnlocked ? unlockAudio : undefined}>
-      {!isUnlocked && <p>Click anywhere to enable sounds 🔊</p>}
+    <div>
       <h2>Admin Orders</h2>
       <ul>
         {orders.map((o) => (
