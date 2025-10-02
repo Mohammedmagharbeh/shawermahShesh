@@ -39,7 +39,6 @@ function App() {
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
             <Route path="/product/:id" element={<ProductView />} />
-            <Route path="/admin/add-product" element={<AdminProductPanel />} />
             <Route
               path="/admin/add-product"
               element={
