@@ -1,38 +1,42 @@
-import { useState } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
-import axios from "axios"
-import { motion } from "framer-motion"
-import { useUser } from "@/contexts/UserContext"
-import toast from "react-hot-toast"
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { useUser } from "@/contexts/UserContext";
+import toast from "react-hot-toast";
 
 function OtpVerification() {
-  const [otp, setOtp] = useState("")
-  const navigate = useNavigate()
-  const location = useLocation()
-  const phone = location.state?.phone
-  const { login } = useUser()
+  const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const phone = location.state?.phone;
+  const { login } = useUser();
 
   const verifyOtp = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/verify-otp`, {
-        phone,
-        otp,
-      })
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/verify-otp`,
+        {
+          phone,
+          otp,
+        }
+      );
 
       login({
         _id: res.data._id,
         phone,
         token: res.data.token,
-      })
+        role: res.data.role,
+      });
 
-      toast.success("تم التحقق من OTP بنجاح")
-      navigate("/")
+      toast.success("تم التحقق من OTP بنجاح");
+      navigate("/");
     } catch (error) {
-      toast.error("OTP غير صحيح")
-      console.error(error)
+      toast.error("OTP غير صحيح");
+      console.error(error);
     }
-  }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-amber-50">
@@ -67,7 +71,9 @@ function OtpVerification() {
         <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
           أدخل رمز التحقق
         </h1>
-        <p className="text-gray-500 text-sm mb-8">تم إرسال رمز التحقق إلى {phone}</p>
+        <p className="text-gray-500 text-sm mb-8">
+          تم إرسال رمز التحقق إلى {phone}
+        </p>
 
         <form onSubmit={verifyOtp} className="flex flex-col gap-5">
           <motion.input
@@ -115,13 +121,18 @@ function OtpVerification() {
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           العودة إلى تسجيل الدخول
         </motion.button>
       </motion.div>
     </div>
-  )
+  );
 }
 
-export default OtpVerification
+export default OtpVerification;

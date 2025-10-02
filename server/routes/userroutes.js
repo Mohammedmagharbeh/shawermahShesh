@@ -80,6 +80,7 @@ routes.post("/verify-otp", async (req, res) => {
       token,
       _id: user._id,
       phone: user.phone,
+      role: user.role,
     });
   } catch (err) {
     res.status(500).json({ msg: err.message });
