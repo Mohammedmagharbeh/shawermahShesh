@@ -4,6 +4,7 @@ import { useUser } from "@/contexts/UserContext";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 function Checkout() {
   const { cart, total, clearCart } = useCart();
@@ -19,6 +20,7 @@ function Checkout() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchAreas() {
@@ -113,8 +115,10 @@ function Checkout() {
         shippingAddress: selectedArea._id, // To-do: create address and get its ID
         paymentMethod: paymentMethod,
       });
+
       toast.success("Order placed successfully!");
       clearCart();
+      navigate("/");
     } catch (error) {
       toast.error("Failed to place order. Try again later.");
     }

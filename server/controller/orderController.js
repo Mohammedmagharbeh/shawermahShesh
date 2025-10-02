@@ -162,7 +162,7 @@ exports.createOrder = async (req, res) => {
       userId,
       products: enrichedProducts,
       totalPrice,
-      status: status || "pending",
+      status: status || "Processing",
       shippingAddress,
       payment: {
         method: paymentMethod,
