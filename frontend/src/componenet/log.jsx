@@ -8,29 +8,20 @@ import toast from "react-hot-toast";
 function Login() {
   const [phone, setPhone] = useState("");
   const navigate = useNavigate();
-  const { login, user } = useUser();
-
-  const formatPhone = (phone) => {
-    let cleaned = phone.trim();
-    if (cleaned.startsWith("0")) {
-      cleaned = cleaned.slice(1);
-    }
-    return `+962${cleaned}`;
-  };
+  const { login } = useUser();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const formattedPhone = formatPhone(phone);
     try {
       const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, {
-        phone: formattedPhone,
+        phone: phone,
       });
 
       if (res.data.token) {
         login({
           _id: res.data._id,
-          phone: formattedPhone,
+          phone: phone,
           token: res.data.token,
           role: res.data.role,
         });
@@ -42,7 +33,7 @@ function Login() {
 
       if (res.data.msg === "OTP sent to your phone") {
         toast.success("تم إرسال رمز التحقق 📲");
-        navigate("/otp-verification", { state: { phone: formattedPhone } });
+        navigate("/otp-verification", { state: { phone: phone } });
       }
     } catch (error) {
       console.error(error);

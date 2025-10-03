@@ -1,3 +1,4 @@
+import Loading from "@/componenet/common/Loading";
 import { useCart } from "@/contexts/CartContext";
 import { useOrder } from "@/contexts/OrderContext";
 import { useUser } from "@/contexts/UserContext";
@@ -20,6 +21,7 @@ function Checkout() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [orderType, setOrderType] = useState("delivery"); // default delivery
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,13 +53,6 @@ function Checkout() {
       type: "text",
     },
     {
-      name: "Area",
-      label: "area",
-      required: true,
-      type: "select",
-      options: areas,
-    },
-    {
       name: "Phone Number",
       label: "phone",
       required: true,
@@ -67,7 +62,8 @@ function Checkout() {
     },
   ];
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = async (e) => {
+    e.preventDefault();
     if (cart.products.length === 0) {
       toast.error("Your cart is empty!");
       return;
@@ -89,7 +85,7 @@ function Checkout() {
             amount: Number.parseFloat(totalWithDelivery.toFixed(2)),
             customerName: "Ahmad",
             customerEmail: "ahmadjkff1@gmail.com",
-            customerMobile: "0799635582",
+            customerMobile: user.phone, // To-Do: get from user profile
             callbackUrl: `${window.location.origin}/payment-success`,
             errorUrl: `${window.location.origin}/payment-success`,
           },
@@ -99,39 +95,37 @@ function Checkout() {
           toast.error("Payment initiation failed. Please try again.");
           return;
         }
+        localStorage.setItem("pendingOrder", JSON.stringify(cart));
         window.location.href = res.data.Data.PaymentURL;
       } catch (error) {
         toast.error("Something went wrong. Please try again later.");
         console.error(error);
       }
-    }
-    try {
-      await createOrder({
-        products: cart.products.map((p) => ({
-          productId: p.productId._id,
-          quantity: p.quantity,
-        })),
-        userId: user?._id,
-        shippingAddress: selectedArea._id, // To-do: create address and get its ID
-        paymentMethod: paymentMethod,
-      });
+    } else {
+      try {
+        await createOrder({
+          products: cart.products.map((p) => ({
+            productId: p.productId._id,
+            quantity: p.quantity,
+          })),
+          userId: user?._id,
+          shippingAddress: selectedArea._id,
+          paymentMethod: "cash",
+        });
 
-      toast.success("Order placed successfully!");
-      clearCart();
-      navigate("/");
-    } catch (error) {
-      toast.error("Failed to place order. Try again later.");
+        toast.success("Order placed successfully!");
+        clearCart();
+        navigate("/");
+      } catch (error) {
+        toast.error("Failed to place order. Try again later.");
+      }
     }
   };
 
-  const totalWithDelivery = total + (selectedArea?.deliveryCost || 0);
+  const totalWithDelivery =
+    total + (orderType === "delivery" ? selectedArea?.deliveryCost || 0 : 0);
 
-  if (isLoading)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>جاري تحميل المناطق...</p>
-      </div>
-    );
+  if (isLoading) return <Loading />;
   if (error)
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -140,7 +134,10 @@ function Checkout() {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
+    <form
+      className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50"
+      onSubmit={(e) => handlePlaceOrder(e)}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -202,6 +199,72 @@ function Checkout() {
                   )}
                 </div>
               ))}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Order Type <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="orderType"
+                      value="pickup"
+                      checked={orderType === "pickup"}
+                      onChange={() => {
+                        setOrderType("pickup");
+                        setSelectedArea({
+                          name: "بدون توصيل",
+                          deliveryCost: 0,
+                          _id: "68d860d988e6a681633f5152",
+                        });
+                      }}
+                      className="w-4 h-4 text-red-500 border-gray-300 focus:ring-red-500"
+                    />
+                    <span>Pickup</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="orderType"
+                      value="delivery"
+                      checked={orderType === "delivery"}
+                      onChange={() => setOrderType("delivery")}
+                      className="w-4 h-4 text-red-500 border-gray-300 focus:ring-red-500"
+                    />
+                    <span>Delivery</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Only show Area if delivery is selected */}
+              {orderType === "delivery" && (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="area"
+                    className="block text-sm font-semibold text-gray-700"
+                  >
+                    Area <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-gray-50 hover:bg-white"
+                    id="area"
+                    required
+                    onChange={(e) => {
+                      const selected = areas.find(
+                        (a) => a.name === e.target.value
+                      );
+                      setSelectedArea(selected);
+                    }}
+                  >
+                    <option value="">اختر المنطقة...</option>
+                    {areas?.map((area, i) => (
+                      <option key={i} value={area.name}>
+                        {area.name} - {area.deliveryCost.toFixed(2)} JOD
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="flex items-start gap-3 pt-4">
                 <input
@@ -257,7 +320,10 @@ function Checkout() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Delivery:</span>
                   <span className="font-semibold text-green-600">
-                    {selectedArea.deliveryCost.toFixed(2)} JOD
+                    {orderType === "delivery"
+                      ? `${selectedArea?.deliveryCost} ` || "0 "
+                      : "0 "}
+                    JOD
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-lg font-bold pt-3 border-t border-gray-200">
@@ -318,7 +384,7 @@ function Checkout() {
 
               <button
                 className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-red-600 hover:to-red-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
-                onClick={handlePlaceOrder}
+                type="submit"
               >
                 🍽️ Place Order - {totalWithDelivery.toFixed(2)} JOD
               </button>
@@ -326,7 +392,7 @@ function Checkout() {
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }
 

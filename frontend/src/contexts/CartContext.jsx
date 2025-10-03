@@ -12,10 +12,10 @@ export const CartProvider = ({ children }) => {
   });
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { user } = useUser();
 
   // Fetch cart on mount
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
     const fetchCart = async () => {
       if (!user?._id) {
         return;
@@ -40,7 +40,7 @@ export const CartProvider = ({ children }) => {
       }
     };
     fetchCart();
-  }, [user]);
+  }, []);
 
   // Calculate total whenever cart changes
   useEffect(() => {
@@ -54,6 +54,7 @@ export const CartProvider = ({ children }) => {
 
   // Add product to cart
   const addToCart = async (productId) => {
+    const user = JSON.parse(localStorage.getItem("user"));
     if (!user._id) {
       toast.error("Please log in to add items to your cart");
       return;
@@ -97,6 +98,7 @@ export const CartProvider = ({ children }) => {
   // Remove product
   const removeFromCart = async (productId) => {
     try {
+      const user = JSON.parse(localStorage.getItem("user"));
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}/cart/remove`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -116,6 +118,7 @@ export const CartProvider = ({ children }) => {
   // Clear cart
   const clearCart = async () => {
     try {
+      const user = JSON.parse(localStorage.getItem("user"));
       const res = await fetch(
         `${import.meta.env.VITE_BASE_URL}/cart/clear/${user._id}`,
         {
