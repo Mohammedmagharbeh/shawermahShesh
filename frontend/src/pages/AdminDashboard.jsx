@@ -15,6 +15,10 @@ import Loading from "@/componenet/common/Loading";
 import { io } from "socket.io-client";
 import newOrderSound from "../../public/newOrder.mp3";
 
+// استيراد مكتبة اكسل
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
   Confirmed: "bg-purple-500 text-primary-foreground",
@@ -68,27 +72,11 @@ function AdminDashboard() {
     getAllOrders();
   }, []);
 
-  // useEffect(() => {
-  //   if (orders) {
-  //     const initialStatuses = {};
-  //     orders.forEach((order) => {
-  //       initialStatuses[order._id] = order.status;
-  //     });
-  //     setOrderStatuses(initialStatuses);
-  //   }
-  // }, [orders]);
-
   const handleStatusChange = (orderId, newStatus) => {
-    // setOrderStatuses((prev) => ({
-    //   ...prev,
-    //   [orderId]: newStatus,
-    // }));
-
     updateOrder(orderId, { status: newStatus });
   };
 
   const handleDeleteOrder = (orderId) => {
-    // handleStatusChange(orderId, "Cancelled");
     deleteOrder(orderId);
   };
 
@@ -96,7 +84,53 @@ function AdminDashboard() {
 
   if (loading) return <Loading />;
 
-  if (!orders || orders.length === 0) {
+  // فلترة الطلبات لليوم الحالي
+  const today = new Date().toISOString().split("T")[0];
+  const todayOrders = orders.filter((order) => {
+    if (!order.createdAt) return false;
+    const orderDate = new Date(order.createdAt).toISOString().split("T")[0];
+    return orderDate === today;
+  });
+
+  // دالة تصدير الطلبات الى Excel
+  const exportToExcel = () => {
+    const data = todayOrders.map((order) => ({
+      "Order ID": order._id,
+      "Customer Phone": order.userId?.phone || "N/A",
+      "Date": order.createdAt
+        ? new Date(order.createdAt).toLocaleString()
+        : "N/A",
+      "Status": order.status,
+      "Payment Status": order.payment?.status || "N/A",
+      "Payment Method": order.payment?.method || "N/A",
+      "Total Price (JOD)": order.totalPrice,
+      "Delivery Cost": order.shippingAddress?.deliveryCost || 0,
+      "Address": `${order.shippingAddress?.name || "N/A"} (Sector ${
+        order.shippingAddress?.SECNO || "N/A"
+      })`,
+      "Products": order.products
+        .map(
+          (item) => `${item.productId?.name || "Unknown"} (Qty: ${item.quantity})`
+        )
+        .join(", "), 
+
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const dataBlob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(dataBlob, `Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
+  };
+
+  if (!todayOrders || todayOrders.length === 0) {
     return (
       <div className="min-h-screen bg-background p-6 md:p-8">
         <div className="mx-auto max-w-7xl">
@@ -111,26 +145,12 @@ function AdminDashboard() {
           </div>
           <Card className="border-2 border-dashed">
             <CardContent className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-12">
-              <div className="rounded-full bg-muted p-6">
-                <svg
-                  className="h-12 w-12 text-muted-foreground"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
               <h3 className="text-xl font-semibold text-foreground">
-                No Orders Yet
+                No Orders Today
               </h3>
               <p className="text-center text-muted-foreground">
-                Orders will appear here once customers start placing them.
+                Orders for today will appear here once customers start placing
+                them.
               </p>
             </CardContent>
           </Card>
@@ -150,13 +170,14 @@ function AdminDashboard() {
             <p className="mt-1 text-muted-foreground">
               Total Orders:
               <span className="font-semibold text-primary">
-                {orders.length}
+                {todayOrders.length}
               </span>
             </p>
           </div>
           <div className="flex gap-3">
             <Button
               variant="outline"
+              onClick={exportToExcel}
               className="border-primary text-primary hover:bg-primary hover:text-primary-foreground bg-transparent"
             >
               Export Orders
@@ -168,7 +189,7 @@ function AdminDashboard() {
         </div>
 
         <div className="space-y-4">
-          {orders.map((order) => (
+          {todayOrders.map((order) => (
             <Card
               key={order._id}
               className="overflow-hidden border-2 transition-shadow hover:shadow-lg"
@@ -373,3 +394,4 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard;
+

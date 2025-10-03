@@ -238,7 +238,7 @@ export default function Home() {
                   >
                     <div className="relative">
                       <img
-                        src={burger}
+                        src={product.image || burger}
                         alt={product.name}
                         className="w-full h-48 object-cover"
                       />

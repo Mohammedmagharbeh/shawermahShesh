@@ -14,10 +14,12 @@ import PaymentFailed from "./pages/PaymentFailed";
 import MyOrders from "./pages/MyOrders";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./ProtectedRoute";
+// import LanguageProvider from "./contexts/LanguageContext";
 
 function App() {
   return (
     <div className="App">
+      {/* <LanguageProvider> */}
       <BrowserRouter>
         <Header />
         <main className="pt-14">
@@ -53,6 +55,7 @@ function App() {
         </main>
       </BrowserRouter>
       <Toaster />
+      {/* </LanguageProvider> */}
     </div>
   );
 }

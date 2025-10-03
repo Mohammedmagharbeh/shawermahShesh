@@ -13,6 +13,10 @@ import { useOrder } from "@/contexts/OrderContext";
 import Loading from "../componenet/common/Loading";
 import burger from "../assets/burger.jpg";
 
+// ✅ استيراد مكتبة اكسل
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 const statusColors = {
   processing: "bg-secondary text-secondary-foreground",
   confirmed: "bg-purple-500 text-primary-foreground",
@@ -51,6 +55,35 @@ function Orders() {
     handleStatusChange(index, "cancelled");
   };
 
+  const exportToExcel = () => {
+    const data = orders.map((order, idx) => ({
+      "Order #": String(idx + 1).padStart(6, "0"),
+      "Order ID": order._id,
+      Date: order.createdAt
+        ? new Date(order.createdAt).toLocaleString()
+        : "N/A",
+      Status: order.status,
+      "Total Price": order.totalPrice,
+      Products:
+        order.products
+          ?.map((p) => `${p.productId?.name || "Unknown"} x${p.quantity}`)
+          .join(", ") || "No Products",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const dataBlob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(dataBlob, `Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
+  };
+
   if (loading) return <Loading />;
 
   return (
@@ -69,8 +102,10 @@ function Orders() {
             </p>
           </div>
           <div className="flex gap-3">
+            {/* ✅ ربط الزر مع التصدير */}
             <Button
               variant="outline"
+              onClick={exportToExcel}
               className="border-primary text-primary hover:bg-primary hover:text-primary-foreground bg-transparent"
             >
               Export Orders
@@ -81,6 +116,7 @@ function Orders() {
           </div>
         </div>
 
+        {/* باقي الكود نفس ما هو */}
         <div className="space-y-4">
           {orders?.map((order, index) => (
             <Card
@@ -224,21 +260,6 @@ function Orders() {
         {(!orders || orders.length === 0) && (
           <Card className="border-2 border-dashed">
             <CardContent className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-12">
-              <div className="rounded-full bg-muted p-6">
-                <svg
-                  className="h-12 w-12 text-muted-foreground"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
               <h3 className="text-xl font-semibold text-foreground">
                 No Orders Yet
               </h3>
