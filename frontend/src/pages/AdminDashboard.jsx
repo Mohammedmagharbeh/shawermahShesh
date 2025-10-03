@@ -237,8 +237,8 @@ function AdminDashboard() {
                         Address:
                       </span>
                       <span className="text-sm text-foreground">
-                        {order.shippingAddress?.name || "N/A"} (Sector
-                        {order.shippingAddress?.SECNO || "N/A"})
+                        {order.shippingAddress?.name || "N/A"} (
+                        {`Sector ${order.shippingAddress?.SECNO || "N/A"}`})
                       </span>
                     </div>
                   </div>

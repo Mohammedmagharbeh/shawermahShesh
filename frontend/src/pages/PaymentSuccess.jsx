@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { useOrder } from "@/contexts/OrderContext";
+import { useCart } from "@/contexts/CartContext";
 
 function PaymentSuccess() {
   const location = useLocation();
@@ -9,6 +12,9 @@ function PaymentSuccess() {
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [invoiceId, setInvoiceId] = useState("");
+  const { createOrder } = useOrder();
+
+  const { clearCart } = useCart();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -16,6 +22,7 @@ function PaymentSuccess() {
 
     if (!paymentId) {
       setError("Missing payment reference.");
+      toast.error("Missing payment reference.");
       setLoading(false);
       return;
     }
@@ -36,6 +43,42 @@ function PaymentSuccess() {
 
         if (!isSuccess) {
           setError("Payment verification failed.");
+          toast.error("Payment verification failed.");
+        }
+
+        try {
+          const storedCart = JSON.parse(localStorage.getItem("pendingOrder"));
+
+          if (!storedCart) {
+            throw new Error("No pending order found in local storage.");
+          }
+          const user = JSON.parse(localStorage.getItem("user"));
+          if (!user || !user._id) {
+            throw new Error("User not found or not logged in.");
+          }
+
+          await createOrder({
+            products: storedCart
+              ? storedCart.products?.map((p) => ({
+                  productId: p.productId._id,
+                  quantity: p.quantity,
+                }))
+              : [],
+            userId: user._id,
+            shippingAddress: "68d860d988e6a681633f5147", // To-Do: replace with selected address ID
+            paymentMethod: "card",
+            paymentStatus: isSuccess ? "paid" : "unpaid",
+            transactionId: paymentId,
+            paidAt: isSuccess ? new Date() : null,
+          });
+
+          toast.success("Order placed successfully!");
+          navigate("/");
+          clearCart();
+          localStorage.removeItem("pendingOrder");
+        } catch (error) {
+          console.error("Order creation failed:", error);
+          toast.error("Failed to place order. Try again later.");
         }
       } catch (e) {
         setError("Unable to verify payment. Please try again later.");

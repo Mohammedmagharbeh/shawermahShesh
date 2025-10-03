@@ -388,6 +388,8 @@
 // }
 
 // export default Login
+
+
 "use client"
 
 import { useState } from "react"
@@ -415,8 +417,6 @@ function Login() {
 
     const formattedPhone = formatPhone(phone)
     try {
-      const token = sessionStorage.getItem("jwt")
-
       const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, {
         phone: formattedPhone,
       })
@@ -425,6 +425,8 @@ function Login() {
         login({
           _id: res.data._id,
           phone: formattedPhone,
+          token: res.data.token,
+          role: res.data.role,
         })
         toast.success("تم تسجيل الدخول بنجاح")
         navigate("/")
@@ -461,54 +463,29 @@ function Login() {
         >
           {/* Smile face container */}
           <div className="relative inline-block">
-            {/* Eyes (two yellow dots) */}
+            {/* Eyes */}
             <motion.div
               className="flex justify-center gap-2 mb-1"
-              animate={{
-                y: [0, -3, 0],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
+              animate={{ y: [0, -3, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
               <motion.div
                 className="w-3 h-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full shadow-lg shadow-yellow-400/50"
-                animate={{
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "easeInOut",
-                }}
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />
               <motion.div
                 className="w-3 h-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full shadow-lg shadow-yellow-400/50"
-                animate={{
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "easeInOut",
-                  delay: 0.1,
-                }}
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
               />
             </motion.div>
 
             {/* Arabic text */}
             <motion.h2
               className="text-4xl font-black text-white mb-1"
-              animate={{
-                scale: [1, 1.02, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
               يلا شيش
             </motion.h2>
@@ -519,14 +496,8 @@ function Login() {
             {/* Smile curve */}
             <motion.div
               className="relative h-8 flex justify-center items-start"
-              animate={{
-                y: [0, 2, 0],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
+              animate={{ y: [0, 2, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             >
               <svg
                 width="120"
@@ -544,12 +515,7 @@ function Login() {
                   fill="none"
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: 1 }}
-                  transition={{
-                    duration: 1.5,
-                    ease: "easeInOut",
-                    repeat: Number.POSITIVE_INFINITY,
-                    repeatDelay: 2,
-                  }}
+                  transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 2 }}
                 />
                 <defs>
                   <linearGradient id="smileGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -561,33 +527,21 @@ function Login() {
               </svg>
             </motion.div>
 
-            {/* Background glow effect */}
-<div className="absolute inset-0 -z-10 bg-red-600 rounded-2xl blur-xl opacity-70" />
+            <div className="absolute inset-0 -z-10 bg-red-600 rounded-2xl blur-xl opacity-70" />
           </div>
         </motion.div>
 
         <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2" style={{ fontFamily: 'Pacifico, cursive' }}>
-  Welcome to شاورما شيش
-</h1>
+          Welcome to شاورما شيش
+        </h1>
 
         <p className="text-gray-500 text-sm mb-8">أدخل رقم هاتفك للمتابعة</p>
 
         <form onSubmit={Loginhandler} className="flex flex-col gap-5">
           <motion.div whileFocus={{ scale: 1.02 }} className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
             </div>
             <input
@@ -610,8 +564,6 @@ function Login() {
             >
               تسجيل الدخول
             </motion.button>
-
-            
           </div>
         </form>
 
