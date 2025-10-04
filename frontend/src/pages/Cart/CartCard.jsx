@@ -69,7 +69,7 @@ function CartCard({ product }) {
           <span className="text-xl font-bold text-red-700">
             {(product?.productId?.price ?? 0 * product?.quantity ?? 0).toFixed(
               2
-            )}{" "}
+            )}
             JOD
           </span>
         </div>

@@ -95,7 +95,7 @@
 //               Order Management
 //             </h1>
 //             <p className="mt-1 text-muted-foreground">
-//               Total Orders:{" "}
+//               Total Orders:
 //               <span className="font-semibold text-primary">
 //                 {orders?.length || 0}
 //               </span>
@@ -368,18 +368,17 @@ function Orders() {
 
   // ✅ فلترة الطلبات: إذا في تاريخ محدد يظهر الطلبات لذلك اليوم، وإلا كل الطلبات
   const filteredOrders = filterDate
-  ? orders?.filter(order => {
-      if (!order.createdAt) return false;
-      const orderDate = new Date(order.createdAt);
-      const selectedDate = new Date(filterDate);
-      return (
-        orderDate.getDate() === selectedDate.getDate() &&
-        orderDate.getMonth() === selectedDate.getMonth() &&
-        orderDate.getFullYear() === selectedDate.getFullYear()
-      );
-    })
-  : orders;
-
+    ? orders?.filter((order) => {
+        if (!order.createdAt) return false;
+        const orderDate = new Date(order.createdAt);
+        const selectedDate = new Date(filterDate);
+        return (
+          orderDate.getDate() === selectedDate.getDate() &&
+          orderDate.getMonth() === selectedDate.getMonth() &&
+          orderDate.getFullYear() === selectedDate.getFullYear()
+        );
+      })
+    : orders;
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
@@ -390,7 +389,7 @@ function Orders() {
               Order Management
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Total Orders:{" "}
+              Total Orders:
               <span className="font-semibold text-primary">
                 {filteredOrders?.length || 0}
               </span>
@@ -506,13 +505,17 @@ function Orders() {
                               {item.productId?.name ?? "Product unavailable"}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              Qty: <span className="font-medium">{item.quantity}</span>
+                              Qty:
+                              <span className="font-medium">
+                                {item.quantity}
+                              </span>
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold text-primary">
-                            ${item.productId?.price ?? item.priceAtPurchase ?? 0}
+                            $
+                            {item.productId?.price ?? item.priceAtPurchase ?? 0}
                           </p>
                         </div>
                       </div>

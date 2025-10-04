@@ -47,7 +47,6 @@ function PaymentSuccess() {
 
         try {
           const storedCart = JSON.parse(sessionStorage.getItem("pendingOrder"));
-          console.log("Stored Cart:", storedCart);
 
           if (!storedCart) {
             throw new Error("No pending order found in local storage.");

@@ -272,8 +272,7 @@ export default function Home() {
                                 {product.discountedPrice
                                   ? product.discountedPrice
                                   : product.price -
-                                    (product.price * product.discount) /
-                                      100}{" "}
+                                    (product.price * product.discount) / 100}
                                 د.أ
                               </p>
 

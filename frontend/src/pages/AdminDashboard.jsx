@@ -46,7 +46,6 @@ function AdminDashboard() {
 
   useEffect(() => {
     socket.on("newOrder", (order) => {
-      console.log("New order received:", order);
       getAllOrders();
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification("📦 New Order!", {
@@ -156,7 +155,7 @@ function AdminDashboard() {
               Order Management
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Total Orders:{" "}
+              Total Orders:
               <span className="font-semibold text-primary">
                 {filteredOrders.length}
               </span>
@@ -318,7 +317,7 @@ function AdminDashboard() {
                                 {item.productId?.description || ""}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                Qty:{" "}
+                                Qty:
                                 <span className="font-medium">
                                   {item.quantity || 0}
                                 </span>
@@ -346,7 +345,7 @@ function AdminDashboard() {
                         {(
                           (order.totalPrice || 0) -
                           (order.shippingAddress?.deliveryCost || 0)
-                        ).toFixed(1)}{" "}
+                        ).toFixed(1)}
                         JOD
                       </span>
                     </div>
