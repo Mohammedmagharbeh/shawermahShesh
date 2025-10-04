@@ -5,6 +5,7 @@ import { useUser } from "@/contexts/UserContext";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 function Checkout() {
@@ -23,6 +24,7 @@ function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [orderType, setOrderType] = useState("delivery"); // default delivery
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     async function fetchAreas() {
@@ -45,15 +47,15 @@ function Checkout() {
   }, []);
 
   const DETAILS = [
-    { name: "First Name", label: "name", required: true, type: "text" },
+    { name: t("name"), label: "name", required: true, type: "text" },
     {
-      name: "Apartment, floor, etc. (optional)",
+      name: `${t("Apartment, floor, etc.")} (${t("optional")})`,
       label: "apartment",
       required: false,
       type: "text",
     },
     {
-      name: "Phone Number",
+      name: t("phone_number"),
       label: "phone",
       required: true,
       type: "text",
@@ -95,7 +97,7 @@ function Checkout() {
           toast.error("Payment initiation failed. Please try again.");
           return;
         }
-        localStorage.setItem("pendingOrder", JSON.stringify(cart));
+        sessionStorage.setItem("pendingOrder", JSON.stringify(cart));
         window.location.href = res.data.Data.PaymentURL;
       } catch (error) {
         toast.error("Something went wrong. Please try again later.");
@@ -141,7 +143,7 @@ function Checkout() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Complete Your Order
+            {t("complete_your_order")}
           </h1>
         </div>
 
@@ -152,7 +154,7 @@ function Checkout() {
               <span className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
                 1
               </span>
-              Delivery Details
+              {t("delivery_details")}
             </h2>
 
             <div className="space-y-6">
@@ -179,7 +181,7 @@ function Checkout() {
                         setSelectedArea(selected);
                       }}
                     >
-                      <option value="">اختر المنطقة...</option>
+                      <option value="">{t("select_area")}</option>
                       {areas?.map((area, i) => (
                         <option key={i} value={area.name}>
                           {area.name} - {area.deliveryCost.toFixed(2)} JOD
@@ -192,7 +194,7 @@ function Checkout() {
                       id={detail.label}
                       type={detail.type}
                       required={detail.required}
-                      placeholder={`Enter your ${detail.name.toLowerCase()}`}
+                      placeholder={`${detail.name.toLowerCase()}`}
                       defaultValue={detail.defaultValue || ""}
                       readOnly={detail.readOnly || false}
                     />
@@ -201,7 +203,7 @@ function Checkout() {
               ))}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
-                  Order Type <span className="text-red-500">*</span>
+                  {t("order_type")} <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-6">
                   <label className="flex items-center gap-2">
@@ -220,7 +222,7 @@ function Checkout() {
                       }}
                       className="w-4 h-4 text-red-500 border-gray-300 focus:ring-red-500"
                     />
-                    <span>Pickup</span>
+                    <span>{t("pickup")}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
@@ -231,7 +233,7 @@ function Checkout() {
                       onChange={() => setOrderType("delivery")}
                       className="w-4 h-4 text-red-500 border-gray-300 focus:ring-red-500"
                     />
-                    <span>Delivery</span>
+                    <span>{t("checkout_delivery")}</span>
                   </label>
                 </div>
               </div>
@@ -243,7 +245,7 @@ function Checkout() {
                     htmlFor="area"
                     className="block text-sm font-semibold text-gray-700"
                   >
-                    Area <span className="text-red-500">*</span>
+                    {t("area")} <span className="text-red-500">*</span>
                   </label>
                   <select
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-gray-50 hover:bg-white"
@@ -256,7 +258,7 @@ function Checkout() {
                       setSelectedArea(selected);
                     }}
                   >
-                    <option value="">اختر المنطقة...</option>
+                    <option value="">{t("select_area")}</option>
                     {areas?.map((area, i) => (
                       <option key={i} value={area.name}>
                         {area.name} - {area.deliveryCost.toFixed(2)} JOD
@@ -265,21 +267,6 @@ function Checkout() {
                   </select>
                 </div>
               )}
-
-              <div className="flex items-start gap-3 pt-4">
-                <input
-                  className="w-5 h-5 text-red-500 border-gray-300 rounded focus:ring-red-500 mt-0.5"
-                  type="checkbox"
-                  name="save"
-                  id="save"
-                />
-                <label
-                  htmlFor="save"
-                  className="text-sm text-gray-600 leading-relaxed"
-                >
-                  Save this information for faster checkout next time
-                </label>
-              </div>
             </div>
           </div>
 
@@ -289,7 +276,7 @@ function Checkout() {
               <span className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
                 2
               </span>
-              Order Summary
+              {t("order_summary")}
             </h2>
 
             <div className="space-y-6">
@@ -303,7 +290,7 @@ function Checkout() {
                       {product.productId.name}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Large • Qty: {product.quantity}
+                      {t("qty")}: {product.quantity}
                     </p>
                   </div>
                   <span className="font-bold text-gray-900">
@@ -314,11 +301,11 @@ function Checkout() {
 
               <div className="space-y-3 pt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Subtotal:</span>
+                  <span className="text-gray-600">{t("subtotal")}:</span>
                   <span className="font-semibold">{total.toFixed(2)} JOD</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Delivery:</span>
+                  <span className="text-gray-600">{t("delivery")}:</span>
                   <span className="font-semibold text-green-600">
                     {orderType === "delivery"
                       ? `${selectedArea?.deliveryCost} ` || "0 "
@@ -327,7 +314,7 @@ function Checkout() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-lg font-bold pt-3 border-t border-gray-200">
-                  <span>Total:</span>
+                  <span>{t("total")}:</span>
                   <span className="text-red-600">
                     {totalWithDelivery.toFixed(2)} JOD
                   </span>
@@ -337,7 +324,7 @@ function Checkout() {
               {/* Payment Method */}
               <div className="pt-6 border-t border-gray-200">
                 <h3 className="font-semibold text-gray-900 mb-4">
-                  Payment Method
+                  {t("payment_method")}
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-red-300 transition-colors">
@@ -352,7 +339,7 @@ function Checkout() {
                       htmlFor="bank"
                       className="flex-1 font-medium text-gray-700"
                     >
-                      Credit/Debit Card
+                      {t("credit_or_debit_card")}
                     </label>
                     <div className="flex gap-1">
                       <div className="w-8 h-5 bg-blue-600 rounded text-white text-xs flex items-center justify-center font-bold">
@@ -375,7 +362,7 @@ function Checkout() {
                       htmlFor="cash"
                       className="flex-1 font-medium text-gray-700"
                     >
-                      Cash on Delivery
+                      {t("cash_on_delivery")}
                     </label>
                     <span className="text-2xl">💵</span>
                   </div>
@@ -386,7 +373,7 @@ function Checkout() {
                 className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-red-600 hover:to-red-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
                 type="submit"
               >
-                🍽️ Place Order - {totalWithDelivery.toFixed(2)} JOD
+                🍽️ {t("place_order")} - {totalWithDelivery.toFixed(2)} JOD
               </button>
             </div>
           </div>

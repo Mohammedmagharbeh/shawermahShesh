@@ -18,6 +18,7 @@ import {
 import { useCart } from "../contexts/CartContext";
 import burger from "../assets/burger.jpg";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 // عدد المنتجات التي ستظهر مبدئيًا
 const PRODUCTS_PER_PAGE = 6;
 
@@ -29,9 +30,9 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [productsToShow, setProductsToShow] = useState(PRODUCTS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(true);
-
   const { addToCart } = useCart();
   const location = useLocation(); // ✨ استخدام useLocation لقراءة الهاش
+  const { t } = useTranslation();
 
   // جلب البيانات وتعيين حالة المنتجات الأساسية
   useEffect(() => {
@@ -292,7 +293,7 @@ export default function Home() {
                           onClick={() => addToCart(product._id)}
                           className="bg-red-700 hover:bg-red-800 text-white px-6 py-2"
                         >
-                          أضف للسلة
+                          {t("add_to_cart")}
                           <ShoppingCart className="mr-2 h-4 w-4" />
                         </Button>
                       </div>

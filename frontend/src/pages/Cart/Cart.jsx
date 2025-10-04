@@ -4,10 +4,12 @@ import Loading from "../../componenet/common/Loading";
 import { useCart } from "@/contexts/CartContext";
 import { useUser } from "@/contexts/UserContext";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 const Cart = () => {
   const { cart, total, loading } = useCart();
   const { user } = useUser();
+  const { t } = useTranslation();
 
   if (!user || !user._id) {
     toast.error("Please log in to view your cart");
@@ -55,9 +57,9 @@ const Cart = () => {
             {/* Desktop Header */}
             <div className="hidden lg:grid lg:grid-cols-4 gap-4 bg-red-600 text-white p-6 rounded-lg font-semibold text-lg mb-6">
               <span>Item Details</span>
-              <span className="text-center">Price</span>
-              <span className="text-center">Quantity</span>
-              <span className="text-center">Subtotal</span>
+              <span className="text-center">{t("price")}</span>
+              <span className="text-center">{t("qty")}</span>
+              <span className="text-center">{t("subtotal")}</span>
             </div>
 
             {/* Cart Items */}
@@ -80,7 +82,7 @@ const Cart = () => {
 
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-600">Subtotal:</span>
+                  <span className="text-gray-600">{t("subtotal")}:</span>
                   <span className="text-lg font-semibold">
                     {total.toFixed(2)} JOD
                   </span>
@@ -88,7 +90,7 @@ const Cart = () => {
 
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600">Delivery:</span>
+                    <span className="text-gray-600">{t("delivery")}:</span>
                     <span className="text-gray-600 font-semibold">
                       According to your location
                     </span>
@@ -98,7 +100,7 @@ const Cart = () => {
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between items-center py-2">
                     <span className="text-xl font-bold text-gray-800">
-                      Total:
+                      {t("total")}:
                     </span>
                     <span className="text-2xl font-bold text-red-600">
                       {total.toFixed(2)} JOD

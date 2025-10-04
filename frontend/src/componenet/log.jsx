@@ -389,59 +389,47 @@
 
 // export default Login
 
-
-"use client"
-
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import axios from "axios"
-import { motion } from "framer-motion"
-import { useUser } from "@/contexts/UserContext"
-import toast from "react-hot-toast"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { useUser } from "@/contexts/UserContext";
+import toast from "react-hot-toast";
 
 function Login() {
-  const [phone, setphone] = useState("")
-  const navigate = useNavigate()
-  const { login } = useUser()
-
-  const formatPhone = (phone) => {
-    let cleaned = phone.trim()
-    if (cleaned.startsWith("0")) {
-      cleaned = cleaned.slice(1)
-    }
-    return `+962${cleaned}`
-  }
+  const [phone, setphone] = useState("");
+  const navigate = useNavigate();
+  const { login } = useUser();
 
   const Loginhandler = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const formattedPhone = formatPhone(phone)
     try {
       const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, {
-        phone: formattedPhone,
-      })
+        phone: phone,
+      });
 
       if (res.data.token) {
         login({
           _id: res.data._id,
-          phone: formattedPhone,
+          phone: phone,
           token: res.data.token,
           role: res.data.role,
-        })
-        toast.success("تم تسجيل الدخول بنجاح")
-        navigate("/")
-        return
+        });
+        toast.success("تم تسجيل الدخول بنجاح");
+        navigate("/");
+        return;
       }
 
       if (res.data.msg === "OTP sent to your phone") {
-        toast.success("تم إرسال رمز التحقق 📲")
-        navigate("/otp-verification", { state: { phone: formattedPhone } })
+        toast.success("تم إرسال رمز التحقق 📲");
+        navigate("/otp-verification", { state: { phone: phone } });
       }
     } catch (error) {
-      console.error(error)
-      toast.error("حدث خطأ أثناء تسجيل الدخول ❌")
+      console.error(error);
+      toast.error("حدث خطأ أثناء تسجيل الدخول");
     }
-  }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-amber-50">
@@ -472,12 +460,21 @@ function Login() {
               <motion.div
                 className="w-3 h-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full shadow-lg shadow-yellow-400/50"
                 animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               />
               <motion.div
                 className="w-3 h-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full shadow-lg shadow-yellow-400/50"
                 animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.1,
+                }}
               />
             </motion.div>
 
@@ -491,7 +488,9 @@ function Login() {
             </motion.h2>
 
             {/* English text */}
-            <p className="text-sm font-bold text-white tracking-wider mb-2">YALLA SHEESH</p>
+            <p className="text-sm font-bold text-white tracking-wider mb-2">
+              YALLA SHEESH
+            </p>
 
             {/* Smile curve */}
             <motion.div
@@ -515,10 +514,21 @@ function Login() {
                   fill="none"
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: 1 }}
-                  transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 2 }}
+                  transition={{
+                    duration: 1.5,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    repeatDelay: 2,
+                  }}
                 />
                 <defs>
-                  <linearGradient id="smileGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <linearGradient
+                    id="smileGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%"
+                  >
                     <stop offset="0%" stopColor="#fbbf24" />
                     <stop offset="50%" stopColor="#f59e0b" />
                     <stop offset="100%" stopColor="#fbbf24" />
@@ -531,7 +541,10 @@ function Login() {
           </div>
         </motion.div>
 
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2" style={{ fontFamily: 'Pacifico, cursive' }}>
+        <h1
+          className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2"
+          style={{ fontFamily: "Pacifico, cursive" }}
+        >
           Welcome to شاورما شيش
         </h1>
 
@@ -540,8 +553,19 @@ function Login() {
         <form onSubmit={Loginhandler} className="flex flex-col gap-5">
           <motion.div whileFocus={{ scale: 1.02 }} className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
               </svg>
             </div>
             <input
@@ -566,10 +590,9 @@ function Login() {
             </motion.button>
           </div>
         </form>
-
       </motion.div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

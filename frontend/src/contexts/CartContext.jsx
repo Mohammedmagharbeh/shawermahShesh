@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
 
   // Fetch cart on mount
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     const fetchCart = async () => {
       if (!user?._id) {
         return;
@@ -54,7 +54,7 @@ export const CartProvider = ({ children }) => {
 
   // Add product to cart
   const addToCart = async (productId) => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     if (!user._id) {
       toast.error("Please log in to add items to your cart");
       return;
@@ -100,7 +100,7 @@ export const CartProvider = ({ children }) => {
   // Remove product
   const removeFromCart = async (productId) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = JSON.parse(sessionStorage.getItem("user"));
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}/cart/remove`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -120,7 +120,7 @@ export const CartProvider = ({ children }) => {
   // Clear cart
   const clearCart = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = JSON.parse(sessionStorage.getItem("user"));
       const res = await fetch(
         `${import.meta.env.VITE_BASE_URL}/cart/clear/${user._id}`,
         {

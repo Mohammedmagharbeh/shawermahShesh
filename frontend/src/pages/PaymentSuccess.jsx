@@ -47,12 +47,12 @@ function PaymentSuccess() {
         }
 
         try {
-          const storedCart = JSON.parse(localStorage.getItem("pendingOrder"));
+          const storedCart = JSON.parse(sessionStorage.getItem("pendingOrder"));
 
           if (!storedCart) {
             throw new Error("No pending order found in local storage.");
           }
-          const user = JSON.parse(localStorage.getItem("user"));
+          const user = JSON.parse(sessionStorage.getItem("user"));
           if (!user || !user._id) {
             throw new Error("User not found or not logged in.");
           }
@@ -75,7 +75,7 @@ function PaymentSuccess() {
           toast.success("Order placed successfully!");
           navigate("/");
           clearCart();
-          localStorage.removeItem("pendingOrder");
+          sessionStorage.removeItem("pendingOrder");
         } catch (error) {
           console.error("Order creation failed:", error);
           toast.error("Failed to place order. Try again later.");

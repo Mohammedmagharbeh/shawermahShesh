@@ -14,11 +14,15 @@ import PaymentFailed from "./pages/PaymentFailed";
 import MyOrders from "./pages/MyOrders";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./ProtectedRoute";
+import { useTranslation } from "react-i18next";
 // import LanguageProvider from "./contexts/LanguageContext";
 
 function App() {
+  const { i18n } = useTranslation();
   return (
-    <div className="App">
+    <div
+      className={`${i18n.language === "ar" ? "text-right" : "text-left"} App`}
+    >
       {/* <LanguageProvider> */}
       <BrowserRouter>
         <Header />
