@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 export default function LanguageSwitcher() {
@@ -23,13 +23,44 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex gap-2 size-10">
-      <button onClick={() => changeLang("en")} className="btn">
-        EN
-      </button>
-      <button onClick={() => changeLang("ar")} className="btn">
-        ع
-      </button>
+    <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-1 bg-white rounded-lg p-1 border-2 border-red-600 shadow-md">
+        <button
+          onClick={() => changeLang("en")}
+          className={`
+            px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 
+            text-xs sm:text-sm md:text-base font-bold 
+            rounded-md transition-all duration-300
+            ${
+              i18n.language === "en"
+                ? "bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg scale-105"
+                : "bg-transparent text-red-700 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-red-50"
+            }
+          `}
+          aria-label="Switch to English"
+        >
+          EN
+        </button>
+
+        <div className="w-px h-6 bg-red-300" />
+
+        <button
+          onClick={() => changeLang("ar")}
+          className={`
+            px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 
+            text-xs sm:text-sm md:text-base font-bold 
+            rounded-md transition-all duration-300
+            ${
+              i18n.language === "ar"
+                ? "bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg scale-105"
+                : "bg-transparent text-red-700 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-red-50"
+            }
+          `}
+          aria-label="التبديل إلى العربية"
+        >
+          ع
+        </button>
+      </div>
     </div>
   );
 }

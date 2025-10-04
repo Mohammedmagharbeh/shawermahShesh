@@ -15,17 +15,19 @@ import MyOrders from "./pages/MyOrders";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import { useTranslation } from "react-i18next";
+import { useUser } from "./contexts/UserContext";
 // import LanguageProvider from "./contexts/LanguageContext";
 
 function App() {
   const { i18n } = useTranslation();
+  const { isAuthenticated } = useUser();
   return (
     <div
       className={`${i18n.language === "ar" ? "text-right" : "text-left"} App`}
     >
       {/* <LanguageProvider> */}
       <BrowserRouter>
-        <Header />
+        {isAuthenticated && <Header />}
         <main className="pt-14">
           <Routes>
             <Route
