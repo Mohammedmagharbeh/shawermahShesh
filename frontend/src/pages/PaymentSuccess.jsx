@@ -13,7 +13,6 @@ function PaymentSuccess() {
   const [status, setStatus] = useState("");
   const [invoiceId, setInvoiceId] = useState("");
   const { createOrder } = useOrder();
-
   const { clearCart } = useCart();
 
   useEffect(() => {
@@ -48,6 +47,7 @@ function PaymentSuccess() {
 
         try {
           const storedCart = JSON.parse(sessionStorage.getItem("pendingOrder"));
+          console.log("Stored Cart:", storedCart);
 
           if (!storedCart) {
             throw new Error("No pending order found in local storage.");
@@ -65,7 +65,7 @@ function PaymentSuccess() {
                 }))
               : [],
             userId: user._id,
-            shippingAddress: "68d860d988e6a681633f5147", // To-Do: replace with selected address ID
+            shippingAddress: storedCart.shippingAddress, // To-Do: replace with selected address ID
             paymentMethod: "card",
             paymentStatus: isSuccess ? "paid" : "unpaid",
             transactionId: paymentId,
