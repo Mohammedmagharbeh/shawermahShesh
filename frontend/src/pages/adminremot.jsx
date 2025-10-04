@@ -48,7 +48,9 @@ export default function AdminProductPanel() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:5000/api/products");
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/products`
+        );
         const allProducts = res.data.data || [];
         setProducts(allProducts);
         const uniqueCategories = [
@@ -107,7 +109,7 @@ export default function AdminProductPanel() {
         category: "",
       });
 
-      const res = await axios.get("http://localhost:5000/api/products");
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`);
       const allProducts = res.data.data || [];
       const uniqueCategories = [...new Set(allProducts.map((p) => p.category))];
       setCategories(["الكل", ...uniqueCategories]);
