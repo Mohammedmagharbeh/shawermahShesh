@@ -199,7 +199,7 @@ exports.updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const body = req.body;
-    const allowedUpdates = ["status", "shippingAddress", "payment"];
+    const allowedUpdates = ["status", "shippingAddress", "payment", "products"];
     const updates = {};
     allowedUpdates.forEach((field) => {
       if (body[field] !== undefined) updates[field] = body[field];
