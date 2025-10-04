@@ -97,7 +97,10 @@ function Checkout() {
           toast.error("Payment initiation failed. Please try again.");
           return;
         }
-        sessionStorage.setItem("pendingOrder", JSON.stringify(cart));
+        sessionStorage.setItem(
+          "pendingOrder",
+          JSON.stringify({ ...cart, shippingAddress: selectedArea._id })
+        );
         window.location.href = res.data.Data.PaymentURL;
       } catch (error) {
         toast.error("Something went wrong. Please try again later.");

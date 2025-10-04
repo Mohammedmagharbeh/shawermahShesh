@@ -22,8 +22,6 @@ export default function LanguageSwitcher() {
     localStorage.setItem("i18nextLng", lng);
   };
 
-  console.log(i18n.language);
-
   return (
     <div className="flex gap-2 size-10">
       <button onClick={() => changeLang("en")} className="btn">

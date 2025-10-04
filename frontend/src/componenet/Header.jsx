@@ -23,8 +23,6 @@ function Header() {
     setIsMenuOpen(false);
   };
 
-  console.log("hello header");
-
   return (
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-yellow-200 z-50 shadow-sm">
       <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">

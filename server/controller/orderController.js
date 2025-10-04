@@ -182,7 +182,6 @@ exports.createOrder = async (req, res) => {
     // Emit event to admins
     const io = req.app.get("io");
     io.emit("newOrder", newOrder); // 🔥 broadcast order to all connected admins
-    console.log("Emitted newOrder event:", newOrder._id);
 
     res.status(201).json({ success: true, data: populatedOrder });
   } catch (error) {
@@ -199,7 +198,13 @@ exports.updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const body = req.body;
-    const allowedUpdates = ["status", "shippingAddress", "payment", "products"];
+    const allowedUpdates = [
+      "status",
+      "shippingAddress",
+      "payment",
+      "products",
+      "totalPrice",
+    ];
     const updates = {};
     allowedUpdates.forEach((field) => {
       if (body[field] !== undefined) updates[field] = body[field];
