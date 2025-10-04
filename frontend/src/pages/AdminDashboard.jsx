@@ -27,7 +27,7 @@ const statusColors = {
   Cancelled: "bg-destructive text-destructive-foreground",
 };
 
-const socket = io("http://localhost:5000");
+const socket = io("https://shawermahshesh.onrender.com");
 
 function AdminDashboard() {
   const { orders, getAllOrders, updateOrder, deleteOrder, loading } =
