@@ -105,7 +105,8 @@ function AdminDashboard() {
     .filter(
       (order) =>
         order.createdAt &&
-        new Date(order.createdAt).toLocaleDateString("en-CA") === filterDate
+        new Date(order.createdAt).toLocaleDateString("en-CA") === filterDate &&
+        (order.status === "Processing" || order.status === "Confirmed")
     )
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
