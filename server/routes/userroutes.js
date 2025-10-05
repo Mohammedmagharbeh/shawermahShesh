@@ -90,5 +90,34 @@ routes.post("/verify-otp", async (req, res) => {
 routes.get("/home", verify, home);
 routes.get("/products", getAllProducts);
 routes.get("/products/:id", getSingleProduct);
+routes.put("/users/update-phone", verify, async (req, res) => {
+  const userId = req.user; // Extracted from the verify middleware
+  const { newPhone } = req.body;
+
+  try {
+    // Check if the new phone number is already in use
+    const existingUser = await userModel.findOne({ phone: newPhone });
+    if (existingUser) {
+      return res.status(400).json({ message: "Phone number already in use" });
+    }
+
+    // Update the user's phone number
+    const updatedUser = await userModel.findByIdAndUpdate(
+      userId,
+      { phone: newPhone },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Phone number updated", user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = routes;

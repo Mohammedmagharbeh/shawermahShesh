@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import { useTranslation } from "react-i18next";
 import { useUser } from "./contexts/UserContext";
+import Settings from "./pages/Settings";
 // import LanguageProvider from "./contexts/LanguageContext";
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/product/:id" element={<ProductView />} />
             <Route
               path="/admin/add-product"
