@@ -626,7 +626,7 @@
 //                 <CardTitle>
 //                   {editingId ? t("edit_product") : t("add_product")}
 //                 </CardTitle>
-//                 <CardDescription> 
+//                 <CardDescription>
 //                   {editingId
 //                     ? t("edit_existing_product")
 //                     : t("add_new_product")}
@@ -842,25 +842,31 @@
 //     </div>
 //   );
 // }
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import axios from "axios"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Search, Edit2, Trash2, Package, Loader2 } from "lucide-react"
-import { useTranslation } from "react-i18next"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Search, Edit2, Trash2, Package, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const PRODUCTS_PER_PAGE = 20
+const PRODUCTS_PER_PAGE = 20;
 
 export default function AdminProductPanel() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -868,58 +874,68 @@ export default function AdminProductPanel() {
     description: "",
     image: "",
     category: "",
-  })
-  const [editingId, setEditingId] = useState(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [displayedCount, setDisplayedCount] = useState(PRODUCTS_PER_PAGE)
-  const [loading, setLoading] = useState(true)
+  });
+  const [editingId, setEditingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [displayedCount, setDisplayedCount] = useState(PRODUCTS_PER_PAGE);
+  const [loading, setLoading] = useState(true);
 
   // جلب المنتجات
   useEffect(() => {
     const fetchProducts = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
-        const res = await axios.get("http://localhost:5000/api/products")
-        const allProducts = res.data.data || []
-        setProducts(allProducts)
-        const uniqueCategories = [...new Set(allProducts.map((p) => p.category))]
-        setCategories(["all", ...uniqueCategories])
-        setSelectedCategory("all")
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/products`
+        );
+        const allProducts = res.data.data || [];
+        setProducts(allProducts);
+        const uniqueCategories = [
+          ...new Set(allProducts.map((p) => p.category)),
+        ];
+        setCategories(["all", ...uniqueCategories]);
+        setSelectedCategory("all");
       } catch (err) {
-        console.error("Error fetching products:", err)
-        alert(t("fetch_products_error"))
+        console.error("Error fetching products:", err);
+        alert(t("fetch_products_error"));
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchProducts()
-  }, [])
+    };
+    fetchProducts();
+  }, []);
 
   const handleInputChange = (e) => {
-    const { id, value } = e.target
-    setFormData({ ...formData, [id]: value })
-  }
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       if (editingId) {
-        const res = await axios.put(`http://127.0.0.1:5000/api/admin/updatefood/${editingId}`, {
-          ...formData,
-          price: Number(formData.price),
-          discount: formData.discount ? Number(formData.discount) : 0,
-        })
-        setProducts(products.map((p) => (p._id === editingId ? res.data : p)))
-        setEditingId(null)
+        const res = await axios.put(
+          `http://127.0.0.1:5000/api/admin/updatefood/${editingId}`,
+          {
+            ...formData,
+            price: Number(formData.price),
+            discount: formData.discount ? Number(formData.discount) : 0,
+          }
+        );
+        setProducts(products.map((p) => (p._id === editingId ? res.data : p)));
+        setEditingId(null);
       } else {
-        const res = await axios.post("http://127.0.0.1:5000/api/admin/postfood", {
-          ...formData,
-          price: Number(formData.price),
-          discount: formData.discount ? Number(formData.discount) : 0,
-        })
-        setProducts([res.data, ...products])
+        const res = await axios.post(
+          "http://127.0.0.1:5000/api/admin/postfood",
+          {
+            ...formData,
+            price: Number(formData.price),
+            discount: formData.discount ? Number(formData.discount) : 0,
+          }
+        );
+        setProducts([res.data, ...products]);
       }
 
       setFormData({
@@ -929,31 +945,31 @@ export default function AdminProductPanel() {
         description: "",
         image: "",
         category: "",
-      })
+      });
 
-      const res = await axios.get("http://localhost:5000/api/products")
-      const allProducts = res.data.data || []
-      const uniqueCategories = [...new Set(allProducts.map((p) => p.category))]
-      setCategories(["all", ...uniqueCategories])
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`);
+      const allProducts = res.data.data || [];
+      const uniqueCategories = [...new Set(allProducts.map((p) => p.category))];
+      setCategories(["all", ...uniqueCategories]);
     } catch (error) {
-      console.error("خطأ في الإرسال:", error.response?.data || error.message)
-      alert(t("submit_error"))
+      console.error("خطأ في الإرسال:", error.response?.data || error.message);
+      alert(t("submit_error"));
     }
-  }
+  };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        const imageData = reader.result
-        setFormData({ ...formData, image: imageData })
-      }
-      reader.readAsDataURL(file)
+        const imageData = reader.result;
+        setFormData({ ...formData, image: imageData });
+      };
+      reader.readAsDataURL(file);
     } else {
-      alert(t("choose_image"))
+      alert(t("choose_image"));
     }
-  }
+  };
 
   const handleEdit = (product) => {
     setFormData({
@@ -963,51 +979,59 @@ export default function AdminProductPanel() {
       description: product.description,
       image: product.image,
       category: product.category,
-    })
-    setEditingId(product._id)
-  }
+    });
+    setEditingId(product._id);
+  };
 
   const handleDelete = async (id) => {
-    if (!window.confirm(t("confirm_delete"))) return
+    if (!window.confirm(t("confirm_delete"))) return;
     try {
-      await axios.delete(`http://127.0.0.1:5000/api/admin/deletefood/${id}`)
-      setProducts(products.filter((p) => p._id !== id))
+      await axios.delete(`http://127.0.0.1:5000/api/admin/deletefood/${id}`);
+      setProducts(products.filter((p) => p._id !== id));
     } catch (error) {
-      console.error("خطأ في الحذف:", error.response?.data || error.message)
-      alert(t("delete_error"))
+      console.error("خطأ في الحذف:", error.response?.data || error.message);
+      alert(t("delete_error"));
     }
-  }
+  };
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchTerm.toLowerCase())
+      p.category.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory = selectedCategory === "all" || p.category === selectedCategory
+    const matchesCategory =
+      selectedCategory === "all" || p.category === selectedCategory;
 
-    return matchesSearch && matchesCategory
-  })
+    return matchesSearch && matchesCategory;
+  });
 
-  const displayedProducts = filteredProducts.slice(0, displayedCount)
-  const hasMoreProducts = filteredProducts.length > displayedCount
+  const displayedProducts = filteredProducts.slice(0, displayedCount);
+  const hasMoreProducts = filteredProducts.length > displayedCount;
 
   const handleCategoryChange = (cat) => {
-    setSelectedCategory(cat)
-    setDisplayedCount(PRODUCTS_PER_PAGE)
-  }
+    setSelectedCategory(cat);
+    setDisplayedCount(PRODUCTS_PER_PAGE);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20"
+      dir="rtl"
+    >
       {/* Header - Made more compact on mobile */}
       <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-<div className="container mx-auto px-4 py-8 mt-10">
+        <div className="container mx-auto px-4 py-8 mt-10">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="p-2 sm:p-3 bg-primary rounded-lg sm:rounded-xl shadow-lg shadow-primary/20">
               <Package className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t("admin_panel")}</h1>
-              <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">{t("admin_panel_desc")}</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                {t("admin_panel")}
+              </h1>
+              <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">
+                {t("admin_panel_desc")}
+              </p>
             </div>
           </div>
         </div>
@@ -1020,18 +1044,31 @@ export default function AdminProductPanel() {
           <div className="lg:col-span-1">
             <Card className="shadow-xl lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto rounded-md">
               <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-lg sm:text-xl">{editingId ? t("edit_product") : t("add_product")}</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">
+                  {editingId ? t("edit_product") : t("add_product")}
+                </CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  {editingId ? t("edit_existing_product") : t("add_new_product")}
+                  {editingId
+                    ? t("edit_existing_product")
+                    : t("add_new_product")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
-                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-4 sm:space-y-5"
+                >
                   <div>
                     <Label htmlFor="name" className="text-sm">
                       {t("product_name")}
                     </Label>
-                    <Input id="name" value={formData.name} onChange={handleInputChange} required className="mt-1.5" />
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      className="mt-1.5"
+                    />
                   </div>
 
                   <div>
@@ -1116,7 +1153,7 @@ export default function AdminProductPanel() {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        setEditingId(null)
+                        setEditingId(null);
                         setFormData({
                           name: "",
                           price: "",
@@ -1124,7 +1161,7 @@ export default function AdminProductPanel() {
                           description: "",
                           image: "",
                           category: "",
-                        })
+                        });
                       }}
                       className="w-full"
                     >
@@ -1177,7 +1214,9 @@ export default function AdminProductPanel() {
               <Card className="border-dashed border-2">
                 <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16">
                   <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/50 mb-3 sm:mb-4" />
-                  <p className="text-base sm:text-lg text-muted-foreground">{t("no_products")}</p>
+                  <p className="text-base sm:text-lg text-muted-foreground">
+                    {t("no_products")}
+                  </p>
                 </CardContent>
               </Card>
             ) : (
@@ -1198,7 +1237,9 @@ export default function AdminProductPanel() {
                     {/* Product Content - Responsive padding and text */}
                     <CardContent className="p-3 sm:p-5">
                       <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-bold text-sm sm:text-base line-clamp-1">{product.name}</h3>
+                        <h3 className="font-bold text-sm sm:text-base line-clamp-1">
+                          {product.name}
+                        </h3>
                         <span className="font-semibold text-primary text-sm sm:text-base whitespace-nowrap">
                           {product.price} د
                         </span>
@@ -1219,7 +1260,8 @@ export default function AdminProductPanel() {
                           size="sm"
                           className="flex-1 text-xs sm:text-sm"
                         >
-                          <Edit2 className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("edit")}
+                          <Edit2 className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          {t("edit")}
                         </Button>
                         <Button
                           onClick={() => handleDelete(product._id)}
@@ -1227,7 +1269,8 @@ export default function AdminProductPanel() {
                           size="sm"
                           className="flex-1 text-xs sm:text-sm"
                         >
-                          <Trash2 className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("delete")}
+                          <Trash2 className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          {t("delete")}
                         </Button>
                       </div>
                     </CardContent>
@@ -1240,7 +1283,9 @@ export default function AdminProductPanel() {
             {hasMoreProducts && (
               <div className="flex justify-center mt-4 sm:mt-6">
                 <Button
-                  onClick={() => setDisplayedCount(displayedCount + PRODUCTS_PER_PAGE)}
+                  onClick={() =>
+                    setDisplayedCount(displayedCount + PRODUCTS_PER_PAGE)
+                  }
                   className="text-sm sm:text-base"
                 >
                   {t("show_more_products")}
@@ -1251,5 +1296,5 @@ export default function AdminProductPanel() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,3 @@
-
 import Loading from "@/componenet/common/Loading";
 import { useCart } from "@/contexts/CartContext";
 import { useOrder } from "@/contexts/OrderContext";
@@ -29,7 +28,9 @@ function Checkout() {
   useEffect(() => {
     async function fetchAreas() {
       try {
-        const response = await fetch("http://localhost:5000/api/locations/get");
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/locations/get`
+        );
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();

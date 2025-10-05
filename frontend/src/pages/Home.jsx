@@ -37,7 +37,7 @@ export default function Home() {
   // جلب البيانات وتعيين حالة المنتجات الأساسية
   useEffect(() => {
     setIsLoading(true);
-    fetch("http://localhost:5000/api/products")
+    fetch(`${import.meta.env.VITE_BASE_URL}/products`)
       .then((res) => res.json())
       .then((data) => {
         const allProducts = data.data || [];
