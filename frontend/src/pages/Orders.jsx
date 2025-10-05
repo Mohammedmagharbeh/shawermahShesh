@@ -305,6 +305,7 @@ function Orders() {
   const { orders, getAllOrders, loading, updateOrder } = useOrder();
   const [orderStatuses, setOrderStatuses] = useState({});
   const [filterDate, setFilterDate] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   useEffect(() => {
     getAllOrders();
@@ -364,22 +365,28 @@ function Orders() {
     );
   };
 
-  
   if (loading) return <Loading />;
 
   // ✅ فلترة الطلبات: إذا في تاريخ محدد يظهر الطلبات لذلك اليوم، وإلا كل الطلبات
-  const filteredOrders = filterDate
-    ? orders?.filter((order) => {
-        if (!order.createdAt) return false;
-        const orderDate = new Date(order.createdAt);
-        const selectedDate = new Date(filterDate);
-        return (
-          orderDate.getDate() === selectedDate.getDate() &&
-          orderDate.getMonth() === selectedDate.getMonth() &&
-          orderDate.getFullYear() === selectedDate.getFullYear()
-        );
-      })
-    : orders;
+  const filteredOrders = orders?.filter((order) => {
+    if (!order.createdAt) return false;
+
+    // Filter by selected date (if any)
+    const orderDate = new Date(order.createdAt);
+    const selectedDate = filterDate ? new Date(filterDate) : null;
+    const matchesDate =
+      !selectedDate ||
+      (orderDate.getDate() === selectedDate.getDate() &&
+        orderDate.getMonth() === selectedDate.getMonth() &&
+        orderDate.getFullYear() === selectedDate.getFullYear());
+
+    // Filter by selected category (if not "All")
+    const matchesCategory =
+      selectedCategory === "All" ||
+      order.status?.toLowerCase() === selectedCategory.toLowerCase();
+
+    return matchesDate && matchesCategory;
+  });
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
@@ -396,26 +403,39 @@ function Orders() {
               </span>
             </p>
             {/* ✅ اختيار التاريخ */}
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="border px-3 py-1 rounded-md text-sm mt-2"
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="border px-3 py-1 rounded-md text-sm mt-2"
+              />
+              <Select
+                value={selectedCategory}
+                onValueChange={(value) => setSelectedCategory(value)}
+              >
+                <SelectTrigger className="w-[180px] mt-2">
+                  <SelectValue placeholder="Filter by Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All</SelectItem>
+                  <SelectItem value="Processing">Processing</SelectItem>
+                  <SelectItem value="Confirmed">Confirmed</SelectItem>
+                  <SelectItem value="Shipped">Shipped</SelectItem>
+                  <SelectItem value="Delivered">Delivered</SelectItem>
+                  <SelectItem value="Cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={exportToExcel}
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground bg-transparent"
-            >
-              Export Orders
-            </Button>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-              New Order
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={exportToExcel}
+            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground bg-transparent"
+          >
+            Export Orders
+          </Button>
         </div>
 
         <div className="space-y-4">
