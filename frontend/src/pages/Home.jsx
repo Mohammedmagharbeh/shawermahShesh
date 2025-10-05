@@ -112,11 +112,11 @@ export default function Home() {
             <div className="text-center lg:text-right">
               <Badge className="mb-6 bg-red-100 text-red-700 border-red-200 px-4 py-2">
                 <Award className="h-4 w-4 ml-2" />
-                {t("best_in_town")}
+                أفضل شاورما في المدينة
               </Badge>
 
               <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gray-900">
-                <span className="text-red-700">{t("resturant_name")}</span>
+                <span className="text-red-700">شاورما شيش</span>
                 <br />
                 طعم لا يُنسى
               </h1>
@@ -447,10 +447,8 @@ export default function Home() {
                 <ChefHat className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold">{t("resturant_name")}</h3>
-                <p className="text-gray-400 text-sm">
-                  {t("resturant_tagline")}
-                </p>
+                <h3 className="text-2xl font-bold">شاورما شيش</h3>
+                <p className="text-gray-400 text-sm">طعم أصيل ولذيذ</p>
               </div>
             </div>
 
@@ -481,3 +479,4 @@ export default function Home() {
     </div>
   );
 }
+
