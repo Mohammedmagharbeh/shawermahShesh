@@ -78,6 +78,7 @@ export default function Home() {
   useEffect(() => {
     let filtered = products;
 
+    
     if (searchTerm.trim() !== "") {
       filtered = filtered.filter((p) =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -112,18 +113,17 @@ export default function Home() {
             <div className="text-center lg:text-right">
               <Badge className="mb-6 bg-red-100 text-red-700 border-red-200 px-4 py-2">
                 <Award className="h-4 w-4 ml-2" />
-                أفضل شاورما في المدينة
+                {t("best_in_town")}
               </Badge>
 
               <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gray-900">
-                <span className="text-red-700">شاورما شيش</span>
+                <span className="text-red-700"> {t("resturant_name")}</span>
                 <br />
-                طعم لا يُنسى
+                {t("taste_unforgettable")}
               </h1>
 
               <p className="text-lg text-gray-600 mb-8 max-w-lg mx-auto lg:mx-0">
-                نقدم لكم أشهى أنواع الشاورما والشيش المحضرة بأجود المكونات وأفضل
-                الطرق التقليدية
+               {t("welcome_description")}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -131,7 +131,7 @@ export default function Home() {
                   size="lg"
                   className="bg-red-700 hover:bg-red-800 text-white px-8 py-3"
                 >
-                  اطلب الآن
+                  {t("order_now")}
                   <ShoppingCart className="mr-2 h-5 w-5" />
                 </Button>
               </div>
@@ -145,7 +145,7 @@ export default function Home() {
               />
               <div className="absolute top-4 right-4">
                 <Badge className="bg-red-700 text-white px-3 py-1">
-                  طازج يومياً
+                {t("fresh_daily")}
                 </Badge>
               </div>
             </div>
@@ -156,25 +156,26 @@ export default function Home() {
       {/* قسم الإحصائيات (لم يتم تغيير ID) */}
       <section className="py-16 bg-red-700 text-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold mb-2">15+</div>
-              <div className="text-red-100">سنة خبرة</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2">100k+</div>
-              <div className="text-red-100">عميل سعيد</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2">100%</div>
-              <div className="text-red-100">مكونات طازجة</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2">09:00AM - 03:00AM</div>
-              <div className="text-red-100">خدمة التوصيل</div>
-            </div>
-          </div>
-        </div>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+    <div>
+      <div className="text-3xl font-bold mb-2">15+</div>
+      <div className="text-red-100">{t("years_of_experience")}</div>
+    </div>
+    <div>
+      <div className="text-3xl font-bold mb-2">100k+</div>
+      <div className="text-red-100">{t("happy_customers")}</div>
+    </div>
+    <div>
+      <div className="text-3xl font-bold mb-2">100%</div>
+      <div className="text-red-100">{t("fresh_ingredients")}</div>
+    </div>
+    <div>
+      <div className="text-3xl font-bold mb-2">09:00AM - 03:00AM</div>
+      <div className="text-red-100">{t("delivery_service")}</div>
+    </div>
+  </div>
+</div>
+
       </section>
 
       {/* قسم القائمة - تأكد من وجود id="menu" */}
@@ -183,13 +184,13 @@ export default function Home() {
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-red-100 text-red-700 border-red-200 px-4 py-2">
               <ChefHat className="h-4 w-4 ml-2" />
-              قائمة الطعام
-            </Badge>
+            {t("menu")}
+              </Badge>
             <h2 className="text-4xl font-bold mb-4 text-gray-900">
-              تشكيلتنا المميزة
+              {t("menu_title")}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              اختر من تشكيلة واسعة من أشهى الأطباق المحضرة بعناية فائقة
+              {t("menu_description")}
             </p>
           </div>
 
@@ -197,7 +198,7 @@ export default function Home() {
             <div className="w-full lg:w-80">
               <input
                 type="text"
-                placeholder="ابحث عن طبقك المفضل..."
+  placeholder={t("search_your_favorite_dish")}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -226,7 +227,7 @@ export default function Home() {
           {isLoading ? (
             <div className="text-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-red-700 mx-auto mb-4" />
-              <p className="text-gray-600">جاري تحميل المنتجات...</p>
+<p className="text-gray-600">{t("loading_products")}</p>
             </div>
           ) : filteredProducts.length > 0 ? (
             <>
@@ -305,24 +306,23 @@ export default function Home() {
               {hasMoreProducts && (
                 <div className="text-center mt-12">
                   <Button
-                    onClick={handleShowMore}
-                    size="lg"
-                    className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-3"
-                  >
-                    إظهار المزيد من المنتجات (
-                    {filteredProducts.length - productsToShow} منتج)
-                  </Button>
+  onClick={handleShowMore}
+  size="lg"
+  className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-3"
+>
+  {t("show_more_products", { count: filteredProducts.length - productsToShow })}
+</Button>
+
                 </div>
               )}
             </>
           ) : (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl font-bold mb-2">لا توجد نتائج</h3>
-              <p className="text-gray-600">
-                جرب البحث بكلمات أخرى أو اختر تصنيف مختلف
-              </p>
-            </div>
+           <div className="text-center py-16">
+  <div className="text-6xl mb-4">🔍</div>
+  <h3 className="text-2xl font-bold mb-2">{t("no_results_title")}</h3>
+  <p className="text-gray-600">{t("no_results_description")}</p>
+</div>
+
           )}
         </div>
       </section>
@@ -334,33 +334,32 @@ export default function Home() {
             <div>
               <Badge className="mb-6 bg-red-100 text-red-700 border-red-200 px-4 py-2">
                 <Heart className="h-4 w-4 ml-2" />
-                قصتنا
-              </Badge>
+                {t("our_story")}
+                </Badge>
               <h2 className="text-4xl font-bold mb-6 text-gray-900">
-                تراث من النكهات الأصيلة
-              </h2>
+                {t("story_title")}
+                </h2>
               <p className="text-lg text-gray-600 mb-8">
-                نحرص على تقديم برغر وشاورما طازجة ولذيذة تجمع بين النكهة الأصيلة
-                والجودة الممتازة
+                {t("story_description")}
               </p>
 
               <div className="grid grid-cols-3 gap-6 mb-8">
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-4 mb-3">
                     <Award className="h-8 w-8 text-red-700 mx-auto" />
-                    <h4 className="font-bold text-sm">جودة عالية</h4>
+                    <h4 className="font-bold text-sm">{t("high_quality")}</h4>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-4 mb-3">
                     <Users className="h-8 w-8 text-red-700 mx-auto" />
-                    <h4 className="font-bold text-sm">فريق محترف</h4>
+                    <h4 className="font-bold text-sm"> {t("professional_team")}</h4>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-4 mb-3">
                     <Clock className="h-8 w-8 text-red-700 mx-auto" />
-                    <h4 className="font-bold text-sm">خدمة سريعة</h4>
+                    <h4 className="font-bold text-sm"> {t("fast_service")}</h4>
                   </div>
                 </div>
               </div>
@@ -383,12 +382,12 @@ export default function Home() {
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-red-100 text-red-700 border-red-200 px-4 py-2">
               <Phone className="h-4 w-4 ml-2" />
-              تواصل معنا
+              {t("contact_us")}
             </Badge>
             <h2 className="text-4xl font-bold mb-4 text-gray-900">
-              نحن في خدمتكم
-            </h2>
-            <p className="text-lg text-gray-600">فريقنا جاهز لخدمتكم</p>
+              {t("contact_section_title")}
+              </h2>
+            <p className="text-lg text-gray-600">  {t("contact_section_description")}</p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
@@ -402,12 +401,13 @@ export default function Home() {
                   <MapPin className="h-8 w-8 text-red-700 cursor-pointer hover:scale-110 transition" />
                 </a>
               </div>
-              <h3 className="text-xl font-bold mb-4">موقعنا</h3>
+              <h3 className="text-xl font-bold mb-4">{t("our_location")}</h3>
               <p className="text-gray-600">
-                العقبة، سوق الثامنة
-                <br />
-                شارع الملك فيصل
-              </p>
+  {t("location_line1")}
+  <br />
+  {t("location_line2")}
+</p>
+
             </Card>
 
             <a href="tel:+96332019099">
@@ -415,11 +415,12 @@ export default function Home() {
                 <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                   <Phone className="h-8 w-8 text-red-700" />
                 </div>
-                <h3 className="text-xl font-bold mb-4">اتصل بنا</h3>
+                <h3 className="text-xl font-bold mb-4"> {t("call_us")}</h3>
                 <p className="text-gray-600">
                   (03) 201 9099
                   <br />
-                  للطلبات والاستفسارات
+                    {t("contact_info")}
+
                 </p>
               </Card>
             </a>
@@ -428,12 +429,13 @@ export default function Home() {
               <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                 <Clock className="h-8 w-8 text-red-700" />
               </div>
-              <h3 className="text-xl font-bold mb-4">ساعات العمل</h3>
+              <h3 className="text-xl font-bold mb-4"> {t("working_hours")}</h3>
               <p className="text-gray-600">
-                يومياً من 9 صباحاً
-                <br />
-                حتى 3 بعد منتصف الليل
-              </p>
+  {t("working_hours_start")}
+  <br />
+  {t("working_hours_end")}
+</p>
+
             </Card>
           </div>
         </div>
@@ -447,12 +449,12 @@ export default function Home() {
                 <ChefHat className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold">شاورما شيش</h3>
-                <p className="text-gray-400 text-sm">طعم أصيل ولذيذ</p>
+                <h3 className="text-2xl font-bold">{t("resturant_name")}</h3>
+                <p className="text-gray-400 text-sm"> {t("resturant_tagline")} </p>
               </div>
             </div>
 
-            <p className="text-gray-400 mb-6">طعم لا يُنسى منذ 2021</p>
+            <p className="text-gray-400 mb-6"> {t("taste_unforgettable")}</p>
 
             <div className="flex justify-center items-center gap-6 mb-6">
               <div className="flex items-center gap-2">
@@ -464,13 +466,13 @@ export default function Home() {
                     />
                   ))}
                 </div>
-                <span className="text-gray-400">4.9 من 5 نجوم</span>
+                <span className="text-gray-400">  {t("rating")} </span>
               </div>
             </div>
 
             <div className="border-t border-gray-800 pt-6">
               <p className="text-gray-500 text-sm">
-                © 2025 شاورما شيش. جميع الحقوق محفوظة.
+                {t("all_rights_reserved")}
               </p>
             </div>
           </div>

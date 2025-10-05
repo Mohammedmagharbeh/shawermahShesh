@@ -50,7 +50,7 @@ export function Dialog({ name, order, updateOrders }) {
   // Calculate subtotal whenever products change
   useEffect(() => {
     const newSubtotal = updatedOrder.products.reduce(
-      (sum, p) => sum + p.productId.price * p.quantity,
+      (sum, p) => sum + p.productId?.price?? 0 * p.quantity,
       0
     );
     setSubtotal(newSubtotal);
@@ -263,11 +263,11 @@ export function Dialog({ name, order, updateOrders }) {
             <div className="space-y-2">
               {updatedOrder.products.map((p, i) => (
                 <div
-                  key={p.productId._id}
+                  key={p.productId?._id}
                   className="border p-3 rounded flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
                 >
                   <div className="flex-1 text-sm sm:text-base">
-                    {p.productId.name} - Price: {p.productId.price} JD
+                    {p.productId?.name??"not found"} - Price: {p.productId?.price??"not found"} JD
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="text-sm">Qty</Label>
