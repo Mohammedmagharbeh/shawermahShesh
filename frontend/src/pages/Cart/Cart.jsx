@@ -140,7 +140,7 @@ const Cart = () => {
   const { t } = useTranslation();
 
   if (!user || !user._id) {
-    toast.error(t("cart_login_required"));
+toast.error(t("cart_login_required")); // "يجب تسجيل الدخول لإتمام الطلب"
     window.location.href = "/login";
     return null;
   }

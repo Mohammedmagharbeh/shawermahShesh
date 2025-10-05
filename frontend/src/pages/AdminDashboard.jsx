@@ -78,7 +78,7 @@ function AdminDashboard() {
     toast(
       (t) => (
         <div className="flex flex-col gap-2">
-          <span>هل أنت متأكد أنك تريد حذف الطلب؟</span>
+      <span>{t("confirm_delete_order")}</span>   // النص صار قابل للترجمة
           <div className="flex justify-end gap-2">
             <Button
               size="sm"
@@ -86,17 +86,17 @@ function AdminDashboard() {
               onClick={() => {
                 deleteOrder(orderId);
                 toast.dismiss(t.id);
-                toast.success("تم حذف الطلب");
+            toast.success(t("order_deleted"));   // الرسالة بعد الحذف مترجمة
               }}
             >
-              نعم
+          {t("yes")}   // زر "نعم" مترجم
             </Button>
             <Button
               size="sm"
               variant="outline"
-              onClick={() => toast.dismiss(t.id)}
+          onClick={() => toast.dismiss(t.id)}
             >
-              لا
+          {t("no")}   // زر "لا" مترجم
             </Button>
           </div>
         </div>

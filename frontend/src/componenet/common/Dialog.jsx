@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
+
 import {
   Dialog as DialogUi,
   DialogTrigger,
@@ -37,6 +39,7 @@ export function Dialog({ name, order, updateOrders }) {
   });
   const [subtotal, setSubtotal] = useState(0);
   const [addresses, setAddresses] = useState([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -121,11 +124,11 @@ export function Dialog({ name, order, updateOrders }) {
 
       if (!res.ok) throw new Error("Failed to update order");
 
-      toast.success("Order updated successfully");
+toast.success(t("order_updated_successfully"));
       updateOrders();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update order");
+toast.error(t("failed_to_update_order"));
     }
   };
 

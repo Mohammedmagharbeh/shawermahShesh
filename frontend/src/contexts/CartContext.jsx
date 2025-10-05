@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useUser } from "./UserContext";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 const CartContext = createContext();
 
@@ -12,6 +13,7 @@ export const CartProvider = ({ children }) => {
   });
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   // Fetch cart on mount
   useEffect(() => {
@@ -56,7 +58,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (productId) => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     if (!user._id) {
-      toast.error("Please log in to add items to your cart");
+      toast.error(t("please_login_to_add_items"));
       return;
     }
     try {
@@ -112,8 +114,12 @@ export const CartProvider = ({ children }) => {
       if (!res.ok) throw new Error("Failed to remove item");
       const data = await res.json();
       setCart(data.cart);
+            toast.success(t("item_removed_from_cart"));
+
     } catch (error) {
       console.error(error);
+            toast.error(t("failed_to_remove_item"));
+
     }
   };
 
@@ -130,8 +136,12 @@ export const CartProvider = ({ children }) => {
       if (!res.ok) throw new Error("Failed to clear cart");
       const data = await res.json();
       setCart(data.cart);
+            toast.success(t("cart_cleared"));
+
     } catch (error) {
       console.error(error);
+            toast.error(t("failed_to_clear_cart"));
+
     }
   };
 

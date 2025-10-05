@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useUser } from "./UserContext";
+import { useTranslation } from "react-i18next";
 
 const OrderContext = createContext();
 
@@ -12,6 +13,7 @@ export const OrderProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user } = useUser();
+  const { t } = useTranslation();
 
   const API_URL = `${import.meta.env.VITE_BASE_URL}/order`; // change to your backend URL
 
@@ -23,6 +25,8 @@ export const OrderProvider = ({ children }) => {
       setOrders(res.data.data);
       setError(null);
     } catch (err) {
+            const msg = err.response?.data?.message || t("failed_fetch_orders");
+
       setError(err.response?.data?.message || "Failed to fetch orders");
     } finally {
       setLoading(false);
@@ -32,7 +36,7 @@ export const OrderProvider = ({ children }) => {
   // 🔹 Get orders by userId
   const getOrdersByUserId = async () => {
     if (!user || !user?._id) {
-      setError("User not logged in");
+      const msg = t("user_not_logged_in");
       return;
     }
 
@@ -42,6 +46,8 @@ export const OrderProvider = ({ children }) => {
       setOrders(res.data.data);
       setError(null);
     } catch (err) {
+            const msg = err.response?.data?.message || t("failed_fetch_user_orders");
+
       setError(err.response?.data?.message || "Failed to fetch user orders");
     } finally {
       setLoading(false);
@@ -56,6 +62,8 @@ export const OrderProvider = ({ children }) => {
       setError(null);
       return res.data.data; // return directly without overwriting state
     } catch (err) {
+            const msg = err.response?.data?.message || t("failed_fetch_order");
+
       setError(err.response?.data?.message || "Failed to fetch order");
     } finally {
       setLoading(false);
@@ -87,8 +95,12 @@ export const OrderProvider = ({ children }) => {
         prev.map((order) => (order._id === id ? res.data : order))
       );
       setError(null);
+            toast.success(t("order_updated_success"));
+
       return res.data;
     } catch (err) {
+            const msg = err.response?.data?.message || t("failed_update_order");
+
       setError(err.response?.data?.message || "Failed to update order");
     } finally {
       setLoading(false);
@@ -102,8 +114,12 @@ export const OrderProvider = ({ children }) => {
       await axios.delete(`${API_URL}/${id}`);
       setOrders((prev) => prev.filter((order) => order._id !== id));
       setError(null);
+            toast.success(t("order_deleted_success"));
+
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete order");
+            const msg = err.response?.data?.message || t("failed_update_order");
+
     } finally {
       setLoading(false);
     }

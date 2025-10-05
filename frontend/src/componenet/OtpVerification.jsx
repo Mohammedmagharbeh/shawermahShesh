@@ -4,6 +4,8 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { useUser } from "@/contexts/UserContext";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+
 
 function OtpVerification() {
   const [otp, setOtp] = useState("");
@@ -11,6 +13,8 @@ function OtpVerification() {
   const location = useLocation();
   const phone = location.state?.phone;
   const { login } = useUser();
+    const { t } = useTranslation();
+
 
   const verifyOtp = async (e) => {
     e.preventDefault();
@@ -30,10 +34,10 @@ function OtpVerification() {
         role: res.data.role,
       });
 
-      toast.success("تم التحقق من OTP بنجاح");
+       toast.success(t("otp_verified"));
       navigate("/");
     } catch (error) {
-      toast.error("OTP غير صحيح");
+      toast.error(t("otp_invalid"));
       console.error(error);
     }
   };
