@@ -82,32 +82,13 @@ function Settings() {
                     className="flex-1 tracking-[0.1em]"
                   />
                   <Button
-                    // disabled={user.phone === phone || phone.length < 10}
+                    disabled={user.phone === phone || phone.length < 10}
                     className="w-full sm:w-auto"
                     onClick={() => handlePhoneUpdate()}
                   >
                     Update Phone
                   </Button>
                 </div>
-                {user.phone !== phone && phone.length === 10 && (
-                  <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                    <Input
-                      type="text"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      placeholder="● ● ● ● ● ●"
-                      maxLength={6}
-                      required
-                      className="p-5 border-2 border-gray-200 rounded-xl text-2xl font-bold text-center tracking-[0.5em] focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/10 placeholder:text-gray-300 placeholder:tracking-[0.5em] transition-all duration-200 bg-gray-50/50"
-                    />
-                    <Button
-                      disabled={otp.length < 6}
-                      className="w-full sm:w-auto"
-                    >
-                      Verify OTP & Save New Number
-                    </Button>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>

@@ -121,7 +121,7 @@ function Header() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="bg-white border-red-600 border-2 text-red-600 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
+                      className="bg-white border-red-600 border-2 text-red-900 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
                     >
                       <Settings className="h-4 w-4" />
                       <span className="hidden xl:inline">
@@ -246,8 +246,8 @@ function Header() {
               {user.role === "admin" && (
                 <div className="flex flex-col gap-2 pt-3 mt-2 border-t-2 border-yellow-200">
                   <div className="flex items-center gap-2 px-4 mb-1">
-                    <Settings className="h-4 w-4 text-red-700" />
-                    <p className="text-xs font-bold text-red-700">
+                    <Settings className="h-4 w-4 text-red-900" />
+                    <p className="text-xs font-bold text-red-900">
                       {t("control_panel")}
                     </p>
                   </div>
