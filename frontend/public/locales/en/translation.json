@@ -113,7 +113,6 @@
   "edit_product_desc": "Edit current product details",
   "add_product_desc": "Add a new product to the list",
   "product_name": "Product Name",
-  "price": "Price (JOD)",
   "discount": "Discount (%)",
   "category": "Category",
   "product_image": "Product Image",
@@ -217,6 +216,5 @@
   "missing_payment_reference": "Missing payment reference.",
   "payment_verification_failed": "Payment verification failed.",
   "order_placed_successfully": "Order placed successfully!",
-  "order_creation_failed_try_again": "Failed to place order. Try again later.",
-  "cart_login_required": "You must be logged in to place an order"
+  "order_creation_failed_try_again": "Failed to place order. Try again later."
 }

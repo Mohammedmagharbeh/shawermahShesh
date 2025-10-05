@@ -24,7 +24,6 @@
   "menu": "القائمة",
   "about_us": "من نحن",
   "contact_us": "اتصل بنا",
-  "price": "السعر",
   "logout": "تسجيل الخروج",
   "login": "تسجيل الدخول",
   "dashboard": "لوحة التحكم",
@@ -111,7 +110,6 @@
   "edit_product_desc": "قم بتعديل بيانات المنتج الحالي",
   "add_product_desc": "أضف منتج جديد إلى القائمة",
   "product_name": "اسم المنتج",
-  "price": "السعر (دينار)",
   "discount": "نسبة الخصم (%)",
   "category": "الفئة",
   "product_image": "صورة المنتج",
@@ -143,7 +141,6 @@
   "price": "السعر",
   "cart_order_summary": "ملخص الطلب",
   "delivery_info": "حسب موقعك",
-  "total": "الإجمالي",
   "cart_checkout": "انتقل إلى الدفع",
 
   "checkout_cart_empty": "سلة التسوق فارغة!",
@@ -217,6 +214,5 @@
   "missing_payment_reference": "معرّف الدفع مفقود.",
   "payment_verification_failed": "فشل التحقق من الدفع.",
   "order_placed_successfully": "تم إنشاء الطلب بنجاح!",
-  "order_creation_failed_try_again": "فشل إنشاء الطلب. حاول مرة أخرى لاحقًا.",
-  "cart_login_required": "يجب تسجيل الدخول لإتمام الطلب"
+  "order_creation_failed_try_again": "فشل إنشاء الطلب. حاول مرة أخرى لاحقًا."
 }
