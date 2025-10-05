@@ -37,6 +37,7 @@ export function Dialog({ name, order, updateOrders }) {
       quantity: p.quantity,
     })),
   });
+
   const [subtotal, setSubtotal] = useState(0);
   const [addresses, setAddresses] = useState([]);
   const { t } = useTranslation();
@@ -50,15 +51,13 @@ export function Dialog({ name, order, updateOrders }) {
     fetchAddresses();
   }, []);
 
-  // Calculate subtotal whenever products change
   useEffect(() => {
     const newSubtotal = updatedOrder.products.reduce(
-      (sum, p) => sum + p.productId?.price?? 0 * p.quantity,
+      (sum, p) => sum + (p.productId?.price ?? 0) * p.quantity,
       0
     );
     setSubtotal(newSubtotal);
 
-    // Update totalPrice automatically
     setUpdatedOrder((prev) => ({
       ...prev,
       totalPrice: newSubtotal + Number(prev.deliveryCost),
@@ -124,11 +123,11 @@ export function Dialog({ name, order, updateOrders }) {
 
       if (!res.ok) throw new Error("Failed to update order");
 
-toast.success(t("order_updated_successfully"));
+      toast.success(t("order_updated_successfully"));
       updateOrders();
     } catch (err) {
       console.error(err);
-toast.error(t("failed_to_update_order"));
+      toast.error(t("failed_to_update_order"));
     }
   };
 
@@ -140,18 +139,18 @@ toast.error(t("failed_to_update_order"));
 
       <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Order</DialogTitle>
-          <DialogDescription>Update order details below</DialogDescription>
+          <DialogTitle>{t("edit_order")}</DialogTitle>
+          <DialogDescription>{t("update_order_details")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="flex flex-col sm:flex-row gap-4 sm:justify-between">
             <div className="flex-1">
-              <Label>Subtotal</Label>
+              <Label>{t("subtotal")}</Label>
               <Input type="number" value={subtotal.toFixed(2)} disabled />
             </div>
             <div className="flex-1">
-              <Label>Total Price</Label>
+              <Label>{t("total_price")}</Label>
               <Input
                 type="number"
                 value={updatedOrder.totalPrice.toFixed(2)}
@@ -160,53 +159,44 @@ toast.error(t("failed_to_update_order"));
             </div>
           </div>
 
-          {/* Payment Status */}
           <div>
-            <Label>Payment Status</Label>
+            <Label>{t("payment_status")}</Label>
             <Select
               value={updatedOrder.paymentStatus || order.payment.status}
               onValueChange={(value) =>
-                setUpdatedOrder((prev) => ({
-                  ...prev,
-                  paymentStatus: value,
-                }))
+                setUpdatedOrder((prev) => ({ ...prev, paymentStatus: value }))
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select Payment Status" />
+                <SelectValue placeholder={t("select_payment_status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="unpaid">Unpaid</SelectItem>
+                <SelectItem value="paid">{t("paid")}</SelectItem>
+                <SelectItem value="unpaid">{t("unpaid")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Payment Method */}
           <div>
-            <Label>Payment Method</Label>
+            <Label>{t("payment_method")}</Label>
             <Select
               value={updatedOrder.paymentMethod || order.payment.method}
               onValueChange={(value) =>
-                setUpdatedOrder((prev) => ({
-                  ...prev,
-                  paymentMethod: value,
-                }))
+                setUpdatedOrder((prev) => ({ ...prev, paymentMethod: value }))
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select Payment Method" />
+                <SelectValue placeholder={t("select_payment_method")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="cash">Cash</SelectItem>
-                <SelectItem value="card">Card</SelectItem>
+                <SelectItem value="cash">{t("cash")}</SelectItem>
+                <SelectItem value="card">{t("card")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Delivery Cost */}
           <div>
-            <Label>Delivery Cost</Label>
+            <Label>{t("delivery_cost")}</Label>
             <Input
               type="number"
               value={updatedOrder.deliveryCost}
@@ -214,9 +204,8 @@ toast.error(t("failed_to_update_order"));
             />
           </div>
 
-          {/* Address */}
           <div>
-            <Label>Address</Label>
+            <Label>{t("address")}</Label>
             <Select
               value={updatedOrder.address}
               onValueChange={(value) => {
@@ -233,22 +222,21 @@ toast.error(t("failed_to_update_order"));
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select an address" />
+                <SelectValue placeholder={t("select_address")} />
               </SelectTrigger>
               <SelectContent>
                 {addresses.length > 0 &&
                   addresses.map((addr) => (
                     <SelectItem value={addr.name} key={addr._id || addr.SECNO}>
-                      {addr.name} - Delivery Cost: {addr.deliveryCost} JD
+                      {addr.name} - {t("delivery_cost")}: {addr.deliveryCost} JD
                     </SelectItem>
                   ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Customer Phone */}
           <div>
-            <Label>Customer Phone</Label>
+            <Label>{t("customer_phone")}</Label>
             <Input
               type="tel"
               value={updatedOrder.customerPhone}
@@ -262,7 +250,7 @@ toast.error(t("failed_to_update_order"));
           </div>
 
           <div>
-            <Label>Products</Label>
+            <Label>{t("products")}</Label>
             <div className="space-y-2">
               {updatedOrder.products.map((p, i) => (
                 <div
@@ -270,10 +258,11 @@ toast.error(t("failed_to_update_order"));
                   className="border p-3 rounded flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
                 >
                   <div className="flex-1 text-sm sm:text-base">
-                    {p.productId?.name??"not found"} - Price: {p.productId?.price??"not found"} JD
+                    {p.productId?.name ?? t("not_found")} - {t("price")}:{" "}
+                    {p.productId?.price ?? t("not_found")} JD
                   </div>
                   <div className="flex items-center gap-2">
-                    <Label className="text-sm">Qty</Label>
+                    <Label className="text-sm">{t("qty")}</Label>
                     <Input
                       type="number"
                       value={p.quantity}
@@ -296,11 +285,11 @@ toast.error(t("failed_to_update_order"));
                 type="button"
                 className="w-full sm:w-auto bg-transparent"
               >
-                Cancel
+                {t("cancel")}
               </Button>
             </DialogClose>
             <Button type="submit" className="w-full sm:w-auto">
-              Save Changes
+              {t("save_changes")}
             </Button>
           </DialogFooter>
         </form>
