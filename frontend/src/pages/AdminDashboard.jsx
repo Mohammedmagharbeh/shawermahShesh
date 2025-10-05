@@ -12,7 +12,7 @@ import {
 import { useOrder } from "@/contexts/OrderContext";
 import Loading from "@/componenet/common/Loading";
 import { io } from "socket.io-client";
-import newOrderSound from "../../public/newOrder.mp3";
+import newOrderSound from "../assets/newOrder.mp3";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { toast } from "react-hot-toast";
