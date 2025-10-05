@@ -78,7 +78,6 @@ export default function Home() {
   useEffect(() => {
     let filtered = products;
 
-    
     if (searchTerm.trim() !== "") {
       filtered = filtered.filter((p) =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -123,7 +122,7 @@ export default function Home() {
               </h1>
 
               <p className="text-lg text-gray-600 mb-8 max-w-lg mx-auto lg:mx-0">
-               {t("welcome_description")}
+                {t("welcome_description")}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -139,13 +138,13 @@ export default function Home() {
 
             <div className="relative">
               <img
-                src="https://scontent.fadj1-1.fna.fbcdn.net/v/t39.30808-6/476454852_122217977474069185_4322824607711777600_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=103&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=dd4XTtVu-oQQ7kNvwG9sIu1&_nc_oc=Admi4bZoX5TL8FA1IKnukMZp0SjENBexVrx6C4HVMRnyK9MF11cc9Hm_trDhXuK47LQ&_nc_zt=23&_nc_ht=scontent.fadj1-1.fna&_nc_gid=x2jZce-ReEMKXr2SybzW6w&oh=00_AfZWq6YgcVUK1rDUxdRXp68u_eSAosWuQux81-FaRdhdng&oe=68E03B01"
+                src={burger}
                 alt="شاورما شيش"
                 className="rounded-2xl shadow-xl w-full h-auto"
               />
               <div className="absolute top-4 right-4">
                 <Badge className="bg-red-700 text-white px-3 py-1">
-                {t("fresh_daily")}
+                  {t("fresh_daily")}
                 </Badge>
               </div>
             </div>
@@ -156,26 +155,25 @@ export default function Home() {
       {/* قسم الإحصائيات (لم يتم تغيير ID) */}
       <section className="py-16 bg-red-700 text-white">
         <div className="container mx-auto px-4">
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-    <div>
-      <div className="text-3xl font-bold mb-2">15+</div>
-      <div className="text-red-100">{t("years_of_experience")}</div>
-    </div>
-    <div>
-      <div className="text-3xl font-bold mb-2">100k+</div>
-      <div className="text-red-100">{t("happy_customers")}</div>
-    </div>
-    <div>
-      <div className="text-3xl font-bold mb-2">100%</div>
-      <div className="text-red-100">{t("fresh_ingredients")}</div>
-    </div>
-    <div>
-      <div className="text-3xl font-bold mb-2">09:00AM - 03:00AM</div>
-      <div className="text-red-100">{t("delivery_service")}</div>
-    </div>
-  </div>
-</div>
-
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-3xl font-bold mb-2">15+</div>
+              <div className="text-red-100">{t("years_of_experience")}</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold mb-2">100k+</div>
+              <div className="text-red-100">{t("happy_customers")}</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold mb-2">100%</div>
+              <div className="text-red-100">{t("fresh_ingredients")}</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold mb-2">09:00AM - 03:00AM</div>
+              <div className="text-red-100">{t("delivery_service")}</div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* قسم القائمة - تأكد من وجود id="menu" */}
@@ -184,8 +182,8 @@ export default function Home() {
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-red-100 text-red-700 border-red-200 px-4 py-2">
               <ChefHat className="h-4 w-4 ml-2" />
-            {t("menu")}
-              </Badge>
+              {t("menu")}
+            </Badge>
             <h2 className="text-4xl font-bold mb-4 text-gray-900">
               {t("menu_title")}
             </h2>
@@ -198,7 +196,7 @@ export default function Home() {
             <div className="w-full lg:w-80">
               <input
                 type="text"
-  placeholder={t("search_your_favorite_dish")}
+                placeholder={t("search_your_favorite_dish")}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -227,7 +225,7 @@ export default function Home() {
           {isLoading ? (
             <div className="text-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-red-700 mx-auto mb-4" />
-<p className="text-gray-600">{t("loading_products")}</p>
+              <p className="text-gray-600">{t("loading_products")}</p>
             </div>
           ) : filteredProducts.length > 0 ? (
             <>
@@ -306,23 +304,25 @@ export default function Home() {
               {hasMoreProducts && (
                 <div className="text-center mt-12">
                   <Button
-  onClick={handleShowMore}
-  size="lg"
-  className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-3"
->
-  {t("show_more_products", { count: filteredProducts.length - productsToShow })}
-</Button>
-
+                    onClick={handleShowMore}
+                    size="lg"
+                    className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-3"
+                  >
+                    {t("show_more_products", {
+                      count: filteredProducts.length - productsToShow,
+                    })}
+                  </Button>
                 </div>
               )}
             </>
           ) : (
-           <div className="text-center py-16">
-  <div className="text-6xl mb-4">🔍</div>
-  <h3 className="text-2xl font-bold mb-2">{t("no_results_title")}</h3>
-  <p className="text-gray-600">{t("no_results_description")}</p>
-</div>
-
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-2xl font-bold mb-2">
+                {t("no_results_title")}
+              </h3>
+              <p className="text-gray-600">{t("no_results_description")}</p>
+            </div>
           )}
         </div>
       </section>
@@ -335,10 +335,10 @@ export default function Home() {
               <Badge className="mb-6 bg-red-100 text-red-700 border-red-200 px-4 py-2">
                 <Heart className="h-4 w-4 ml-2" />
                 {t("our_story")}
-                </Badge>
+              </Badge>
               <h2 className="text-4xl font-bold mb-6 text-gray-900">
                 {t("story_title")}
-                </h2>
+              </h2>
               <p className="text-lg text-gray-600 mb-8">
                 {t("story_description")}
               </p>
@@ -353,7 +353,10 @@ export default function Home() {
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-4 mb-3">
                     <Users className="h-8 w-8 text-red-700 mx-auto" />
-                    <h4 className="font-bold text-sm"> {t("professional_team")}</h4>
+                    <h4 className="font-bold text-sm">
+                      {" "}
+                      {t("professional_team")}
+                    </h4>
                   </div>
                 </div>
                 <div className="text-center">
@@ -386,8 +389,11 @@ export default function Home() {
             </Badge>
             <h2 className="text-4xl font-bold mb-4 text-gray-900">
               {t("contact_section_title")}
-              </h2>
-            <p className="text-lg text-gray-600">  {t("contact_section_description")}</p>
+            </h2>
+            <p className="text-lg text-gray-600">
+              {" "}
+              {t("contact_section_description")}
+            </p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
@@ -403,11 +409,10 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-4">{t("our_location")}</h3>
               <p className="text-gray-600">
-  {t("location_line1")}
-  <br />
-  {t("location_line2")}
-</p>
-
+                {t("location_line1")}
+                <br />
+                {t("location_line2")}
+              </p>
             </Card>
 
             <a href="tel:+96332019099">
@@ -419,8 +424,7 @@ export default function Home() {
                 <p className="text-gray-600">
                   (03) 201 9099
                   <br />
-                    {t("contact_info")}
-
+                  {t("contact_info")}
                 </p>
               </Card>
             </a>
@@ -431,11 +435,10 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-4"> {t("working_hours")}</h3>
               <p className="text-gray-600">
-  {t("working_hours_start")}
-  <br />
-  {t("working_hours_end")}
-</p>
-
+                {t("working_hours_start")}
+                <br />
+                {t("working_hours_end")}
+              </p>
             </Card>
           </div>
         </div>
@@ -450,7 +453,10 @@ export default function Home() {
               </div>
               <div>
                 <h3 className="text-2xl font-bold">{t("resturant_name")}</h3>
-                <p className="text-gray-400 text-sm"> {t("resturant_tagline")} </p>
+                <p className="text-gray-400 text-sm">
+                  {" "}
+                  {t("resturant_tagline")}{" "}
+                </p>
               </div>
             </div>
 
@@ -466,7 +472,7 @@ export default function Home() {
                     />
                   ))}
                 </div>
-                <span className="text-gray-400">  {t("rating")} </span>
+                <span className="text-gray-400"> {t("rating")} </span>
               </div>
             </div>
 
@@ -481,4 +487,3 @@ export default function Home() {
     </div>
   );
 }
-

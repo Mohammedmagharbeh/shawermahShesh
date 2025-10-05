@@ -111,15 +111,6 @@ function Header() {
                     )}
                   </Button>
                 </Link>
-                <Link to="/settings">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="relative border-2 border-red-600 text-red-700 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white bg-white h-10 w-10 md:h-11 md:w-11 p-0 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-200 flex-shrink-0"
-                  >
-                    <Settings className="size-5" />
-                  </Button>
-                </Link>
               </div>
             )}
 
@@ -195,6 +186,15 @@ function Header() {
                 </Button>
               </Link>
             )}
+            <Link to="/settings">
+              <Button
+                variant="outline"
+                size="sm"
+                className="relative border-2 border-red-600 text-red-700 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white bg-white h-10 w-10 md:h-11 md:w-11 p-0 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-200 flex-shrink-0"
+              >
+                <Settings className="size-5" />
+              </Button>
+            </Link>
 
             <Button
               variant="ghost"
