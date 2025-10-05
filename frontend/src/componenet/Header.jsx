@@ -54,10 +54,10 @@ function Header() {
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-700 via-red-600 to-red-700 bg-clip-text text-transparent drop-shadow-sm">
-                  شاورما شيش
+                  {t("resturant_name")}
                 </h1>
                 <p className="text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic">
-                  طعم أصيل ولذيذ
+                  {t("resturant_tagline")}
                 </p>
               </div>
             </div>
@@ -121,10 +121,12 @@ function Header() {
                     <Button
                       variant="outline"
                       size="sm"
-  className="bg-white border-red-600 border-2 text-red-600 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
+                      className="bg-white border-red-600 border-2 text-red-600 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
                     >
                       <Settings className="h-4 w-4" />
-                      <span className="hidden xl:inline">لوحة الإدارة</span>
+                      <span className="hidden xl:inline">
+                        {t("control_panel")}
+                      </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
@@ -135,7 +137,7 @@ function Header() {
                       <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                         <LayoutDashboard className="h-4 w-4 ml-2 text-red-600" />
                         <span className="font-semibold text-gray-700">
-                          لوحة التحكم
+                          {t("dashboard")}
                         </span>
                       </DropdownMenuItem>
                     </Link>
@@ -143,7 +145,7 @@ function Header() {
                       <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                         <Package className="h-4 w-4 ml-2 text-red-600" />
                         <span className="font-semibold text-gray-700">
-                          الطلبات
+                          {t("orders")}
                         </span>
                       </DropdownMenuItem>
                     </Link>
@@ -151,7 +153,7 @@ function Header() {
                       <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                         <Plus className="h-4 w-4 ml-2 text-red-600" />
                         <span className="font-semibold text-gray-700">
-                          إضافة منتج
+                          {t("products")}
                         </span>
                       </DropdownMenuItem>
                     </Link>
@@ -167,8 +169,8 @@ function Header() {
                 onClick={handleLogout}
                 className="hidden sm:flex bg-gradient-to-r  border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
               >
-                <span className="hidden md:inline">تسجيل خروج</span>
-                <span className="md:hidden">خروج</span>
+                <span className="hidden md:inline">{t("logout")}</span>
+                <span className="md:hidden">{t("logout")}</span>
                 <LogOut className="h-4 w-4" />
               </Button>
             ) : (
@@ -178,8 +180,8 @@ function Header() {
                   size="sm"
                   className="bg-gradient-to-r  border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105"
                 >
-                  <span className="hidden md:inline">تسجيل دخول</span>
-                  <span className="md:hidden">دخول</span>
+                  <span className="hidden md:inline">{t("login")}</span>
+                  <span className="md:hidden">{t("login")}</span>
                   <LogIn className="h-4 w-4" />
                 </Button>
               </Link>
@@ -208,28 +210,28 @@ function Header() {
                 onClick={handleLinkClick}
                 className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
               >
-                الرئيسية
+                {t("home")}
               </Link>
               <Link
                 to="/#menu"
                 onClick={handleLinkClick}
                 className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
               >
-                القائمة
+                {t("menu")}
               </Link>
               <Link
                 to="/#about"
                 onClick={handleLinkClick}
                 className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
               >
-                من نحن
+                {t("about_us")}
               </Link>
               <Link
                 to="/#contact"
                 onClick={handleLinkClick}
                 className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
               >
-                اتصل بنا
+                {t("contact_us")}
               </Link>
 
               {user.role === "admin" && (
@@ -237,25 +239,25 @@ function Header() {
                   <div className="flex items-center gap-2 px-4 mb-1">
                     <Settings className="h-4 w-4 text-red-700" />
                     <p className="text-xs font-bold text-red-700">
-                      لوحة الإدارة
+                      {t("control_panel")}
                     </p>
                   </div>
                   <Link to="/admin/dashboard" onClick={handleLinkClick}>
                     <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
                       <LayoutDashboard className="h-5 w-5 text-red-600" />
-                      <span>لوحة التحكم</span>
+                      <span> {t("dashboard")}</span>
                     </div>
                   </Link>
                   <Link to="/orders" onClick={handleLinkClick}>
                     <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
                       <Package className="h-5 w-5 text-red-600" />
-                      <span>الطلبات</span>
+                      <span>{t("orders")}</span>
                     </div>
                   </Link>
                   <Link to="/admin/add-product" onClick={handleLinkClick}>
                     <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
                       <Plus className="h-5 w-5 text-red-600" />
-                      <span>إضافة منتج</span>
+                      <span>{t("products")}</span>
                     </div>
                   </Link>
                 </div>
@@ -269,8 +271,7 @@ function Header() {
                     onClick={handleLogout}
                     className="w-full bg-gradient-to-r border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-12 text-base font-bold gap-2 transition-all duration-300 shadow-md"
                   >
-                    تسجيل خروج
-                    <LogOut className="h-5 w-5" />
+                    {t("logout")} <LogOut className="h-5 w-5" />
                   </Button>
                 ) : (
                   <Link to="/login" className="block" onClick={handleLinkClick}>
@@ -279,7 +280,7 @@ function Header() {
                       size="sm"
                       className="w-full bg-gradient-to-r  border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-12 text-base font-bold gap-2 transition-all duration-300 shadow-md"
                     >
-                      تسجيل دخول
+                      {t("login")}
                       <LogIn className="h-5 w-5" />
                     </Button>
                   </Link>

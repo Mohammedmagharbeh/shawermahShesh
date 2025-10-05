@@ -26,5 +26,14 @@
   "menu": "Menu",
   "about_us": "About Us",
   "contact_us": "Contact Us",
-  "price": "Price"
+  "price": "Price",
+  "logout": "Logout",
+  "login": "Login",
+  "dashboard": "Dashboard",
+  "orders": "Orders",
+  "products": "Products",
+  "control_panel": "Control Panel",
+  "resturant_name": "Shawarma Sheesh",
+  "resturant_tagline": "Authentic and Delicious Taste",
+  "best_in_town": "Best Shawarma in Town"
 }

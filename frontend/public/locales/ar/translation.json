@@ -26,5 +26,14 @@
   "menu": "القائمة",
   "about_us": "من نحن",
   "contact_us": "اتصل بنا",
-  "price": "السعر"
+  "price": "السعر",
+  "logout": "تسجيل الخروج",
+  "login": "تسجيل الدخول",
+  "dashboard": "لوحة التحكم",
+  "orders": "الطلبات",
+  "products": "المنتجات",
+  "control_panel": "لوحة الإدارة",
+  "resturant_name": "شاورما شيش",
+  "resturant_tagline": "طعم أصيل ولذيذ",
+  "best_in_town": "أفضل شاورما في المدينة"
 }
