@@ -6,15 +6,14 @@ import { useUser } from "@/contexts/UserContext";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 
-
 function OtpVerification() {
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const phone = location.state?.phone;
+  const newPhone = location.state?.newPhone;
   const { login } = useUser();
-    const { t } = useTranslation();
-
+  const { t } = useTranslation();
 
   const verifyOtp = async (e) => {
     e.preventDefault();
@@ -23,6 +22,7 @@ function OtpVerification() {
         `${import.meta.env.VITE_BASE_URL}/verify-otp`,
         {
           phone,
+          newPhone,
           otp,
         }
       );
@@ -34,7 +34,7 @@ function OtpVerification() {
         role: res.data.role,
       });
 
-       toast.success(t("otp_verified"));
+      toast.success(t("otp_verified"));
       navigate("/");
     } catch (error) {
       toast.error(t("otp_invalid"));

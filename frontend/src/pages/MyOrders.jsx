@@ -136,37 +136,44 @@ function MyOrders() {
                         <div className="relative h-16 w-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                           <img
                             src={burger}
-                            alt={item.productId.name}
+                            alt={
+                              item.productId?.name ?? "Unknown Product Image"
+                            }
                             className="h-full w-full object-cover"
                           />
                         </div>
                         <div>
                           <p className="font-semibold text-foreground">
-                            {item.productId.name}
+                            {item.productId?.name ?? "Unknown Product Name"}
                           </p>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>Quantity: {item.quantity}</span>
                             <span>•</span>
                             <span className="capitalize">
-                              {item.productId.category}
+                              {item.productId?.category ?? "Unknown Category"}
                             </span>
                           </div>
-                          {item.productId.discount > 0 && (
-                            <Badge variant="secondary" className="mt-1 text-xs">
-                              {item.productId.discount}% off
-                            </Badge>
-                          )}
+                          {item.productId?.discount ||
+                            (0 > 0 && (
+                              <Badge
+                                variant="secondary"
+                                className="mt-1 text-xs"
+                              >
+                                {item.productId.discount}% off
+                              </Badge>
+                            ))}
                         </div>
                       </div>
                       <div className="sm:text-right">
                         <p className="font-semibold text-foreground">
                           {item.priceAtPurchase.toFixed(2)} JOD
                         </p>
-                        {item.productId.discount > 0 && (
-                          <p className="text-sm text-muted-foreground line-through">
-                            {item.productId.price.toFixed(2)} JOD
-                          </p>
-                        )}
+                        {item.productId?.discount ||
+                          (0 > 0 && (
+                            <p className="text-sm text-muted-foreground line-through">
+                              {item.productId.price.toFixed(2)} JOD
+                            </p>
+                          ))}
                       </div>
                     </div>
                     {productIndex < order.products.length - 1 && (

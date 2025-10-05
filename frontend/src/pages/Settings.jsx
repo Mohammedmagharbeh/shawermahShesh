@@ -13,11 +13,13 @@ import { User, Phone, Palette, Trash2, AlertCircle } from "lucide-react";
 import Loading from "@/componenet/common/Loading";
 import LanguageSwitcher from "@/componenet/LanguageSwitcher";
 import { useUser } from "@/contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
 function Settings() {
   const { user, updatePhone } = useUser();
   const [phone, setPhone] = useState(user?.phone || "");
   const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
 
   const handlePhoneChange = (value) => {
     setPhone(value);
@@ -25,8 +27,7 @@ function Settings() {
 
   const handlePhoneUpdate = async () => {
     try {
-      await updatePhone(phone);
-      alert("Phone number updated successfully");
+      await updatePhone(phone, navigate);
     } catch (error) {
       console.error("Failed to update phone number:", error);
       alert("Failed to update phone number");
@@ -81,7 +82,7 @@ function Settings() {
                     className="flex-1 tracking-[0.1em]"
                   />
                   <Button
-                    disabled={user.phone === phone || phone.length < 10}
+                    // disabled={user.phone === phone || phone.length < 10}
                     className="w-full sm:w-auto"
                     onClick={() => handlePhoneUpdate()}
                   >

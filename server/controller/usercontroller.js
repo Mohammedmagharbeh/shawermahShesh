@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { CATEGORIES } = require("../constants");
 const products = require("../models/products");
+const dotenv = require("dotenv");
+dotenv.config();
 
 // get endpoint
 exports.getuser = async (req, res) => {

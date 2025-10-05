@@ -54,7 +54,7 @@ routes.post("/login", async (req, res) => {
 
 // Verify OTP → issue JWT
 routes.post("/verify-otp", async (req, res) => {
-  const { phone, otp } = req.body;
+  const { phone, newPhone, otp } = req.body;
 
   try {
     const user = await userModel.findOne({ phone });
@@ -66,8 +66,12 @@ routes.post("/verify-otp", async (req, res) => {
     }
 
     // Clear OTP
+    console.log("phone", phone);
+    console.log("newPhone", newPhone);
+
     user.otp = null;
     user.otpExpires = null;
+    user.phone = newPhone ?? phone; // Update phone number if needed
     await user.save();
 
     // Issue JWT
@@ -90,33 +94,38 @@ routes.post("/verify-otp", async (req, res) => {
 routes.get("/home", verify, home);
 routes.get("/products", getAllProducts);
 routes.get("/products/:id", getSingleProduct);
-routes.put("/users/update-phone", verify, async (req, res) => {
-  const userId = req.user; // Extracted from the verify middleware
-  const { newPhone } = req.body;
-
+routes.put("/update-phone", verify, async (req, res) => {
   try {
-    // Check if the new phone number is already in use
+    const { newPhone } = req.body;
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) return res.status(401).json({ msg: "No token provided" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
     const existingUser = await userModel.findOne({ phone: newPhone });
-    if (existingUser) {
-      return res.status(400).json({ message: "Phone number already in use" });
-    }
+    if (existingUser)
+      return res.status(400).json({ msg: "Phone number already in use" });
+    if (user.phone === newPhone)
+      return res
+        .status(400)
+        .json({ msg: "New phone number must be different" });
 
-    // Update the user's phone number
-    const updatedUser = await userModel.findByIdAndUpdate(
-      userId,
-      { phone: newPhone },
-      { new: true }
-    );
+    // Generate and send OTP
+    const otp = generateOTP();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 5 * 60 * 1000; // OTP valid for 5 minutes
+    await user.save();
+    await sendOTP(newPhone, otp);
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res
-      .status(200)
-      .json({ message: "Phone number updated", user: updatedUser });
+    res.json({ msg: "OTP sent to your phone" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ msg: "Failed to send OTP" });
   }
 });
 
