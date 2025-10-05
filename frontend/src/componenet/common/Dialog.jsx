@@ -129,8 +129,6 @@ export function Dialog({ name, order, updateOrders }) {
     }
   };
 
-  console.log(order);
-
   return (
     <DialogUi>
       <DialogTrigger asChild>
