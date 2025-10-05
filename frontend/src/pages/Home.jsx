@@ -170,7 +170,7 @@ export default function Home() {
               <div className="text-red-100">مكونات طازجة</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">09:00Am - 03:00Am</div>
+              <div className="text-3xl font-bold mb-2">09:00AM - 03:00AM</div>
               <div className="text-red-100">خدمة التوصيل</div>
             </div>
           </div>
