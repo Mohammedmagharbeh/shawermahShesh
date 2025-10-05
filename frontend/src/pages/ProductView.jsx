@@ -12,7 +12,6 @@ function ProductView() {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
-  // const [isFavorite, setIsFavorite] = useState(false);
   const [product, setProduct] = useState({
     _id: "",
     name: "",
@@ -24,7 +23,6 @@ function ProductView() {
   const { addToCart } = useCart();
 
   useEffect(() => {
-    
     const fetchProductDetails = async () => {
       try {
         setLoading(true);

@@ -208,7 +208,8 @@ function Checkout() {
               {/* Order Type */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
-                  {t("checkout_order_type")} <span className="text-red-500">*</span>
+                  {t("checkout_order_type")}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-6">
                   <label className="flex items-center gap-2">
@@ -250,7 +251,8 @@ function Checkout() {
                     htmlFor="area"
                     className="block text-sm font-semibold text-gray-700"
                   >
-                    {t("checkout_select_area_text")} <span className="text-red-500">*</span>
+                    {t("checkout_select_area_text")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <select
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-gray-50 hover:bg-white"
@@ -378,7 +380,8 @@ function Checkout() {
                 className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-red-600 hover:to-red-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
                 type="submit"
               >
-                🍽️ {t("checkout_place_order")} - {totalWithDelivery.toFixed(2)} JOD
+                🍽️ {t("checkout_place_order")} - {totalWithDelivery.toFixed(2)}{" "}
+                JOD
               </button>
             </div>
           </div>
