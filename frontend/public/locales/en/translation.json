@@ -1,13 +1,10 @@
 {
-
   "welcome": "Welcome to Shawarma Sheesh",
   "name": "Name",
   "place_order": "Place Order",
   "payment_success": "Payment successful!",
   "delivery_details": "Delivery Details",
-  "delivery": "Delivery",
   "total": "Total",
-  "subtotal": "Subtotal",
   "pickup": "Pickup",
   "checkout_delivery": "Delivery",
   "order_summary": "Order Summary",
@@ -27,7 +24,6 @@
   "menu": "Menu",
   "about_us": "About Us",
   "contact_us": "Contact Us",
-  "price": "Price",
   "logout": "Logout",
   "login": "Login",
   "dashboard": "Dashboard",
@@ -60,29 +56,26 @@
   "rating": "out of 5 stars",
   "welcome_description": "We offer the most delicious Shawarma and Sheesh prepared with the finest ingredients and the best traditional methods",
   "years_of_experience": "Years of Experience",
-"happy_customers": "Happy Customers",
-"fresh_ingredients": "Fresh Ingredients",
-"delivery_service": "Delivery Service",
-"search_your_favorite_dish": "Search for your favorite dish...",
-"loading_products": "Loading products...",
-"show_more_products": "Show more products ({{count}} items)",
-"no_results_title": "No Results",
-"no_results_description": "Try searching with different keywords or choose another category",
-"location_line1": "Aqaba, 8th Market",
-"location_line2": "King Faisal Street",
-"contact_info": "For orders and inquiries",
-"working_hours_start": "Daily from 9 AM",
-"working_hours_end": "to 3 AM",
-"all": "All",
+  "happy_customers": "Happy Customers",
+  "fresh_ingredients": "Fresh Ingredients",
+  "delivery_service": "Delivery Service",
+  "search_your_favorite_dish": "Search for your favorite dish...",
+  "loading_products": "Loading products...",
+  "show_more_products": "Show more products ({{count}} items)",
+  "no_results_title": "No Results",
+  "no_results_description": "Try searching with different keywords or choose another category",
+  "location_line1": "Aqaba, 8th Market",
+  "location_line2": "King Faisal Street",
+  "contact_info": "For orders and inquiries",
+  "working_hours_start": "Daily from 9 AM",
+  "working_hours_end": "to 3 AM",
+  "all": "All",
 
-
-
-"order_management": "Order Management",
+  "order_management": "Order Management",
   "total_orders": "Total Orders:",
   "filter_by_date": "Filter by Date:",
   "export_orders": "Export Orders",
   "no_orders": "No Orders",
-  "orders_for_selected_date": "Orders for selected date will appear here.",
   "order_id": "Order ID:",
   "customer": "Customer:",
   "date": "Date:",
@@ -107,13 +100,13 @@
   "quantity": "Quantity",
   "price_jod": "Price (JOD)",
   "paid": "Paid",
-"unpaid": "Unpaid",
-"view_details": "View Details",
-"cancel_order": "Cancel Order",
-"no_orders_found": "No Orders Found",
-"orders_for_selected_date": "Orders for the selected date will appear here.",
+  "unpaid": "Unpaid",
+  "view_details": "View Details",
+  "cancel_order": "Cancel Order",
+  "no_orders_found": "No Orders Found",
+  "orders_for_selected_date": "Orders for the selected date will appear here.",
 
-"admin_panel": "Admin Product Panel 🍔",
+  "admin_panel": "Admin Product Panel 🍔",
   "admin_panel_desc": "Manage your menu and products",
   "add_product": "Add New Product",
   "edit_product": "Edit Product",
@@ -142,16 +135,7 @@
   "discount_percentage": "Discount Percentage",
   "discount_example": "Example: 10",
 
-
-
-
-
-
-
-
-
-
-   "cart_login_required": "Please log in to view your cart",
+  "cart_login_required": "Please log in to view your cart",
   "cart_empty_title": "Your Cart is Empty",
   "cart_empty_desc": "Looks like you haven't added any items to your cart yet.",
   "cart_start_shopping": "Start Shopping",
@@ -159,14 +143,11 @@
   "cart_review_order": "Review your delicious selections",
   "cart_item_details": "Item Details",
   "price": "Price",
-  "qty": "Qty",
   "subtotal": "Subtotal",
   "cart_order_summary": "Order Summary",
   "delivery": "Delivery",
   "delivery_info": "According to your location",
-  "total": "Total",
   "cart_checkout": "Proceed to Checkout",
-
 
   "checkout_cart_empty": "Your cart is empty!",
   "checkout_select_payment": "Please select a payment method.",
@@ -177,7 +158,7 @@
   "checkout_error": "Something went wrong. Please try again later.",
   "checkout_login_required": "Please log in to view your cart",
   "checkout_fetch_area_error": "Failed to fetch locations. Please try again.",
-  
+
   "complete_order": "Complete your order",
   "checkout_delivery_details": "Delivery Details",
   "checkout_apartment_floor": "Apartment, floor, etc.",
@@ -186,21 +167,16 @@
   "checkout_phone": "Phone Number",
   "checkout_order_type": "Order Type",
   "checkout_pickup": "Pickup",
-  "checkout_delivery": "Delivery",
   "checkout_select_area_text": "Select Area",
-  
+
   "checkout_order_summary": "Order Summary",
-  "qty": "Qty",
-  "subtotal": "Subtotal",
-  "delivery": "Delivery",
-  "total": "Total",
-  
+
   "checkout_payment_method": "Payment Method",
   "checkout_card_payment": "Credit / Debit Card",
   "checkout_cash_payment": "Cash on Delivery",
   "checkout_place_order": "Place Order",
-    "no_permission": "You do not have permission to access this page",
-    "login_success": "Login successful",
+  "no_permission": "You do not have permission to access this page",
+  "login_success": "Login successful",
   "otp_sent": "Verification code sent 📲",
   "login_error": "An error occurred while logging in",
   "otp_verified": "OTP verified successfully",
@@ -229,24 +205,18 @@
   "failed_delete_order": "Failed to delete order",
   "order_deleted_success": "Order deleted successfully",
   "user_not_logged_in": "User not logged in",
-   "new_order_title": "📦 New Order!",
+  "new_order_title": "📦 New Order!",
   "ordered_for": "ordered for",
   "new_order_received": "New order received",
   "order_updated": "Order updated successfully",
   "order_update_failed": "Failed to update order",
   "confirm_delete_order": "Are you sure you want to delete this order?",
   "order_deleted": "Order deleted",
-  "yes": "Yes",
-  "no": "No",
   "export_success": "Orders exported successfully",
   "export_failed": "Failed to export orders",
-   "missing_payment_reference": "Missing payment reference.",
+  "missing_payment_reference": "Missing payment reference.",
   "payment_verification_failed": "Payment verification failed.",
   "order_placed_successfully": "Order placed successfully!",
   "order_creation_failed_try_again": "Failed to place order. Try again later.",
-    "cart_login_required": "You must be logged in to place an order"
-
-  
-
-
+  "cart_login_required": "You must be logged in to place an order"
 }
