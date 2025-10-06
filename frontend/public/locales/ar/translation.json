@@ -92,8 +92,8 @@
   "delete_order": "حذف الطلب",
   "are_you_sure_delete": "هل أنت متأكد أنك تريد حذف الطلب؟",
   "print_invoice": "طباعة الفاتورة",
-  "order_total": "إجمالي الطلب:",
-  "delivery_cost": "تكلفة التوصيل:",
+  "order_total": "إجمالي الطلب",
+  "delivery_cost": "تكلفة التوصيل",
   "order_subtotal": "المجموع الفرعي:",
   "product": "المنتج",
   "quantity": "الكمية",
@@ -225,5 +225,11 @@
   "cash": "نقداً",
   "card": "بطاقة",
   "cancel": "إلغاء",
-  "save_changes": "حفظ التغييرات"
+  "save_changes": "حفظ التغييرات",
+  "add_new_product": "إضافة منتج جديد",
+  "edit_existing_product": "تعديل منتج موجود",
+  "arabic_name": "الاسم بالعربية",
+  "english_name": "الاسم بالإنجليزية",
+  "arabic_description": "الوصف بالعربية",
+  "english_description": "الوصف بالإنجليزية"
 }

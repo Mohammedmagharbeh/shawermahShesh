@@ -5,6 +5,10 @@ import { useTranslation } from "react-i18next";
 function CartCard({ product }) {
   const { updateQuantity, removeFromCart } = useCart();
   const { t } = useTranslation();
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+
+  console.log(product);
+
   return (
     <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
@@ -26,13 +30,13 @@ function CartCard({ product }) {
           <div className="size-16 rounded-lg overflow-hidden bg-gray-100">
             <img
               src={product?.images?.[0] || burger}
-              alt={product.name}
+              alt={product.productId.name[selectedLanguage]}
               className="w-full h-full object-cover"
             />
           </div>
           <div>
             <h3 className="font-semibold text-gray-800 text-lg">
-              {product?.productId?.name ?? "Product Name"}
+              {product?.productId?.name[selectedLanguage] ?? "Product Name"}
             </h3>
             <p className="text-sm text-gray-500">Restaurant Special</p>
           </div>

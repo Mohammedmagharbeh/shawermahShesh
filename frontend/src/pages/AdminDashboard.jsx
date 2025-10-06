@@ -33,6 +33,7 @@ const socket = io("https://shawermahshesh-backend.onrender.com");
 
 function AdminDashboard() {
   const { t } = useTranslation(); // <-- صح داخل الدالة
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
   const { orders, getAllOrders, updateOrder, deleteOrder, loading } =
     useOrder();
@@ -130,7 +131,7 @@ function AdminDashboard() {
       Products: order.products
         .map(
           (item) =>
-            `${item.productId?.name || "Unknown"} (Qty: ${item.quantity})`
+            `${item.productId?.name[selectedLanguage] || "Unknown"} (Qty: ${item.quantity})`
         )
         .join(", "),
     }));
@@ -324,16 +325,22 @@ function AdminDashboard() {
                             <div className="h-16 w-16 overflow-hidden rounded-md border-2 border-primary/20">
                               <img
                                 src={burger}
-                                alt={item.productId?.name || "Product"}
+                                alt={
+                                  item.productId?.name[selectedLanguage] ||
+                                  "Product"
+                                }
                                 className="h-full w-full object-cover"
                               />
                             </div>
                             <div className="flex flex-col gap-1">
                               <p className="font-semibold text-foreground">
-                                {item.productId?.name || "Unknown Product"}
+                                {item.productId?.name[selectedLanguage] ||
+                                  "Unknown Product"}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {item.productId?.description || ""}
+                                {item.productId?.description[
+                                  selectedLanguage
+                                ] || ""}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {t("quantity")}:{" "}
@@ -424,7 +431,7 @@ function AdminDashboard() {
                         <tbody>`;
                       order.products?.forEach((item) => {
                         productsHtml += `<tr>
-                          <td style="padding:4px;">${item.productId?.name || "Unknown"}</td>
+                          <td style="padding:4px;">${item.productId?.name[selectedLanguage] || "Unknown"}</td>
                           <td style="padding:4px; text-align:center;">${item.quantity}</td>
                           <td style="padding:4px; text-align:right;">${(item.priceAtPurchase * item.quantity).toFixed(2)}</td>
                         </tr>`;

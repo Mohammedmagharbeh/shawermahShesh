@@ -242,7 +242,7 @@ function PaymentSuccess() {
           });
 
           toast.success(t("order_placed_successfully"));
-          navigate("/");
+          // navigate("/");
           clearCart();
           sessionStorage.removeItem("pendingOrder");
         } catch (error) {

@@ -4,21 +4,42 @@ const products = require("../models/products");
 // for post
 exports.postEat = async (req, res) => {
   try {
-    const { name, price, category, image, description } = req.body;
-    if (!name || !price || !category || !image || !description) {
+    const {
+      arName,
+      enName,
+      price,
+      category,
+      image,
+      arDescription,
+      enDescription,
+    } = req.body;
+    if (
+      !arName ||
+      !enName ||
+      !price ||
+      !category ||
+      !arDescription ||
+      !enDescription
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     if (!CATEGORIES.includes(category)) {
       return res.status(400).json({ message: "Invalid category" });
     }
-    
+
     const creatfood = await products.create({
-      name: name,
+      name: {
+        ar: arName,
+        en: enName,
+      },
       price: price,
       category: category,
       image: image,
-      description: description,
+      description: {
+        ar: arDescription,
+        en: enDescription,
+      },
     });
     res.status(200).json(creatfood);
   } catch (error) {

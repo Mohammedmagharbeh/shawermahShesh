@@ -1,16 +1,19 @@
-const moongoose = require("mongoose");
+const mongoose = require("mongoose");
 const { CATEGORIES } = require("../constants");
 
-const productShcsema = new moongoose.Schema({
-  name: { type: String, require: true },
-  price: { type: Number, require: true },
-   discount: {  type: Number, default: 0, min: 0,max: 100 },
-  image: { type: String, require: true },
-  category: { type: String, enum: CATEGORIES, require: true },
-  description: { type: String, require: true },
+const productSchema = new mongoose.Schema({
+  name: {
+    ar: { type: String, required: true },
+    en: { type: String, required: true },
+  },
+  price: { type: Number, required: true },
+  discount: { type: Number, default: 0, min: 0, max: 100 },
+  image: { type: String, required: false, default: "" },
+  category: { type: String, enum: CATEGORIES, required: true },
+  description: {
+    ar: { type: String, required: true },
+    en: { type: String, required: true },
+  },
 });
 
-
-
-const products = moongoose.model("product", productShcsema);
-module.exports = products;
+module.exports = mongoose.model("Product", productSchema);

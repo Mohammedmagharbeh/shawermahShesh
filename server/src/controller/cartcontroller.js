@@ -159,6 +159,12 @@ exports.getCart = async (req, res) => {
       .findOne({ userId })
       .populate("products.productId");
 
+    if (!userCart) {
+      return res
+        .status(200)
+        .json({ message: "Cart is empty", cart: { products: [] } });
+    }
+
     if (!userCart) return res.status(404).json({ message: "Cart not found" });
 
     return res.status(200).json(userCart);

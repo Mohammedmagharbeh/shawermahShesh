@@ -24,7 +24,7 @@ function Checkout() {
   const [orderType, setOrderType] = useState("delivery"); // default delivery
   const navigate = useNavigate();
   const { t } = useTranslation();
-
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   useEffect(() => {
     async function fetchAreas() {
       try {
@@ -87,7 +87,7 @@ function Checkout() {
             paymentMethodId: 2,
             amount: Number.parseFloat(totalWithDelivery.toFixed(2)),
             customerName: user?.name || "Customer",
-            customerEmail: user?.email || "",
+            customerEmail: user?.email || "ahmadjkff1@gmial.com",
             customerMobile: user.phone,
             callbackUrl: `${window.location.origin}/payment-success`,
             errorUrl: `${window.location.origin}/payment-success`,
@@ -295,7 +295,7 @@ function Checkout() {
                 >
                   <div>
                     <p className="font-semibold text-gray-900">
-                      {product.productId.name}
+                      {product.productId.name[selectedLanguage]}
                     </p>
                     <p className="text-sm text-gray-500">
                       {t("qty")}: {product.quantity}
