@@ -235,7 +235,6 @@
   "settings": "الإعدادات",
   "manage_settings": "إدارة إعدادات حسابك وتفضيلاتك",
   "profile_information": "معلومات الملف الشخصي",
-  "phone_number": "رقم الهاتف",
   "enter_phone": "أدخل رقم الهاتف",
   "update_phone": "تحديث رقم الهاتف",
   "update_phone_failed": "فشل في تحديث رقم الهاتف",
@@ -247,6 +246,7 @@
   "irreversible_actions": "إجراءات غير قابلة للتراجع لحسابك",
   "delete_account": "حذف الحساب",
   "delete_account_desc": "حذف حسابك وجميع البيانات المرتبطة به بشكل دائم",
-  "cancel": "إلغاء",
-  "save_changes": "حفظ جميع التغييرات"
+  "verify_otp": "تحقق من OTP",
+  "verifying": "جار التحقق",
+  "logging_in": "جار تسجيل الدخول"
 }

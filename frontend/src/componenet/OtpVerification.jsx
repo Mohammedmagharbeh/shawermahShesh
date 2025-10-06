@@ -15,6 +15,11 @@ function OtpVerification() {
   const newPhone = location.state?.newPhone;
   const { login } = useUser();
   const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+
+  if (!phone) {
+    navigate("/login");
+  }
 
   // تشغيل العداد كل ثانية
   useEffect(() => {
@@ -27,6 +32,7 @@ function OtpVerification() {
   // التحقق من الكود
   const verifyOtp = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/verify-otp`,
@@ -49,6 +55,8 @@ function OtpVerification() {
     } catch (error) {
       toast.error(t("otp_invalid"));
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -120,11 +128,18 @@ function OtpVerification() {
 
           <motion.button
             type="submit"
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-200 mt-2"
+            whileHover={otp.length < 6 ? { scale: 1.02, y: -2 } : {}}
+            whileTap={otp.length < 6 ? { scale: 0.98 } : {}}
+            className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200
+              ${
+                loading || otp.length < 6
+                  ? "bg-gradient-to-r from-gray-400 to-gray-500 text-gray-200 cursor-not-allowed! shadow-none"
+                  : "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40"
+              }
+            `}
+            disabled={loading || otp.length < 6}
           >
-            تحقق
+            {loading ? t("verifying") + "..." : t("verify_otp")}
           </motion.button>
 
           {/* زر إعادة الإرسال */}

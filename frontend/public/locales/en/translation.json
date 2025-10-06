@@ -226,7 +226,6 @@
   "select_address": "Select an address",
   "cash": "Cash",
   "card": "Card",
-  "cancel": "Cancel",
   "save_changes": "Save Changes",
   "add_new_product": "Add New Product",
   "edit_existing_product": "Edit Existing Product",
@@ -234,10 +233,9 @@
   "english_name": "English Name",
   "arabic_description": "Arabic Description",
   "english_description": "English Description",
-   "settings": "Settings",
+  "settings": "Settings",
   "manage_settings": "Manage your account settings and preferences",
   "profile_information": "Profile Information",
-  "phone_number": "Phone Number",
   "enter_phone": "Enter phone number",
   "update_phone": "Update Phone",
   "update_phone_failed": "Failed to update phone number",
@@ -250,5 +248,7 @@
   "delete_account": "Delete Account",
   "delete_account_desc": "Permanently delete your account and all associated data",
   "cancel": "Cancel",
-  "save_changes": "Save All Changes"
+  "verify_otp": "Verify OTP",
+  "verifying": "Verifying",
+  "logging_in": "Logging in"
 }
