@@ -3,7 +3,7 @@ import { Plus, Minus, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useParams } from "react-router-dom";
-import burger from "../assets/burger.jpg";
+import product_placeholder from "../assets/product_placeholder.jpeg";
 import Loading from "@/componenet/common/Loading";
 import toast from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
@@ -85,7 +85,7 @@ function ProductView() {
         <div className="relative">
           <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
             <img
-              src={burger}
+              src={product_placeholder}
               alt={product.name}
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             />

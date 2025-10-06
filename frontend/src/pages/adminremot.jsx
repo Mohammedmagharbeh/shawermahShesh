@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Edit2, Trash2, Package, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import burger from "../assets/burger.jpg";
+import product_placeholder from "../assets/product_placeholder.jpeg";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -215,7 +215,7 @@ export default function AdminProductPanel() {
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Form - Non-sticky on mobile, sticky on desktop */}
-          
+
           <div className="lg:col-span-1">
             <Card className="shadow-xl lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto rounded-md">
               <CardHeader className="p-4 sm:p-6">
@@ -232,7 +232,6 @@ export default function AdminProductPanel() {
                 <form
                   onSubmit={handleSubmit}
                   className="space-y-4 sm:space-y-5"
-
                 >
                   <div className="flex flex-col">
                     <Label htmlFor="arName" className="text-sm">
@@ -432,7 +431,7 @@ export default function AdminProductPanel() {
                     {/* Product Image - Responsive height */}
                     <div className="relative h-40 sm:h-48 bg-muted">
                       <img
-                        src={product.image || burger}
+                        src={product.image || product_placeholder}
                         alt={product.name[selectedLanguage]}
                         className="w-full h-full object-cover"
                       />

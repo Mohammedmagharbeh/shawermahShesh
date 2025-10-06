@@ -1,5 +1,5 @@
 import { useCart } from "@/contexts/CartContext";
-import burger from "../../assets/burger.jpg";
+import product_placeholder from "../../assets/product_placeholder.jpeg";
 import { useTranslation } from "react-i18next";
 
 function CartCard({ product }) {
@@ -29,7 +29,7 @@ function CartCard({ product }) {
           </button>
           <div className="size-16 rounded-lg overflow-hidden bg-gray-100">
             <img
-              src={product?.images?.[0] || burger}
+              src={product?.images?.[0] || product_placeholder}
               alt={product.productId.name[selectedLanguage]}
               className="w-full h-full object-cover"
             />

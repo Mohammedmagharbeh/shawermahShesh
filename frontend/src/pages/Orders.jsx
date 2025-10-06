@@ -11,7 +11,7 @@
 // } from "@/components/ui/select";
 // import { useOrder } from "@/contexts/OrderContext";
 // import Loading from "../componenet/common/Loading";
-// import burger from "../assets/burger.jpg";
+// import product_placeholder from "../assets/product_placeholder.jpg";
 // import * as XLSX from "xlsx";
 // import { saveAs } from "file-saver";
 // import { useTranslation } from "react-i18next";
@@ -241,7 +241,7 @@
 //                         <div className="flex items-center gap-4">
 //                           <div className="h-16 w-16 overflow-hidden rounded-md border-2 border-primary/20">
 //                             <img
-//                               src={burger}
+//                               src={product_placeholder}
 //                               alt="product"
 //                               className="h-full w-full object-cover"
 //                             />
@@ -340,7 +340,7 @@ import {
 } from "@/components/ui/select";
 import { useOrder } from "@/contexts/OrderContext";
 import Loading from "../componenet/common/Loading";
-import burger from "../assets/burger.jpg";
+import product_placeholder from "../assets/product_placeholder.jpeg";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useTranslation } from "react-i18next";
@@ -592,7 +592,7 @@ function Orders() {
                         <div className="flex items-center gap-4">
                           <div className="h-16 w-16 overflow-hidden rounded-md border-2 border-primary/20">
                             <img
-                              src={burger}
+                              src={product_placeholder}
                               alt="product"
                               className="h-full w-full object-cover"
                             />

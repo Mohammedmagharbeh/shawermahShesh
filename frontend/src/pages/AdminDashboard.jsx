@@ -18,7 +18,7 @@ import newOrderSound from "../assets/newOrder.mp3";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { toast } from "react-hot-toast";
-import burger from "../assets/burger.jpg";
+import product_placeholder from "../assets/product_placeholder.jpeg";
 import { Dialog } from "@/componenet/common/Dialog";
 
 const statusColors = {
@@ -324,7 +324,7 @@ function AdminDashboard() {
                           <div className="flex items-center gap-4">
                             <div className="h-16 w-16 overflow-hidden rounded-md border-2 border-primary/20">
                               <img
-                                src={burger}
+                                src={product_placeholder}
                                 alt={
                                   item.productId?.name[selectedLanguage] ||
                                   "Product"

@@ -16,7 +16,9 @@ import {
   Loader2,
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
-import burger from "../assets/burger.jpg";
+import product_placeholder from "../assets/product_placeholder.jpeg";
+import home_logo from "../assets/home_logo.jpeg";
+import home_logo2 from "../assets/home_logo2.jpeg";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 // عدد المنتجات التي ستظهر مبدئيًا
@@ -139,9 +141,9 @@ export default function Home() {
 
             <div className="relative">
               <img
-                src={burger}
+                src={home_logo}
                 alt="شاورما شيش"
-                className="rounded-2xl shadow-xl w-full h-auto"
+                className="rounded-2xl shadow-xl w-full "
               />
               <div className="absolute top-4 right-4">
                 <Badge className="bg-red-700 text-white px-3 py-1">
@@ -239,7 +241,7 @@ export default function Home() {
                   >
                     <div className="relative">
                       <img
-                        src={product.image || burger}
+                        src={product.image || product_placeholder}
                         alt={product.name[selectedLanguage]}
                         className="w-full h-48 object-cover"
                       />
@@ -371,9 +373,9 @@ export default function Home() {
 
             <div>
               <img
-                src={burger}
+                src={home_logo2}
                 alt="مطبخنا"
-                className="rounded-2xl shadow-xl w-full h-auto"
+                className="rounded-2xl shadow-xl w-full h-[500px] object-cover"
               />
             </div>
           </div>
