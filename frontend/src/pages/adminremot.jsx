@@ -14,6 +14,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Search, Edit2, Trash2, Package, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
+import burger from "../assets/burger.jpg";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -81,6 +83,12 @@ export default function AdminProductPanel() {
             discount: formData.discount ? Number(formData.discount) : 0,
           }
         );
+        console.log("pyload", {
+          ...formData,
+          price: Number(formData.price),
+          discount: formData.discount ? Number(formData.discount) : 0,
+        });
+
         setProducts(products.map((p) => (p._id === editingId ? res.data : p)));
         setEditingId(null);
       } else {
@@ -88,6 +96,11 @@ export default function AdminProductPanel() {
           `${import.meta.env.VITE_BASE_URL}/admin/postfood`,
           {
             ...formData,
+            name: { ar: formData.arName, en: formData.enName },
+            description: {
+              ar: formData.arDescription,
+              en: formData.enDescription,
+            },
             price: Number(formData.price),
             discount: formData.discount ? Number(formData.discount) : 0,
           }
@@ -110,6 +123,7 @@ export default function AdminProductPanel() {
       const allProducts = res.data.data || [];
       const uniqueCategories = [...new Set(allProducts.map((p) => p.category))];
       setCategories(["all", ...uniqueCategories]);
+      toast.success(editingId ? "product_updated" : "product_added");
     } catch (error) {
       console.error("خطأ في الإرسال:", error.response?.data || error.message);
       alert(t("submit_error"));
@@ -418,7 +432,7 @@ export default function AdminProductPanel() {
                     {/* Product Image - Responsive height */}
                     <div className="relative h-40 sm:h-48 bg-muted">
                       <img
-                        src={product.image || "/placeholder.svg"}
+                        src={product.image || burger}
                         alt={product.name[selectedLanguage]}
                         className="w-full h-full object-cover"
                       />
