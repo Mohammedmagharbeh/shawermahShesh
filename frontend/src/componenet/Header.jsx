@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   Package,
   Plus,
+  MonitorCog,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -123,7 +124,7 @@ function Header() {
                       size="sm"
                       className="bg-white border-red-600 border-2 text-red-900 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
                     >
-                      <Settings className="h-4 w-4" />
+                      <MonitorCog className="h-4 w-4" />
                       <span className="hidden xl:inline">
                         {t("control_panel")}
                       </span>
@@ -162,6 +163,16 @@ function Header() {
               </div>
             )}
 
+            <Link to="/settings">
+              <Button
+                variant="outline"
+                size="sm"
+                className="relative border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white bg-white h-10 w-10 md:h-11 md:w-11 p-0 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-200 flex-shrink-0"
+              >
+                <Settings className="size-5" />
+              </Button>
+            </Link>
+
             {user?._id ? (
               <Button
                 variant="outline"
@@ -186,15 +197,6 @@ function Header() {
                 </Button>
               </Link>
             )}
-            <Link to="/settings">
-              <Button
-                variant="outline"
-                size="sm"
-                className="relative border-2 border-red-600 text-red-700 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white bg-white h-10 w-10 md:h-11 md:w-11 p-0 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-200 flex-shrink-0"
-              >
-                <Settings className="size-5" />
-              </Button>
-            </Link>
 
             <Button
               variant="ghost"
