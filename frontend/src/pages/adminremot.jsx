@@ -201,6 +201,7 @@ export default function AdminProductPanel() {
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Form - Non-sticky on mobile, sticky on desktop */}
+          
           <div className="lg:col-span-1">
             <Card className="shadow-xl lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto rounded-md">
               <CardHeader className="p-4 sm:p-6">
@@ -217,6 +218,7 @@ export default function AdminProductPanel() {
                 <form
                   onSubmit={handleSubmit}
                   className="space-y-4 sm:space-y-5"
+
                 >
                   <div className="flex flex-col">
                     <Label htmlFor="arName" className="text-sm">
