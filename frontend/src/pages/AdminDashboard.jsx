@@ -29,7 +29,7 @@ const statusColors = {
   Cancelled: "bg-destructive text-destructive-foreground",
 };
 
-const socket = io("https://shawermahshesh-backend.onrender.com");
+const socket = io(import.meta.env.VITE_SOCKET_URL);
 
 function AdminDashboard() {
   const { t } = useTranslation(); // <-- صح داخل الدالة
