@@ -17,11 +17,22 @@ import ProtectedRoute from "./ProtectedRoute";
 import { useTranslation } from "react-i18next";
 import { useUser } from "./contexts/UserContext";
 import Settings from "./pages/Settings";
+import { useEffect } from "react";
 // import LanguageProvider from "./contexts/LanguageContext";
 
 function App() {
   const { i18n } = useTranslation();
   const { isAuthenticated } = useUser();
+
+  useEffect(() => {
+    const currentLang = localStorage.getItem("i18nextLng") || "ar";
+    document.documentElement.setAttribute(
+      "dir",
+      currentLang === "ar" ? "rtl" : "ltr"
+    );
+    document.documentElement.setAttribute("lang", currentLang);
+  }, []);
+
   return (
     <div
       className={`${i18n.language === "ar" ? "text-right" : "text-left"} App`}

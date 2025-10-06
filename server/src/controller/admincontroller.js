@@ -52,10 +52,30 @@ exports.updatedfood = async (req, res) => {
   try {
     const id = req.params.id;
     const body = req.body;
-    const newfood = await products.findByIdAndUpdate(id, body, { new: true });
+
+    const updatedData = {
+      name: {
+        ar: body.arName,
+        en: body.enName,
+      },
+      description: {
+        ar: body.arDescription,
+        en: body.enDescription,
+      },
+      price: body.price,
+      discount: body.discount,
+      image: body.image,
+      category: body.category,
+    };
+
+    const newfood = await products.findByIdAndUpdate(id, updatedData, {
+      new: true,
+    });
+
     if (!newfood) {
       return res.status(404).json({ message: "Item not found" });
     }
+
     res.status(200).json(newfood);
   } catch (error) {
     res.status(500).json({ message: error.message });
