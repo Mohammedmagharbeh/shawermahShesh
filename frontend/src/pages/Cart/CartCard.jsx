@@ -1,8 +1,14 @@
 import { useCart } from "@/contexts/CartContext";
 import burger from "../../assets/burger.jpg";
+import { useTranslation } from "react-i18next";
 
 function CartCard({ product }) {
   const { updateQuantity, removeFromCart } = useCart();
+  const { t } = useTranslation();
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+
+  console.log(product);
+
   return (
     <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
@@ -24,13 +30,13 @@ function CartCard({ product }) {
           <div className="size-16 rounded-lg overflow-hidden bg-gray-100">
             <img
               src={product?.images?.[0] || burger}
-              alt={product.name}
+              alt={product.productId.name[selectedLanguage]}
               className="w-full h-full object-cover"
             />
           </div>
           <div>
             <h3 className="font-semibold text-gray-800 text-lg">
-              {product?.productId?.name ?? "Product Name"}
+              {product?.productId?.name[selectedLanguage] ?? "Product Name"}
             </h3>
             <p className="text-sm text-gray-500">Restaurant Special</p>
           </div>
@@ -38,7 +44,9 @@ function CartCard({ product }) {
 
         {/* Price */}
         <div className="flex justify-between lg:justify-center items-center">
-          <span className="lg:hidden font-medium text-gray-600">Price:</span>
+          <span className="lg:hidden font-medium text-gray-600">
+            {t("price")}:
+          </span>
           <span className="text-xl font-bold text-red-600">
             {product?.productId?.price ?? "Price Unavailable"} JOD
           </span>
@@ -46,7 +54,9 @@ function CartCard({ product }) {
 
         {/* Quantity */}
         <div className="flex justify-between lg:justify-center items-center">
-          <span className="lg:hidden font-medium text-gray-600">Quantity:</span>
+          <span className="lg:hidden font-medium text-gray-600">
+            {t("quantity")}:
+          </span>
           <div className="flex items-center space-x-2">
             <input
               type="number"
@@ -65,7 +75,9 @@ function CartCard({ product }) {
 
         {/* Total */}
         <div className="flex justify-between lg:justify-center items-center">
-          <span className="lg:hidden font-medium text-gray-600">Total:</span>
+          <span className="lg:hidden font-medium text-gray-600">
+            {t("total")}:
+          </span>
           <span className="text-xl font-bold text-red-700">
             {(product?.productId?.price ?? 0 * product?.quantity ?? 0).toFixed(
               2

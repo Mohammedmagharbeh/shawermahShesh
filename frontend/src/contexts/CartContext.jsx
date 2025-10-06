@@ -46,7 +46,7 @@ export const CartProvider = ({ children }) => {
 
   // Calculate total whenever cart changes
   useEffect(() => {
-    const newTotal = cart.products.reduce((acc, item) => {
+    const newTotal = cart.products?.reduce((acc, item) => {
       const price = item.productId?.price || 0;
       const quantity = item.quantity || 0;
       return acc + price * quantity;
@@ -114,12 +114,10 @@ export const CartProvider = ({ children }) => {
       if (!res.ok) throw new Error("Failed to remove item");
       const data = await res.json();
       setCart(data.cart);
-            toast.success(t("item_removed_from_cart"));
-
+      toast.success(t("item_removed_from_cart"));
     } catch (error) {
       console.error(error);
-            toast.error(t("failed_to_remove_item"));
-
+      toast.error(t("failed_to_remove_item"));
     }
   };
 
@@ -136,12 +134,9 @@ export const CartProvider = ({ children }) => {
       if (!res.ok) throw new Error("Failed to clear cart");
       const data = await res.json();
       setCart(data.cart);
-            toast.success(t("cart_cleared"));
-
     } catch (error) {
       console.error(error);
-            toast.error(t("failed_to_clear_cart"));
-
+      toast.error(t("failed_to_clear_cart"));
     }
   };
 

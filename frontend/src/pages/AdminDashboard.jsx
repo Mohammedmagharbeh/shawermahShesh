@@ -29,10 +29,11 @@ const statusColors = {
   Cancelled: "bg-destructive text-destructive-foreground",
 };
 
-const socket = io("http://localhost:5000");
+const socket = io("https://shawermahshesh-backend.onrender.com");
 
 function AdminDashboard() {
-    const { t } = useTranslation(); // <-- صح داخل الدالة
+  const { t } = useTranslation(); // <-- صح داخل الدالة
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
   const { orders, getAllOrders, updateOrder, deleteOrder, loading } =
     useOrder();
@@ -78,7 +79,7 @@ function AdminDashboard() {
     toast(
       (t) => (
         <div className="flex flex-col gap-2">
-      <span>{t("confirm_delete_order")}</span>   // النص صار قابل للترجمة
+          <span>{t("confirm_delete_order")}</span> // النص صار قابل للترجمة
           <div className="flex justify-end gap-2">
             <Button
               size="sm"
@@ -86,17 +87,17 @@ function AdminDashboard() {
               onClick={() => {
                 deleteOrder(orderId);
                 toast.dismiss(t.id);
-            toast.success(t("order_deleted"));   // الرسالة بعد الحذف مترجمة
+                toast.success(t("order_deleted")); // الرسالة بعد الحذف مترجمة
               }}
             >
-          {t("yes")}   // زر "نعم" مترجم
+              {t("yes")} // زر "نعم" مترجم
             </Button>
             <Button
               size="sm"
               variant="outline"
-          onClick={() => toast.dismiss(t.id)}
+              onClick={() => toast.dismiss(t.id)}
             >
-          {t("no")}   // زر "لا" مترجم
+              {t("no")} // زر "لا" مترجم
             </Button>
           </div>
         </div>
@@ -130,7 +131,7 @@ function AdminDashboard() {
       Products: order.products
         .map(
           (item) =>
-            `${item.productId?.name || "Unknown"} (Qty: ${item.quantity})`
+            `${item.productId?.name[selectedLanguage] || "Unknown"} (Qty: ${item.quantity})`
         )
         .join(", "),
     }));
@@ -157,7 +158,7 @@ function AdminDashboard() {
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold text-foreground">
-              {t("order_management")}  
+              {t("order_management")}
             </h1>
             <p className="mt-1 text-muted-foreground">
               {t("total_orders")}
@@ -223,8 +224,7 @@ function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground">
-                      {t("date")}
-
+                        {t("date")}
                       </span>
                       <span className="text-sm text-foreground">
                         {order.createdAt
@@ -257,17 +257,18 @@ function AdminDashboard() {
                       <span className="text-sm font-medium text-muted-foreground">
                         {t("payment")}
                       </span>
-                     <Badge
-  className={
-    order.payment?.status === "paid"
-      ? "bg-green-600 text-white"
-      : "bg-secondary text-secondary-foreground"
-  }
->
-  {order.payment?.status ? t(order.payment.status) : "N/A"} (
-  {order.payment?.method || "N/A"})
-</Badge>
-
+                      <Badge
+                        className={
+                          order.payment?.status === "paid"
+                            ? "bg-green-600 text-white"
+                            : "bg-secondary text-secondary-foreground"
+                        }
+                      >
+                        {order.payment?.status
+                          ? t(order.payment.status)
+                          : "N/A"}{" "}
+                        ({order.payment?.method || "N/A"})
+                      </Badge>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground">
@@ -281,17 +282,29 @@ function AdminDashboard() {
                       >
                         <SelectTrigger className="w-[160px]">
                           <SelectValue>
-  <Badge className={statusColors[order.status]}>
-    {order.status ? t(order.status.toLowerCase()) : "N/A"}
-  </Badge>
-</SelectValue>
+                            <Badge className={statusColors[order.status]}>
+                              {order.status
+                                ? t(order.status.toLowerCase())
+                                : "N/A"}
+                            </Badge>
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Processing">{t("processing")}</SelectItem>
-                          <SelectItem value="Confirmed">{t("confirmed")}</SelectItem>
-                          <SelectItem value="Shipped">{t("shipped")}</SelectItem>
-                          <SelectItem value="Delivered">{t("delivered")}</SelectItem>
-                          <SelectItem value="Cancelled">{t("cancelled")}</SelectItem>
+                          <SelectItem value="Processing">
+                            {t("processing")}
+                          </SelectItem>
+                          <SelectItem value="Confirmed">
+                            {t("confirmed")}
+                          </SelectItem>
+                          <SelectItem value="Shipped">
+                            {t("shipped")}
+                          </SelectItem>
+                          <SelectItem value="Delivered">
+                            {t("delivered")}
+                          </SelectItem>
+                          <SelectItem value="Cancelled">
+                            {t("cancelled")}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -312,16 +325,22 @@ function AdminDashboard() {
                             <div className="h-16 w-16 overflow-hidden rounded-md border-2 border-primary/20">
                               <img
                                 src={burger}
-                                alt={item.productId?.name || "Product"}
+                                alt={
+                                  item.productId?.name[selectedLanguage] ||
+                                  "Product"
+                                }
                                 className="h-full w-full object-cover"
                               />
                             </div>
                             <div className="flex flex-col gap-1">
                               <p className="font-semibold text-foreground">
-                                {item.productId?.name || "Unknown Product"}
+                                {item.productId?.name[selectedLanguage] ||
+                                  "Unknown Product"}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {item.productId?.description || ""}
+                                {item.productId?.description[
+                                  selectedLanguage
+                                ] || ""}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {t("quantity")}:{" "}
@@ -333,8 +352,7 @@ function AdminDashboard() {
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-bold text-primary">
-                              {item.priceAtPurchase || 0}  {t("price_jod")}
-
+                              {item.priceAtPurchase || 0} {t("price_jod")}
                             </p>
                             {item.quantity > 1 && (
                               <p className="text-xs text-muted-foreground">
@@ -348,7 +366,9 @@ function AdminDashboard() {
 
                   <div className="mt-6 space-y-2 border-t pt-4">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{t("order_subtotal")}:</span>
+                      <span className="text-muted-foreground">
+                        {t("order_subtotal")}:
+                      </span>
                       <span className="font-medium text-foreground">
                         {(
                           (order.totalPrice || 0) -
@@ -371,7 +391,6 @@ function AdminDashboard() {
                       </span>
                       <span className="text-2xl font-bold text-primary">
                         {order.totalPrice || 0} {t("price_jod")}
-
                       </span>
                     </div>
                   </div>
@@ -379,7 +398,7 @@ function AdminDashboard() {
 
                 <div className="mt-6 flex flex-col gap-3 border-t pt-4 md:flex-row md:items-center md:justify-end">
                   <Dialog
-          name={t("edit_order")} // <-- هنا النص مترجم
+                    name={t("edit_order")} // <-- هنا النص مترجم
                     order={order}
                     updateOrders={getAllOrders}
                   />
@@ -412,7 +431,7 @@ function AdminDashboard() {
                         <tbody>`;
                       order.products?.forEach((item) => {
                         productsHtml += `<tr>
-                          <td style="padding:4px;">${item.productId?.name || "Unknown"}</td>
+                          <td style="padding:4px;">${item.productId?.name[selectedLanguage] || "Unknown"}</td>
                           <td style="padding:4px; text-align:center;">${item.quantity}</td>
                           <td style="padding:4px; text-align:right;">${(item.priceAtPurchase * item.quantity).toFixed(2)}</td>
                         </tr>`;

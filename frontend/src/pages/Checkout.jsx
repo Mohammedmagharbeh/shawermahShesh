@@ -1,4 +1,3 @@
-
 import Loading from "@/componenet/common/Loading";
 import { useCart } from "@/contexts/CartContext";
 import { useOrder } from "@/contexts/OrderContext";
@@ -25,11 +24,13 @@ function Checkout() {
   const [orderType, setOrderType] = useState("delivery"); // default delivery
   const navigate = useNavigate();
   const { t } = useTranslation();
-
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   useEffect(() => {
     async function fetchAreas() {
       try {
-        const response = await fetch("http://localhost:5000/api/locations/get");
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/locations/get`
+        );
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
@@ -86,7 +87,7 @@ function Checkout() {
             paymentMethodId: 2,
             amount: Number.parseFloat(totalWithDelivery.toFixed(2)),
             customerName: user?.name || "Customer",
-            customerEmail: user?.email || "",
+            customerEmail: user?.email || "ahmadjkff1@gmial.com",
             customerMobile: user.phone,
             callbackUrl: `${window.location.origin}/payment-success`,
             errorUrl: `${window.location.origin}/payment-success`,
@@ -294,7 +295,7 @@ function Checkout() {
                 >
                   <div>
                     <p className="font-semibold text-gray-900">
-                      {product.productId.name}
+                      {product.productId.name[selectedLanguage]}
                     </p>
                     <p className="text-sm text-gray-500">
                       {t("qty")}: {product.quantity}

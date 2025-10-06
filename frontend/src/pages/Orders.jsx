@@ -1,4 +1,3 @@
-
 // import { useEffect, useState } from "react";
 // import { Badge } from "@/components/ui/badge";
 // import { Button } from "@/components/ui/button";
@@ -27,7 +26,7 @@
 
 // function Orders() {
 //       const { t } = useTranslation(); // <-- صح داخل الدالة
-  
+
 //   const { orders, getAllOrders, loading, updateOrder } = useOrder();
 //   const [orderStatuses, setOrderStatuses] = useState({});
 //   const [filterDate, setFilterDate] = useState("");
@@ -291,7 +290,7 @@
 //                       variant="outline"
 //                       className="border-secondary text-secondary-foreground hover:bg-secondary bg-transparent"
 //                     >
-                      
+
 //                       {t("edit_order")}
 //                     </Button>
 //                     <Button
@@ -361,6 +360,7 @@ function Orders() {
   const [orderStatuses, setOrderStatuses] = useState({});
   const [filterDate, setFilterDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
   useEffect(() => {
     getAllOrders();
@@ -399,7 +399,10 @@ function Orders() {
       "Total Price": order.totalPrice,
       Products:
         order.products
-          ?.map((p) => `${p.productId?.name || "Unknown"} x${p.quantity}`)
+          ?.map(
+            (p) =>
+              `${p.productId?.name[selectedLanguage] || "Unknown"} x${p.quantity}`
+          )
           .join(", ") || "No Products",
     }));
 
@@ -559,11 +562,19 @@ function Orders() {
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Processing">{t("processing")}</SelectItem>
-                        <SelectItem value="Confirmed">{t("confirmed")}</SelectItem>
+                        <SelectItem value="Processing">
+                          {t("processing")}
+                        </SelectItem>
+                        <SelectItem value="Confirmed">
+                          {t("confirmed")}
+                        </SelectItem>
                         <SelectItem value="Shipped">{t("shipped")}</SelectItem>
-                        <SelectItem value="Delivered">{t("delivered")}</SelectItem>
-                        <SelectItem value="Cancelled">{t("cancelled")}</SelectItem>
+                        <SelectItem value="Delivered">
+                          {t("delivered")}
+                        </SelectItem>
+                        <SelectItem value="Cancelled">
+                          {t("cancelled")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -588,7 +599,8 @@ function Orders() {
                           </div>
                           <div className="flex flex-col gap-1">
                             <p className="font-semibold text-foreground">
-                              {item.productId?.name ?? "Product unavailable"}
+                              {item.productId?.name[selectedLanguage] ??
+                                "Product unavailable"}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {t("quantity")}:

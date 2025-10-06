@@ -33,11 +33,12 @@ export default function Home() {
   const { addToCart } = useCart();
   const location = useLocation(); // ✨ استخدام useLocation لقراءة الهاش
   const { t } = useTranslation();
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
   // جلب البيانات وتعيين حالة المنتجات الأساسية
   useEffect(() => {
     setIsLoading(true);
-    fetch("http://localhost:5000/api/products")
+    fetch(`${import.meta.env.VITE_BASE_URL}/products`)
       .then((res) => res.json())
       .then((data) => {
         const allProducts = data.data || [];
@@ -239,7 +240,7 @@ export default function Home() {
                     <div className="relative">
                       <img
                         src={product.image || burger}
-                        alt={product.name}
+                        alt={product.name[selectedLanguage]}
                         className="w-full h-48 object-cover"
                       />
                       <div className="absolute top-3 right-3">
@@ -251,10 +252,10 @@ export default function Home() {
 
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold mb-2 text-gray-900">
-                        {product.name}
+                        {product.name[selectedLanguage]}
                       </h3>
                       <p className="text-gray-600 mb-4 text-sm">
-                        {product.description}
+                        {product.description[selectedLanguage]}
                       </p>
 
                       <div className="flex items-center justify-between">
@@ -370,7 +371,7 @@ export default function Home() {
 
             <div>
               <img
-                src="https://scontent.fadj1-1.fna.fbcdn.net/v/t39.30808-6/472238019_122212350974069185_5089714023424660035_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=86c6b0&_nc_ohc=-T7Lk-loCQcQ7kNvwEgN31q&_nc_oc=AdmB0m-eK1W7DVxz_okSOzvmS5U4TbBl4J-at5hp3JcHubDYaerdGwnPl8LBEywCRZA&_nc_zt=23&_nc_ht=scontent.fadj1-1.fna&_nc_gid=vYeRhwov-vuv5fkKzFMEUw&oh=00_AfaiB7cKaNfCTZVJOXTbqIRWxlitg2_AXTLLU0cZqU9q7A&oe=68E05936"
+                src={burger}
                 alt="مطبخنا"
                 className="rounded-2xl shadow-xl w-full h-auto"
               />

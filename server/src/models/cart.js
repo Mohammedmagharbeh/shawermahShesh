@@ -11,7 +11,7 @@ const cartSchema = new moongoose.Schema(
       {
         productId: {
           type: moongoose.Schema.Types.ObjectId,
-          ref: "product",
+          ref: "Product",
           require: true,
         },
         quantity: { type: Number, default: 1 },

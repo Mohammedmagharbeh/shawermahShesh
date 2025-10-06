@@ -66,9 +66,6 @@ routes.post("/verify-otp", async (req, res) => {
     }
 
     // Clear OTP
-    console.log("phone", phone);
-    console.log("newPhone", newPhone);
-
     user.otp = null;
     user.otpExpires = null;
     user.phone = newPhone ?? phone; // Update phone number if needed

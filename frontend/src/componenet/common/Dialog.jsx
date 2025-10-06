@@ -41,6 +41,7 @@ export function Dialog({ name, order, updateOrders }) {
   const [subtotal, setSubtotal] = useState(0);
   const [addresses, setAddresses] = useState([]);
   const { t } = useTranslation();
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -227,8 +228,9 @@ export function Dialog({ name, order, updateOrders }) {
               <SelectContent>
                 {addresses.length > 0 &&
                   addresses.map((addr) => (
-                    <SelectItem value={addr.name} key={addr._id || addr.SECNO}>
-                      {addr.name} - {t("delivery_cost")}: {addr.deliveryCost} JD
+                    <SelectItem key={addr._id || addr.SECNO} value={addr.name}>
+                      {addr.name} - {t("delivery_cost")} : {addr.deliveryCost}
+                      JD
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -258,8 +260,8 @@ export function Dialog({ name, order, updateOrders }) {
                   className="border p-3 rounded flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
                 >
                   <div className="flex-1 text-sm sm:text-base">
-                    {p.productId?.name ?? t("not_found")} - {t("price")}:{" "}
-                    {p.productId?.price ?? t("not_found")} JD
+                    {p.productId?.name[selectedLanguage] ?? t("not_found")} -{" "}
+                    {t("price")}: {p.productId?.price ?? t("not_found")} JD
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="text-sm">{t("qty")}</Label>

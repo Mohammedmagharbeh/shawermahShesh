@@ -227,5 +227,11 @@
   "cash": "Cash",
   "card": "Card",
   "cancel": "Cancel",
-  "save_changes": "Save Changes"
+  "save_changes": "Save Changes",
+  "add_new_product": "Add New Product",
+  "edit_existing_product": "Edit Existing Product",
+  "arabic_name": "Arabic Name",
+  "english_name": "English Name",
+  "arabic_description": "Arabic Description",
+  "english_description": "English Description"
 }
