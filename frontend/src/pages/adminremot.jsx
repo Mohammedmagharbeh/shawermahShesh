@@ -161,7 +161,9 @@ export default function AdminProductPanel() {
   const handleDelete = async (id) => {
     if (!window.confirm(t("confirm_delete"))) return;
     try {
-      await axios.delete(`http://127.0.0.1:5000/api/admin/deletefood/${id}`);
+      await axios.delete(
+        `${import.meta.env.VITE_BASE_URL}/admin/deletefood/${id}`
+      );
       setProducts(products.filter((p) => p._id !== id));
     } catch (error) {
       console.error("خطأ في الحذف:", error.response?.data || error.message);
