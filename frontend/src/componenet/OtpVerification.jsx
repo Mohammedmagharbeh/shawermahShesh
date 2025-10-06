@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 function OtpVerification() {
   const [otp, setOtp] = useState("");
+  const [timer, setTimer] = useState(20); // ⏱ 20 ثانية للعد التنازلي
   const navigate = useNavigate();
   const location = useLocation();
   const phone = location.state?.phone;
@@ -15,6 +16,15 @@ function OtpVerification() {
   const { login } = useUser();
   const { t } = useTranslation();
 
+  // تشغيل العداد كل ثانية
+  useEffect(() => {
+    if (timer > 0) {
+      const countdown = setTimeout(() => setTimer(timer - 1), 1000);
+      return () => clearTimeout(countdown);
+    }
+  }, [timer]);
+
+  // التحقق من الكود
   const verifyOtp = async (e) => {
     e.preventDefault();
     try {
@@ -39,6 +49,21 @@ function OtpVerification() {
     } catch (error) {
       toast.error(t("otp_invalid"));
       console.error(error);
+    }
+  };
+
+  const resendOtp = async () => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, {
+        phone,
+      });
+      if (res.data.msg === "OTP sent to your phone") {
+        toast.success(t("otp_sent"));
+        setTimer(20); // ⏳ إعادة ضبط العداد بعد الإرسال
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(t("otp_resend_failed"));
     }
   };
 
@@ -102,15 +127,22 @@ function OtpVerification() {
             تحقق
           </motion.button>
 
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate(-1)}
-            className="text-gray-500 hover:text-red-600 font-medium transition-colors duration-200"
-          >
-            لم تستلم الرمز؟ إعادة الإرسال
-          </motion.button>
+          {/* زر إعادة الإرسال */}
+          {timer === 0 ? (
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={resendOtp}
+              className="text-gray-500 hover:text-red-600 font-medium transition-colors duration-200"
+            >
+              لم تستلم الرمز؟ إعادة الإرسال
+            </motion.button>
+          ) : (
+            <p className="text-gray-400 text-sm">
+              يمكنك إعادة الإرسال بعد {timer} ثانية
+            </p>
+          )}
         </form>
 
         <motion.button

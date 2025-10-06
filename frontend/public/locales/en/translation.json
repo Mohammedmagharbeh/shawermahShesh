@@ -233,5 +233,22 @@
   "arabic_name": "Arabic Name",
   "english_name": "English Name",
   "arabic_description": "Arabic Description",
-  "english_description": "English Description"
+  "english_description": "English Description",
+   "settings": "Settings",
+  "manage_settings": "Manage your account settings and preferences",
+  "profile_information": "Profile Information",
+  "phone_number": "Phone Number",
+  "enter_phone": "Enter phone number",
+  "update_phone": "Update Phone",
+  "update_phone_failed": "Failed to update phone number",
+  "preferences": "Preferences",
+  "customize_app": "Customize your app experience",
+  "preferred_language": "Preferred Language",
+  "choose_language": "Choose your display language",
+  "danger_zone": "Danger Zone",
+  "irreversible_actions": "Irreversible actions for your account",
+  "delete_account": "Delete Account",
+  "delete_account_desc": "Permanently delete your account and all associated data",
+  "cancel": "Cancel",
+  "save_changes": "Save All Changes"
 }
