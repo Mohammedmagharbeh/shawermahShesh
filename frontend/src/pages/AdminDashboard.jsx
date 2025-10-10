@@ -440,49 +440,104 @@ function AdminDashboard() {
                           ? "Delivery"
                           : "Pickup";
                       const area = order.shippingAddress?.name || "N/A";
-                      let productsHtml = `<table style="width:100%; border-collapse: collapse; margin-top: 10px;">
-                        <thead>
-                          <tr>
-                            <th style="border-bottom:1px solid #000; text-align:left; padding:4px;">المنتج</th>
-                            <th style="border-bottom:1px solid #000; text-align:center; padding:4px;">الكمية</th>
-                            <th style="border-bottom:1px solid #000; text-align:right; padding:4px;">السعر (JOD)</th>
-                          </tr>
-                        </thead>
-                        <tbody>`;
-                      order.products?.forEach((item) => {
-                        console.log(item.additions);
 
-                        productsHtml += `<tr>
-                          <td style="padding:4px;">${item.productId?.name[selectedLanguage] || "Unknown"} + ${item.additions.map((a) => a.name).join(", ")}</td>
-                          <td style="padding:4px; text-align:center;">${item.quantity}</td>
-                          <td style="padding:4px; text-align:right;">${(item.priceAtPurchase * item.quantity).toFixed(2)}</td>
-                        </tr>`;
+                      // Build product table
+                      let productsHtml = `
+      <table style="width:100%; border-collapse: collapse; margin-top: 10px; font-size:14px;">
+        <thead>
+          <tr>
+            <th style="border-bottom:1px solid #000; text-align:left; padding:6px;">المنتج</th>
+            <th style="border-bottom:1px solid #000; text-align:center; padding:6px;">الكمية</th>
+            <th style="border-bottom:1px solid #000; text-align:right; padding:6px;">السعر (JOD)</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+                      order.products?.forEach((item) => {
+                        const additions =
+                          Array.isArray(item.additions) &&
+                          item.additions.length > 0
+                            ? `<div style="font-size:12px; color:#555;">+ ${item.additions
+                                .map((a) => a.name)
+                                .join(", ")}</div>`
+                            : "";
+
+                        const notes =
+                          item.notes && item.notes.trim() !== ""
+                            ? `<div style="font-size:12px; color:#777;">ملاحظات: ${item.notes}</div>`
+                            : "";
+
+                        productsHtml += `
+        <tr>
+          <td style="padding:6px; vertical-align:top;">
+            ${item.productId?.name[selectedLanguage] || "Unknown"}
+            ${additions}
+            ${notes}
+          </td>
+          <td style="padding:6px; text-align:center; vertical-align:top;">
+            ${item.quantity}
+          </td>
+          <td style="padding:6px; text-align:right; vertical-align:top;">
+            ${(item.priceAtPurchase * item.quantity).toFixed(2)}
+          </td>
+        </tr>
+      `;
                       });
+
                       productsHtml += "</tbody></table>";
 
-                      orderDiv.innerHTML = `<div style="font-family:sans-serif; width:100%; max-width:400px; margin:auto; padding:20px; border:1px solid #ccc;">
-                        <h2 style="text-align:center; margin-bottom:20px;">فاتورة الطلب</h2>
-                        <p><strong>رقم العميل:</strong> ${customerPhone}</p>
-                        <p><strong>نوع الطلب:</strong> ${deliveryType}</p>
-                        ${deliveryType === "Delivery" ? `<p><strong>المنطقة:</strong> ${area}</p>` : ""}
-                        ${productsHtml}
-                        <hr style="margin:10px 0;"/>
-                        <p style="display:flex; justify-content:space-between;"><strong>Subtotal:</strong> <span>${(order.totalPrice - (order.shippingAddress?.deliveryCost || 0)).toFixed(2)} JOD</span></p>
-                        <p style="display:flex; justify-content:space-between;"><strong>Delivery Cost:</strong> <span>${order.shippingAddress?.deliveryCost || 0} JOD</span></p>
-                        <p style="display:flex; justify-content:space-between; font-size:1.2em; font-weight:bold;"><strong>Total:</strong> <span>${order.totalPrice.toFixed(2)} JOD</span></p>
-                        <p style="text-align:center; margin-top:20px;">شاورما شيش</p>
-                      </div>`;
+                      // Build the main invoice HTML
+                      orderDiv.innerHTML = `
+      <div style="font-family: 'Tahoma', sans-serif; width:100%; max-width:400px; margin:auto; padding:16px; border:1px solid #ccc; box-sizing:border-box;">
+        <h2 style="text-align:center; margin-bottom:12px;">فاتورة الطلب</h2>
+        <div style="margin-bottom:10px;">
+          <p><strong>رقم العميل:</strong> ${customerPhone}</p>
+          <p><strong>نوع الطلب:</strong> ${deliveryType}</p>
+          ${
+            deliveryType === "Delivery"
+              ? `<p><strong>المنطقة:</strong> ${area}</p>`
+              : ""
+          }
+        </div>
+        ${productsHtml}
+        <hr style="margin:12px 0;"/>
+        <div style="font-size:15px;">
+          <p style="display:flex; justify-content:space-between;"><strong>Subtotal:</strong> <span>${(
+            order.totalPrice - (order.shippingAddress?.deliveryCost || 0)
+          ).toFixed(2)} JOD</span></p>
+          <p style="display:flex; justify-content:space-between;"><strong>Delivery:</strong> <span>${order.shippingAddress?.deliveryCost || 0} JOD</span></p>
+          <p style="display:flex; justify-content:space-between; font-size:1.1em; font-weight:bold; margin-top:6px;"><strong>Total:</strong> <span>${order.totalPrice.toFixed(
+            2
+          )} JOD</span></p>
+        </div>
+        <hr style="margin:12px 0;"/>
+        <p style="text-align:center; margin-top:10px; font-weight:bold;">شاورما شيش</p>
+      </div>
+    `;
 
+                      // Print logic
                       const printWindow = window.open(
                         "",
                         "",
                         "height=600,width=400"
                       );
-                      printWindow.document.write(
-                        "<html><head><title>فاتورة</title></head><body>"
-                      );
-                      printWindow.document.write(orderDiv.innerHTML);
-                      printWindow.document.write("</body></html>");
+                      printWindow.document.write(`
+      <html>
+        <head>
+          <title>فاتورة</title>
+          <meta charset="UTF-8" />
+          <style>
+            @media print {
+              body { margin: 0; padding: 0; font-size: 13px; }
+              table { width: 100%; border-collapse: collapse; }
+              th, td { border-bottom: 1px solid #ddd; }
+            }
+          </style>
+        </head>
+        <body>${orderDiv.innerHTML}</body>
+      </html>
+    `);
                       printWindow.document.close();
                       printWindow.focus();
                       printWindow.print();
