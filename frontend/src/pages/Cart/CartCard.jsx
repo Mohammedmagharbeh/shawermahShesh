@@ -8,8 +8,6 @@ function CartCard({ product }) {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
-  console.log(product);
-
   return (
     <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">

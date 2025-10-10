@@ -32,8 +32,6 @@ export const UserProvider = ({ children }) => {
   const updatePhone = async (newPhone, navigate) => {
     if (!user) throw new Error("No user logged in");
 
-    console.log(user);
-
     try {
       const res = await axios.put(
         `${import.meta.env.VITE_BASE_URL}/update-phone`,

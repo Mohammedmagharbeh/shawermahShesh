@@ -88,7 +88,6 @@ export const CartProvider = ({ children }) => {
       if (!res.ok) throw new Error("Failed to add to cart");
       const data = await res.json();
       setCart(data.cart);
-      console.log(data);
 
       toast.success("Item added to cart");
     } catch (error) {

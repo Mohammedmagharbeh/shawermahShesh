@@ -91,8 +91,6 @@ export function ProductDialog({ id, triggerLabel = "View Product" }) {
     );
   };
 
-  console.log(notes);
-
   return (
     <DialogUi>
       <DialogTrigger asChild>

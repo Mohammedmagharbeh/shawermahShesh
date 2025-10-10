@@ -151,7 +151,6 @@ function AdminDashboard() {
   };
 
   if (loading) return <Loading />;
-  console.log(filteredOrders);
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
@@ -350,19 +349,16 @@ function AdminDashboard() {
                                 </span>
                               </p>
                               <Badge>{item.isSpicy ? "حار" : "عادي"}</Badge>
-                              {item.additions &&
-                                item.additions.length > 0 &&
-                                (console.log(item.additions),
-                                (
-                                  <div className="flex gap-1">
-                                    {t("additions")}:
-                                    {item.additions.map((addition) => (
-                                      <Badge key={addition._id} className="p-1">
-                                        {addition.name}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                ))}
+                              {item.additions && item.additions.length > 0 && (
+                                <div className="flex gap-1">
+                                  {t("additions")}:
+                                  {item.additions.map((addition) => (
+                                    <Badge key={addition._id} className="p-1">
+                                      {addition.name}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
                               {item.notes && (
                                 <p className="text-sm text-gray-600 italic">
                                   {t("notes")}: {item.notes}

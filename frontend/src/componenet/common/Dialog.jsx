@@ -42,8 +42,6 @@ export function Dialog({ name, order, updateOrders }) {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
-  console.log(updatedOrder);
-
   useEffect(() => {
     const fetchAddresses = async () => {
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}/locations/get`);
