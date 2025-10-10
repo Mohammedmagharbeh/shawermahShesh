@@ -231,6 +231,9 @@ function PaymentSuccess() {
               ? storedCart.products?.map((p) => ({
                   productId: p.productId._id,
                   quantity: p.quantity,
+                  isSpicy: p.isSpicy || false,
+                  notes: p.notes || "",
+                  additions: p.additions || [],
                 }))
               : [],
             userId: user._id,
