@@ -25,7 +25,7 @@ export const OrderProvider = ({ children }) => {
       setOrders(res.data.data);
       setError(null);
     } catch (err) {
-            const msg = err.response?.data?.message || t("failed_fetch_orders");
+      const msg = err.response?.data?.message || t("failed_fetch_orders");
 
       setError(err.response?.data?.message || "Failed to fetch orders");
     } finally {
@@ -46,7 +46,7 @@ export const OrderProvider = ({ children }) => {
       setOrders(res.data.data);
       setError(null);
     } catch (err) {
-            const msg = err.response?.data?.message || t("failed_fetch_user_orders");
+      const msg = err.response?.data?.message || t("failed_fetch_user_orders");
 
       setError(err.response?.data?.message || "Failed to fetch user orders");
     } finally {
@@ -62,9 +62,8 @@ export const OrderProvider = ({ children }) => {
       setError(null);
       return res.data.data; // return directly without overwriting state
     } catch (err) {
-            const msg = err.response?.data?.message || t("failed_fetch_order");
-
-      setError(err.response?.data?.message || "Failed to fetch order");
+      const msg = err.response?.data?.message || t("failed_fetch_order");
+      setError(msg || "Failed to fetch order");
     } finally {
       setLoading(false);
     }
@@ -95,11 +94,11 @@ export const OrderProvider = ({ children }) => {
         prev.map((order) => (order._id === id ? res.data : order))
       );
       setError(null);
-            toast.success(t("order_updated_success"));
+      toast.success(t("order_updated_success"));
 
       return res.data;
     } catch (err) {
-            const msg = err.response?.data?.message || t("failed_update_order");
+      const msg = err.response?.data?.message || t("failed_update_order");
 
       setError(err.response?.data?.message || "Failed to update order");
     } finally {
@@ -114,12 +113,10 @@ export const OrderProvider = ({ children }) => {
       await axios.delete(`${API_URL}/${id}`);
       setOrders((prev) => prev.filter((order) => order._id !== id));
       setError(null);
-            toast.success(t("order_deleted_success"));
-
+      toast.success(t("order_deleted_success"));
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to delete order");
-            const msg = err.response?.data?.message || t("failed_update_order");
-
+      const msg = err.response?.data?.message || t("failed_update_order");
+      setError(msg || "Failed to delete order");
     } finally {
       setLoading(false);
     }
