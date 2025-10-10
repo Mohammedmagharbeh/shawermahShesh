@@ -248,5 +248,6 @@
   "delete_account_desc": "حذف حسابك وجميع البيانات المرتبطة به بشكل دائم",
   "verify_otp": "تحقق من OTP",
   "verifying": "جار التحقق",
-  "logging_in": "جار تسجيل الدخول"
+  "logging_in": "جار تسجيل الدخول",
+  "additions": "إضافات"
 }

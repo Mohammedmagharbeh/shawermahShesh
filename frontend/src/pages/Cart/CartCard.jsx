@@ -1,6 +1,7 @@
 import { useCart } from "@/contexts/CartContext";
 import product_placeholder from "../../assets/product_placeholder.jpeg";
 import { useTranslation } from "react-i18next";
+import { Badge } from "@/components/ui/badge";
 
 function CartCard({ product }) {
   const { updateQuantity, removeFromCart } = useCart();
@@ -34,11 +35,21 @@ function CartCard({ product }) {
               className="w-full h-full object-cover"
             />
           </div>
-          <div>
+          <div className="flex flex-col space-y-1">
             <h3 className="font-semibold text-gray-800 text-lg">
               {product?.productId?.name[selectedLanguage] ?? "Product Name"}
             </h3>
-            <p className="text-sm text-gray-500">Restaurant Special</p>
+            <Badge>{product.isSpicy ? "حار" : "عادي"}</Badge>
+            {product.additions && product.additions.length > 0 && (
+              <div className="flex gap-1">
+                {t("additions")}:
+                {product.additions.map((addition) => (
+                  <Badge key={addition._id} className="p-1">
+                    {addition.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

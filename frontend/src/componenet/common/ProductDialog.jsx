@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog as DialogUi,
   DialogTrigger,
@@ -16,6 +16,8 @@ import { useCart } from "@/contexts/CartContext";
 import Loading from "@/componenet/common/Loading";
 import toast from "react-hot-toast";
 import product_placeholder from "../../assets/product_placeholder.jpeg";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function ProductDialog({ id, triggerLabel = "View Product" }) {
   const [quantity, setQuantity] = useState(1);
@@ -28,7 +30,9 @@ export function ProductDialog({ id, triggerLabel = "View Product" }) {
     category: "",
     description: "",
   });
-
+  const [additions, setAdditions] = useState([]);
+  const [selectedAdditions, setSelectedAdditions] = useState([]);
+  const [spicy, setSpicy] = useState(null); // null, true, false
   const { addToCart } = useCart();
   const selectedLanguage = localStorage.getItem("language") || "ar";
 
@@ -61,12 +65,30 @@ export function ProductDialog({ id, triggerLabel = "View Product" }) {
     if (id) fetchProductDetails();
   }, [id]);
 
+  useEffect(() => {
+    const fetchAdditions = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/additions`
+        );
+        if (!response.ok) throw new Error("Failed to fetch additions");
+
+        const data = await response.json();
+        setAdditions(data.additions);
+      } catch (error) {
+        console.error("Error fetching additions:", error);
+        setAdditions([]);
+      }
+    };
+    fetchAdditions();
+  }, []);
+
   const handleQuantityChange = (increment) => {
     setQuantity((prev) => Math.max(1, prev + increment));
   };
 
   const handleAddToCart = () => {
-    addToCart(product._id, quantity);
+    addToCart(product._id, quantity, spicy, selectedAdditions);
     toast.success(
       `Added ${quantity} ${product.name[selectedLanguage]} to cart`
     );
@@ -153,6 +175,62 @@ export function ProductDialog({ id, triggerLabel = "View Product" }) {
                     <ShoppingCart className="w-5 h-5 mr-2" />
                     Add to Cart - ${(product.price * quantity).toFixed(2)}
                   </Button>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  {/* sipcy or not radio input */}
+                  <span className="text-lg font-medium text-gray-900 mb-2">
+                    Choose Spiciness:
+                  </span>
+                  <Label className="inline-flex gap-2 items-center justify-center">
+                    <Input
+                      type="radio"
+                      className="form-radio text-red-500"
+                      name="spicy"
+                      value="yes"
+                      onChange={() => setSpicy(true)}
+                    />
+                    <span className="ml-2">Spicy</span>
+                  </Label>
+                  <Label className="inline-flex gap-2 items-center justify-center ml-6">
+                    <Input
+                      type="radio"
+                      className="form-radio text-red-500"
+                      name="spicy"
+                      value="no"
+                      defaultChecked
+                      onChange={() => setSpicy(false)}
+                    />
+                    <span className="ml-2">Not Spicy</span>
+                  </Label>
+                </div>
+                <div>
+                  {additions?.map((addition) => (
+                    <div key={addition._id} className="flex items-center gap-2">
+                      <Input
+                        type="checkbox"
+                        id={addition._id}
+                        name="addition"
+                        value={addition._id}
+                        className="form-checkbox h-5 w-5 text-red-500"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedAdditions((prev) => [
+                              ...prev,
+                              addition._id,
+                            ]);
+                          } else {
+                            setSelectedAdditions((prev) =>
+                              prev.filter((id) => id !== addition._id)
+                            );
+                          }
+                        }}
+                      />
+                      <Label htmlFor={addition._id} className="text-gray-700">
+                        {addition.name} (+$
+                        {addition.price.toFixed(2)})
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

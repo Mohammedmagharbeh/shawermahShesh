@@ -250,5 +250,6 @@
   "cancel": "Cancel",
   "verify_otp": "Verify OTP",
   "verifying": "Verifying",
-  "logging_in": "Logging in"
+  "logging_in": "Logging in",
+  "additions": "Additions"
 }

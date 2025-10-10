@@ -14,6 +14,7 @@ export const CartProvider = ({ children }) => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+  const { user } = useUser();
 
   // Fetch cart on mount
   useEffect(() => {
@@ -55,8 +56,7 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   // Add product to cart
-  const addToCart = async (productId) => {
-    const user = JSON.parse(sessionStorage.getItem("user"));
+  const addToCart = async (productId, quantity, isSpicy, additions) => {
     if (!user._id) {
       toast.error(t("please_login_to_add_items"));
       return;
@@ -67,12 +67,19 @@ export const CartProvider = ({ children }) => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId, quantity: 1 }),
+          body: JSON.stringify({
+            productId,
+            quantity: quantity || 1,
+            isSpicy: isSpicy || false,
+            additions: additions || [],
+          }),
         }
       );
       if (!res.ok) throw new Error("Failed to add to cart");
       const data = await res.json();
       setCart(data.cart);
+      console.log(data);
+
       toast.success("Item added to cart");
     } catch (error) {
       console.error(error);
