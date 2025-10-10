@@ -197,6 +197,7 @@ exports.createOrder = async (req, res) => {
       { path: "products.additions" },
       { path: "userId" },
       { path: "shippingAddress" },
+      
     ]);
 
     // Emit event to admins

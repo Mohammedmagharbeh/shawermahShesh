@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-
+import { Badge } from "@/components/ui/badge";
 function Checkout() {
   const { cart, total, clearCart } = useCart();
   const { createOrder } = useOrder();
@@ -113,6 +113,8 @@ function Checkout() {
           products: cart.products.map((p) => ({
             productId: p.productId._id,
             quantity: p.quantity,
+            isSpicy:p.isSpicy||false,
+            additions:additions||[]
           })),
           userId: user?._id,
           shippingAddress: selectedArea._id,
@@ -288,24 +290,46 @@ function Checkout() {
             </h2>
 
             <div className="space-y-6">
-              {cart.products.map((product, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center py-3 border-b border-gray-100"
-                >
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      {product.productId.name[selectedLanguage]}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {t("qty")}: {product.quantity}
-                    </p>
-                  </div>
-                  <span className="font-bold text-gray-900">
-                    {product.productId.price.toFixed(2)} JOD
-                  </span>
-                </div>
-              ))}
+{cart.products.map((product, index) => (
+  <div
+    key={index}
+    className="py-3 border-b border-gray-100"
+  >
+    <div className="flex justify-between items-center">
+      <div>
+        <p className="font-semibold text-gray-900">
+          {product.productId.name[selectedLanguage]}
+        </p>
+        <p className="text-sm text-gray-500">
+          {t("qty")}: {product.quantity}
+        </p>
+
+        {product.spicy !== null && (
+          <p className="text-sm text-gray-500">
+            🌶️ {product.spicy ? t("spicy") : t("not_spicy")}
+          </p>
+        )}
+
+        {/* 🧀 عرض الإضافات */}
+        {product.additions?.length > 0 && (
+          <ul className="mt-2 text-sm text-gray-600 list-disc list-inside flex gap-2">
+            {product.additions.map((addition, i) => (
+              <Badge key={i}>
+                 {addition.name || "Addition"} (
+                {addition.price?.toFixed(2) || "0.00"} JOD)
+              </Badge>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <span className="font-bold text-gray-900">
+        {product.productId.price.toFixed(2)} JOD
+      </span>
+    </div>
+  </div>
+))}
+
 
               <div className="space-y-3 pt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center">

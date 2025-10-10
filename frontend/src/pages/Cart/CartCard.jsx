@@ -89,6 +89,7 @@ function CartCard({ product }) {
           <span className="lg:hidden font-medium text-gray-600">
             {t("total")}:
           </span>
+
           <span className="text-xl font-bold text-red-700">
             {(product?.productId?.price ?? 0 * product?.quantity ?? 0).toFixed(
               2

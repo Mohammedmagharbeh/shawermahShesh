@@ -47,13 +47,25 @@ export const CartProvider = ({ children }) => {
 
   // Calculate total whenever cart changes
   useEffect(() => {
-    const newTotal = cart.products?.reduce((acc, item) => {
-      const price = item.productId?.price || 0;
-      const quantity = item.quantity || 0;
-      return acc + price * quantity;
-    }, 0);
-    setTotal(newTotal);
-  }, [cart]);
+  const newTotal = cart.products?.reduce((acc, item) => {
+    const basePrice = item.productId?.price || 0;
+    const quantity = item.quantity || 0;
+
+    // 🧀 حساب مجموع أسعار الإضافات
+    const additionsPrice = item.additions?.reduce(
+      (sum, add) => sum + (add.price || 0),
+      0
+    ) || 0;
+
+    // 🧮 جمع السعر الكلي للمنتج مع الإضافات
+    const itemTotal = (basePrice + additionsPrice) * quantity;
+
+    return acc + itemTotal;
+  }, 0);
+
+  setTotal(newTotal);
+}, [cart]);
+
 
   // Add product to cart
   const addToCart = async (productId, quantity, isSpicy, additions) => {
