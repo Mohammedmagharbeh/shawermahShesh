@@ -302,9 +302,9 @@ function Checkout() {
                         {t("qty")}: {product.quantity}
                       </p>
 
-                      {product.spicy !== null && (
+                      {product.isSpicy !== null && (
                         <p className="text-sm text-gray-500">
-                          🌶️ {product.spicy ? t("spicy") : t("not_spicy")}
+                          {product.isSpicy ? "حار" : "عادي"}
                         </p>
                       )}
 
