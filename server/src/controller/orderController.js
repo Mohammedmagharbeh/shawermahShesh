@@ -3,6 +3,7 @@ const User = require("../models/user");
 const productsModel = require("../models/products");
 const locationsModel = require("../models/locations");
 const locations = require("../models/locations");
+const additionsModel = require("../models/additions");
 const { default: mongoose } = require("mongoose");
 
 // get all orders
@@ -139,22 +140,40 @@ exports.createOrder = async (req, res) => {
     }
 
     // enrich products with price at purchase
-    const enrichedProducts = products.map((p) => {
-      const matched = dbProducts.find(
-        (dp) => dp._id.toString() === p.productId
-      );
-      return {
-        productId: p.productId,
-        quantity: p.quantity,
-        priceAtPurchase: matched.price,
-      };
-    });
+    const enrichedProducts = await Promise.all(
+      products.map(async (p) => {
+        const matchedProduct = dbProducts.find(
+          (dp) => dp._id.toString() === p.productId
+        );
+
+        const dbAdditions = await additionsModel.find({
+          _id: { $in: p.additions || [] },
+        });
+
+        const additions = dbAdditions.map((a) => ({
+          _id: a._id,
+          name: a.name,
+          price: a.price,
+        }));
+
+        return {
+          productId: p.productId,
+          quantity: p.quantity,
+          additions,
+          priceAtPurchase: matchedProduct.price,
+        };
+      })
+    );
 
     // calculate total price (products + delivery fee)
-    const productsTotal = enrichedProducts.reduce(
-      (sum, p) => sum + p.quantity * p.priceAtPurchase,
-      0
-    );
+    const productsTotal = enrichedProducts.reduce((sum, p) => {
+      const additionsSum = p.additions.reduce(
+        (aSum, add) => aSum + add.price,
+        0
+      );
+      return sum + (p.priceAtPurchase + additionsSum) * p.quantity;
+    }, 0);
+
     const totalPrice = productsTotal + location.deliveryCost;
 
     // create order
@@ -175,6 +194,7 @@ exports.createOrder = async (req, res) => {
     // populate related fields
     const populatedOrder = await newOrder.populate([
       { path: "products.productId" },
+      { path: "products.additions" },
       { path: "userId" },
       { path: "shippingAddress" },
     ]);
@@ -218,6 +238,7 @@ exports.updateOrder = async (req, res) => {
       new: true,
     })
       .populate("products.productId")
+      .populate("products.additions")
       .populate("userId")
       .populate("shippingAddress");
 

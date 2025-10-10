@@ -21,6 +21,7 @@ function ProductView() {
     description: "",
   });
   const { addToCart } = useCart();
+  const selectedLanguage = localStorage.getItem("language") || "ar";
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -61,21 +62,10 @@ function ProductView() {
   const handleAddToCart = () => {
     // Add to cart logic here
     addToCart(product._id, quantity);
-    toast.success(`Added ${quantity} ${product.name} to cart`);
+    toast.success(
+      `Added ${quantity} ${product.name[selectedLanguage]} to cart`
+    );
   };
-
-  // const toggleFavorite = () => {
-  //   setIsFavorite(!isFavorite);
-  // };
-
-  // const renderSpiceLevel = (level) => {
-  //   return Array.from({ length: 3 }, (_, i) => (
-  //     <Flame
-  //       key={i}
-  //       className={`w-4 h-4 ${i < level ? "fill-red-500 text-red-500" : "text-gray-300"}`}
-  //     />
-  //   ));
-  // };
 
   if (loading) return <Loading />;
 
@@ -86,7 +76,7 @@ function ProductView() {
           <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
             <img
               src={product_placeholder}
-              alt={product.name}
+              alt={product.name[selectedLanguage]}
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             />
           </div>
@@ -98,7 +88,7 @@ function ProductView() {
         <div className="flex flex-col space-y-6">
           <div>
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-              {product.name}
+              {product.name[selectedLanguage]}
             </h1>
 
             {/* <div className="flex items-center gap-2 mb-4">
@@ -125,7 +115,7 @@ function ProductView() {
           </div>
 
           <p className="text-gray-700 text-lg leading-relaxed">
-            {product.description}
+            {product.description[selectedLanguage]}
           </p>
 
           {/* <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-200">

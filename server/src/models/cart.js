@@ -15,6 +15,9 @@ const cartSchema = new moongoose.Schema(
           require: true,
         },
         quantity: { type: Number, default: 1 },
+        additions: [
+          { type: moongoose.Schema.Types.ObjectId, ref: "additions" },
+        ],
       },
     ],
   },

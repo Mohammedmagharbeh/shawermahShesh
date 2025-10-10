@@ -6,7 +6,7 @@ const userModel = require("../models/user");
 exports.addToCart = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { productId, quantity } = req.body;
+    const { productId, quantity, additions } = req.body;
 
     if (!productId || !quantity || isNaN(quantity) || quantity <= 0) {
       return res.status(400).json({ message: "Invalid productId or quantity" });
@@ -18,26 +18,25 @@ exports.addToCart = async (req, res) => {
     const product = await productsModel.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    if (product.stock && product.stock < quantity) {
-      return res.status(400).json({ message: "Not enough stock available" });
-    }
-
     let updatedCart = await cart
       .findOneAndUpdate(
         { userId, "products.productId": productId },
         { $inc: { "products.$.quantity": quantity } },
+        { $addToSet: { "products.$.additions": { $each: additions || [] } } },
         { new: true }
       )
-      .populate("products.productId");
+      .populate("products.productId")
+      .populate("products.additions");
 
     if (!updatedCart) {
       updatedCart = await cart
         .findOneAndUpdate(
           { userId },
-          { $push: { products: { productId, quantity } } },
+          { $push: { products: { productId, quantity, additions } } },
           { upsert: true, new: true }
         )
-        .populate("products.productId");
+        .populate("products.productId")
+        .populate("products.additions");
     }
 
     return res.status(200).json({
@@ -53,7 +52,7 @@ exports.addToCart = async (req, res) => {
 // ✅ Update Cart Item Quantity
 exports.updateCart = async (req, res) => {
   const cartId = req.params.id;
-  const { productId, quantity } = req.body;
+  const { productId, quantity, additions } = req.body;
 
   try {
     if (!productId || quantity == null || isNaN(quantity) || quantity <= 0) {
@@ -73,10 +72,19 @@ exports.updateCart = async (req, res) => {
 
     userCart.products[productIndex].quantity = quantity;
 
+    if (additions) {
+      userCart.products[productIndex].additions = additions;
+    }
+
     await userCart.save();
 
     // populate productId before sending
     await userCart.populate("products.productId");
+    if (additions) {
+      console.log("Populating additions");
+
+      await userCart.populate("products.additions");
+    }
 
     return res.status(200).json({
       message: "Cart updated successfully",
@@ -157,7 +165,8 @@ exports.getCart = async (req, res) => {
 
     const userCart = await cart
       .findOne({ userId })
-      .populate("products.productId");
+      .populate("products.productId")
+      .populate("products.additions");
 
     if (!userCart) {
       return res

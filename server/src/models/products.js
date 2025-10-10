@@ -14,6 +14,7 @@ const productSchema = new mongoose.Schema({
     ar: { type: String, required: true },
     en: { type: String, required: true },
   },
+  isSpicy: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("Product", productSchema);

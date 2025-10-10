@@ -11,6 +11,9 @@ const ordersSchema = new moongoose.Schema(
       {
         productId: { type: moongoose.Schema.Types.ObjectId, ref: "Product" },
         quantity: { type: Number, required: true, default: 1, min: 1 },
+        additions: [
+          { type: moongoose.Schema.Types.ObjectId, ref: "additions" },
+        ],
         priceAtPurchase: { type: Number, required: true },
       },
     ],

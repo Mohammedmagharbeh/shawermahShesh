@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import home_logo from "../assets/home_logo.jpeg";
 import home_logo2 from "../assets/home_logo2.jpeg";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import { ProductDialog } from "@/componenet/common/ProductDialog";
 // عدد المنتجات التي ستظهر مبدئيًا
 const PRODUCTS_PER_PAGE = 6;
 
@@ -290,13 +291,14 @@ export default function Home() {
                           )}
                         </div>
 
-                        <Button
-                          onClick={() => addToCart(product._id)}
+                        {/* <Link
+                          to={`product/`}
                           className="bg-red-700 hover:bg-red-800 text-white px-6 py-2"
                         >
-                          {t("add_to_cart")}
+                          
                           <ShoppingCart className="mr-2 h-4 w-4" />
-                        </Button>
+                        </Link> */}
+                        <ProductDialog id={product._id} />
                       </div>
                     </CardContent>
                   </Card>

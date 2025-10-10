@@ -1,0 +1,175 @@
+import { useEffect, useState } from "react";
+import {
+  Dialog as DialogUi,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Minus, ShoppingCart } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import Loading from "@/componenet/common/Loading";
+import toast from "react-hot-toast";
+import product_placeholder from "../../assets/product_placeholder.jpeg";
+
+export function ProductDialog({ id, triggerLabel = "View Product" }) {
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState({
+    _id: "",
+    name: "",
+    price: 0,
+    image: "",
+    category: "",
+    description: "",
+  });
+
+  const { addToCart } = useCart();
+  const selectedLanguage = localStorage.getItem("language") || "ar";
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/products/${id}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch product details");
+
+        const data = await response.json();
+        setProduct(data.data);
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+        setProduct({
+          _id: "",
+          name: "",
+          price: 0,
+          image: "",
+          category: "",
+          description: "",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchProductDetails();
+  }, [id]);
+
+  const handleQuantityChange = (increment) => {
+    setQuantity((prev) => Math.max(1, prev + increment));
+  };
+
+  const handleAddToCart = () => {
+    addToCart(product._id, quantity);
+    toast.success(
+      `Added ${quantity} ${product.name[selectedLanguage]} to cart`
+    );
+  };
+
+  return (
+    <DialogUi>
+      <DialogTrigger asChild>
+        <Button variant="outline">{triggerLabel}</Button>
+      </DialogTrigger>
+
+      <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {product.name[selectedLanguage] || "Product Details"}
+          </DialogTitle>
+          <DialogDescription>{product.category}</DialogDescription>
+        </DialogHeader>
+
+        {loading ? (
+          <Loading />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 py-4">
+            {/* Product Image */}
+            <div className="relative">
+              <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
+                <img
+                  src={product.image || product_placeholder}
+                  alt={product.name[selectedLanguage]}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              {product.category && (
+                <Badge className="absolute top-4 left-4 bg-red-500 hover:bg-red-600 text-white">
+                  {product.category}
+                </Badge>
+              )}
+            </div>
+
+            {/* Product Details */}
+            <div className="flex flex-col space-y-6">
+              <div>
+                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                  {product.name[selectedLanguage]}
+                </h1>
+                <p className="text-4xl font-bold text-red-500 mb-4">
+                  ${product.price.toFixed(2)}
+                </p>
+              </div>
+
+              <p className="text-gray-700 text-lg leading-relaxed">
+                {product.description[selectedLanguage]}
+              </p>
+
+              {/* Quantity + Add to Cart */}
+              <div className="space-y-4 mt-6">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="flex items-center border-2 border-gray-200 rounded-lg">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-12 w-12 hover:bg-red-50 hover:text-red-500"
+                      onClick={() => handleQuantityChange(-1)}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <span className="w-16 text-center font-semibold text-lg">
+                      {quantity}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-12 w-12 hover:bg-red-50 hover:text-red-500"
+                      onClick={() => handleQuantityChange(1)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <Button
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white h-12 text-lg font-semibold"
+                  >
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    Add to Cart - ${(product.price * quantity).toFixed(2)}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <DialogFooter className="mt-6 flex-col sm:flex-row gap-2">
+          <DialogClose asChild>
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto bg-transparent"
+            >
+              Close
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </DialogUi>
+  );
+}

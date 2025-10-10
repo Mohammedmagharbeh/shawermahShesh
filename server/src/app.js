@@ -13,6 +13,7 @@ const adminroutes = require("./routes/adminroutes");
 const cartRoutes = require("./routes/cartRoutes");
 const locationsRoute = require("./routes/locationsRoute");
 const myfatoorah = require("./routes/myfatoorah");
+const additions = require("./routes/additions");
 
 dotenv.config();
 const app = express();
@@ -51,5 +52,6 @@ app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/locations", locationsRoute);
 app.use("/api/myfatoorah", myfatoorah);
+app.use("/api/additions", additions);
 
 module.exports = server; // export server instead of app
