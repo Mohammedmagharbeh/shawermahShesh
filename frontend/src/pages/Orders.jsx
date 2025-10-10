@@ -608,12 +608,25 @@ function Orders() {
                                 {item.quantity}
                               </span>
                             </p>
+                            <Badge>{item.isSpicy ? "حار" : "عادي"}</Badge>
+                            {item.additions && item.additions.length > 0 && (
+                              <div className="flex gap-1">
+                                {t("additions")}:
+                                {item.additions.map((addition) => (
+                                  <Badge key={addition._id} className="p-1">
+                                    {addition.name}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold text-primary">
                             {t("price_jod")}:
-                            {item.productId?.price ?? item.priceAtPurchase ?? 0}
+                            {item.productId?.price.toFixed(2) ??
+                              item.priceAtPurchase ??
+                              0}
                           </p>
                         </div>
                       </div>
@@ -626,7 +639,7 @@ function Orders() {
                       {t("order_total")}:
                     </span>
                     <span className="text-2xl font-bold text-primary">
-                      {order.totalPrice} {t("price_jod")}
+                      {order.totalPrice.toFixed(2)} {t("price_jod")}
                     </span>
                   </div>
 

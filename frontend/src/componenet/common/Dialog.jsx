@@ -37,11 +37,12 @@ export function Dialog({ name, order, updateOrders }) {
       quantity: p.quantity,
     })),
   });
-
   const [subtotal, setSubtotal] = useState(0);
   const [addresses, setAddresses] = useState([]);
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+
+  console.log(updatedOrder);
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -53,10 +54,18 @@ export function Dialog({ name, order, updateOrders }) {
   }, []);
 
   useEffect(() => {
-    const newSubtotal = updatedOrder.products.reduce(
-      (sum, p) => sum + (p.productId?.price ?? 0) * p.quantity,
-      0
-    );
+    const newSubtotal = updatedOrder.products.reduce((sum, p) => {
+      const basePrice = p.productId?.price ?? 0;
+
+      // Sum all addition prices safely
+      const additionsTotal = Array.isArray(p.additions)
+        ? p.additions.reduce((aSum, add) => aSum + (add.price ?? 0), 0)
+        : 0;
+
+      // Multiply by quantity
+      return sum + (basePrice + additionsTotal) * (p.quantity ?? 1);
+    }, 0);
+
     setSubtotal(newSubtotal);
 
     setUpdatedOrder((prev) => ({

@@ -11,6 +11,7 @@ exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("products.productId")
+      .populate("products.additions")
       .populate("userId")
       .populate("shippingAddress");
 
@@ -33,6 +34,7 @@ exports.getOrderById = async (req, res) => {
 
     const order = await Order.findById(id)
       .populate("products.productId")
+      .populate("products.additions")
       .populate("userId")
       .populate("shippingAddress");
 
@@ -76,6 +78,7 @@ exports.getOrdersByUserId = async (req, res) => {
 
     const userOrders = await Order.find({ userId })
       .populate("products.productId")
+      .populate("products.additions")
       .populate("shippingAddress");
 
     if (!userOrders.length) {
@@ -197,7 +200,6 @@ exports.createOrder = async (req, res) => {
       { path: "products.additions" },
       { path: "userId" },
       { path: "shippingAddress" },
-      
     ]);
 
     // Emit event to admins

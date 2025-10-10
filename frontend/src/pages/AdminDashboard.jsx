@@ -151,7 +151,7 @@ function AdminDashboard() {
   };
 
   if (loading) return <Loading />;
-  console.log(filteredOrders)
+  console.log(filteredOrders);
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
@@ -349,19 +349,20 @@ function AdminDashboard() {
                                   {item.quantity || 0}
                                 </span>
                               </p>
-                             <Badge>{item.isSpicy ? "حار" : "عادي"}</Badge>
-            {item.additions && item.additions.length > 0 && (
-              console.log(item.additions),
-              <div className="flex gap-1">
-                {t("additions")}:
-                {item.additions.map((addition) => (
-                  <Badge key={addition._id} className="p-1">
-                    {addition.name}
-                  </Badge>
-                ))}
-              </div>
-            )}
-                              
+                              <Badge>{item.isSpicy ? "حار" : "عادي"}</Badge>
+                              {item.additions &&
+                                item.additions.length > 0 &&
+                                (console.log(item.additions),
+                                (
+                                  <div className="flex gap-1">
+                                    {t("additions")}:
+                                    {item.additions.map((addition) => (
+                                      <Badge key={addition._id} className="p-1">
+                                        {addition.name}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                ))}
                             </div>
                           </div>
                           <div className="text-right">
@@ -387,7 +388,7 @@ function AdminDashboard() {
                         {(
                           (order.totalPrice || 0) -
                           (order.shippingAddress?.deliveryCost || 0)
-                        ).toFixed(1)}
+                        ).toFixed(2)}
                         {t("price_jod")}
                       </span>
                     </div>
@@ -404,7 +405,7 @@ function AdminDashboard() {
                         {t("order_total")}:
                       </span>
                       <span className="text-2xl font-bold text-primary">
-                        {order.totalPrice || 0} {t("price_jod")}
+                        {order.totalPrice.toFixed(2) || 0} {t("price_jod")}
                       </span>
                     </div>
                   </div>
@@ -444,8 +445,10 @@ function AdminDashboard() {
                         </thead>
                         <tbody>`;
                       order.products?.forEach((item) => {
+                        console.log(item.additions);
+
                         productsHtml += `<tr>
-                          <td style="padding:4px;">${item.productId?.name[selectedLanguage] || "Unknown"}</td>
+                          <td style="padding:4px;">${item.productId?.name[selectedLanguage] || "Unknown"} + ${item.additions.map((a) => a.name).join(", ")}</td>
                           <td style="padding:4px; text-align:center;">${item.quantity}</td>
                           <td style="padding:4px; text-align:right;">${(item.priceAtPurchase * item.quantity).toFixed(2)}</td>
                         </tr>`;

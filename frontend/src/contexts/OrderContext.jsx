@@ -72,6 +72,8 @@ export const OrderProvider = ({ children }) => {
   // 🔹 Create new order
   const createOrder = async (orderData) => {
     setLoading(true);
+    console.log(orderData);
+    
     try {
       const res = await axios.post(`${API_URL}/post`, orderData);
       setOrders((prev) => [...prev, res.data.data]); // append new order
