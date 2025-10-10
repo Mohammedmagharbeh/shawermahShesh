@@ -50,6 +50,11 @@ function CartCard({ product }) {
                 ))}
               </div>
             )}
+            {product.notes && (
+              <p className="text-sm text-gray-600 italic">
+                {t("notes")}: {product.notes}
+              </p>
+            )}
           </div>
         </div>
 

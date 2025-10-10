@@ -363,6 +363,11 @@ function AdminDashboard() {
                                     ))}
                                   </div>
                                 ))}
+                              {item.notes && (
+                                <p className="text-sm text-gray-600 italic">
+                                  {t("notes")}: {item.notes}
+                                </p>
+                              )}
                             </div>
                           </div>
                           <div className="text-right">

@@ -164,6 +164,8 @@ exports.createOrder = async (req, res) => {
           quantity: p.quantity,
           additions,
           priceAtPurchase: matchedProduct.price,
+          isSpicy: p.isSpicy || false,
+          notes: p.notes || "",
         };
       })
     );
@@ -201,6 +203,8 @@ exports.createOrder = async (req, res) => {
       { path: "userId" },
       { path: "shippingAddress" },
     ]);
+
+    console.log("New Order Created:", populatedOrder);
 
     // Emit event to admins
     const io = req.app.get("io");

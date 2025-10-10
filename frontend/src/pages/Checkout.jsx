@@ -115,6 +115,7 @@ function Checkout() {
             quantity: p.quantity,
             isSpicy: p.isSpicy || false,
             additions: p.additions || [],
+            notes: p.notes || "",
           })),
           userId: user?._id,
           shippingAddress: selectedArea._id,
@@ -317,6 +318,11 @@ function Checkout() {
                             </Badge>
                           ))}
                         </ul>
+                      )}
+                      {product.notes && (
+                        <p className="text-sm text-gray-500 italic mt-1">
+                          {t("notes")}: {product.notes}
+                        </p>
                       )}
                     </div>
 

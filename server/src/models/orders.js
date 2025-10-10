@@ -16,6 +16,7 @@ const ordersSchema = new moongoose.Schema(
         ],
         priceAtPurchase: { type: Number, required: true },
         isSpicy: { type: Boolean, default: false },
+        notes: { type: String, default: "" },
       },
     ],
     totalPrice: { type: Number, required: true },
@@ -41,7 +42,6 @@ const ordersSchema = new moongoose.Schema(
       transactionId: { type: String },
       paidAt: { type: Date },
     },
-    notes: { type: String, default: "" },
   },
   { timestamps: true }
 );

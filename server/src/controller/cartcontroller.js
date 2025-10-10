@@ -6,7 +6,7 @@ const userModel = require("../models/user");
 exports.addToCart = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { productId, quantity, additions, isSpicy } = req.body;
+    const { productId, quantity, additions, isSpicy, notes } = req.body;
 
     if (!productId || !quantity || isNaN(quantity) || quantity <= 0) {
       return res.status(400).json({ message: "Invalid productId or quantity" });
@@ -40,7 +40,7 @@ exports.addToCart = async (req, res) => {
           { userId },
           {
             $push: {
-              products: { productId, quantity, additions, isSpicy },
+              products: { productId, quantity, additions, isSpicy, notes },
             },
           },
           { upsert: true, new: true }
