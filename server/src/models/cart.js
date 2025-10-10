@@ -18,6 +18,7 @@ const cartSchema = new moongoose.Schema(
         additions: [
           { type: moongoose.Schema.Types.ObjectId, ref: "additions" },
         ],
+        isSpicy: { type: Boolean, default: false },
       },
     ],
   },

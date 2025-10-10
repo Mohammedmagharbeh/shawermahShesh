@@ -6,7 +6,7 @@ const userModel = require("../models/user");
 exports.addToCart = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { productId, quantity, additions } = req.body;
+    const { productId, quantity, additions, isSpicy } = req.body;
 
     if (!productId || !quantity || isNaN(quantity) || quantity <= 0) {
       return res.status(400).json({ message: "Invalid productId or quantity" });
@@ -18,21 +18,31 @@ exports.addToCart = async (req, res) => {
     const product = await productsModel.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
+    // Try updating an existing cart item for this product
     let updatedCart = await cart
       .findOneAndUpdate(
         { userId, "products.productId": productId },
-        { $inc: { "products.$.quantity": quantity } },
-        { $addToSet: { "products.$.additions": { $each: additions || [] } } },
+        {
+          $inc: { "products.$.quantity": quantity },
+          ...(additions?.length
+            ? { $addToSet: { "products.$.additions": { $each: additions } } }
+            : {}),
+        },
         { new: true }
       )
       .populate("products.productId")
       .populate("products.additions");
 
+    // If product wasn't found, push a new one
     if (!updatedCart) {
       updatedCart = await cart
         .findOneAndUpdate(
           { userId },
-          { $push: { products: { productId, quantity, additions } } },
+          {
+            $push: {
+              products: { productId, quantity, additions, isSpicy },
+            },
+          },
           { upsert: true, new: true }
         )
         .populate("products.productId")
@@ -79,12 +89,10 @@ exports.updateCart = async (req, res) => {
     await userCart.save();
 
     // populate productId before sending
-    await userCart.populate("products.productId");
-    if (additions) {
-      console.log("Populating additions");
-
-      await userCart.populate("products.additions");
-    }
+    await userCart.populate([
+      { path: "products.productId" },
+      { path: "products.additions" },
+    ]);
 
     return res.status(200).json({
       message: "Cart updated successfully",
