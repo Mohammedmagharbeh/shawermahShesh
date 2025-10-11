@@ -115,7 +115,14 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // validate shipping address & get delivery fee
+    // ✅ Validate user
+    const foundUser = await User.findById(userId);
+    if (!foundUser)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+
+    // ✅ Validate shipping address
     const location = await locationsModel.findById(shippingAddress);
     if (!location) {
       return res
@@ -123,36 +130,41 @@ exports.createOrder = async (req, res) => {
         .json({ success: false, message: "Invalid shipping address" });
     }
 
-    // validate user
-    const foundUser = await User.findById(userId);
-    if (!foundUser) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
+    // ✅ Extract unique product IDs from cart/order
+    const productIds = products.map((p) =>
+      typeof p.productId === "object" ? p.productId._id : p.productId
+    );
+    const uniqueProductIds = [...new Set(productIds)];
 
-    // validate products
+    // ✅ Fetch products from DB
     const dbProducts = await productsModel.find({
-      _id: { $in: products.map((p) => p.productId) },
+      _id: { $in: uniqueProductIds },
     });
-    if (dbProducts.length !== products.length) {
+    const dbProductIds = dbProducts.map((p) => p._id.toString());
+
+    // ✅ Check for missing products
+    const missingProducts = uniqueProductIds.filter(
+      (pid) => !dbProductIds.includes(pid)
+    );
+    if (missingProducts.length > 0) {
       return res.status(400).json({
         success: false,
-        message: "One or more products not found",
+        message: `Products not found: ${missingProducts.join(", ")}`,
       });
     }
 
-    // enrich products with price at purchase
+    // ✅ Enrich each product item (handle duplicates with different additions/notes/spicy)
     const enrichedProducts = await Promise.all(
       products.map(async (p) => {
+        const productId =
+          typeof p.productId === "object" ? p.productId._id : p.productId;
         const matchedProduct = dbProducts.find(
-          (dp) => dp._id.toString() === p.productId
+          (dp) => dp._id.toString() === productId.toString()
         );
 
         const dbAdditions = await additionsModel.find({
           _id: { $in: p.additions || [] },
         });
-
         const additions = dbAdditions.map((a) => ({
           _id: a._id,
           name: a.name,
@@ -160,7 +172,7 @@ exports.createOrder = async (req, res) => {
         }));
 
         return {
-          productId: p.productId,
+          productId,
           quantity: p.quantity,
           additions,
           priceAtPurchase: matchedProduct.price,
@@ -170,7 +182,7 @@ exports.createOrder = async (req, res) => {
       })
     );
 
-    // calculate total price (products + delivery fee)
+    // ✅ Calculate total (products + additions + delivery)
     const productsTotal = enrichedProducts.reduce((sum, p) => {
       const additionsSum = p.additions.reduce(
         (aSum, add) => aSum + add.price,
@@ -181,7 +193,7 @@ exports.createOrder = async (req, res) => {
 
     const totalPrice = productsTotal + location.deliveryCost;
 
-    // create order
+    // ✅ Create the order
     const newOrder = await Order.create({
       userId,
       products: enrichedProducts,
@@ -196,7 +208,7 @@ exports.createOrder = async (req, res) => {
       },
     });
 
-    // populate related fields
+    // ✅ Populate for frontend
     const populatedOrder = await newOrder.populate([
       { path: "products.productId" },
       { path: "products.additions" },
@@ -204,15 +216,13 @@ exports.createOrder = async (req, res) => {
       { path: "shippingAddress" },
     ]);
 
-    console.log("New Order Created:", populatedOrder);
-
-    // Emit event to admins
+    // ✅ Notify admins (if socket.io enabled)
     const io = req.app.get("io");
-    io.emit("newOrder", newOrder); // 🔥 broadcast order to all connected admins
+    if (io) io.emit("newOrder", populatedOrder);
 
     res.status(201).json({ success: true, data: populatedOrder });
   } catch (error) {
-    console.error("Error in createOrder:", error);
+    console.error("❌ Error in createOrder:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Server error",

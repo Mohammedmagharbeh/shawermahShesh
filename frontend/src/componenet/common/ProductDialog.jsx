@@ -86,9 +86,7 @@ export function ProductDialog({ id, triggerLabel = "View Product" }) {
     );
 
     addToCart(product._id, quantity, spicy, selectedFullAdditions, notes);
-    toast.success(
-      `✅ تمت إضافة ${quantity} من ${product.name[selectedLanguage]}`
-    );
+    toast.success(`تمت إضافة ${quantity} من ${product.name[selectedLanguage]}`);
   };
 
   return (

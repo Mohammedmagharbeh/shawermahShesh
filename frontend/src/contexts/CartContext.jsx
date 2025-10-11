@@ -88,8 +88,6 @@ export const CartProvider = ({ children }) => {
       if (!res.ok) throw new Error("Failed to add to cart");
       const data = await res.json();
       setCart(data.cart);
-
-      toast.success("Item added to cart");
     } catch (error) {
       console.error(error);
       toast.error("Failed to add item to cart");
@@ -116,7 +114,7 @@ export const CartProvider = ({ children }) => {
   };
 
   // Remove product
-  const removeFromCart = async (productId) => {
+  const removeFromCart = async (productId, additions) => {
     try {
       const user = JSON.parse(sessionStorage.getItem("user"));
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}/cart/remove`, {
@@ -125,6 +123,7 @@ export const CartProvider = ({ children }) => {
         body: JSON.stringify({
           userId: user._id,
           productId,
+          additions: additions || [],
         }),
       });
       if (!res.ok) throw new Error("Failed to remove item");

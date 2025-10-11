@@ -6,7 +6,7 @@ const userModel = require("../models/user");
 exports.addToCart = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { productId, quantity, additions, isSpicy, notes } = req.body;
+    const { productId, quantity, additions = [], isSpicy, notes } = req.body;
 
     if (!productId || !quantity || isNaN(quantity) || quantity <= 0) {
       return res.status(400).json({ message: "Invalid productId or quantity" });
@@ -18,40 +18,49 @@ exports.addToCart = async (req, res) => {
     const product = await productsModel.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    // Try updating an existing cart item for this product
-    let updatedCart = await cart
-      .findOneAndUpdate(
-        { userId, "products.productId": productId },
-        {
-          $inc: { "products.$.quantity": quantity },
-          ...(additions?.length
-            ? { $addToSet: { "products.$.additions": { $each: additions } } }
-            : {}),
-        },
-        { new: true }
-      )
-      .populate("products.productId")
-      .populate("products.additions");
-
-    // If product wasn't found, push a new one
-    if (!updatedCart) {
-      updatedCart = await cart
-        .findOneAndUpdate(
-          { userId },
-          {
-            $push: {
-              products: { productId, quantity, additions, isSpicy, notes },
-            },
-          },
-          { upsert: true, new: true }
-        )
-        .populate("products.productId")
-        .populate("products.additions");
+    let userCart = await cart.findOne({ userId });
+    if (!userCart) {
+      userCart = await cart.create({ userId, products: [] });
     }
+
+    // ✅ Compare additions by their IDs (sorted)
+    const normalizeIds = (ids) => ids.map(String).sort();
+
+    const existingProductIndex = userCart.products.findIndex((item) => {
+      const sameProduct = item.productId.toString() === productId;
+      const sameSpicy = item.isSpicy === isSpicy;
+      const sameNotes = (item.notes || "") === (notes || "");
+      const sameAdditions =
+        JSON.stringify(normalizeIds(item.additions || [])) ===
+        JSON.stringify(normalizeIds(additions || []));
+      return sameProduct && sameAdditions && sameSpicy && sameNotes;
+    });
+
+    if (existingProductIndex > -1) {
+      // ✅ If exact same item (same additions, spicy, notes), increase quantity
+      userCart.products[existingProductIndex].quantity += quantity;
+    } else {
+      // ✅ Otherwise, add as new item
+      userCart.products.push({
+        productId,
+        quantity,
+        additions,
+        isSpicy,
+        notes,
+      });
+    }
+
+    await userCart.save();
+
+    // ✅ Populate before sending
+    await userCart.populate([
+      { path: "products.productId" },
+      { path: "products.additions" },
+    ]);
 
     return res.status(200).json({
       message: "Cart updated successfully",
-      cart: updatedCart,
+      cart: userCart,
     });
   } catch (error) {
     console.error("Error in addToCart:", error);
@@ -62,7 +71,7 @@ exports.addToCart = async (req, res) => {
 // ✅ Update Cart Item Quantity
 exports.updateCart = async (req, res) => {
   const cartId = req.params.id;
-  const { productId, quantity, additions } = req.body;
+  const { productId, additions = [], isSpicy, notes, quantity } = req.body;
 
   try {
     if (!productId || quantity == null || isNaN(quantity) || quantity <= 0) {
@@ -74,21 +83,26 @@ exports.updateCart = async (req, res) => {
     const userCart = await cart.findById(cartId);
     if (!userCart) return res.status(404).json({ message: "Cart not found" });
 
-    const productIndex = userCart.products.findIndex(
-      (p) => p.productId.toString() === productId
-    );
+    const normalizeIds = (ids) => ids.map(String).sort();
+
+    const productIndex = userCart.products.findIndex((p) => {
+      const sameProduct = p.productId.toString() === productId;
+      const sameSpicy = p.isSpicy === isSpicy;
+      const sameNotes = (p.notes || "") === (notes || "");
+      const sameAdditions =
+        JSON.stringify(normalizeIds(p.additions || [])) ===
+        JSON.stringify(normalizeIds(additions || []));
+      return sameProduct && sameAdditions && sameSpicy && sameNotes;
+    });
+
     if (productIndex === -1)
       return res.status(404).json({ message: "Product not found in cart" });
 
+    // ✅ Update quantity only for the exact item
     userCart.products[productIndex].quantity = quantity;
-
-    if (additions) {
-      userCart.products[productIndex].additions = additions;
-    }
 
     await userCart.save();
 
-    // populate productId before sending
     await userCart.populate([
       { path: "products.productId" },
       { path: "products.additions" },
@@ -106,7 +120,7 @@ exports.updateCart = async (req, res) => {
 
 // ✅ Remove Specific Item from Cart
 exports.removeFromCart = async (req, res) => {
-  const { userId, productId } = req.body;
+  const { userId, productId, additions } = req.body; // include additions
 
   try {
     if (!userId || !productId) {
@@ -118,19 +132,36 @@ exports.removeFromCart = async (req, res) => {
     const userCart = await cart.findOne({ userId });
     if (!userCart) return res.status(404).json({ message: "Cart not found" });
 
-    const productIndex = userCart.products.findIndex(
-      (p) => p.productId.toString() === productId
-    );
+    // Find product that matches both productId and additions
+    const productIndex = userCart.products.findIndex((p) => {
+      const sameProduct = p.productId.toString() === productId;
+
+      // Compare additions as sets (to ensure same selections)
+      const sameAdditions =
+        (!additions && (!p.additions || p.additions.length === 0)) ||
+        (Array.isArray(additions) &&
+          Array.isArray(p.additions) &&
+          additions.length === p.additions.length &&
+          additions.every((a) =>
+            p.additions.map(String).includes(a.toString())
+          ));
+
+      return sameProduct && sameAdditions;
+    });
+
     if (productIndex === -1) {
       return res.status(404).json({ message: "Product not found in cart" });
     }
 
-    // remove the product
+    // remove the matched product
     userCart.products.splice(productIndex, 1);
     await userCart.save();
 
-    // populate productId before sending
-    await userCart.populate("products.productId");
+    // repopulate after save
+    await userCart.populate([
+      { path: "products.productId" },
+      { path: "products.additions" },
+    ]);
 
     return res.status(200).json({
       message: "Product removed from cart",

@@ -12,7 +12,7 @@ const Cart = () => {
   const { t } = useTranslation();
 
   if (!user || !user._id) {
-toast.error(t("cart_login_required")); // "يجب تسجيل الدخول لإتمام الطلب"
+    toast.error(t("cart_login_required")); // "يجب تسجيل الدخول لإتمام الطلب"
     window.location.href = "/login";
     return null;
   }
@@ -65,7 +65,12 @@ toast.error(t("cart_login_required")); // "يجب تسجيل الدخول لإت
               {cart.products.map((product) => (
                 <CartCard
                   product={product}
-                  key={product?.productId?._id ?? "id not found"}
+                  key={
+                    (product?.productId?._id ?? "id not found") +
+                    product.notes +
+                    product.isSpicy +
+                    product.additions.map((a) => a._id).join(",")
+                  }
                 />
               ))}
             </div>
