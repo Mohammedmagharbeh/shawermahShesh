@@ -17,6 +17,7 @@ function MyOrders() {
   const { orders, getOrdersByUserId } = useOrder();
   const { user } = useUser();
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
   useEffect(() => {
     if (user?._id) {
@@ -137,14 +138,16 @@ function MyOrders() {
                           <img
                             src={burger}
                             alt={
-                              item.productId?.name ?? "Unknown Product Image"
+                              item.productId?.name[selectedLanguage] ??
+                              "Unknown Product Image"
                             }
                             className="h-full w-full object-cover"
                           />
                         </div>
                         <div>
                           <p className="font-semibold text-foreground">
-                            {item.productId?.name ?? "Unknown Product Name"}
+                            {item.productId?.name[selectedLanguage] ??
+                              "Unknown Product Name"}
                           </p>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>Quantity: {item.quantity}</span>
