@@ -116,6 +116,11 @@ export function Dialog({ name, order, updateOrders }) {
         productId: p.productId._id,
         quantity: p.quantity,
         priceAtPurchase: p.productId.price,
+        additions: Array.isArray(p.additions)
+          ? p.additions.map((a) => a._id)
+          : [],
+        isSpicy: p.isSpicy || false,
+        notes: p.notes || "",
       })),
     };
 
@@ -138,6 +143,9 @@ export function Dialog({ name, order, updateOrders }) {
       toast.error(t("failed_to_update_order"));
     }
   };
+
+  // console.log(order.products);
+  console.log(updatedOrder);
 
   return (
     <DialogUi>

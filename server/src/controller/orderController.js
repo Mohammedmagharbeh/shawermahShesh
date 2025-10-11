@@ -2,7 +2,6 @@ const Order = require("../models/orders");
 const User = require("../models/user");
 const productsModel = require("../models/products");
 const locationsModel = require("../models/locations");
-const locations = require("../models/locations");
 const additionsModel = require("../models/additions");
 const { default: mongoose } = require("mongoose");
 

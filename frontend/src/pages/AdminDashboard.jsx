@@ -77,9 +77,9 @@ function AdminDashboard() {
 
   const handleDeleteOrder = (orderId) => {
     toast(
-      (t) => (
+      () => (
         <div className="flex flex-col gap-2">
-          <span>{t("confirm_delete_order")}</span> // النص صار قابل للترجمة
+          <span>{t("confirm_delete_order")}</span>
           <div className="flex justify-end gap-2">
             <Button
               size="sm"
@@ -90,14 +90,14 @@ function AdminDashboard() {
                 toast.success(t("order_deleted")); // الرسالة بعد الحذف مترجمة
               }}
             >
-              {t("yes")} // زر "نعم" مترجم
+              {t("yes")}
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={() => toast.dismiss(t.id)}
             >
-              {t("no")} // زر "لا" مترجم
+              {t("no")}
             </Button>
           </div>
         </div>
