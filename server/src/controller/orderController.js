@@ -15,7 +15,7 @@ exports.getAllOrders = async (req, res) => {
     )
       .populate({
         path: "products.productId",
-        select: "name price image", // limit product fields
+        // select: "name price image description", // limit product fields
         options: { lean: true },
       })
       .populate({
@@ -32,6 +32,7 @@ exports.getAllOrders = async (req, res) => {
         select: "deliveryCost name",
         options: { lean: true },
       })
+      .populate({ path: "payment" })
       .lean() // 2️⃣ Use lean() to skip Mongoose doc overhead and improve speed
       .limit(100) // 3️⃣ Prevent fetching thousands at once — use pagination
       .sort({ createdAt: -1 }); // 4️⃣ Sort newest first
