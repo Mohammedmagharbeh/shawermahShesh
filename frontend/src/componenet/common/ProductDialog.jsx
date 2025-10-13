@@ -397,37 +397,7 @@ export function ProductDialog({ id, triggerLabel = "View Product" }) {
 
               <div className="space-y-4 mt-6">
                 {/* الكمية */}
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="flex items-center border-2 border-gray-200 rounded-lg">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-12 w-12 hover:bg-red-50 hover:text-red-500"
-                      onClick={() => handleQuantityChange(-1)}
-                    >
-                      <Minus className="w-4 h-4" />
-                    </Button>
-                    <span className="w-16 text-center font-semibold text-lg">
-                      {quantity}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-12 w-12 hover:bg-red-50 hover:text-red-500"
-                      onClick={() => handleQuantityChange(1)}
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-
-                  <Button
-                    onClick={handleAddToCart}
-                    className="flex-1 bg-red-500 hover:bg-red-600 text-white h-12 text-lg font-semibold"
-                  >
-                    <ShoppingCart className="w-5 h-5 mr-2" />
-                    أضف إلى السلة - ${(product.price * quantity).toFixed(2)}
-                  </Button>
-                </div>
+               
 
                 {/* اختيار حار أو غير حار */}
                 <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -490,6 +460,37 @@ export function ProductDialog({ id, triggerLabel = "View Product" }) {
                     setNotes(e.target.value);
                   }}
                 />
+                 <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="flex items-center border-2 border-gray-200 rounded-lg">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-12 w-12 hover:bg-red-50 hover:text-red-500"
+                      onClick={() => handleQuantityChange(-1)}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <span className="w-16 text-center font-semibold text-lg">
+                      {quantity}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-12 w-12 hover:bg-red-50 hover:text-red-500"
+                      onClick={() => handleQuantityChange(1)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <Button
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white h-12 text-lg font-semibold"
+                  >
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    أضف إلى السلة - ${(product.price * quantity).toFixed(2)}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
