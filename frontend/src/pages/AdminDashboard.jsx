@@ -152,6 +152,8 @@ function AdminDashboard() {
 
   if (loading) return <Loading />;
 
+  console.log(orders);
+
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
       <div className="mx-auto max-w-7xl">
@@ -212,6 +214,14 @@ function AdminDashboard() {
                       </span>
                       <span className="font-mono text-sm font-semibold text-foreground">
                         #{order._id?.slice(-8) || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        اسم العميل
+                      </span>
+                      <span className="text-sm font-semibold text-foreground">
+                        {order.userDetails?.name || "Unknown"}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
