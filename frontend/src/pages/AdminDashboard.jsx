@@ -127,7 +127,7 @@ function AdminDashboard() {
       "Payment Method": order.payment?.method || "N/A",
       "Total Price (JOD)": order.totalPrice,
       "Delivery Cost": order.shippingAddress?.deliveryCost || 0,
-      Address: `${order.shippingAddress?.name || "N/A"} (Sector ${order.shippingAddress?.SECNO || "N/A"})`,
+      Address: `${order.shippingAddress?.name || "N/A"}`,
       Products: order.products
         .map(
           (item) =>
@@ -241,13 +241,26 @@ function AdminDashboard() {
                           : "N/A"}
                       </span>
                     </div>
+
+
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        نوع الطلب
+                      </span>
+                      <span className="text-sm text-foreground">
+                        {order.shippingAddress?.name || "N/A"} 
+                        
+                      </span>
+                    </div>
+
+
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground">
                         {t("address")}
                       </span>
                       <span className="text-sm text-foreground">
-                        {order.shippingAddress?.name || "N/A"} (
-                        {`Sector ${order.shippingAddress?.SECNO || "N/A"}`})
+                        {order.shippingAddress?.name || "N/A"} 
+                        
                       </span>
                     </div>
                   </div>
