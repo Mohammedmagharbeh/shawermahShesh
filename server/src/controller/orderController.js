@@ -8,13 +8,36 @@ const { default: mongoose } = require("mongoose");
 // get all orders
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
-      .populate("products.productId")
-      .populate("products.additions")
-      .populate("userId")
-      .populate("shippingAddress");
+    // 1️⃣ Only fetch essential fields — avoid pulling everything from every model
+    const orders = await Order.find(
+      {},
+      "status totalPrice createdAt userId shippingAddress products"
+    )
+      .populate({
+        path: "products.productId",
+        // select: "name price image description", // limit product fields
+        options: { lean: true },
+      })
+      .populate({
+        path: "products.additions",
+        options: { lean: true },
+      })
+      .populate({
+        path: "userId",
+        select: "phone role",
+        options: { lean: true },
+      })
+      .populate({
+        path: "shippingAddress",
+        select: "deliveryCost name",
+        options: { lean: true },
+      })
+      .populate({ path: "payment" })
+      .lean() // 2️⃣ Use lean() to skip Mongoose doc overhead and improve speed
+      .limit(100) // 3️⃣ Prevent fetching thousands at once — use pagination
+      .sort({ createdAt: -1 }); // 4️⃣ Sort newest first
 
-    res.status(200).json({ data: orders });
+    res.status(200).json({ success: true, count: orders.length, data: orders });
   } catch (error) {
     console.error("Error in getAllOrders:", error);
     res.status(500).json({ success: false, message: "Server error" });
