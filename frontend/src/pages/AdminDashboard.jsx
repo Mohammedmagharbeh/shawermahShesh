@@ -248,8 +248,11 @@ function AdminDashboard() {
                       </span>
                       <span className="text-sm text-foreground">
                         {order.orderType === "delivery" ? "توصيل" : "استلام"}
+                        
                       </span>
+                      
                     </div>
+                    
                     {order.orderType === "delivery" && (
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-medium text-muted-foreground">
