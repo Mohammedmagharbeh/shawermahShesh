@@ -48,7 +48,9 @@ export const CartProvider = ({ children }) => {
   // Calculate total whenever cart changes
   useEffect(() => {
     const newTotal = cart.products?.reduce((acc, item) => {
-      const basePrice = item.productId?.price || 0;
+      let basePrice = item.productId?.price || 0;
+      if (item.productId?.discount)
+        basePrice = basePrice - (basePrice * item.productId.discount) / 100;
       const quantity = item.quantity || 0;
 
       // 🧀 حساب مجموع أسعار الإضافات

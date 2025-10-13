@@ -67,7 +67,13 @@ function CartCard({ product }) {
             {t("price")}:
           </span>
           <span className="text-xl font-bold text-red-600">
-            {product?.productId?.price ?? "Price Unavailable"} JOD
+            {product.productId.discount === 0
+              ? (product?.productId?.price).toFixed(2)
+              : ((
+                  product.productId.price -
+                  (product.productId.discount * product.productId.price) / 100
+                ).toFixed(2) ?? "Price Unavailable")}
+            JOD
           </span>
         </div>
 
@@ -99,9 +105,17 @@ function CartCard({ product }) {
           </span>
 
           <span className="text-xl font-bold text-red-700">
-            {(product?.productId?.price ?? 0 * product?.quantity ?? 0).toFixed(
-              2
-            )}
+            {product.productId.discount === 0
+              ? product?.productId?.price
+              : (
+                  product.productId.price -
+                    (
+                      product.productId.discount * product.productId.price
+                    ).toFixed(2) /
+                      100 ??
+                  0 * product?.quantity ??
+                  0
+                ).toFixed(2)}
             JOD
           </span>
         </div>
