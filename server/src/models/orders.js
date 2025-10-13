@@ -42,6 +42,11 @@ const ordersSchema = new moongoose.Schema(
       transactionId: { type: String },
       paidAt: { type: Date },
     },
+    orderType: {
+      type: String,
+      enum: ["delivery", "pickup"],
+      required: true,
+    },
   },
   { timestamps: true }
 );

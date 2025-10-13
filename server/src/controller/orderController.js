@@ -126,9 +126,16 @@ exports.createOrder = async (req, res) => {
       paymentStatus,
       transactionId,
       paidAt,
+      orderType,
     } = req.body;
 
-    if (!userId || !products?.length || !shippingAddress || !paymentMethod) {
+    if (
+      !userId ||
+      !products?.length ||
+      !shippingAddress ||
+      !paymentMethod ||
+      !orderType
+    ) {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
@@ -198,6 +205,7 @@ exports.createOrder = async (req, res) => {
           priceAtPurchase: matchedProduct.price,
           isSpicy: p.isSpicy || false,
           notes: p.notes || "",
+          orderType,
         };
       })
     );
@@ -226,6 +234,7 @@ exports.createOrder = async (req, res) => {
         transactionId: transactionId || null,
         paidAt: paidAt || null,
       },
+      orderType,
     });
 
     // ✅ Populate for frontend

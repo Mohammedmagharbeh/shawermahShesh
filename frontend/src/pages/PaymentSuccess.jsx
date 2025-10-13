@@ -242,6 +242,7 @@ function PaymentSuccess() {
             paymentStatus: isSuccess ? "paid" : "unpaid",
             transactionId: paymentId,
             paidAt: isSuccess ? new Date() : null,
+            orderType: storedCart.orderType || "unknown",
           });
 
           toast.success(t("order_placed_successfully"));

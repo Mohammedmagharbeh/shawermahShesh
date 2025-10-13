@@ -242,27 +242,24 @@ function AdminDashboard() {
                       </span>
                     </div>
 
-
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground">
                         نوع الطلب
                       </span>
                       <span className="text-sm text-foreground">
-                        {order.shippingAddress?.name || "N/A"} 
-                        
+                        {order.orderType === "delivery" ? "توصيل" : "استلام"}
                       </span>
                     </div>
-
-
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-muted-foreground">
-                        {t("address")}
-                      </span>
-                      <span className="text-sm text-foreground">
-                        {order.shippingAddress?.name || "N/A"} 
-                        
-                      </span>
-                    </div>
+                    {order.orderType === "delivery" && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {t("address")}
+                        </span>
+                        <span className="text-sm text-foreground">
+                          {order.shippingAddress?.name || "N/A"}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-3">

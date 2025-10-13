@@ -100,7 +100,11 @@ function Checkout() {
         }
         sessionStorage.setItem(
           "pendingOrder",
-          JSON.stringify({ ...cart, shippingAddress: selectedArea._id })
+          JSON.stringify({
+            ...cart,
+            shippingAddress: selectedArea._id,
+            orderType,
+          })
         );
         window.location.href = res.data.Data.PaymentURL;
       } catch (error) {
@@ -120,6 +124,7 @@ function Checkout() {
           userId: user?._id,
           shippingAddress: selectedArea._id,
           paymentMethod: "cash",
+          orderType,
         });
 
         toast.success(t("checkout_success"));
