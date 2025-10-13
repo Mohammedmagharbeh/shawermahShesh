@@ -15,7 +15,6 @@ exports.getAllOrders = async (req, res) => {
     )
       .populate({
         path: "products.productId",
-        // select: "name price image description", // limit product fields
         options: { lean: true },
       })
       .populate({
@@ -29,7 +28,6 @@ exports.getAllOrders = async (req, res) => {
       })
       .populate({
         path: "shippingAddress",
-        select: "deliveryCost name",
         options: { lean: true },
       })
       .populate({ path: "payment" })
