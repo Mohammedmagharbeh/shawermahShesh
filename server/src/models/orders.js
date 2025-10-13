@@ -47,6 +47,13 @@ const ordersSchema = new moongoose.Schema(
       enum: ["delivery", "pickup"],
       required: true,
     },
+    userDetails: {
+      type: {
+        name: { type: String, required: true },
+        apartment: { type: String },
+      },
+      required: true,
+    },
   },
   { timestamps: true }
 );

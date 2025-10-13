@@ -22,9 +22,15 @@ function Checkout() {
   const [error, setError] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [orderType, setOrderType] = useState("delivery"); // default delivery
+  const [details, setDetails] = useState({
+    name: user?.name || "",
+    apartment: "",
+    phone: user?.phone || "",
+  });
   const navigate = useNavigate();
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+
   useEffect(() => {
     async function fetchAreas() {
       try {
@@ -125,6 +131,7 @@ function Checkout() {
           shippingAddress: selectedArea._id,
           paymentMethod: "cash",
           orderType,
+          userDetails: details,
         });
 
         toast.success(t("checkout_success"));
@@ -209,6 +216,12 @@ function Checkout() {
                       placeholder={`${detail.name.toLowerCase()}`}
                       defaultValue={detail.defaultValue || ""}
                       readOnly={detail.readOnly || false}
+                      onChange={(e) =>
+                        setDetails({
+                          ...details,
+                          [detail.label]: e.target.value,
+                        })
+                      }
                     />
                   )}
                 </div>

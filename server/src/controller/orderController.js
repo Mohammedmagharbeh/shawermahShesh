@@ -11,7 +11,7 @@ exports.getAllOrders = async (req, res) => {
     // 1️⃣ Only fetch essential fields — avoid pulling everything from every model
     const orders = await Order.find(
       {},
-      "status totalPrice createdAt userId shippingAddress products"
+      "status totalPrice createdAt userId shippingAddress products orderType userDetails payment"
     )
       .populate({
         path: "products.productId",
@@ -127,6 +127,7 @@ exports.createOrder = async (req, res) => {
       transactionId,
       paidAt,
       orderType,
+      userDetails,
     } = req.body;
 
     if (
@@ -134,7 +135,8 @@ exports.createOrder = async (req, res) => {
       !products?.length ||
       !shippingAddress ||
       !paymentMethod ||
-      !orderType
+      !orderType ||
+      !userDetails?.name
     ) {
       return res.status(400).json({
         success: false,
@@ -206,6 +208,7 @@ exports.createOrder = async (req, res) => {
           isSpicy: p.isSpicy || false,
           notes: p.notes || "",
           orderType,
+          userDetails,
         };
       })
     );
@@ -235,6 +238,7 @@ exports.createOrder = async (req, res) => {
         paidAt: paidAt || null,
       },
       orderType,
+      userDetails,
     });
 
     // ✅ Populate for frontend
