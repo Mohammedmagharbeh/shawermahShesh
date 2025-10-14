@@ -54,6 +54,7 @@ const ordersSchema = new moongoose.Schema(
       },
       required: true,
     },
+    sequenceNumber: { type: Number, required: true },
   },
   { timestamps: true }
 );

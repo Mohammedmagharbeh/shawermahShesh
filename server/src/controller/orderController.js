@@ -4,15 +4,12 @@ const productsModel = require("../models/products");
 const locationsModel = require("../models/locations");
 const additionsModel = require("../models/additions");
 const { default: mongoose } = require("mongoose");
+const counterModel = require("../models/counter");
 
 // get all orders
 exports.getAllOrders = async (req, res) => {
   try {
-    // 1️⃣ Only fetch essential fields — avoid pulling everything from every model
-    const orders = await Order.find(
-      {},
-      "status totalPrice createdAt userId shippingAddress products orderType userDetails payment"
-    )
+    const orders = await Order.find({})
       .populate({
         path: "products.productId",
         options: { lean: true },
@@ -113,6 +110,16 @@ exports.getOrdersByUserId = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+async function getNextDailySequence() {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const counter = await counterModel.findOneAndUpdate(
+    { date: todayStr },
+    { $inc: { sequence: 1 } },
+    { new: true, upsert: true }
+  );
+  return counter.sequence;
+}
 
 // create new order
 exports.createOrder = async (req, res) => {
@@ -239,6 +246,7 @@ exports.createOrder = async (req, res) => {
       },
       orderType,
       userDetails,
+      sequenceNumber: await getNextDailySequence(),
     });
 
     // ✅ Populate for frontend
