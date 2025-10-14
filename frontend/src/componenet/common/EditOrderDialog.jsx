@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function Dialog({ name, order, updateOrders }) {
+export function EditOrderDialog({ name, order, updateOrders }) {
   const [updatedOrder, setUpdatedOrder] = useState({
     totalPrice: order.totalPrice,
     paymentStatus: order.payment?.status,
@@ -143,9 +143,6 @@ export function Dialog({ name, order, updateOrders }) {
       toast.error(t("failed_to_update_order"));
     }
   };
-
-  // console.log(order.products);
-  console.log(updatedOrder);
 
   return (
     <DialogUi>

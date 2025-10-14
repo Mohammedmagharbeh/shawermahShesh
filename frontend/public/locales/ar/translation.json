@@ -249,5 +249,7 @@
   "verify_otp": "تحقق من OTP",
   "verifying": "جار التحقق",
   "logging_in": "جار تسجيل الدخول",
-  "additions": "إضافات"
+  "additions": "إضافات",
+  "customer_name": "اسم العميل",
+  "detailed_address": "العنوان التفصيلي"
 }

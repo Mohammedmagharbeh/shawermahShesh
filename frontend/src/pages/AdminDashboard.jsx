@@ -19,7 +19,14 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { toast } from "react-hot-toast";
 import product_placeholder from "../assets/product_placeholder.jpeg";
-import { Dialog } from "@/componenet/common/Dialog";
+import { EditOrderDialog } from "@/componenet/common/EditOrderDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
@@ -34,12 +41,35 @@ const socket = io(import.meta.env.VITE_SOCKET_URL);
 function AdminDashboard() {
   const { t } = useTranslation(); // <-- صح داخل الدالة
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
-
   const { orders, getAllOrders, updateOrder, deleteOrder, loading } =
     useOrder();
   const [filterDate, setFilterDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [soundAllowed, setSoundAllowed] = useState(false);
+  const [sound, setSound] = useState(null);
+  const [incomingOrder, setIncomingOrder] = useState(null);
+
+  useEffect(() => {
+    // Preload the sound
+    const audio = new Audio(newOrderSound);
+    audio.loop = true;
+    setSound(audio);
+  }, []);
+
+  const enableSound = () => {
+    if (sound) {
+      sound
+        .play()
+        .then(() => {
+          sound.pause();
+          sound.currentTime = 0;
+          setSoundAllowed(true);
+          toast.success("🔔 Sound notifications enabled!");
+        })
+        .catch((err) => console.log("Sound activation failed:", err));
+    }
+  };
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
@@ -52,18 +82,24 @@ function AdminDashboard() {
   useEffect(() => {
     socket.on("newOrder", (order) => {
       getAllOrders();
+      setIncomingOrder(order);
+
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification("📦 New Order!", {
           body: `${order.userId.phone} ordered for ${order.totalPrice} JOD`,
           icon: "/order-icon.png",
         });
       }
-      const sound = new Audio(newOrderSound);
-      sound.play().catch((err) => console.log("Play blocked:", err));
+
+      if (soundAllowed && sound) {
+        console.log("Playing sound for incoming order");
+        sound.currentTime = 0;
+        sound.play().catch((err) => console.log("Play blocked:", err));
+      }
     });
 
     return () => socket.off("newOrder");
-  }, []);
+  }, [soundAllowed, sound]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -152,8 +188,6 @@ function AdminDashboard() {
 
   if (loading) return <Loading />;
 
-  console.log(orders);
-
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
       <div className="mx-auto max-w-7xl">
@@ -168,6 +202,57 @@ function AdminDashboard() {
                 {filteredOrders.length}
               </span>
             </p>
+
+            <Dialog open={!soundAllowed}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Allow Notifications</DialogTitle>
+                </DialogHeader>
+                <div className="flex gap-2 mt-4 justify-end">
+                  <Button
+                    onClick={enableSound}
+                    className="bg-green-500 text-white"
+                  >
+                    Enable Sound Notifications
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog
+              open={incomingOrder !== null}
+              onOpenChange={(open) => {
+                if (!open && sound) {
+                  sound.pause();
+                  sound.currentTime = 0;
+                }
+                !open && setIncomingOrder(null);
+              }}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>📦 New Order!</DialogTitle>
+                  <DialogDescription>
+                    Phone: {incomingOrder?.userId.phone} <br />
+                    Total: {incomingOrder?.totalPrice} JOD
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex gap-2 mt-4 justify-end">
+                  <Button
+                    onClick={() => {
+                      if (sound) {
+                        sound.pause();
+                        sound.currentTime = 0;
+                      }
+                      setIncomingOrder(null);
+                    }}
+                  >
+                    Accept
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <input
               type="date"
               value={filterDate}
@@ -218,10 +303,18 @@ function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground">
-                        اسم العميل
+                        {t("customer_name")}:
                       </span>
                       <span className="text-sm font-semibold text-foreground">
                         {order.userDetails?.name || "Unknown"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {t("detailed_address")}:
+                      </span>
+                      <span className="text-sm font-semibold text-foreground">
+                        {order.userDetails?.apartment || "Unknown"}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -254,7 +347,7 @@ function AdminDashboard() {
 
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground">
-                        نوع الطلب
+                        {t("order_type")}:
                       </span>
                       <span className="text-sm text-foreground">
                         {order.orderType === "delivery" ? "توصيل" : "استلام"}
@@ -434,7 +527,7 @@ function AdminDashboard() {
                 </div>
 
                 <div className="mt-6 flex flex-col gap-3 border-t pt-4 md:flex-row md:items-center md:justify-end">
-                  <Dialog
+                  <EditOrderDialog
                     name={t("edit_order")} // <-- هنا النص مترجم
                     order={order}
                     updateOrders={getAllOrders}

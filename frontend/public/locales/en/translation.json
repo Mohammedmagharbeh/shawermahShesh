@@ -251,5 +251,7 @@
   "verify_otp": "Verify OTP",
   "verifying": "Verifying",
   "logging_in": "Logging in",
-  "additions": "Additions"
+  "additions": "Additions",
+  "customer_name": "Customer Name",
+  "detailed_address": "Detailed Address"
 }
