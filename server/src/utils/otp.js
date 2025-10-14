@@ -31,13 +31,13 @@ async function sendOTP(phone, otp) {
   return { otp, response: response.data };
 }
 
-async function sendOrderConfirm(phone, status) {
+async function sendOrderConfirm(phone) {
   const senderid = "Sh.Sheesh";
   const accname = "highfit";
   const accpass = "RwQ$$8P_m@RA!Dsd88";
 
   // 3. Build the message
-  const msg = `Your Order has been ${status}`;
+  const msg = `تم التأكيد - طلبك قيد التحضير .`;
   const encodedMsg = encodeURIComponent(msg);
   const encodedPass = encodeURIComponent(accpass);
 

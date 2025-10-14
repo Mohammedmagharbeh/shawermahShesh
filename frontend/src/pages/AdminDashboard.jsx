@@ -245,6 +245,7 @@ function AdminDashboard() {
                         sound.currentTime = 0;
                       }
                       setIncomingOrder(null);
+                      updateOrder(incomingOrder._id, { status: "Confirmed" });
                     }}
                   >
                     Accept

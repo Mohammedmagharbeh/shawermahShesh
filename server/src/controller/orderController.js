@@ -304,9 +304,9 @@ exports.updateOrder = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    if (updates.status) {
+    if (updates.status === "Confirmed") {
       const { sendOrderConfirm } = require("../utils/otp");
-      await sendOrderConfirm(updatedOrder.userId.phone, updates.status);
+      await sendOrderConfirm(updatedOrder.userId.phone);
     }
 
     res.status(200).json(updatedOrder);
