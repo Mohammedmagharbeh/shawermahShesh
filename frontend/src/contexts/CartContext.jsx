@@ -97,14 +97,23 @@ export const CartProvider = ({ children }) => {
   };
 
   // Update quantity
-  const updateQuantity = async (productId, quantity) => {
+  const updateQuantity = async (
+    productId,
+    { quantity, additions, isSpicy, notes }
+  ) => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BASE_URL}/cart/update/${cart._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId, quantity }),
+          body: JSON.stringify({
+            productId,
+            quantity,
+            additions,
+            isSpicy,
+            notes,
+          }),
         }
       );
       if (!res.ok) throw new Error("Failed to update cart");

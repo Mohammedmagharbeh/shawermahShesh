@@ -8,6 +8,12 @@ function CartCard({ product }) {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
+  const unitPrice =
+    product.productId.discount === 0
+      ? product.productId.price
+      : product.productId.price -
+        (product.productId.discount * product.productId.price) / 100;
+
   return (
     <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
@@ -87,10 +93,12 @@ function CartCard({ product }) {
               type="number"
               value={product.quantity}
               onChange={(e) =>
-                updateQuantity(
-                  product.productId._id,
-                  Number.parseInt(e.target.value, 10)
-                )
+                updateQuantity(product.productId._id, {
+                  quantity: Number.parseInt(e.target.value, 10),
+                  additions: product.additions.map((a) => a._id),
+                  isSpicy: product.isSpicy,
+                  notes: product.notes,
+                })
               }
               className="w-20 px-3 py-2 border-2 border-red-200 rounded-lg text-center font-semibold focus:border-red-500 focus:outline-none transition-colors"
               min="1"
@@ -105,18 +113,7 @@ function CartCard({ product }) {
           </span>
 
           <span className="text-xl font-bold text-red-700">
-            {product.productId.discount === 0
-              ? product?.productId?.price
-              : (
-                  product.productId.price -
-                    (
-                      product.productId.discount * product.productId.price
-                    ).toFixed(2) /
-                      100 ??
-                  0 * product?.quantity ??
-                  0
-                ).toFixed(2)}
-            JOD
+            {(unitPrice * product.quantity).toFixed(2)} JOD
           </span>
         </div>
       </div>

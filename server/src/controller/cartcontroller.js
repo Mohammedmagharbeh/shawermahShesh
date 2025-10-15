@@ -92,6 +92,7 @@ exports.updateCart = async (req, res) => {
       const sameAdditions =
         JSON.stringify(normalizeIds(p.additions || [])) ===
         JSON.stringify(normalizeIds(additions || []));
+
       return sameProduct && sameAdditions && sameSpicy && sameNotes;
     });
 
