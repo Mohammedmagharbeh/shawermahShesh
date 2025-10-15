@@ -51,6 +51,8 @@ function OtpVerification() {
       });
 
       toast.success(t("otp_verified"));
+      if (User.role === "employee") navigate("/admin/dashboard");
+
       navigate("/");
     } catch (error) {
       toast.error(t("otp_invalid"));
