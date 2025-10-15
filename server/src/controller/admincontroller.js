@@ -1,4 +1,4 @@
-const { CATEGORIES } = require("../constants");
+const { CATEGORIES, AR_CATEGORIES, EN_CATEGORIES } = require("../constants");
 const products = require("../models/products");
 
 // for post
@@ -8,7 +8,8 @@ exports.postEat = async (req, res) => {
       arName,
       enName,
       price,
-      category,
+      arCategory,
+      enCategory,
       image,
       arDescription,
       enDescription,
@@ -17,14 +18,18 @@ exports.postEat = async (req, res) => {
       !arName ||
       !enName ||
       !price ||
-      !category ||
+      !arCategory ||
+      !enCategory ||
       !arDescription ||
       !enDescription
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (!CATEGORIES.includes(category)) {
+    if (
+      !EN_CATEGORIES.includes(enCategory) ||
+      !AR_CATEGORIES.includes(arCategory)
+    ) {
       return res.status(400).json({ message: "Invalid category" });
     }
 
@@ -34,7 +39,10 @@ exports.postEat = async (req, res) => {
         en: enName,
       },
       price: price,
-      category: category,
+      category: {
+        ar: arCategory,
+        en: enCategory,
+      },
       image: image,
       description: {
         ar: arDescription,

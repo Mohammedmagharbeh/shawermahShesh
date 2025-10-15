@@ -1,5 +1,5 @@
 // product Constants
-export const CATEGORIES = [
+export const EN_CATEGORIES = [
   "Burgers",
   "Snacks",
   "drinks",
@@ -11,6 +11,20 @@ export const CATEGORIES = [
   "Kids",
   "Sauces",
   "Sides",
+];
+
+export const AR_CATEGORIES = [
+  "برجر",
+  "وجبات خفيفة",
+  "مشروبات",
+  "شاورما",
+  "بوكس",
+  "أطباق",
+  "مقبلات",
+  "سلطات",
+  "أطفال",
+  "صلصات",
+  "جانبية",
 ];
 
 // Order Constants
