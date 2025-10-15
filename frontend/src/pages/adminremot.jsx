@@ -31,7 +31,8 @@ export default function AdminProductPanel() {
     arDescription: "",
     enDescription: "",
     image: "",
-    category: "",
+    arCategory: "",
+    enCategory: "",
   });
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,7 +53,9 @@ export default function AdminProductPanel() {
         const allProducts = res.data.data || [];
         setProducts(allProducts);
         const uniqueCategories = [
-          ...new Set(allProducts.map((p) => p.category)),
+          ...new Set(
+            allProducts.map((p) => p.category[selectedLanguage] || p.category)
+          ),
         ];
         setCategories(["all", ...uniqueCategories]);
         setSelectedCategory("all");
@@ -121,7 +124,11 @@ export default function AdminProductPanel() {
 
       const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`);
       const allProducts = res.data.data || [];
-      const uniqueCategories = [...new Set(allProducts.map((p) => p.category))];
+      const uniqueCategories = [
+        ...new Set(
+          allProducts.map((p) => p.category[selectedLanguage] || p.category)
+        ),
+      ];
       setCategories(["all", ...uniqueCategories]);
       toast.success(editingId ? "product_updated" : "product_added");
     } catch (error) {
@@ -153,7 +160,8 @@ export default function AdminProductPanel() {
       arDescription: product.description.ar,
       enDescription: product.description.en,
       image: product.image,
-      category: product.category,
+      arCategory: product.category.ar,
+      enCategory: product.category.en,
     });
     setEditingId(product._id);
   };
@@ -172,14 +180,19 @@ export default function AdminProductPanel() {
   };
 
   const filteredProducts = products.filter((p) => {
+    const name = p.name?.[selectedLanguage] || "";
+    const categoryLang =
+      typeof p.category === "object"
+        ? p.category?.[selectedLanguage] || ""
+        : p.category || "";
+
     const matchesSearch =
-      p.name[selectedLanguage]
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchTerm.toLowerCase());
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      categoryLang.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCategory =
-      selectedCategory === "all" || p.category === selectedCategory;
+      selectedCategory === "all" ||
+      categoryLang.toLowerCase() === selectedCategory.toLowerCase();
 
     return matchesSearch && matchesCategory;
   });
@@ -295,12 +308,24 @@ export default function AdminProductPanel() {
                   </div>
 
                   <div className="flex flex-col">
-                    <Label htmlFor="category" className="text-sm">
-                      {t("category")}
+                    <Label htmlFor="arCategory" className="text-sm">
+                      {t("ar_category")}
                     </Label>
                     <Input
-                      id="category"
-                      value={formData.category}
+                      id="arCategory"
+                      value={formData.arCategory}
+                      onChange={handleInputChange}
+                      required
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <Label htmlFor="enCategory" className="text-sm">
+                      {t("en_category")}
+                    </Label>
+                    <Input
+                      id="enCategory"
+                      value={formData.enCategory}
                       onChange={handleInputChange}
                       required
                       className="mt-1.5"
@@ -438,7 +463,10 @@ export default function AdminProductPanel() {
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
-                        <Badge className="text-xs">{product.category}</Badge>
+                        <Badge className="text-xs">
+                          {product.category[selectedLanguage] ||
+                            product.category}
+                        </Badge>
                       </div>
                     </div>
                     {/* Product Content - Responsive padding and text */}

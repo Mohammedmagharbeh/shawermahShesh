@@ -251,5 +251,7 @@
   "logging_in": "جار تسجيل الدخول",
   "additions": "إضافات",
   "customer_name": "اسم العميل",
-  "detailed_address": "العنوان التفصيلي"
+  "detailed_address": "العنوان التفصيلي",
+  "ar_category": "الفئة (عربي)",
+  "en_category": "الفئة (إنجليزي)"
 }
