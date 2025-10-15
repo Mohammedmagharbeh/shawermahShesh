@@ -47,7 +47,12 @@ export default function Home() {
         const allProducts = data.data || [];
         setProducts(allProducts);
         setFilteredProducts(allProducts);
-        const cats = ["الكل", ...new Set(allProducts.map((p) => p.category))];
+        const cats = [
+          "الكل",
+          ...new Set(
+            allProducts.map((p) => p.category[selectedLanguage] || p.category)
+          ),
+        ];
         setCategories(cats);
         setIsLoading(false);
       })
@@ -84,15 +89,25 @@ export default function Home() {
 
     if (searchTerm.trim() !== "") {
       filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+        p.name[selectedLanguage]
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
       );
     }
+
     if (selectedCategory !== "الكل") {
-      filtered = filtered.filter((p) => p.category === selectedCategory);
+      filtered = filtered.filter((p) => {
+        const categoryName =
+          typeof p.category === "object"
+            ? p.category[selectedLanguage]
+            : p.category;
+        return categoryName === selectedCategory;
+      });
     }
+
     setFilteredProducts(filtered);
-    setProductsToShow(PRODUCTS_PER_PAGE); // إعادة تعيين العدد المعروض عند كل فلترة
-  }, [products, searchTerm, selectedCategory]);
+    setProductsToShow(PRODUCTS_PER_PAGE);
+  }, [products, searchTerm, selectedCategory, selectedLanguage]);
 
   // دالة لإظهار جميع المنتجات
   const handleShowMore = () => {
@@ -248,7 +263,8 @@ export default function Home() {
                       />
                       <div className="absolute top-3 right-3">
                         <Badge className="bg-red-700 text-white">
-                          {product.category}
+                          {product.category?.[selectedLanguage] ||
+                            product.category}
                         </Badge>
                       </div>
                     </div>
@@ -291,13 +307,6 @@ export default function Home() {
                           )}
                         </div>
 
-                        {/* <Link
-                          to={`product/`}
-                          className="bg-red-700 hover:bg-red-800 text-white px-6 py-2"
-                        >
-                          
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                        </Link> */}
                         <ProductDialog id={product._id} />
                       </div>
                     </CardContent>
