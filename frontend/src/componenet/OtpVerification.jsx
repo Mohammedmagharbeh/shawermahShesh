@@ -51,7 +51,7 @@ function OtpVerification() {
       });
 
       toast.success(t("otp_verified"));
-      if (User.role === "employee") navigate("/admin/dashboard");
+      if (res.data.role === "employee") navigate("/admin/dashboard");
 
       navigate("/");
     } catch (error) {
