@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useUser } from "./contexts/UserContext";
 import Settings from "./pages/Settings";
 import { useEffect } from "react";
+import StatisticsPage from "./pages/statistic";
 // import LanguageProvider from "./contexts/LanguageContext";
 
 function App() {
@@ -51,6 +52,9 @@ function App() {
               }
             />
             <Route path="/Login" element={<Login />} />
+                        <Route path="/statistic" element={<StatisticsPage />} />
+
+
             <Route path="/otp-verification" element={<OtpVerification />} />
             <Route
               path="/cart"

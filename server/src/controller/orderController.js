@@ -7,37 +7,37 @@ const { default: mongoose } = require("mongoose");
 const counterModel = require("../models/counter");
 
 // get all orders
-exports.getAllOrders = async (req, res) => {
-  try {
-    const orders = await Order.find({})
-      .populate({
-        path: "products.productId",
-        options: { lean: true },
-      })
-      .populate({
-        path: "products.additions",
-        options: { lean: true },
-      })
-      .populate({
-        path: "userId",
-        select: "phone role",
-        options: { lean: true },
-      })
-      .populate({
-        path: "shippingAddress",
-        options: { lean: true },
-      })
-      .populate({ path: "payment" })
-      .lean() // 2️⃣ Use lean() to skip Mongoose doc overhead and improve speed
-      .limit(100) // 3️⃣ Prevent fetching thousands at once — use pagination
-      .sort({ createdAt: -1 }); // 4️⃣ Sort newest first
+// exports.getAllOrders = async (req, res) => {
+//   try {
+//     const orders = await Order.find({})
+//       .populate({
+//         path: "products.productId",
+//         options: { lean: true },
+//       })
+//       .populate({
+//         path: "products.additions",
+//         options: { lean: true },
+//       })
+//       .populate({
+//         path: "userId",
+//         select: "phone role",
+//         options: { lean: true },
+//       })
+//       .populate({
+//         path: "shippingAddress",
+//         options: { lean: true },
+//       })
+//       .populate({ path: "payment" })
+//       .lean() // 2️⃣ Use lean() to skip Mongoose doc overhead and improve speed
+//       .limit(100) // 3️⃣ Prevent fetching thousands at once — use pagination
+//       .sort({ createdAt: -1 }); // 4️⃣ Sort newest first
 
-    res.status(200).json({ success: true, count: orders.length, data: orders });
-  } catch (error) {
-    console.error("Error in getAllOrders:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
+//     res.status(200).json({ success: true, count: orders.length, data: orders });
+//   } catch (error) {
+//     console.error("Error in getAllOrders:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
 
 // get order by id
 exports.getOrderById = async (req, res) => {
@@ -69,29 +69,84 @@ exports.getOrderById = async (req, res) => {
 };
 
 // get orders by user id
+// exports.getOrdersByUserId = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+
+//     if (!userId) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "User ID is required" });
+//     }
+
+//     // ✅ Validate ObjectId
+//     if (!mongoose.Types.ObjectId.isValid(userId)) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Invalid User ID" });
+//     }
+
+//     const foundUser = await User.findById(userId);
+//     if (!foundUser) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "User not found" });
+//     }
+
+//     const userOrders = await Order.find({ userId })
+//       .populate("products.productId")
+//       .populate("products.additions")
+//       .populate("shippingAddress")
+//       .sort({ createdAt: -1 });
+
+//     if (!userOrders.length) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "No orders found for this user" });
+//     }
+
+//     res.status(200).json({ success: true, data: userOrders });
+//   } catch (error) {
+//     console.error("Error in getOrdersByUserId:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+const Order = require("../models/orders");
+const User = require("../models/user");
+const productsModel = require("../models/products");
+const locationsModel = require("../models/locations");
+const additionsModel = require("../models/additions");
+const { default: mongoose } = require("mongoose");
+const counterModel = require("../models/counter");
+
+// get all orders
+exports.getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({})
+      .populate("products.productId")
+      .populate("products.additions")
+      .populate("userId", "phone name") // 🟢 جلب الاسم والهاتف مباشرة
+      .populate("shippingAddress")
+      .lean()
+      .limit(100)
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, count: orders.length, data: orders });
+  } catch (error) {
+    console.error("Error in getAllOrders:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// get orders by user id
 exports.getOrdersByUserId = async (req, res) => {
   try {
     const { userId } = req.params;
-
-    if (!userId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User ID is required" });
-    }
-
-    // ✅ Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid User ID" });
-    }
+    if (!userId) return res.status(400).json({ success: false, message: "User ID is required" });
+    if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ success: false, message: "Invalid User ID" });
 
     const foundUser = await User.findById(userId);
-    if (!foundUser) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
+    if (!foundUser) return res.status(404).json({ success: false, message: "User not found" });
 
     const userOrders = await Order.find({ userId })
       .populate("products.productId")
@@ -99,11 +154,7 @@ exports.getOrdersByUserId = async (req, res) => {
       .populate("shippingAddress")
       .sort({ createdAt: -1 });
 
-    if (!userOrders.length) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No orders found for this user" });
-    }
+    if (!userOrders.length) return res.status(404).json({ success: false, message: "No orders found for this user" });
 
     res.status(200).json({ success: true, data: userOrders });
   } catch (error) {
