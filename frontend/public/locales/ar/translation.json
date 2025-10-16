@@ -277,6 +277,14 @@
 "numberOfOrders": "عدد الطلبات",
 "totalSpent": "إجمالي الإنفاق",
 "orderedBadge": "قام بالطلب",
-"notOrderedBadge": "لم يطلب"
+"notOrderedBadge": "لم يطلب",
+"Today": "اليوم",
+"This week": "هذا الاسبوع",
+"This mounth": "هذا الشهر",
+"Statistics":"الاحصاء"
+
+
+
+
 
 }

@@ -279,5 +279,10 @@
     "numberOfOrders": "Number of Orders",
     "totalSpent": "Total Spent",
     "orderedBadge": "Ordered",
-    "notOrderedBadge": "Not Ordered"
+    "notOrderedBadge": "Not Ordered",
+"Today": "Today",
+"This week": "This week",
+"This mounth": "This mounth",
+"Statistics":"Statistics"
+
 }

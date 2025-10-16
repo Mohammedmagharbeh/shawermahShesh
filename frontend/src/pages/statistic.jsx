@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -22,10 +20,21 @@ import {
   Loader2,
   BarChart3,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
 import { useUser } from "@/contexts/UserContext";
 import { useOrder } from "@/contexts/OrderContext";
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  isWithinInterval,
+} from "date-fns";
 
-export default function StatisticsPage({ translations }) {
+export default function StatisticsPage() {
   const { allUsers, getAllUsers } = useUser();
   const { orders, getAllOrders } = useOrder();
   const [orderedUsers, setOrderedUsers] = useState([]);
@@ -33,24 +42,22 @@ export default function StatisticsPage({ translations }) {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all"); // all, ordered, not-ordered
+  const [dateFilter, setDateFilter] = useState("all"); // ✅ "all", "today", "week", "month"
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchData = async () => {
-      const allUsersData = await getAllUsers();
-      const ordersData = await getAllOrders();
+      const users = await getAllUsers();
+      const allOrders = await getAllOrders();
 
-      const orderedUserIds = new Set(
-        ordersData.map((order) => order.userId._id)
-      );
+      const filteredOrders = applyDateFilter(allOrders, dateFilter);
 
-      const ordered = allUsersData.filter((user) =>
-        orderedUserIds.has(user._id)
-      );
-      const notOrdered = allUsersData.filter(
-        (user) => !orderedUserIds.has(user._id)
-      );
+      const orderedUserIds = new Set(filteredOrders.map((o) => o.userId._id));
 
-      const revenue = ordersData.reduce((sum, order) => sum + order.totalPrice, 0);
+      const ordered = users.filter((u) => orderedUserIds.has(u._id));
+      const notOrdered = users.filter((u) => !orderedUserIds.has(u._id));
+
+      const revenue = filteredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
 
       setOrderedUsers(ordered);
       setNotOrderedUsers(notOrdered);
@@ -58,11 +65,39 @@ export default function StatisticsPage({ translations }) {
     };
 
     fetchData();
-  }, []);
+  }, [dateFilter]); // ✅ refetch stats when date filter changes
 
-  useEffect(() => {
-    setSearchTerm("");
-  }, [filterStatus]);
+  useEffect(() => setSearchTerm(""), [filterStatus]);
+
+  // ✅ helper to filter by date
+  const applyDateFilter = (orders, filter) => {
+    const now = new Date();
+    console.log("Now:", now);
+
+    return orders.filter((order) => {
+      const orderDate = new Date(order.createdAt);
+
+      switch (filter) {
+        case "today":
+          return isWithinInterval(orderDate, {
+            start: startOfDay(now),
+            end: endOfDay(now),
+          });
+        case "week":
+          return isWithinInterval(orderDate, {
+            start: startOfWeek(now, { weekStartsOn: 6 }), // week starts Saturday
+            end: endOfWeek(now, { weekStartsOn: 6 }),
+          });
+        case "month":
+          return isWithinInterval(orderDate, {
+            start: startOfMonth(now),
+            end: endOfMonth(now),
+          });
+        default:
+          return true;
+      }
+    });
+  };
 
   const getTotalOrdersByUser = (userId) => {
     return orders.filter((order) => order.userId._id === userId).length;
@@ -78,8 +113,8 @@ export default function StatisticsPage({ translations }) {
     filterStatus === "ordered"
       ? orderedUsers
       : filterStatus === "not-ordered"
-      ? notOrderedUsers
-      : allUsers
+        ? notOrderedUsers
+        : allUsers
   ).filter((user) => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return true;
@@ -89,8 +124,45 @@ export default function StatisticsPage({ translations }) {
     );
   });
 
+  const filteredOrders = applyDateFilter(orders, dateFilter);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      <div className="container mx-auto my-10 px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        <div className="flex flex-wrap gap-2 mb-4">
+          {/* ✅ Date Filter Buttons */}
+          <Button
+            variant={dateFilter === "all" ? "default" : "outline"}
+            onClick={() => setDateFilter("all")}
+            size="sm"
+          >
+              {t("filterAll")}
+          </Button>
+          <Button
+            variant={dateFilter === "today" ? "default" : "outline"}
+            onClick={() => setDateFilter("today")}
+            size="sm"
+          >
+              {t("Today")}
+          </Button>
+          <Button
+            variant={dateFilter === "week" ? "default" : "outline"}
+            onClick={() => setDateFilter("week")}
+            size="sm"
+          >
+              {t("This week")}
+          </Button>
+          <Button
+            variant={dateFilter === "month" ? "default" : "outline"}
+            onClick={() => setDateFilter("month")}
+            size="sm"
+          >
+              {t("This mounth")}
+          </Button>
+        </div>
+
+        {/* ... the rest of your statistics cards and user list remain the same ... */}
+      </div>
       <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -99,10 +171,10 @@ export default function StatisticsPage({ translations }) {
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
-                {translations.statisticsTitle}
+                {t("statisticsTitle")}
               </h1>
               <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">
-                {translations.statisticsDescription}
+                {t("statisticsDescription")}
               </p>
             </div>
           </div>
@@ -123,7 +195,7 @@ export default function StatisticsPage({ translations }) {
                 <CardHeader className="pb-3 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      {translations.totalUsers}
+              {t("totalUsers")}
                     </CardTitle>
                     <div className="p-2 bg-blue-500 rounded-lg">
                       <Users className="h-5 w-5 text-white" />
@@ -135,7 +207,7 @@ export default function StatisticsPage({ translations }) {
                     {allUsers.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    {translations.totalUsersDescription}
+              {t("visitorsListDescription")}
                   </p>
                 </CardContent>
               </Card>
@@ -145,7 +217,7 @@ export default function StatisticsPage({ translations }) {
                 <CardHeader className="pb-3 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      {translations.usersWithOrders}
+                      {t("usersWithOrders")}
                     </CardTitle>
                     <div className="p-2 bg-green-500 rounded-lg">
                       <CheckCircle2 className="h-5 w-5 text-white" />
@@ -156,6 +228,9 @@ export default function StatisticsPage({ translations }) {
                   <div className="text-3xl sm:text-4xl font-bold text-green-600">
                     {orderedUsers.length}
                   </div>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                    {/* معدل التحويل: {stats.conversionRate.toFixed(1)}% */}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -164,7 +239,7 @@ export default function StatisticsPage({ translations }) {
                 <CardHeader className="pb-3 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      {translations.usersWithoutOrders}
+                      {t("usersWithoutOrders")}
                     </CardTitle>
                     <div className="p-2 bg-orange-500 rounded-lg">
                       <XCircle className="h-5 w-5 text-white" />
@@ -176,7 +251,7 @@ export default function StatisticsPage({ translations }) {
                     {notOrderedUsers.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    {translations.usersWithoutOrdersDescription}
+                    {t("usersWithoutOrdersDescription")}
                   </p>
                 </CardContent>
               </Card>
@@ -186,7 +261,7 @@ export default function StatisticsPage({ translations }) {
                 <CardHeader className="pb-3 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      {translations.totalOrders}
+                      {t("totalOrders")}
                     </CardTitle>
                     <div className="p-2 bg-purple-500 rounded-lg">
                       <ShoppingCart className="h-5 w-5 text-white" />
@@ -195,10 +270,10 @@ export default function StatisticsPage({ translations }) {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-purple-600">
-                    {orders.length}
+                    {filteredOrders.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    {translations.totalOrdersDescription}
+                    {t("totalOrdersDescription")}
                   </p>
                 </CardContent>
               </Card>
@@ -208,7 +283,7 @@ export default function StatisticsPage({ translations }) {
                 <CardHeader className="pb-3 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      {translations.totalRevenue}
+                      {t("totalRevenue")}
                     </CardTitle>
                     <div className="p-2 bg-teal-500 rounded-lg">
                       <TrendingUp className="h-5 w-5 text-white" />
@@ -218,10 +293,10 @@ export default function StatisticsPage({ translations }) {
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-teal-600">
                     {totalRevenue.toFixed(2)}
-                    <span className="text-xl">د.أ</span>
+                    <span className="text-xl">{t("price_jod")}</span>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    {translations.totalRevenueDescription}
+                    {t("totalRevenueDescription")}
                   </p>
                 </CardContent>
               </Card>
@@ -231,10 +306,10 @@ export default function StatisticsPage({ translations }) {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">
-                  {translations.visitorsList}
+                  {t("visitorsList")}
                 </CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  {translations.visitorsListDescription}
+                  {t("visitorsListDescription")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -242,7 +317,7 @@ export default function StatisticsPage({ translations }) {
                   <div className="relative flex-1">
                     <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder={translations.searchPlaceholder}
+                      placeholder={t("searchPlaceholder")}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pr-10"
@@ -255,23 +330,27 @@ export default function StatisticsPage({ translations }) {
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                      {translations.filterAll} ({allUsers.length})
+                      {t("filterAll")} ({allUsers.length})
                     </Button>
                     <Button
-                      variant={filterStatus === "ordered" ? "default" : "outline"}
+                      variant={
+                        filterStatus === "ordered" ? "default" : "outline"
+                      }
                       onClick={() => setFilterStatus("ordered")}
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                      {translations.filterOrdered} ({orderedUsers.length})
+                     {t("filterOrdered")}({orderedUsers.length})
                     </Button>
                     <Button
-                      variant={filterStatus === "not-ordered" ? "default" : "outline"}
+                      variant={
+                        filterStatus === "not-ordered" ? "default" : "outline"
+                      }
                       onClick={() => setFilterStatus("not-ordered")}
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                      {translations.filterNotOrdered} ({notOrderedUsers.length})
+                      {t("filterNotOrdered")}({notOrderedUsers.length})
                     </Button>
                   </div>
                 </div>
@@ -280,7 +359,7 @@ export default function StatisticsPage({ translations }) {
                   {filteredUsers.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
                       <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p>{translations.noResults}</p>
+                      <p>{t("noResults")}</p>
                     </div>
                   ) : (
                     filteredUsers.map((user) => (
@@ -304,8 +383,10 @@ export default function StatisticsPage({ translations }) {
                                   </p>
                                 )}
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  {translations.registrationDate}:{" "}
-                                  {new Date(user.createdAt).toLocaleDateString("ar-SA")}
+                                  {t("registrationDate")}{" "}
+                                  {new Date(user.createdAt).toLocaleDateString(
+                                    "ar-SA"
+                                  )}
                                 </p>
                               </div>
                             </div>
@@ -315,11 +396,11 @@ export default function StatisticsPage({ translations }) {
                                 <>
                                   <Badge className="bg-green-500 hover:bg-green-600 text-white">
                                     <CheckCircle2 className="ml-1 h-3 w-3" />
-                                    {translations.orderedBadge}
+                                    {t("orderedBadge")}
                                   </Badge>
                                   <div className="text-left">
                                     <p className="text-xs text-muted-foreground">
-                                      {translations.numberOfOrders}
+                                    {t("numberOfOrders")}
                                     </p>
                                     <p className="font-bold text-sm">
                                       {getTotalOrdersByUser(user._id)}
@@ -327,11 +408,11 @@ export default function StatisticsPage({ translations }) {
                                   </div>
                                   <div className="text-left">
                                     <p className="text-xs text-muted-foreground">
-                                      {translations.totalSpent}
+                                    {t("totalSpent")}
                                     </p>
                                     <p className="font-bold text-sm text-green-600">
-                                      {getTotalSpentByUser(user._id).toFixed(2)} د.أ
-                                    </p>
+                                      {getTotalSpentByUser(user._id).toFixed(2)}
+{t("price_jod")}                                    </p>
                                   </div>
                                 </>
                               ) : (
@@ -340,8 +421,8 @@ export default function StatisticsPage({ translations }) {
                                   className="bg-orange-100 text-orange-700 hover:bg-orange-200"
                                 >
                                   <XCircle className="ml-1 h-3 w-3" />
-                                  {translations.notOrderedBadge}
-                                </Badge>
+                                  {t("notOrderedBadge")}
+                             </Badge>
                               )}
                             </div>
                           </div>
