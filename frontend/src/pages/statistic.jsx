@@ -182,11 +182,7 @@ export default function StatisticsPage() {
       </div>
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
-        {filteredUsers.length === 0 ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="animate-spin h-10 w-10 text-primary" />
-          </div>
-        ) : (
+        {
           <div className="space-y-6">
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -435,7 +431,7 @@ export default function StatisticsPage() {
               </CardContent>
             </Card>
           </div>
-        )}
+        }
       </div>
     </div>
   );
