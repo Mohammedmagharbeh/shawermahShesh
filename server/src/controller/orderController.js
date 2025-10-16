@@ -111,13 +111,6 @@ exports.getOrderById = async (req, res) => {
 //     res.status(500).json({ success: false, message: "Server error" });
 //   }
 // };
-const Order = require("../models/orders");
-const User = require("../models/user");
-const productsModel = require("../models/products");
-const locationsModel = require("../models/locations");
-const additionsModel = require("../models/additions");
-const { default: mongoose } = require("mongoose");
-const counterModel = require("../models/counter");
 
 // get all orders
 exports.getAllOrders = async (req, res) => {
@@ -142,11 +135,20 @@ exports.getAllOrders = async (req, res) => {
 exports.getOrdersByUserId = async (req, res) => {
   try {
     const { userId } = req.params;
-    if (!userId) return res.status(400).json({ success: false, message: "User ID is required" });
-    if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ success: false, message: "Invalid User ID" });
+    if (!userId)
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID is required" });
+    if (!mongoose.Types.ObjectId.isValid(userId))
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid User ID" });
 
     const foundUser = await User.findById(userId);
-    if (!foundUser) return res.status(404).json({ success: false, message: "User not found" });
+    if (!foundUser)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
 
     const userOrders = await Order.find({ userId })
       .populate("products.productId")
@@ -154,7 +156,10 @@ exports.getOrdersByUserId = async (req, res) => {
       .populate("shippingAddress")
       .sort({ createdAt: -1 });
 
-    if (!userOrders.length) return res.status(404).json({ success: false, message: "No orders found for this user" });
+    if (!userOrders.length)
+      return res
+        .status(404)
+        .json({ success: false, message: "No orders found for this user" });
 
     res.status(200).json({ success: true, data: userOrders });
   } catch (error) {
