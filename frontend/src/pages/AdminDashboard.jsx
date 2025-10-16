@@ -43,9 +43,10 @@ function AdminDashboard() {
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const { orders, getAllOrders, updateOrder, deleteOrder, loading } =
     useOrder();
-  const [filterDate, setFilterDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+const [filterDate, setFilterDate] = useState(
+  new Date().toLocaleDateString("en-CA")
+);
+
   const [soundAllowed, setSoundAllowed] = useState(false);
   const [sound, setSound] = useState(null);
   const [incomingOrder, setIncomingOrder] = useState(null);
