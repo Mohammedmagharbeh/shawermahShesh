@@ -52,9 +52,14 @@ function App() {
               }
             />
             <Route path="/Login" element={<Login />} />
-                        <Route path="/statistic" element={<StatisticsPage />} />
-
-
+            <Route
+              path="/admin/statistics"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <StatisticsPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/otp-verification" element={<OtpVerification />} />
             <Route
               path="/cart"

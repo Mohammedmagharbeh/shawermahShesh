@@ -19,6 +19,7 @@ import {
   Package,
   Plus,
   MonitorCog,
+  ChartNoAxesCombined,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -158,6 +159,16 @@ function Header() {
                           <Plus className="h-4 w-4 ml-2 text-red-600" />
                           <span className="font-semibold text-gray-700">
                             {t("products")}
+                          </span>
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
+                    {user.role === "admin" && (
+                      <Link to="/admin/statistics">
+                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                          <ChartNoAxesCombined className="h-4 w-4 ml-2 text-red-600" />
+                          <span className="font-semibold text-gray-700">
+                            Statistics
                           </span>
                         </DropdownMenuItem>
                       </Link>
