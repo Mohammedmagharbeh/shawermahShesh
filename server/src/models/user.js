@@ -1,8 +1,9 @@
 const moongoose = require("mongoose");
+const { USER_ROLES } = require("../constants");
 
 const userShcsema = new moongoose.Schema({
   phone: { type: String, required: true, unique: true },
-  role: { type: String, default: "user", required: true },
+  role: { type: String, enum: USER_ROLES, default: "user", required: true },
   otp: String,
   otpExpires: Date,
 });

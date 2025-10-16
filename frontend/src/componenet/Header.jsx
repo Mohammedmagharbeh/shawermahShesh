@@ -115,53 +115,58 @@ function Header() {
               </div>
             )}
 
-            {user.role === "admin" && (
-              <div className="hidden lg:block">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-white border-red-600 border-2 text-red-900 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
+            {user.role === "admin" ||
+              (user.role === "employee" && (
+                <div className="hidden lg:block">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-white border-red-600 border-2 text-red-900 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
+                      >
+                        <MonitorCog className="h-4 w-4" />
+                        <span className="hidden xl:inline">
+                          {t("control_panel")}
+                        </span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-56 bg-white border-2 border-red-200 shadow-xl rounded-lg p-2"
                     >
-                      <MonitorCog className="h-4 w-4" />
-                      <span className="hidden xl:inline">
-                        {t("control_panel")}
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-56 bg-white border-2 border-red-200 shadow-xl rounded-lg p-2"
-                  >
-                    <Link to="/admin/dashboard">
-                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                        <LayoutDashboard className="h-4 w-4 ml-2 text-red-600" />
-                        <span className="font-semibold text-gray-700">
-                          {t("dashboard")}
-                        </span>
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link to="/orders">
-                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                        <Package className="h-4 w-4 ml-2 text-red-600" />
-                        <span className="font-semibold text-gray-700">
-                          {t("orders")}
-                        </span>
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link to="/admin/add-product">
-                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                        <Plus className="h-4 w-4 ml-2 text-red-600" />
-                        <span className="font-semibold text-gray-700">
-                          {t("products")}
-                        </span>
-                      </DropdownMenuItem>
-                    </Link>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+                      <Link to="/admin/dashboard">
+                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                          <LayoutDashboard className="h-4 w-4 ml-2 text-red-600" />
+                          <span className="font-semibold text-gray-700">
+                            {t("dashboard")}
+                          </span>
+                        </DropdownMenuItem>
+                      </Link>
+                      {user.role === "admin" && (
+                        <Link to="/orders">
+                          <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                            <Package className="h-4 w-4 ml-2 text-red-600" />
+                            <span className="font-semibold text-gray-700">
+                              {t("orders")}
+                            </span>
+                          </DropdownMenuItem>
+                        </Link>
+                      )}
+                      {user.role === "admin" && (
+                        <Link to="/admin/add-product">
+                          <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                            <Plus className="h-4 w-4 ml-2 text-red-600" />
+                            <span className="font-semibold text-gray-700">
+                              {t("products")}
+                            </span>
+                          </DropdownMenuItem>
+                        </Link>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
 
             <Link to="/settings">
               <Button

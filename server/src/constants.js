@@ -37,3 +37,5 @@ export const ORDER_STATUSES = Object.freeze([
 ]);
 export const PAYMENT_METHODS = Object.freeze(["cash", "card"]);
 export const PAYMENT_STATUSES = Object.freeze(["unpaid", "paid"]);
+
+export const USER_ROLES = Object.freeze(["user", "employee", "admin"]);
