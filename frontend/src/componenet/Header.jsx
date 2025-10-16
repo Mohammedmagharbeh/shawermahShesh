@@ -168,7 +168,7 @@ function Header() {
                         <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                           <ChartNoAxesCombined className="h-4 w-4 ml-2 text-red-600" />
                           <span className="font-semibold text-gray-700">
-                            Statistics
+                            {t("Statistics")}
                           </span>
                         </DropdownMenuItem>
                       </Link>
