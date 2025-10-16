@@ -48,7 +48,7 @@ function AdminDashboard() {
   );
   const [soundAllowed, setSoundAllowed] = useState(false);
   const [sound, setSound] = useState(null);
-  const [incomingOrder, setIncomingOrder] = useState(null);
+  const [incomingOrder, setIncomingOrder] = useState([]);
 
   useEffect(() => {
     // Preload the sound
@@ -82,7 +82,7 @@ function AdminDashboard() {
   useEffect(() => {
     socket.on("newOrder", (order) => {
       getAllOrders();
-      setIncomingOrder(order);
+      incomingOrder.push(order);
 
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification("📦 New Order!", {
@@ -219,40 +219,48 @@ function AdminDashboard() {
               </DialogContent>
             </Dialog>
 
-            <Dialog
-              open={incomingOrder !== null}
-              onOpenChange={(open) => {
-                if (!open && sound) {
-                  sound.pause();
-                  sound.currentTime = 0;
-                }
-                !open && setIncomingOrder(null);
-              }}
-            >
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>📦 New Order!</DialogTitle>
-                  <DialogDescription>
-                    Phone: {incomingOrder?.userId.phone} <br />
-                    Total: {incomingOrder?.totalPrice} JOD
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex gap-2 mt-4 justify-end">
-                  <Button
-                    onClick={() => {
-                      if (sound) {
-                        sound.pause();
-                        sound.currentTime = 0;
-                      }
-                      setIncomingOrder(null);
-                      updateOrder(incomingOrder._id, { status: "Confirmed" });
-                    }}
-                  >
-                    Accept
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            {incomingOrder.length > 0 &&
+              incomingOrder.map((o) => (
+                <Dialog
+                  open={incomingOrder.length > 0}
+                  onOpenChange={(open) => {
+                    if (!open && sound) {
+                      sound.pause();
+                      sound.currentTime = 0;
+                    }
+                    !open && setIncomingOrder(null);
+                  }}
+                >
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>📦 New Order!</DialogTitle>
+                      <DialogDescription>
+                        Phone: {o?.userId.phone} <br />
+                        Total: {o?.totalPrice} JOD
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex gap-2 mt-4 justify-end">
+                      <Button
+                        onClick={() => {
+                          if (sound && incomingOrder.length === 1) {
+                            sound.pause();
+                            sound.currentTime = 0;
+                          }
+                          setIncomingOrder(null);
+                          updateOrder(o._id, {
+                            status: "Confirmed",
+                          });
+                          setIncomingOrder(
+                            incomingOrder.filter((ord) => ord !== o)
+                          );
+                        }}
+                      >
+                        Accept
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              ))}
 
             <input
               type="date"
