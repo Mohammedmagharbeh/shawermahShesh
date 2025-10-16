@@ -96,7 +96,8 @@ exports.getOrdersByUserId = async (req, res) => {
     const userOrders = await Order.find({ userId })
       .populate("products.productId")
       .populate("products.additions")
-      .populate("shippingAddress");
+      .populate("shippingAddress")
+      .sort({ createdAt: -1 });
 
     if (!userOrders.length) {
       return res
