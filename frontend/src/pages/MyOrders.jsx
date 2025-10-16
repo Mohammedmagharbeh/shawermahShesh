@@ -12,11 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 function MyOrders() {
   const { orders, getOrdersByUserId } = useOrder();
   const { user } = useUser();
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
   useEffect(() => {
@@ -156,7 +158,7 @@ function MyOrders() {
                               {item.productId?.category ?? "Unknown Category"}
                             </span>
                           </div>
-                          {item.productId?.discount ||
+                          {item.productId?.discount > 0 ||
                             (0 > 0 && (
                               <Badge
                                 variant="secondary"
@@ -165,6 +167,22 @@ function MyOrders() {
                                 {item.productId.discount}% off
                               </Badge>
                             ))}
+                          <Badge>{item.isSpicy ? "حار" : "عادي"}</Badge>
+                          {item.additions && item.additions.length > 0 && (
+                            <div className="flex gap-1">
+                              {t("additions")}:
+                              {item.additions.map((addition) => (
+                                <Badge key={addition._id} className="p-1">
+                                  {addition.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                          {item.notes && (
+                            <p className="text-sm text-gray-600 italic">
+                              {t("notes")}: {item.notes}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="sm:text-right">
