@@ -255,5 +255,6 @@
   "customer_name": "Customer Name",
   "detailed_address": "Detailed Address",
   "ar_category": "Category (Arabic)",
-  "en_category": "Category (English)"
+  "en_category": "Category (English)",
+  "invalid_phone": "Invalid phone number"
 }

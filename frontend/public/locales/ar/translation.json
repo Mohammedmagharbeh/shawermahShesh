@@ -253,5 +253,6 @@
   "customer_name": "اسم العميل",
   "detailed_address": "العنوان التفصيلي",
   "ar_category": "الفئة (عربي)",
-  "en_category": "الفئة (إنجليزي)"
+  "en_category": "الفئة (إنجليزي)",
+  "invalid_phone": "رقم هاتف غير صالح"
 }

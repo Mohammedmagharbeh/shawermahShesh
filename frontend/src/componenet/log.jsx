@@ -17,6 +17,12 @@ function Login() {
     e.preventDefault();
     setLoading(true);
 
+    if (phone.length !== 10 || !/^(079|078|077)\d{7}$/.test(phone)) {
+      toast.error(t("invalid_phone"));
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, {
         phone: phone,
