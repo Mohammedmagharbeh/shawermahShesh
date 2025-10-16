@@ -23,6 +23,7 @@ export const OrderProvider = ({ children }) => {
     try {
       const res = await axios.get(`${API_URL}/get`);
       setOrders(res.data.data);
+      return res.data.data; // return directly without overwriting state
       setError(null);
     } catch (err) {
       const msg = err.response?.data?.message || t("failed_fetch_orders");

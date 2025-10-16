@@ -21,107 +21,77 @@ import {
   Loader2,
   BarChart3,
 } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
+import { useCart } from "@/contexts/CartContext";
+import { useOrder } from "@/contexts/OrderContext";
 
 export default function StatisticsPage() {
-  const [users, setUsers] = useState([]);
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    usersWithOrders: 0,
-    usersWithoutOrders: 0,
-    conversionRate: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-  });
-  const [loading, setLoading] = useState(true);
+  const { allUsers, getAllUsers } = useUser();
+  const { orders, getAllOrders } = useOrder();
+  const [orderedUsers, setOrderedUsers] = useState([]);
+  const [notOrderedUsers, setNotOrderedUsers] = useState([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all"); // all, ordered, not-ordered
 
   useEffect(() => {
-    fetchStatistics();
+    const fetchData = async () => {
+      const allUsers = await getAllUsers();
+      const orders = await getAllOrders();
+
+      const orderedUserIds = new Set(
+        orders.map((order) => {
+          return order.userId._id;
+        })
+      );
+
+      const ordered = allUsers.filter((user) => {
+        return orderedUserIds.has(user._id);
+      });
+      const notOrdered = allUsers.filter(
+        (user) => !orderedUserIds.has(user._id)
+      );
+      const revenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+      setOrderedUsers(ordered);
+      setNotOrderedUsers(notOrdered);
+      setTotalRevenue(revenue);
+    };
+
+    fetchData();
   }, []);
 
-  const fetchStatistics = async () => {
-    setLoading(true);
-    try {
-      // جلب جميع المستخدمين
-      const usersResponse = await axios.get("http://localhost:5000/api/users");
-      const usersData = usersResponse.data || [];
+  useEffect(() => {
+    setSearchTerm("");
+  }, [filterStatus]);
 
-      // جلب جميع الطلبات
-      const ordersResponse = await axios.get(
-        "http://localhost:5000/api/order/get"
-      );
-      const ordersData = ordersResponse.data.data || [];
-
-      // معالجة بيانات المستخدمين
-      const processedUsers = usersData.map((user) => {
-        const userOrders = ordersData.filter(
-          (order) => order.userId?._id === user._id
-        );
-        const totalSpent = userOrders.reduce(
-          (sum, order) => sum + (order.totalPrice || 0),
-          0
-        );
-
-        return {
-          _id: user._id,
-          phone: user.phone,
-          name: user.name || "",
-          createdAt: user.createdAt,
-          hasOrdered: userOrders.length > 0,
-          orderCount: userOrders.length,
-          totalSpent,
-        };
-      });
-
-      setUsers(processedUsers);
-
-      // حساب الإحصائيات
-      const usersWithOrders = processedUsers.filter((u) => u.hasOrdered).length;
-      const usersWithoutOrders = processedUsers.length - usersWithOrders;
-      const conversionRate =
-        processedUsers.length > 0
-          ? (usersWithOrders / processedUsers.length) * 100
-          : 0;
-      const totalRevenue = ordersData.reduce(
-        (sum, order) => sum + (order.totalPrice || 0),
-        0
-      );
-      const totalOrders = ordersData.length;
-
-      setStats({
-        totalUsers: processedUsers.length,
-        usersWithOrders,
-        usersWithoutOrders,
-        conversionRate,
-        totalOrders,
-        totalRevenue,
-      });
-    } catch (error) {
-      console.error("خطأ في جلب الإحصائيات:", error);
-    } finally {
-      setLoading(false);
-    }
+  const getTotalOrdersByUser = (userId) => {
+    return orders.filter((order) => order.userId._id === userId).length;
   };
 
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.phone.includes(searchTerm) ||
-      (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const getTotalSpentByUser = (userId) => {
+    return orders
+      .filter((order) => order.userId._id === userId)
+      .reduce((sum, order) => sum + order.totalPrice, 0);
+  };
 
-    const matchesFilter =
-      filterStatus === "all" ||
-      (filterStatus === "ordered" && user.hasOrdered) ||
-      (filterStatus === "not-ordered" && !user.hasOrdered);
-
-    return matchesSearch && matchesFilter;
+  const filteredUsers = (
+    filterStatus === "ordered"
+      ? orderedUsers
+      : filterStatus === "not-ordered"
+        ? notOrderedUsers
+        : allUsers
+  ).filter((user) => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return true;
+    return (
+      (user.phone && user.phone.toLowerCase().includes(term)) ||
+      (user.name && user.name.toLowerCase().includes(term))
+    );
   });
 
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20"
-      dir="rtl"
-    >
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
       <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -141,7 +111,7 @@ export default function StatisticsPage() {
       </div>
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
-        {loading ? (
+        {filteredUsers.length === 0 ? (
           <div className="flex justify-center items-center py-20">
             <Loader2 className="animate-spin h-10 w-10 text-primary" />
           </div>
@@ -163,7 +133,7 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-blue-600">
-                    {stats.totalUsers}
+                    {allUsers.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     عدد الأشخاص الذين وصلهم OTP
@@ -185,10 +155,10 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-green-600">
-                    {stats.usersWithOrders}
+                    {orderedUsers.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    معدل التحويل: {stats.conversionRate.toFixed(1)}%
+                    {/* معدل التحويل: {stats.conversionRate.toFixed(1)}% */}
                   </p>
                 </CardContent>
               </Card>
@@ -207,7 +177,7 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-orange-600">
-                    {stats.usersWithoutOrders}
+                    {notOrderedUsers.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     دخلوا ولم يطلبوا
@@ -229,7 +199,7 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-purple-600">
-                    {stats.totalOrders}
+                    {orders.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     عدد الطلبات الكلي
@@ -251,7 +221,7 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-teal-600">
-                    {stats.totalRevenue.toFixed(2)}{" "}
+                    {totalRevenue.toFixed(2)}
                     <span className="text-xl">د.أ</span>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
@@ -289,7 +259,7 @@ export default function StatisticsPage() {
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                      الكل ({users.length})
+                      الكل ({allUsers.length})
                     </Button>
                     <Button
                       variant={
@@ -299,7 +269,7 @@ export default function StatisticsPage() {
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                      قاموا بالطلب ({stats.usersWithOrders})
+                      قاموا بالطلب ({orderedUsers.length})
                     </Button>
                     <Button
                       variant={
@@ -309,7 +279,7 @@ export default function StatisticsPage() {
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                      لم يطلبوا ({stats.usersWithoutOrders})
+                      لم يطلبوا ({notOrderedUsers.length})
                     </Button>
                   </div>
                 </div>
@@ -351,7 +321,7 @@ export default function StatisticsPage() {
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                              {user.hasOrdered ? (
+                              {orderedUsers.includes(user) ? (
                                 <>
                                   <Badge className="bg-green-500 hover:bg-green-600 text-white">
                                     <CheckCircle2 className="ml-1 h-3 w-3" />
@@ -362,7 +332,7 @@ export default function StatisticsPage() {
                                       عدد الطلبات
                                     </p>
                                     <p className="font-bold text-sm">
-                                      {user.orderCount}
+                                      {getTotalOrdersByUser(user._id)}
                                     </p>
                                   </div>
                                   <div className="text-left">
@@ -370,7 +340,8 @@ export default function StatisticsPage() {
                                       إجمالي الإنفاق
                                     </p>
                                     <p className="font-bold text-sm text-green-600">
-                                      {user.totalSpent.toFixed(2)} د.أ
+                                      {getTotalSpentByUser(user._id).toFixed(2)}
+                                      د.أ
                                     </p>
                                   </div>
                                 </>
