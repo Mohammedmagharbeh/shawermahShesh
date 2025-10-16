@@ -1,5 +1,6 @@
+"use client"
+
 import { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Card,
   CardContent,
@@ -22,10 +23,9 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
-import { useCart } from "@/contexts/CartContext";
 import { useOrder } from "@/contexts/OrderContext";
 
-export default function StatisticsPage() {
+export default function StatisticsPage({ translations }) {
   const { allUsers, getAllUsers } = useUser();
   const { orders, getAllOrders } = useOrder();
   const [orderedUsers, setOrderedUsers] = useState([]);
@@ -36,22 +36,21 @@ export default function StatisticsPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const allUsers = await getAllUsers();
-      const orders = await getAllOrders();
+      const allUsersData = await getAllUsers();
+      const ordersData = await getAllOrders();
 
       const orderedUserIds = new Set(
-        orders.map((order) => {
-          return order.userId._id;
-        })
+        ordersData.map((order) => order.userId._id)
       );
 
-      const ordered = allUsers.filter((user) => {
-        return orderedUserIds.has(user._id);
-      });
-      const notOrdered = allUsers.filter(
+      const ordered = allUsersData.filter((user) =>
+        orderedUserIds.has(user._id)
+      );
+      const notOrdered = allUsersData.filter(
         (user) => !orderedUserIds.has(user._id)
       );
-      const revenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+      const revenue = ordersData.reduce((sum, order) => sum + order.totalPrice, 0);
 
       setOrderedUsers(ordered);
       setNotOrderedUsers(notOrdered);
@@ -79,8 +78,8 @@ export default function StatisticsPage() {
     filterStatus === "ordered"
       ? orderedUsers
       : filterStatus === "not-ordered"
-        ? notOrderedUsers
-        : allUsers
+      ? notOrderedUsers
+      : allUsers
   ).filter((user) => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return true;
@@ -100,10 +99,10 @@ export default function StatisticsPage() {
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
-                إحصائيات الزوار
+                {translations.statisticsTitle}
               </h1>
               <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">
-                تتبع الزوار والطلبات ومعدل التحويل
+                {translations.statisticsDescription}
               </p>
             </div>
           </div>
@@ -124,7 +123,7 @@ export default function StatisticsPage() {
                 <CardHeader className="pb-3 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      إجمالي الزوار
+                      {translations.totalUsers}
                     </CardTitle>
                     <div className="p-2 bg-blue-500 rounded-lg">
                       <Users className="h-5 w-5 text-white" />
@@ -136,7 +135,7 @@ export default function StatisticsPage() {
                     {allUsers.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    عدد الأشخاص الذين وصلهم OTP
+                    {translations.totalUsersDescription}
                   </p>
                 </CardContent>
               </Card>
@@ -146,7 +145,7 @@ export default function StatisticsPage() {
                 <CardHeader className="pb-3 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      زوار قاموا بالطلب
+                      {translations.usersWithOrders}
                     </CardTitle>
                     <div className="p-2 bg-green-500 rounded-lg">
                       <CheckCircle2 className="h-5 w-5 text-white" />
@@ -157,9 +156,6 @@ export default function StatisticsPage() {
                   <div className="text-3xl sm:text-4xl font-bold text-green-600">
                     {orderedUsers.length}
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    {/* معدل التحويل: {stats.conversionRate.toFixed(1)}% */}
-                  </p>
                 </CardContent>
               </Card>
 
@@ -168,7 +164,7 @@ export default function StatisticsPage() {
                 <CardHeader className="pb-3 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      زوار بدون طلبات
+                      {translations.usersWithoutOrders}
                     </CardTitle>
                     <div className="p-2 bg-orange-500 rounded-lg">
                       <XCircle className="h-5 w-5 text-white" />
@@ -180,7 +176,7 @@ export default function StatisticsPage() {
                     {notOrderedUsers.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    دخلوا ولم يطلبوا
+                    {translations.usersWithoutOrdersDescription}
                   </p>
                 </CardContent>
               </Card>
@@ -190,7 +186,7 @@ export default function StatisticsPage() {
                 <CardHeader className="pb-3 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      إجمالي الطلبات
+                      {translations.totalOrders}
                     </CardTitle>
                     <div className="p-2 bg-purple-500 rounded-lg">
                       <ShoppingCart className="h-5 w-5 text-white" />
@@ -202,7 +198,7 @@ export default function StatisticsPage() {
                     {orders.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    عدد الطلبات الكلي
+                    {translations.totalOrdersDescription}
                   </p>
                 </CardContent>
               </Card>
@@ -212,7 +208,7 @@ export default function StatisticsPage() {
                 <CardHeader className="pb-3 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-                      إجمالي الإيرادات
+                      {translations.totalRevenue}
                     </CardTitle>
                     <div className="p-2 bg-teal-500 rounded-lg">
                       <TrendingUp className="h-5 w-5 text-white" />
@@ -225,7 +221,7 @@ export default function StatisticsPage() {
                     <span className="text-xl">د.أ</span>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    مجموع قيمة جميع الطلبات
+                    {translations.totalRevenueDescription}
                   </p>
                 </CardContent>
               </Card>
@@ -235,10 +231,10 @@ export default function StatisticsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">
-                  قائمة الزوار
+                  {translations.visitorsList}
                 </CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  جميع الأشخاص الذين وصلهم OTP مع حالة الطلب
+                  {translations.visitorsListDescription}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -246,7 +242,7 @@ export default function StatisticsPage() {
                   <div className="relative flex-1">
                     <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="ابحث برقم الهاتف أو الاسم..."
+                      placeholder={translations.searchPlaceholder}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pr-10"
@@ -259,27 +255,23 @@ export default function StatisticsPage() {
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                      الكل ({allUsers.length})
+                      {translations.filterAll} ({allUsers.length})
                     </Button>
                     <Button
-                      variant={
-                        filterStatus === "ordered" ? "default" : "outline"
-                      }
+                      variant={filterStatus === "ordered" ? "default" : "outline"}
                       onClick={() => setFilterStatus("ordered")}
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                      قاموا بالطلب ({orderedUsers.length})
+                      {translations.filterOrdered} ({orderedUsers.length})
                     </Button>
                     <Button
-                      variant={
-                        filterStatus === "not-ordered" ? "default" : "outline"
-                      }
+                      variant={filterStatus === "not-ordered" ? "default" : "outline"}
                       onClick={() => setFilterStatus("not-ordered")}
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                      لم يطلبوا ({notOrderedUsers.length})
+                      {translations.filterNotOrdered} ({notOrderedUsers.length})
                     </Button>
                   </div>
                 </div>
@@ -288,7 +280,7 @@ export default function StatisticsPage() {
                   {filteredUsers.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
                       <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p>لا توجد نتائج</p>
+                      <p>{translations.noResults}</p>
                     </div>
                   ) : (
                     filteredUsers.map((user) => (
@@ -312,10 +304,8 @@ export default function StatisticsPage() {
                                   </p>
                                 )}
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  تاريخ التسجيل:{" "}
-                                  {new Date(user.createdAt).toLocaleDateString(
-                                    "ar-SA"
-                                  )}
+                                  {translations.registrationDate}:{" "}
+                                  {new Date(user.createdAt).toLocaleDateString("ar-SA")}
                                 </p>
                               </div>
                             </div>
@@ -325,11 +315,11 @@ export default function StatisticsPage() {
                                 <>
                                   <Badge className="bg-green-500 hover:bg-green-600 text-white">
                                     <CheckCircle2 className="ml-1 h-3 w-3" />
-                                    قام بالطلب
+                                    {translations.orderedBadge}
                                   </Badge>
                                   <div className="text-left">
                                     <p className="text-xs text-muted-foreground">
-                                      عدد الطلبات
+                                      {translations.numberOfOrders}
                                     </p>
                                     <p className="font-bold text-sm">
                                       {getTotalOrdersByUser(user._id)}
@@ -337,11 +327,10 @@ export default function StatisticsPage() {
                                   </div>
                                   <div className="text-left">
                                     <p className="text-xs text-muted-foreground">
-                                      إجمالي الإنفاق
+                                      {translations.totalSpent}
                                     </p>
                                     <p className="font-bold text-sm text-green-600">
-                                      {getTotalSpentByUser(user._id).toFixed(2)}
-                                      د.أ
+                                      {getTotalSpentByUser(user._id).toFixed(2)} د.أ
                                     </p>
                                   </div>
                                 </>
@@ -351,7 +340,7 @@ export default function StatisticsPage() {
                                   className="bg-orange-100 text-orange-700 hover:bg-orange-200"
                                 >
                                   <XCircle className="ml-1 h-3 w-3" />
-                                  لم يطلب
+                                  {translations.notOrderedBadge}
                                 </Badge>
                               )}
                             </div>
