@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Card,
   CardContent,
@@ -22,8 +21,16 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
-import { useCart } from "@/contexts/CartContext";
 import { useOrder } from "@/contexts/OrderContext";
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  isWithinInterval,
+} from "date-fns";
 
 export default function StatisticsPage() {
   const { allUsers, getAllUsers } = useUser();
@@ -33,25 +40,21 @@ export default function StatisticsPage() {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all"); // all, ordered, not-ordered
+  const [dateFilter, setDateFilter] = useState("all"); // ✅ "all", "today", "week", "month"
 
   useEffect(() => {
     const fetchData = async () => {
-      const allUsers = await getAllUsers();
-      const orders = await getAllOrders();
+      const users = await getAllUsers();
+      const allOrders = await getAllOrders();
 
-      const orderedUserIds = new Set(
-        orders.map((order) => {
-          return order.userId._id;
-        })
-      );
+      const filteredOrders = applyDateFilter(allOrders, dateFilter);
 
-      const ordered = allUsers.filter((user) => {
-        return orderedUserIds.has(user._id);
-      });
-      const notOrdered = allUsers.filter(
-        (user) => !orderedUserIds.has(user._id)
-      );
-      const revenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+      const orderedUserIds = new Set(filteredOrders.map((o) => o.userId._id));
+
+      const ordered = users.filter((u) => orderedUserIds.has(u._id));
+      const notOrdered = users.filter((u) => !orderedUserIds.has(u._id));
+
+      const revenue = filteredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
 
       setOrderedUsers(ordered);
       setNotOrderedUsers(notOrdered);
@@ -59,11 +62,39 @@ export default function StatisticsPage() {
     };
 
     fetchData();
-  }, []);
+  }, [dateFilter]); // ✅ refetch stats when date filter changes
 
-  useEffect(() => {
-    setSearchTerm("");
-  }, [filterStatus]);
+  useEffect(() => setSearchTerm(""), [filterStatus]);
+
+  // ✅ helper to filter by date
+  const applyDateFilter = (orders, filter) => {
+    const now = new Date();
+    console.log("Now:", now);
+
+    return orders.filter((order) => {
+      const orderDate = new Date(order.createdAt);
+
+      switch (filter) {
+        case "today":
+          return isWithinInterval(orderDate, {
+            start: startOfDay(now),
+            end: endOfDay(now),
+          });
+        case "week":
+          return isWithinInterval(orderDate, {
+            start: startOfWeek(now, { weekStartsOn: 6 }), // week starts Saturday
+            end: endOfWeek(now, { weekStartsOn: 6 }),
+          });
+        case "month":
+          return isWithinInterval(orderDate, {
+            start: startOfMonth(now),
+            end: endOfMonth(now),
+          });
+        default:
+          return true;
+      }
+    });
+  };
 
   const getTotalOrdersByUser = (userId) => {
     return orders.filter((order) => order.userId._id === userId).length;
@@ -90,8 +121,45 @@ export default function StatisticsPage() {
     );
   });
 
+  const filteredOrders = applyDateFilter(orders, dateFilter);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      <div className="container mx-auto my-10 px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        <div className="flex flex-wrap gap-2 mb-4">
+          {/* ✅ Date Filter Buttons */}
+          <Button
+            variant={dateFilter === "all" ? "default" : "outline"}
+            onClick={() => setDateFilter("all")}
+            size="sm"
+          >
+            الكل
+          </Button>
+          <Button
+            variant={dateFilter === "today" ? "default" : "outline"}
+            onClick={() => setDateFilter("today")}
+            size="sm"
+          >
+            اليوم
+          </Button>
+          <Button
+            variant={dateFilter === "week" ? "default" : "outline"}
+            onClick={() => setDateFilter("week")}
+            size="sm"
+          >
+            هذا الأسبوع
+          </Button>
+          <Button
+            variant={dateFilter === "month" ? "default" : "outline"}
+            onClick={() => setDateFilter("month")}
+            size="sm"
+          >
+            هذا الشهر
+          </Button>
+        </div>
+
+        {/* ... the rest of your statistics cards and user list remain the same ... */}
+      </div>
       <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -199,7 +267,7 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-purple-600">
-                    {orders.length}
+                    {filteredOrders.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     عدد الطلبات الكلي
