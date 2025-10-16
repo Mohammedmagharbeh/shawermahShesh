@@ -260,7 +260,7 @@ function Header() {
                 {t("contact_us")}
               </Link>
 
-              {user.role === "admin" && (
+              {(user.role === "admin" || user.role === "employee") && (
                 <div className="flex flex-col gap-2 pt-3 mt-2 border-t-2 border-yellow-200">
                   <div className="flex items-center gap-2 px-4 mb-1">
                     <Settings className="h-4 w-4 text-red-900" />
@@ -268,24 +268,39 @@ function Header() {
                       {t("control_panel")}
                     </p>
                   </div>
-                  <Link to="/admin/dashboard" onClick={handleLinkClick}>
-                    <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                      <LayoutDashboard className="h-5 w-5 text-red-600" />
-                      <span> {t("dashboard")}</span>
-                    </div>
-                  </Link>
-                  <Link to="/orders" onClick={handleLinkClick}>
-                    <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                      <Package className="h-5 w-5 text-red-600" />
-                      <span>{t("orders")}</span>
-                    </div>
-                  </Link>
-                  <Link to="/admin/add-product" onClick={handleLinkClick}>
-                    <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                      <Plus className="h-5 w-5 text-red-600" />
-                      <span>{t("products")}</span>
-                    </div>
-                  </Link>
+                  {(user.role === "admin" || user.role === "employee") && (
+                    <Link to="/admin/dashboard" onClick={handleLinkClick}>
+                      <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                        <LayoutDashboard className="h-5 w-5 text-red-600" />
+                        <span> {t("dashboard")}</span>
+                      </div>
+                    </Link>
+                  )}
+                  {user.role === "admin" && (
+                    <Link to="/orders" onClick={handleLinkClick}>
+                      <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                        <Package className="h-5 w-5 text-red-600" />
+                        <span>{t("orders")}</span>
+                      </div>
+                    </Link>
+                  )}
+                  {user.role === "admin" && (
+                    <Link to="/admin/add-product" onClick={handleLinkClick}>
+                      <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                        <Plus className="h-5 w-5 text-red-600" />
+                        <span>{t("products")}</span>
+                      </div>
+                    </Link>
+                  )}
+
+                  {user.role === "admin" && (
+                    <Link to="/admin/add-product" onClick={handleLinkClick}>
+                      <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                        <ChartNoAxesCombined className="h-5 w-5 text-red-600" />
+                        <span>Statistics</span>
+                      </div>
+                    </Link>
+                  )}
                 </div>
               )}
 
