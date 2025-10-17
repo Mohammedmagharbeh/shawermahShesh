@@ -35,17 +35,18 @@ export const OrderProvider = ({ children }) => {
   };
 
   // 🔹 Get orders by userId
-  const getOrdersByUserId = async () => {
-    if (!user || !user?._id) {
+  const getOrdersByUserId = async (id = user._id) => {
+    if (!user || !id) {
       const msg = t("user_not_logged_in");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/user/${user._id}`);
+      const res = await axios.get(`${API_URL}/user/${id}`);
       setOrders(res.data.data);
       setError(null);
+      return res.data.data; // return directly without overwriting state
     } catch (err) {
       const msg = err.response?.data?.message || t("failed_fetch_user_orders");
 

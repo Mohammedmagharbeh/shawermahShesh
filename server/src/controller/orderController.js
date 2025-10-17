@@ -156,11 +156,6 @@ exports.getOrdersByUserId = async (req, res) => {
       .populate("shippingAddress")
       .sort({ createdAt: -1 });
 
-    if (!userOrders.length)
-      return res
-        .status(404)
-        .json({ success: false, message: "No orders found for this user" });
-
     res.status(200).json({ success: true, data: userOrders });
   } catch (error) {
     console.error("Error in getOrdersByUserId:", error);

@@ -13,13 +13,12 @@ import { User, Phone, Palette, Trash2, AlertCircle } from "lucide-react";
 import Loading from "@/componenet/common/Loading";
 import LanguageSwitcher from "@/componenet/LanguageSwitcher";
 import { useUser } from "@/contexts/UserContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 function Settings() {
   const { user, updatePhone } = useUser();
   const [phone, setPhone] = useState(user?.phone || "");
-
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -85,6 +84,12 @@ function Settings() {
                     {t("update_phone")}
                   </Button>
                 </div>
+                <Link
+                  className="w-full mt-5 bg-red-700 text-white p-2 rounded-md flex items-center justify-center gap-2 hover:bg-red-800 transition-colors"
+                  to={`/orders/${user._id}`}
+                >
+                  My Past Orders
+                </Link>
               </div>
             </CardContent>
           </Card>

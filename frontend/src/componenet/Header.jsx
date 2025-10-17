@@ -106,7 +106,7 @@ function Header() {
                     className="relative border-2 border-red-600 text-red-700 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white bg-white h-10 w-10 md:h-11 md:w-11 p-0 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-200 flex-shrink-0"
                   >
                     <ShoppingCart className="size-5" />
-                    {cart.products.length > 0 && (
+                    {cart.products?.length > 0 && (
                       <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs font-bold bg-gradient-to-br from-yellow-400 to-yellow-600 text-red-900 border-2 border-white shadow-md animate-pulse">
                         {cart.products.length}
                       </Badge>
@@ -294,10 +294,10 @@ function Header() {
                   )}
 
                   {user.role === "admin" && (
-                    <Link to="/admin/add-product" onClick={handleLinkClick}>
+                    <Link to="/admin/statistics" onClick={handleLinkClick}>
                       <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
                         <ChartNoAxesCombined className="h-5 w-5 text-red-600" />
-                        <span>Statistics</span>
+                        <span>{t("Statistics")}</span>
                       </div>
                     </Link>
                   )}
