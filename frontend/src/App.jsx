@@ -19,6 +19,7 @@ import { useUser } from "./contexts/UserContext";
 import Settings from "./pages/Settings";
 import { useEffect } from "react";
 import StatisticsPage from "./pages/statistic";
+import AdminUsersPage from "./pages/adminusers";
 // import LanguageProvider from "./contexts/LanguageContext";
 
 function App() {
@@ -52,6 +53,8 @@ function App() {
               }
             />
             <Route path="/Login" element={<Login />} />
+                        <Route path="/AdminUsersPage" element={<AdminUsersPage />} />
+
             <Route
               path="/admin/statistics"
               element={

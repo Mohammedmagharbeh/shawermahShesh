@@ -16,24 +16,6 @@ exports.getuser = async (req, res) => {
   }
 };
 
-// postEndpoint
-// exports.postuser = async (req, res) => {
-//   try {
-//     const { username, email, password } = req.body;
-
-//     const hashedpassword = await bcrypt.hash(password, 10);
-//     const userwithhash = {
-//       username: username,
-//       email: email,
-//       password: hashedpassword,
-//       password2: hashedpassword,
-//     };
-//     const newuser = await user.create(userwithhash);
-//     res.status(200).json(newuser);
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
 
 exports.userLogin = async (req, res) => {
   const { phone } = req.body;
