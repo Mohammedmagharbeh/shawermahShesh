@@ -13,19 +13,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
 
 function MyOrders() {
-  const { orders, getOrdersByUserId } = useOrder();
+  const { getOrdersByUserId } = useOrder();
   const { user } = useUser();
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [userOrders, setUserOrders] = useState([]);
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const { id } = useParams();
 
   useEffect(() => {
-    if (user?._id) {
-      getOrdersByUserId();
-    }
-  }, [user]);
+    const fetchUserOrders = async () => {
+      const orders = await getOrdersByUserId(id);
+      console.log("getOrdersByUserId returned:", orders);
+      setUserOrders(Array.isArray(orders) ? orders : []);
+    };
+
+    fetchUserOrders();
+  }, [id, user]);
 
   const statusColors = {
     Processing: "bg-secondary text-secondary-foreground",
@@ -38,7 +45,7 @@ function MyOrders() {
     return status === "paid" ? "default" : "destructive";
   };
 
-  const filteredOrders = orders?.filter((order) => {
+  const filteredOrders = userOrders?.filter((order) => {
     if (!order.createdAt) return false;
 
     const matchesCategory =

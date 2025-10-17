@@ -33,6 +33,7 @@ import {
   endOfMonth,
   isWithinInterval,
 } from "date-fns";
+import { Link } from "react-router-dom";
 
 export default function StatisticsPage() {
   const { allUsers, getAllUsers } = useUser();
@@ -43,6 +44,7 @@ export default function StatisticsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all"); // all, ordered, not-ordered
   const [dateFilter, setDateFilter] = useState("all"); // ✅ "all", "today", "week", "month"
+  const [totalVisitors, setTotalVisitors] = useState(0);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -59,9 +61,15 @@ export default function StatisticsPage() {
 
       const revenue = filteredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
 
+      const totalVisitorsCount = applyDateFilterToUsers(
+        users,
+        dateFilter
+      ).length;
+
       setOrderedUsers(ordered);
       setNotOrderedUsers(notOrdered);
       setTotalRevenue(revenue);
+      setTotalVisitors(totalVisitorsCount);
     };
 
     fetchData();
@@ -90,6 +98,32 @@ export default function StatisticsPage() {
           });
         case "month":
           return isWithinInterval(orderDate, {
+            start: startOfMonth(now),
+            end: endOfMonth(now),
+          });
+        default:
+          return true;
+      }
+    });
+  };
+
+  const applyDateFilterToUsers = (users, filter) => {
+    const now = new Date();
+    return users.filter((user) => {
+      const registrationDate = new Date(user.updatedAt);
+      switch (filter) {
+        case "today":
+          return isWithinInterval(registrationDate, {
+            start: startOfDay(now),
+            end: endOfDay(now),
+          });
+        case "week":
+          return isWithinInterval(registrationDate, {
+            start: startOfWeek(now, { weekStartsOn: 6 }),
+            end: endOfWeek(now, { weekStartsOn: 6 }),
+          });
+        case "month":
+          return isWithinInterval(registrationDate, {
             start: startOfMonth(now),
             end: endOfMonth(now),
           });
@@ -128,42 +162,7 @@ export default function StatisticsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
-      <div className="container mx-auto my-10 px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
-        <div className="flex flex-wrap gap-2 mb-4">
-          {/* ✅ Date Filter Buttons */}
-          <Button
-            variant={dateFilter === "all" ? "default" : "outline"}
-            onClick={() => setDateFilter("all")}
-            size="sm"
-          >
-              {t("filterAll")}
-          </Button>
-          <Button
-            variant={dateFilter === "today" ? "default" : "outline"}
-            onClick={() => setDateFilter("today")}
-            size="sm"
-          >
-              {t("Today")}
-          </Button>
-          <Button
-            variant={dateFilter === "week" ? "default" : "outline"}
-            onClick={() => setDateFilter("week")}
-            size="sm"
-          >
-              {t("This week")}
-          </Button>
-          <Button
-            variant={dateFilter === "month" ? "default" : "outline"}
-            onClick={() => setDateFilter("month")}
-            size="sm"
-          >
-              {t("This mounth")}
-          </Button>
-        </div>
-
-        {/* ... the rest of your statistics cards and user list remain the same ... */}
-      </div>
-      <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10 mt-10">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl shadow-lg">
@@ -180,13 +179,43 @@ export default function StatisticsPage() {
           </div>
         </div>
       </div>
-
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
-        {filteredUsers.length === 0 ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="animate-spin h-10 w-10 text-primary" />
-          </div>
-        ) : (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {/* ✅ Date Filter Buttons */}
+          <Button
+            variant={dateFilter === "all" ? "default" : "outline"}
+            onClick={() => setDateFilter("all")}
+            size="sm"
+          >
+            {t("filterAll")}
+          </Button>
+          <Button
+            variant={dateFilter === "today" ? "default" : "outline"}
+            onClick={() => setDateFilter("today")}
+            size="sm"
+          >
+            {t("Today")}
+          </Button>
+          <Button
+            variant={dateFilter === "week" ? "default" : "outline"}
+            onClick={() => setDateFilter("week")}
+            size="sm"
+          >
+            {t("This week")}
+          </Button>
+          <Button
+            variant={dateFilter === "month" ? "default" : "outline"}
+            onClick={() => setDateFilter("month")}
+            size="sm"
+          >
+            {t("This mounth")}
+          </Button>
+        </div>
+
+        {/* ... the rest of your statistics cards and user list remain the same ... */}
+      </div>
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        {
           <div className="space-y-6">
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -195,7 +224,7 @@ export default function StatisticsPage() {
                 <CardHeader className="pb-3 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base sm:text-lg">
-              {t("totalUsers")}
+                      {t("totalUsers")}
                     </CardTitle>
                     <div className="p-2 bg-blue-500 rounded-lg">
                       <Users className="h-5 w-5 text-white" />
@@ -204,10 +233,10 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-blue-600">
-                    {allUsers.length}
+                    {totalVisitors}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              {t("visitorsListDescription")}
+                    {t("visitorsListDescription")}
                   </p>
                 </CardContent>
               </Card>
@@ -248,7 +277,7 @@ export default function StatisticsPage() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="text-3xl sm:text-4xl font-bold text-orange-600">
-                    {notOrderedUsers.length}
+                    {totalVisitors - orderedUsers.length}
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     {t("usersWithoutOrdersDescription")}
@@ -340,7 +369,7 @@ export default function StatisticsPage() {
                       size="sm"
                       className="whitespace-nowrap"
                     >
-                     {t("filterOrdered")}({orderedUsers.length})
+                      {t("filterOrdered")}({orderedUsers.length})
                     </Button>
                     <Button
                       variant={
@@ -362,79 +391,86 @@ export default function StatisticsPage() {
                       <p>{t("noResults")}</p>
                     </div>
                   ) : (
-                    filteredUsers.map((user) => (
-                      <Card
-                        key={user._id}
-                        className="hover:shadow-md transition-shadow"
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex items-start gap-3 flex-1">
-                              <div className="p-2 bg-muted rounded-lg">
-                                <Phone className="h-5 w-5 text-muted-foreground" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-bold text-base sm:text-lg truncate">
-                                  {user.phone}
-                                </p>
-                                {user.name && (
-                                  <p className="text-sm text-muted-foreground truncate">
-                                    {user.name}
-                                  </p>
-                                )}
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {t("registrationDate")}{" "}
-                                  {new Date(user.createdAt).toLocaleDateString(
-                                    "ar-SA"
-                                  )}
-                                </p>
-                              </div>
-                            </div>
+                    <div className="space-y-3 flex flex-col">
+                      {filteredUsers.map((user) => (
+                        <Link to={`/orders/${user._id}`} key={user._id}>
+                          <Card
+                            key={user._id}
+                            className="hover:shadow-md transition-shadow"
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-start gap-3 flex-1">
+                                  <div className="p-2 bg-muted rounded-lg">
+                                    <Phone className="h-5 w-5 text-muted-foreground" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-base sm:text-lg truncate">
+                                      {user.phone}
+                                    </p>
+                                    {user.name && (
+                                      <p className="text-sm text-muted-foreground truncate">
+                                        {user.name}
+                                      </p>
+                                    )}
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {t("registrationDate")}{" "}
+                                      {new Date(
+                                        user.createdAt
+                                      ).toLocaleDateString("ar-SA")}
+                                    </p>
+                                  </div>
+                                </div>
 
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                              {orderedUsers.includes(user) ? (
-                                <>
-                                  <Badge className="bg-green-500 hover:bg-green-600 text-white">
-                                    <CheckCircle2 className="ml-1 h-3 w-3" />
-                                    {t("orderedBadge")}
-                                  </Badge>
-                                  <div className="text-left">
-                                    <p className="text-xs text-muted-foreground">
-                                    {t("numberOfOrders")}
-                                    </p>
-                                    <p className="font-bold text-sm">
-                                      {getTotalOrdersByUser(user._id)}
-                                    </p>
-                                  </div>
-                                  <div className="text-left">
-                                    <p className="text-xs text-muted-foreground">
-                                    {t("totalSpent")}
-                                    </p>
-                                    <p className="font-bold text-sm text-green-600">
-                                      {getTotalSpentByUser(user._id).toFixed(2)}
-{t("price_jod")}                                    </p>
-                                  </div>
-                                </>
-                              ) : (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-orange-100 text-orange-700 hover:bg-orange-200"
-                                >
-                                  <XCircle className="ml-1 h-3 w-3" />
-                                  {t("notOrderedBadge")}
-                             </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                  {orderedUsers.includes(user) ? (
+                                    <>
+                                      <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                                        <CheckCircle2 className="ml-1 h-3 w-3" />
+                                        {t("orderedBadge")}
+                                      </Badge>
+                                      <div className="text-left">
+                                        <p className="text-xs text-muted-foreground">
+                                          {t("numberOfOrders")}
+                                        </p>
+                                        <p className="font-bold text-sm">
+                                          {getTotalOrdersByUser(user._id)}
+                                        </p>
+                                      </div>
+                                      <div className="text-left">
+                                        <p className="text-xs text-muted-foreground">
+                                          {t("totalSpent")}
+                                        </p>
+                                        <p className="font-bold text-sm text-green-600">
+                                          {getTotalSpentByUser(
+                                            user._id
+                                          ).toFixed(2)}
+                                          {t("price_jod")}{" "}
+                                        </p>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <Badge
+                                      variant="secondary"
+                                      className="bg-orange-100 text-orange-700 hover:bg-orange-200"
+                                    >
+                                      <XCircle className="ml-1 h-3 w-3" />
+                                      {t("notOrderedBadge")}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
-        )}
+        }
       </div>
     </div>
   );
