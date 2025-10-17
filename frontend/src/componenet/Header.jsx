@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -98,25 +99,23 @@ function Header() {
 
           <div className="flex items-center gap-1 sm:gap-2 md:gap-2">
             {user.role === "user" && (
-              <div className="flex items-center gap-1 sm:gap-2 md:gap-2">
-                <Link to="/cart">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="relative border-2 border-red-600 text-red-700 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white bg-white h-10 w-10 md:h-11 md:w-11 p-0 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-200 flex-shrink-0"
-                  >
-                    <ShoppingCart className="size-5" />
-                    {cart.products?.length > 0 && (
-                      <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs font-bold bg-gradient-to-br from-yellow-400 to-yellow-600 text-red-900 border-2 border-white shadow-md animate-pulse">
-                        {cart.products.length}
-                      </Badge>
-                    )}
-                  </Button>
-                </Link>
-              </div>
+              <Link to="/cart">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="relative border-2 border-red-600 text-red-700 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white bg-white h-10 w-10 md:h-11 md:w-11 p-0 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-200 flex-shrink-0"
+                >
+                  <ShoppingCart className="size-5" />
+                  {cart.products?.length > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs font-bold bg-gradient-to-br from-yellow-400 to-yellow-600 text-red-900 border-2 border-white shadow-md animate-pulse">
+                      {cart.products.length}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
             )}
 
-            {(user.role === "admin" || user.role === "employee") && (
+            {user.role === "admin" && (
               <div className="hidden lg:block">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -136,43 +135,49 @@ function Header() {
                     className="w-56 bg-white border-2 border-red-200 shadow-xl rounded-lg p-2"
                   >
                     <Link to="/admin/dashboard">
-                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200">
                         <LayoutDashboard className="h-4 w-4 ml-2 text-red-600" />
                         <span className="font-semibold text-gray-700">
                           {t("dashboard")}
                         </span>
                       </DropdownMenuItem>
                     </Link>
-                    {user.role === "admin" && (
-                      <Link to="/orders">
-                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                          <Package className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">
-                            {t("orders")}
-                          </span>
-                        </DropdownMenuItem>
-                      </Link>
-                    )}
-                    {user.role === "admin" && (
-                      <Link to="/admin/add-product">
-                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                          <Plus className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">
-                            {t("products")}
-                          </span>
-                        </DropdownMenuItem>
-                      </Link>
-                    )}
-                    {user.role === "admin" && (
-                      <Link to="/admin/statistics">
-                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                          <ChartNoAxesCombined className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">
-                            {t("Statistics")}
-                          </span>
-                        </DropdownMenuItem>
-                      </Link>
-                    )}
+
+                    <Link to="/orders">
+                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200">
+                        <Package className="h-4 w-4 ml-2 text-red-600" />
+                        <span className="font-semibold text-gray-700">
+                          {t("orders")}
+                        </span>
+                      </DropdownMenuItem>
+                    </Link>
+
+                    <Link to="/admin/add-product">
+                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200">
+                        <Plus className="h-4 w-4 ml-2 text-red-600" />
+                        <span className="font-semibold text-gray-700">
+                          {t("products")}
+                        </span>
+                      </DropdownMenuItem>
+                    </Link>
+
+                    <Link to="/admin/statistics">
+                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200">
+                        <ChartNoAxesCombined className="h-4 w-4 ml-2 text-red-600" />
+                        <span className="font-semibold text-gray-700">
+                          {t("Statistics")}
+                        </span>
+                      </DropdownMenuItem>
+                    </Link>
+
+                    <Link to="/AdminUsersPage">
+                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200">
+                        <ChartNoAxesCombined className="h-4 w-4 ml-2 text-red-600" />
+                        <span className="font-semibold text-gray-700">
+                          AdminUsersPage
+                        </span>
+                      </DropdownMenuItem>
+                    </Link>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -195,8 +200,7 @@ function Header() {
                 onClick={handleLogout}
                 className="hidden sm:flex bg-gradient-to-r  border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
               >
-                <span className="hidden md:inline">{t("logout")}</span>
-                <span className="md:hidden">{t("logout")}</span>
+                <span>{t("logout")}</span>
                 <LogOut className="h-4 w-4" />
               </Button>
             ) : (
@@ -204,10 +208,9 @@ function Header() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="bg-gradient-to-r  border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105"
+                  className="bg-gradient-to-r border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105"
                 >
-                  <span className="hidden md:inline">{t("login")}</span>
-                  <span className="md:hidden">{t("login")}</span>
+                  {t("login")}
                   <LogIn className="h-4 w-4" />
                 </Button>
               </Link>
@@ -219,117 +222,10 @@ function Header() {
               className="lg:hidden h-10 w-10 p-0 hover:bg-red-100 text-red-700 transition-all duration-300 flex-shrink-0"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
         </div>
-
-        {isMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 border-t-2 border-yellow-300 animate-in slide-in-from-top-2 duration-300 bg-gradient-to-b from-yellow-50/50 to-transparent rounded-b-lg">
-            <div className="flex flex-col gap-2 pt-4">
-              <Link
-                to="/#home"
-                onClick={handleLinkClick}
-                className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
-              >
-                {t("home")}
-              </Link>
-              <Link
-                to="/#menu"
-                onClick={handleLinkClick}
-                className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
-              >
-                {t("menu")}
-              </Link>
-              <Link
-                to="/#about"
-                onClick={handleLinkClick}
-                className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
-              >
-                {t("about_us")}
-              </Link>
-              <Link
-                to="/#contact"
-                onClick={handleLinkClick}
-                className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
-              >
-                {t("contact_us")}
-              </Link>
-
-              {(user.role === "admin" || user.role === "employee") && (
-                <div className="flex flex-col gap-2 pt-3 mt-2 border-t-2 border-yellow-200">
-                  <div className="flex items-center gap-2 px-4 mb-1">
-                    <Settings className="h-4 w-4 text-red-900" />
-                    <p className="text-xs font-bold text-red-900">
-                      {t("control_panel")}
-                    </p>
-                  </div>
-                  {(user.role === "admin" || user.role === "employee") && (
-                    <Link to="/admin/dashboard" onClick={handleLinkClick}>
-                      <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                        <LayoutDashboard className="h-5 w-5 text-red-600" />
-                        <span> {t("dashboard")}</span>
-                      </div>
-                    </Link>
-                  )}
-                  {user.role === "admin" && (
-                    <Link to="/orders" onClick={handleLinkClick}>
-                      <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                        <Package className="h-5 w-5 text-red-600" />
-                        <span>{t("orders")}</span>
-                      </div>
-                    </Link>
-                  )}
-                  {user.role === "admin" && (
-                    <Link to="/admin/add-product" onClick={handleLinkClick}>
-                      <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                        <Plus className="h-5 w-5 text-red-600" />
-                        <span>{t("products")}</span>
-                      </div>
-                    </Link>
-                  )}
-
-                  {user.role === "admin" && (
-                    <Link to="/admin/statistics" onClick={handleLinkClick}>
-                      <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                        <ChartNoAxesCombined className="h-5 w-5 text-red-600" />
-                        <span>{t("Statistics")}</span>
-                      </div>
-                    </Link>
-                  )}
-                </div>
-              )}
-
-              <div className="sm:hidden pt-3 mt-2 border-t-2 border-yellow-200">
-                {user?._id ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleLogout}
-                    className="w-full bg-gradient-to-r border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-12 text-base font-bold gap-2 transition-all duration-300 shadow-md"
-                  >
-                    {t("logout")} <LogOut className="h-5 w-5" />
-                  </Button>
-                ) : (
-                  <Link to="/login" className="block" onClick={handleLinkClick}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full bg-gradient-to-r  border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-12 text-base font-bold gap-2 transition-all duration-300 shadow-md"
-                    >
-                      {t("login")}
-                      <LogIn className="h-5 w-5" />
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );
