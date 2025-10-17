@@ -259,8 +259,8 @@
 "statisticsDescription": "تتبع الزوار والطلبات ومعدل التحويل",
 "totalUsers": "إجمالي الزوار",
 "totalUsersDescription": "عدد الأشخاص الذين وصلهم OTP",
-"usersWithOrders": "زوار قاموا بالطلب",
-"usersWithoutOrders": "زوار بدون طلبات",
+"usersWithOrders": "  قاموا بالطلب",
+"usersWithoutOrders": " بدون طلبات",
 "usersWithoutOrdersDescription": "دخلوا ولم يطلبوا",
 "totalOrders": "إجمالي الطلبات",
 "totalOrdersDescription": "عدد الطلبات الكلي",
@@ -282,9 +282,5 @@
 "This week": "هذا الاسبوع",
 "This mounth": "هذا الشهر",
 "Statistics":"الاحصاء"
-
-
-
-
 
 }
