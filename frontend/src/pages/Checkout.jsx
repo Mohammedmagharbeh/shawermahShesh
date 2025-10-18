@@ -26,6 +26,7 @@ function Checkout() {
     name: user?.name || "",
     apartment: "",
     phone: user?.phone || "",
+    _id: user?._id || "",
   });
   const navigate = useNavigate();
   const { t } = useTranslation();
