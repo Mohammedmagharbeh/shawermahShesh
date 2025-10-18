@@ -535,14 +535,19 @@ export default function StatisticsPage() {
 
       const filteredOrders = applyDateFilter(allOrders, dateFilter);
 
-      const orderedUserIds = new Set(filteredOrders.map((o) => o.userId._id));
+      const orderedUserIds = new Set(
+        filteredOrders.map((o) => o.userId._id || o.userDetails._id)
+      );
 
       const ordered = users.filter((u) => orderedUserIds.has(u._id));
       const notOrdered = users.filter((u) => !orderedUserIds.has(u._id));
 
       const revenue = filteredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
 
-      const totalVisitorsCount = applyDateFilterToUsers(users, dateFilter).length;
+      const totalVisitorsCount = applyDateFilterToUsers(
+        users,
+        dateFilter
+      ).length;
 
       setOrderedUsers(ordered);
       setNotOrderedUsers(notOrdered);
@@ -622,8 +627,8 @@ export default function StatisticsPage() {
     filterStatus === "ordered"
       ? orderedUsers
       : filterStatus === "not-ordered"
-      ? notOrderedUsers
-      : allUsers
+        ? notOrderedUsers
+        : allUsers
   ).filter((user) => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return true;
@@ -645,8 +650,8 @@ export default function StatisticsPage() {
     ];
 
     const usersData = allUsers.map((user) => ({
-      "الهاتف": user.phone,
-      "الاسم": user.name || "-",
+      الهاتف: user.phone,
+      الاسم: user.name || "-",
       "تاريخ التسجيل": new Date(user.createdAt).toLocaleDateString("ar-SA"),
       "حالة الطلب": orderedUsers.includes(user) ? "قاموا بالطلب" : "بدون طلب",
       "عدد الطلبات": getTotalOrdersByUser(user._id),
@@ -659,7 +664,10 @@ export default function StatisticsPage() {
     const usersSheet = XLSX.utils.json_to_sheet(usersData);
     XLSX.utils.book_append_sheet(workbook, usersSheet, "بيانات المستخدمين");
 
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
     const file = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(file, "Statistics.xlsx");
   };
@@ -674,8 +682,12 @@ export default function StatisticsPage() {
               <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t("statisticsTitle")}</h1>
-              <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">{t("statisticsDescription")}</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                {t("statisticsTitle")}
+              </h1>
+              <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">
+                {t("statisticsDescription")}
+              </p>
             </div>
           </div>
           <Button onClick={exportToExcel}>تصدير إلى Excel</Button>
@@ -685,10 +697,34 @@ export default function StatisticsPage() {
       {/* Date Filters */}
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="flex flex-wrap gap-2 mb-4">
-          <Button variant={dateFilter === "all" ? "default" : "outline"} onClick={() => setDateFilter("all")} size="sm">{t("filterAll")}</Button>
-          <Button variant={dateFilter === "today" ? "default" : "outline"} onClick={() => setDateFilter("today")} size="sm">{t("Today")}</Button>
-          <Button variant={dateFilter === "week" ? "default" : "outline"} onClick={() => setDateFilter("week")} size="sm">{t("This week")}</Button>
-          <Button variant={dateFilter === "month" ? "default" : "outline"} onClick={() => setDateFilter("month")} size="sm">{t("This mounth")}</Button>
+          <Button
+            variant={dateFilter === "all" ? "default" : "outline"}
+            onClick={() => setDateFilter("all")}
+            size="sm"
+          >
+            {t("filterAll")}
+          </Button>
+          <Button
+            variant={dateFilter === "today" ? "default" : "outline"}
+            onClick={() => setDateFilter("today")}
+            size="sm"
+          >
+            {t("Today")}
+          </Button>
+          <Button
+            variant={dateFilter === "week" ? "default" : "outline"}
+            onClick={() => setDateFilter("week")}
+            size="sm"
+          >
+            {t("This week")}
+          </Button>
+          <Button
+            variant={dateFilter === "month" ? "default" : "outline"}
+            onClick={() => setDateFilter("month")}
+            size="sm"
+          >
+            {t("This mounth")}
+          </Button>
         </div>
 
         {/* Statistics Cards */}
@@ -702,7 +738,9 @@ export default function StatisticsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-600">{totalVisitors}</div>
+              <div className="text-3xl font-bold text-blue-600">
+                {totalVisitors}
+              </div>
             </CardContent>
           </Card>
 
@@ -715,7 +753,9 @@ export default function StatisticsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">{orderedUsers.length}</div>
+              <div className="text-3xl font-bold text-green-600">
+                {orderedUsers.length}
+              </div>
             </CardContent>
           </Card>
 
@@ -728,7 +768,9 @@ export default function StatisticsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-600">{totalVisitors - orderedUsers.length}</div>
+              <div className="text-3xl font-bold text-orange-600">
+                {totalVisitors - orderedUsers.length}
+              </div>
             </CardContent>
           </Card>
 
@@ -741,7 +783,9 @@ export default function StatisticsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-600">{filteredOrders.length}</div>
+              <div className="text-3xl font-bold text-purple-600">
+                {filteredOrders.length}
+              </div>
             </CardContent>
           </Card>
 
@@ -780,9 +824,29 @@ export default function StatisticsPage() {
                 />
               </div>
               <div className="flex gap-2 overflow-x-auto pb-2">
-                <Button variant={filterStatus === "all" ? "default" : "outline"} onClick={() => setFilterStatus("all")} size="sm">{t("filterAll")} ({allUsers.length})</Button>
-                <Button variant={filterStatus === "ordered" ? "default" : "outline"} onClick={() => setFilterStatus("ordered")} size="sm">{t("filterOrdered")} ({orderedUsers.length})</Button>
-                <Button variant={filterStatus === "not-ordered" ? "default" : "outline"} onClick={() => setFilterStatus("not-ordered")} size="sm">{t("filterNotOrdered")} ({notOrderedUsers.length})</Button>
+                <Button
+                  variant={filterStatus === "all" ? "default" : "outline"}
+                  onClick={() => setFilterStatus("all")}
+                  size="sm"
+                >
+                  {t("filterAll")} ({allUsers.length})
+                </Button>
+                <Button
+                  variant={filterStatus === "ordered" ? "default" : "outline"}
+                  onClick={() => setFilterStatus("ordered")}
+                  size="sm"
+                >
+                  {t("filterOrdered")} ({orderedUsers.length})
+                </Button>
+                <Button
+                  variant={
+                    filterStatus === "not-ordered" ? "default" : "outline"
+                  }
+                  onClick={() => setFilterStatus("not-ordered")}
+                  size="sm"
+                >
+                  {t("filterNotOrdered")} ({notOrderedUsers.length})
+                </Button>
               </div>
             </div>
 
@@ -806,27 +870,47 @@ export default function StatisticsPage() {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-bold">{user.phone}</p>
-                                {user.name && <p className="text-muted-foreground">{user.name}</p>}
+                                {user.name && (
+                                  <p className="text-muted-foreground">
+                                    {user.name}
+                                  </p>
+                                )}
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  تاريخ التسجيل: {new Date(user.createdAt).toLocaleDateString("ar-SA")}
+                                  تاريخ التسجيل:{" "}
+                                  {new Date(user.createdAt).toLocaleDateString(
+                                    "ar-SA"
+                                  )}
                                 </p>
                               </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                               {orderedUsers.includes(user) ? (
                                 <>
-                                  <Badge className="bg-green-500 text-white">{t("orderedBadge")}</Badge>
+                                  <Badge className="bg-green-500 text-white">
+                                    {t("orderedBadge")}
+                                  </Badge>
                                   <div className="text-left">
-                                    <p className="text-xs text-muted-foreground">{t("numberOfOrders")}</p>
-                                    <p className="font-bold text-sm">{getTotalOrdersByUser(user._id)}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {t("numberOfOrders")}
+                                    </p>
+                                    <p className="font-bold text-sm">
+                                      {getTotalOrdersByUser(user._id)}
+                                    </p>
                                   </div>
                                   <div className="text-left">
-                                    <p className="text-xs text-muted-foreground">{t("totalSpent")}</p>
-                                    <p className="font-bold text-sm text-green-600">{getTotalSpentByUser(user._id).toFixed(2)} JOD</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {t("totalSpent")}
+                                    </p>
+                                    <p className="font-bold text-sm text-green-600">
+                                      {getTotalSpentByUser(user._id).toFixed(2)}{" "}
+                                      JOD
+                                    </p>
                                   </div>
                                 </>
                               ) : (
-                                <Badge className="bg-orange-100 text-orange-700">{t("notOrderedBadge")}</Badge>
+                                <Badge className="bg-orange-100 text-orange-700">
+                                  {t("notOrderedBadge")}
+                                </Badge>
                               )}
                             </div>
                           </div>
