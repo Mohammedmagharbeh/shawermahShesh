@@ -74,6 +74,7 @@ export default function StatisticsPage() {
       setNotOrderedUsers(notOrdered);
       setTotalRevenue(revenue);
       setTotalVisitors(totalVisitorsCount);
+      
     };
 
     fetchData();
@@ -160,6 +161,7 @@ export default function StatisticsPage() {
   });
 
   const filteredOrders = applyDateFilter(orders, dateFilter);
+console.log("⚠️ Orders with null userId:", filteredOrders.filter(o => !o.userId));
 
   const exportToExcel = () => {
     const stats = [
