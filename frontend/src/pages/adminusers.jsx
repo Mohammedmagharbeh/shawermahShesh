@@ -44,7 +44,7 @@ const AdminUsersPage = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${import.meta.env.BASE_BASE_URL}/users`);
+const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users`);
       setUsers(res.data);
     } catch (err) {
       console.error("خطأ في جلب المستخدمين:", err);
@@ -61,7 +61,7 @@ const AdminUsersPage = () => {
     }
     try {
       setActionLoading(true);
-      await axios.post(`${import.meta.env.BASE_BASE_URL}/users`, newUser);
+      await axios.post(`${import.meta.env.VITE_BASE_URL}/users`, newUser);
       setNewUser({ username: "", phone: "", role: "user" });
       fetchUsers();
       toast.success("تم إضافة المستخدم بنجاح");
@@ -75,8 +75,8 @@ const AdminUsersPage = () => {
 
   const handleUpdateRole = async (id) => {
     try {
-      setActionLoading(true);
-      await axios.put(`${import.meta.env.BASE_BASE_URL}/users/${id}`, {
+      setActionLoading(true); 
+      await axios.put(`${import.meta.env.VITE_BASE_URL}/users/${id}`, {
         role: editRole,
       });
       setEditUserId(null);
