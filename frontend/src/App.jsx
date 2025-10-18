@@ -53,7 +53,7 @@ function App() {
               }
             />
             <Route path="/Login" element={<Login />} />
-                        <Route path="/AdminUsersPage" element={<AdminUsersPage />} />
+            <Route path="/admin/users-control" element={<AdminUsersPage />} />
 
             <Route
               path="/admin/statistics"
