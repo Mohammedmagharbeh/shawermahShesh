@@ -44,7 +44,7 @@ const AdminUsersPage = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users`);
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users`);
       setUsers(res.data);
     } catch (err) {
       console.error("خطأ في جلب المستخدمين:", err);
@@ -75,8 +75,8 @@ const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users`);
 
   const handleUpdateRole = async (id) => {
     try {
-      setActionLoading(true); 
-      await axios.put(`${import.meta.env.VITE_BASE_URL}/users/${id}`, {
+      setActionLoading(true);
+      await axios.put(`${import.meta.env.VITE_BASE_URL}/admin/user/${id}`, {
         role: editRole,
       });
       setEditUserId(null);
