@@ -22,12 +22,12 @@ import {
   Phone,
   Loader2,
 } from "lucide-react";
+import Loading from "@/componenet/common/Loading";
 
 const AdminUsersPage = () => {
   const [users, setUsers] = useState([]);
   const [showUsers, setShowUsers] = useState(false);
   const [newUser, setNewUser] = useState({
-    username: "",
     phone: "",
     role: "user",
   });
@@ -45,7 +45,8 @@ const AdminUsersPage = () => {
     try {
       setLoading(true);
       const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users`);
-      setUsers(res.data);
+      const data = res.data.sort((a, b) => a.role.localeCompare(b.role));
+      setUsers(data);
     } catch (err) {
       console.error("خطأ في جلب المستخدمين:", err);
       toast.error("فشل في جلب المستخدمين");
@@ -55,19 +56,23 @@ const AdminUsersPage = () => {
   };
 
   const handleAddUser = async () => {
-    if (!newUser.username || !newUser.phone) {
+    if (!newUser.phone) {
       toast.error("يرجى ملء جميع الحقول");
       return;
     }
     try {
       setActionLoading(true);
-      await axios.post(`${import.meta.env.VITE_BASE_URL}/users`, newUser);
-      setNewUser({ username: "", phone: "", role: "user" });
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/admin/user/add`,
+        newUser
+      );
+      setNewUser({ phone: "", role: "user" });
       fetchUsers();
       toast.success("تم إضافة المستخدم بنجاح");
     } catch (err) {
       console.error("خطأ في إضافة المستخدم:", err);
-      toast.error("فشل في إضافة المستخدم");
+      // toast.error("فشل في إضافة المستخدم");
+      toast.error(err.response?.data?.message || "فشل في إضافة المستخدم");
     } finally {
       setActionLoading(false);
     }
@@ -102,7 +107,16 @@ const AdminUsersPage = () => {
   };
 
   // كل البادجات باللون الأحمر
-  const getRoleBadgeColor = (role) => "bg-red-700 text-white";
+  const getRoleBadgeColor = (role) => {
+    role = role.toLowerCase();
+    if (role === "admin") return "bg-red-100 text-red-800";
+    if (role === "employee") return "bg-green-100 text-green-800";
+    return "bg-yellow-100 text-gray-800";
+  };
+
+  if (loading) return <Loading />;
+
+  console.log(newUser);
 
   return (
     <div className="min-h-screen bg-white p-4 md:p-8" dir="rtl">
@@ -140,23 +154,13 @@ const AdminUsersPage = () => {
             <div>
               <Input
                 type="text"
-                placeholder="اسم المستخدم"
-                value={newUser.username}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, username: e.target.value })
-                }
-                className="border border-gray-300 rounded-xl h-12"
-              />
-            </div>
-            <div>
-              <Input
-                type="text"
                 placeholder="رقم الهاتف"
                 value={newUser.phone}
                 onChange={(e) =>
                   setNewUser({ ...newUser, phone: e.target.value })
                 }
                 className="border border-gray-300 rounded-xl h-12"
+                maxLength={10}
               />
             </div>
             <div>
@@ -213,7 +217,6 @@ const AdminUsersPage = () => {
                   <div className="flex items-center gap-3">
                     <User className="w-6 h-6 text-red-700" />
                     <div>
-                      <h3 className="font-bold">{user.username}</h3>
                       <p className="text-sm text-gray-600">{user.phone}</p>
                     </div>
                   </div>
