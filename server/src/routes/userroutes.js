@@ -61,10 +61,11 @@ routes.post("/verify-otp", async (req, res) => {
     if (!user) return res.status(400).json({ msg: "User not found" });
 
     // Validate OTP
-    if (user.otp !== otp || user.otpExpires < Date.now()) {
-      return res.status(400).json({ msg: "Invalid or expired OTP" });
+    if (user.otp !== otp) {
+      return res.status(400).json({ msg: "Invalid OTP" });
     }
-
+    if (user.otpExpires < Date.now())
+      return res.status(400).json({ msg: "OTP has expired" });
     // Clear OTP
     user.otp = null;
     user.otpExpires = null;
