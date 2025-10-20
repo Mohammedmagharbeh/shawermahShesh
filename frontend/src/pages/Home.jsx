@@ -288,11 +288,10 @@ export default function Home() {
 
                               {/* السعر بعد الخصم */}
                               <p className="text-2xl font-bold text-red-700">
-                                {product.discountedPrice
-                                  ? product.discountedPrice
-                                  : product.price -
-                                    (product.price * product.discount) / 100}
-                                د.أ
+{product.discountedPrice
+  ? product.discountedPrice.toFixed(2)
+  : (product.price - (product.price * product.discount) / 100).toFixed(2)} د.أ
+
                               </p>
 
                               {/* نسبة الخصم */}

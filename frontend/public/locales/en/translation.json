@@ -6,6 +6,8 @@
   "delivery_details": "Delivery Details",
   "total": "Total",
   "pickup": "Pickup",
+  "View product": " View product",
+
   "checkout_delivery": "Delivery",
   "order_summary": "Order Summary",
   "area": "Area",
@@ -283,6 +285,38 @@
 "Today": "Today",
 "This week": "This week",
 "This mounth": "This mounth",
-"Statistics":"Statistics"
+"Statistics":"Statistics",
+  "fetch_product_failed": "Failed to fetch product details",
+  "fetch_additions_failed": "Failed to fetch additions",
+  "product_details": "Product details",
+  "discount": "Discount",
+  "choose_spicy_level": "Choose spiciness level:",
+  "spicy": "🌶️ Spicy",
+  "not_spicy": "❄️ Not spicy",
+  "notes": "Notes",
+  "add_to_cart": "Add to cart",
+  "added_successfully": "Added",
+  "of": "of",
+      "my past order": "my past order",
+      
+  "manage_additions": "Manage Additions",
+  "add_addition": "Add Addition",
+  "edit_addition": "Edit Addition",
+  "delete_addition": "Delete Addition",
+  "addition_name": "Addition Name",
+  "addition_price": "Addition Price",
+  "confirm_delete_addition": "Are you sure you want to delete this addition?",
+  "addition_success_added": "Addition added successfully",
+  "addition_success_updated": "Addition updated successfully",
+  "addition_success_deleted": "Addition deleted successfully",
+  "no_additions": "No additions yet",
+    "confirm_delete_addition": "Are you sure you want to delete this addition?",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "addition_deleted_success": "Addition deleted successfully",
+  "addition_delete_error": "Error occurred while deleting the addition"
+
+
+
 
 }

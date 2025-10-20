@@ -88,7 +88,7 @@ function Settings() {
                   className="w-full mt-5 bg-red-700 text-white p-2 rounded-md flex items-center justify-center gap-2 hover:bg-red-800 transition-colors"
                   to={`/orders/${user._id}`}
                 >
-                  My Past Orders
+                    {t("my past order")}
                 </Link>
               </div>
             </CardContent>
