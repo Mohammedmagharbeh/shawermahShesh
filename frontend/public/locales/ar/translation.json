@@ -310,7 +310,10 @@
   "cancel": "إلغاء",
   "delete": "حذف",
   "addition_deleted_success": "تم حذف الإضافة",
-  "addition_delete_error": "حدث خطأ أثناء الحذف"
+  "addition_delete_error": "حدث خطأ أثناء الحذف",
+  "product_added":"تم اضافة المنتج",
+  "product_updated":"تم تحديث المنتج",
+  "product_deleted":"تم حذف المنتج"
 
 
 

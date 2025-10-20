@@ -314,7 +314,10 @@
   "cancel": "Cancel",
   "delete": "Delete",
   "addition_deleted_success": "Addition deleted successfully",
-  "addition_delete_error": "Error occurred while deleting the addition"
+  "addition_delete_error": "Error occurred while deleting the addition",
+  "product_added":"product_added",
+  "product_updated":"product_updated",
+  "product_deleted":"product_deleted"
 
 
 
