@@ -37,3 +37,32 @@ routes.put("/user/:id", async (req, res) => {
   }
 });
 module.exports = routes;
+
+routes.post("/user/add", async (req, res) => {
+  try {
+    const { phone, role } = req.body;
+    if (!phone) {
+      return res.status(400).json({ message: "phone number is required" });
+    }
+
+    const user = await userModel.findOne({ phone: phone });
+    if (user) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    if (role && !USER_ROLES.includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+    const newUser = new userModel({
+      phone,
+      role: role || "user",
+    });
+
+    await newUser.save();
+    res.status(201).json(newUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+module.exports = routes;
