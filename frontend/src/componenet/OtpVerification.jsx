@@ -53,7 +53,7 @@ function OtpVerification() {
       toast.success(t("otp_verified"));
       if (res.data.role === "employee") navigate("/admin/dashboard");
 
-      navigate("/");
+      navigate("/products");
     } catch (error) {
       toast.error(t("otp_invalid"));
       console.error(error);
@@ -78,7 +78,7 @@ function OtpVerification() {
   };
 
   if (user) {
-    navigate("/");
+    navigate("/products");
     return null;
   }
 

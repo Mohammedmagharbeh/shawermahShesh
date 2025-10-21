@@ -20,9 +20,11 @@ import { useEffect } from "react";
 import StatisticsPage from "./pages/statistic";
 import AdminUsersPage from "./pages/adminusers";
 import Products from "./pages/Products";
+import { useUser } from "./contexts/UserContext";
 
 function App() {
   const { i18n } = useTranslation();
+  const { user } = useUser();
 
   useEffect(() => {
     const currentLang = localStorage.getItem("i18nextLng") || "ar";
@@ -42,9 +44,16 @@ function App() {
         <Header />
         <main className="pt-14">
           <Routes>
-            <Route path="/" element={<Home />} />
+            {!user && <Route path="/" element={<Home />} />}
             <Route path="/Login" element={<Login />} />
-            <Route path="/products" element={<Products />} />
+            <Route
+              path="/products"
+              element={
+                <ProtectedRoute>
+                  <Products />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/admin/users-control" element={<AdminUsersPage />} />
             <Route
               path="/admin/statistics"

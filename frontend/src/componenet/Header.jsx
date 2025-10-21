@@ -45,7 +45,7 @@ function Header() {
     <nav className="fixed top-0 w-full bg-gradient-to-r from-white via-yellow-50/30 to-white backdrop-blur-md border-b-2 border-yellow-400 z-50 shadow-lg shadow-yellow-100/50">
       <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-3 sm:gap-4 md:gap-6">
-          <Link to="/" className="flex-shrink-0 group">
+          <Link to={user ? "/products" : "/"} className="flex-shrink-0 group">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center flex-shrink-0 ring-2 ring-yellow-400 ring-offset-2 transition-transform group-hover:scale-105 duration-300">
                 <img
@@ -73,13 +73,7 @@ function Header() {
             >
               {t("home")}
             </Link>
-            <Link
-              to="/#menu"
-              onClick={handleLinkClick}
-              className="text-sm xl:text-base text-gray-700 hover:text-red-700 font-semibold transition-all duration-300 whitespace-nowrap relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-red-600 after:to-yellow-500 hover:after:w-full after:transition-all after:duration-300"
-            >
-              {t("menu")}
-            </Link>
+
             <Link
               to="/#about"
               onClick={handleLinkClick}
@@ -249,13 +243,6 @@ function Header() {
                 className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
               >
                 {t("home")}
-              </Link>
-              <Link
-                to="/#menu"
-                onClick={handleLinkClick}
-                className="text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
-              >
-                {t("menu")}
               </Link>
               <Link
                 to="/#about"

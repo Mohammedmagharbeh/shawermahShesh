@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,10 +20,13 @@ import { useTranslation } from "react-i18next";
 import c from "../assets/c.jpeg";
 import c2 from "../assets/c.jpeg";
 import c3 from "../assets/c.jpeg";
+import { useUser } from "@/contexts/UserContext";
 
 const ImageCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { t } = useTranslation();
+  const { isAuthenticated } = useUser();
+  const navigate = useNavigate();
 
   const slides = [
     {
@@ -51,6 +54,11 @@ const ImageCarousel = () => {
     return () => clearInterval(interval);
   }, []);
 
+  if (isAuthenticated) {
+    navigate("/products");
+    return null;
+  }
+
   return (
     <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[70vh] overflow-hidden ">
       {slides.map((slide, index) => (
@@ -75,7 +83,7 @@ const ImageCarousel = () => {
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white mb-6 sm:mb-8 drop-shadow-lg">
               {slide.subtitle}
             </p>
-            <Link to={"/products"}>
+            <Link to={"/login"}>
               <Button
                 size="lg"
                 className="text-sm sm:text-base md:text-lg px-6 sm:px-8 py-4 sm:py-6 text-white font-bold shadow-xl hover:scale-105 transition-transform"
