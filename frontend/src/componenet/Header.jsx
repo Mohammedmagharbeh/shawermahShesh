@@ -43,7 +43,7 @@ function Header() {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-gradient-to-r from-white via-yellow-50/30 to-white backdrop-blur-md border-b-2 border-yellow-400 z-50 shadow-lg shadow-yellow-100/50">
+    <nav className="fixed top-0 w-full bg-gradient-to-r from-white via-yellow-50/10 to-white backdrop-blur-md border-b-2 border-yellow-400  shadow-yellow-100/50">
       <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-3 sm:gap-4 md:gap-6">
           <Link to="/" className="flex-shrink-0 group">
