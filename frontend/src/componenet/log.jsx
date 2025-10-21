@@ -1,5 +1,5 @@
-"use client"
-import { useState } from "react"
+
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { motion } from "framer-motion"
@@ -13,6 +13,27 @@ function Login() {
   const { login } = useUser()
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
+
+  // إصلاح الخلفية والمركزية
+  useEffect(() => {
+    document.body.style.margin = "0"
+    document.body.style.padding = "0"
+    document.body.style.background = "#b80505"
+    document.body.style.minHeight = "100vh"
+    document.body.style.display = "flex"
+    document.body.style.alignItems = "center"
+    document.body.style.justifyContent = "center"
+    
+    return () => {
+      document.body.style.margin = ""
+      document.body.style.padding = ""
+      document.body.style.background = ""
+      document.body.style.minHeight = ""
+      document.body.style.display = ""
+      document.body.style.alignItems = ""
+      document.body.style.justifyContent = ""
+    }
+  }, [])
 
   const Loginhandler = async (e) => {
     e.preventDefault()
@@ -54,7 +75,7 @@ function Login() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#b80505]">
+    <div className="w-full flex justify-center items-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -72,15 +93,23 @@ function Login() {
           className="mb-6 relative"
         >
           <div className="relative inline-block">
-          <div className="flex justify-center md:justify-end">
-  <img 
-    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png" 
-    alt="Restaurant Logo" 
-    className="h-56 w-56 object-contain" 
-  />
-</div>
+            <div className="flex justify-center">
+              <img 
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png" 
+                alt="Restaurant Logo" 
+                className="h-56 w-56 object-contain" 
+              />
+            </div>
             <motion.div
-              className="absolute inset-0 -z-10 bg-yellow-400 rounded-full blur-2xl"
+              className="absolute inset-0 -z-10 rounded-full blur-2xl"
+              style={{
+                width: '224px',
+                height: '224px',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                borderRadius: '50%'
+              }}
               animate={{
                 opacity: [0.3, 0.6, 0.3],
                 scale: [0.9, 1.1, 0.9],
