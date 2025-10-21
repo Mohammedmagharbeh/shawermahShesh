@@ -313,7 +313,16 @@
   "addition_delete_error": "حدث خطأ أثناء الحذف",
   "product_added":"تم اضافة المنتج",
   "product_updated":"تم تحديث المنتج",
-  "product_deleted":"تم حذف المنتج"
+  "product_deleted":"تم حذف المنتج",
+  "shawarma_delicious": "شاورما لذيذة",
+  "authentic_taste": "طعم أصيل لا يُنسى",
+  "fresh_meals": "وجبات طازجة يومياً",
+  "high_quality": "مكونات عالية الجودة",
+  "fast_delivery": "خدمة توصيل سريعة",
+  "order_now": "اطلب الآن واستمتع",
+  "products_and_shopping": "المنتجات والتسوق",
+    "all_rights_reserved": "© 2025–2026 شاورما شيش | جميع الحقوق محفوظة."
+
 
 
 

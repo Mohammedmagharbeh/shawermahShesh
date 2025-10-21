@@ -20,6 +20,7 @@ import Settings from "./pages/Settings";
 import { useEffect } from "react";
 import StatisticsPage from "./pages/statistic";
 import AdminUsersPage from "./pages/adminusers";
+import Newproduct from "./pages/newproduct";
 // import LanguageProvider from "./contexts/LanguageContext";
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
               }
             />
             <Route path="/Login" element={<Login />} />
+            <Route path="/newproduct" element={<Newproduct />} />
             <Route path="/admin/users-control" element={<AdminUsersPage />} />
 
             <Route

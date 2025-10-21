@@ -1,381 +1,236 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Star,
-  ShoppingCart,
-  Clock,
-  MapPin,
-  Phone,
-  ChefHat,
-  Award,
-  Users,
-  Heart,
-  Loader2,
-} from "lucide-react";
-import { useCart } from "../contexts/CartContext";
-import product_placeholder from "../assets/product_placeholder.jpeg";
-import home_logo from "../assets/home_logo.jpeg";
-import home_logo2 from "../assets/home_logo2.jpeg";
-import toast from "react-hot-toast";
-import { useTranslation } from "react-i18next";
-import { ProductDialog } from "@/componenet/common/ProductDialog";
-// عدد المنتجات التي ستظهر مبدئيًا
-const PRODUCTS_PER_PAGE = 6;
+"use client"
+
+import { useState, useEffect } from "react"
+import { useLocation } from "react-router-dom"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Clock, MapPin, Phone, Award, Users, Heart, Facebook, Instagram } from "lucide-react"
+import { useCart } from "../contexts/CartContext"
+import product_placeholder from "../assets/product_placeholder.jpeg"
+import home_logo from "../assets/home_logo.jpeg"
+import home_logo2 from "../assets/home_logo2.jpeg"
+import toast from "react-hot-toast"
+import { useTranslation } from "react-i18next"
+import c from "../assets/c.jpeg"
+import c2 from "../assets/c.jpeg"
+import c3 from "../assets/c.jpeg"
+
+const ImageCarousel = () => {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const { t } = useTranslation()
+
+  const slides = [
+    {
+      image: home_logo,
+      title: t("shawarma_delicious"),
+      subtitle: t("authentic_taste"),
+    },
+    {
+      image: home_logo2,
+      title: t("fresh_meals"),
+      subtitle: t("high_quality"),
+    },
+    {
+      image: product_placeholder,
+      title: t("fast_delivery"),
+      subtitle: t("order_now"),
+    },
+  ]
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length)
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[70vh] overflow-hidden">
+      {slides.map((slide, index) => (
+        <div
+          key={index}
+          className={`absolute inset-0 transition-opacity duration-1000 ${
+            index === currentIndex ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <img
+            src={slide.image || "/placeholder.svg"}
+            alt={`Slide ${index + 1}`}
+            className="w-full h-full object-cover"
+          />
+
+          <div className="absolute inset-0 bg-black/40" />
+
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
+              {slide.title}
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white mb-6 sm:mb-8 drop-shadow-lg">
+              {slide.subtitle}
+            </p>
+            <Button
+              size="lg"
+              className="text-sm sm:text-base md:text-lg px-6 sm:px-8 py-4 sm:py-6 text-white font-bold shadow-xl hover:scale-105 transition-transform"
+              style={{ backgroundColor: "#dc0606" }}
+              onClick={() => {
+                window.location.href = "/Login"
+              }}
+            >
+              {t("products_and_shopping")}
+            </Button>
+          </div>
+        </div>
+      ))}
+
+      <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1.5 sm:gap-2 z-10">
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all ${
+              index === currentIndex ? "bg-white w-6 sm:w-8" : "bg-white/50"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const FloatingCertificates = () => {
+  return (
+    <div className="fixed top-1/2 right-2 sm:right-3 md:right-4 transform -translate-y-1/2 z-50 flex flex-col gap-2 sm:gap-3 items-end">
+      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white">
+        <img src={c3 || "/placeholder.svg"} alt="certificate" className="w-full h-full object-cover" />
+      </div>
+
+      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white mr-1 sm:mr-2">
+        <img src={c2 || "/placeholder.svg"} alt="certificate" className="w-full h-full object-cover" />
+      </div>
+
+      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white mr-2 sm:mr-3 md:mr-4">
+        <img src={c || "/placeholder.svg"} alt="certificate" className="w-full h-full object-cover" />
+      </div>
+    </div>
+  )
+}
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("الكل");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [productsToShow, setProductsToShow] = useState(PRODUCTS_PER_PAGE);
-  const [isLoading, setIsLoading] = useState(true);
-  const { addToCart } = useCart();
-  const location = useLocation(); // ✨ استخدام useLocation لقراءة الهاش
-  const { t } = useTranslation();
-  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const [products, setProducts] = useState([])
+  const [filteredProducts, setFilteredProducts] = useState([])
+  const [categories, setCategories] = useState([])
+  const [selectedCategory, setSelectedCategory] = useState("الكل")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [productsToShow, setProductsToShow] = useState(6)
+  const [isLoading, setIsLoading] = useState(true)
+  const { addToCart } = useCart()
+  const location = useLocation()
+  const { t } = useTranslation()
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar"
 
-  // جلب البيانات وتعيين حالة المنتجات الأساسية
   useEffect(() => {
-    setIsLoading(true);
+    setIsLoading(true)
     fetch(`${import.meta.env.VITE_BASE_URL}/products`)
       .then((res) => res.json())
       .then((data) => {
-        const allProducts = data.data || [];
-        setProducts(allProducts);
-        setFilteredProducts(allProducts);
-        const cats = [
-          "الكل",
-          ...new Set(
-            allProducts.map((p) => p.category[selectedLanguage] || p.category)
-          ),
-        ];
-        setCategories(cats);
-        setIsLoading(false);
+        const allProducts = data.data || []
+        setProducts(allProducts)
+        setFilteredProducts(allProducts)
+        const cats = ["الكل", ...new Set(allProducts.map((p) => p.category[selectedLanguage] || p.category))]
+        setCategories(cats)
+        setIsLoading(false)
       })
       .catch((err) => {
-        toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
-        setIsLoading(false);
-      });
-  }, []);
+        toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.")
+        setIsLoading(false)
+      })
+  }, [])
 
-  // ✨ منطق التمرير السلس عند العودة من صفحة أخرى
   useEffect(() => {
-    // التأكد من أن جميع المكونات قد تم تحميلها والـ products قد تم جلبها
     if (location.hash && !isLoading) {
-      const id = location.hash.substring(1); // إزالة رمز #
-      const element = document.getElementById(id);
+      const id = location.hash.substring(1)
+      const element = document.getElementById(id)
 
-      // تأخير بسيط لضمان انتهاء تحديث الـ DOM والتمرير بسلاسة
       const timer = setTimeout(() => {
         if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
+          element.scrollIntoView({ behavior: "smooth" })
         }
-      }, 100);
+      }, 100)
 
-      return () => clearTimeout(timer); // تنظيف المؤقت
+      return () => clearTimeout(timer)
     } else if (!location.hash) {
-      // إذا لا يوجد هاش، تأكد من أن الصفحة تبدأ من الأعلى عند التحميل العادي
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
-  }, [location.hash, isLoading]); // يعتمد على تغير الهاش وحالة التحميل
+  }, [location.hash, isLoading])
 
-  // فلترة المنتجات عند تغير البحث أو التصنيف
   useEffect(() => {
-    let filtered = products;
+    let filtered = products
 
     if (searchTerm.trim() !== "") {
-      filtered = filtered.filter((p) =>
-        p.name[selectedLanguage]
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((p) => p.name[selectedLanguage].toLowerCase().includes(searchTerm.toLowerCase()))
     }
 
     if (selectedCategory !== "الكل") {
       filtered = filtered.filter((p) => {
-        const categoryName =
-          typeof p.category === "object"
-            ? p.category[selectedLanguage]
-            : p.category;
-        return categoryName === selectedCategory;
-      });
+        const categoryName = typeof p.category === "object" ? p.category[selectedLanguage] : p.category
+        return categoryName === selectedCategory
+      })
     }
 
-    setFilteredProducts(filtered);
-    setProductsToShow(PRODUCTS_PER_PAGE);
-  }, [products, searchTerm, selectedCategory, selectedLanguage]);
+    setFilteredProducts(filtered)
+    setProductsToShow(6)
+  }, [products, searchTerm, selectedCategory, selectedLanguage])
 
-  // دالة لإظهار جميع المنتجات
   const handleShowMore = () => {
-    setProductsToShow(filteredProducts.length);
-  };
+    setProductsToShow(filteredProducts.length)
+  }
 
-  // المنتجات التي سيتم عرضها فعلياً (تستخدم في JSX)
-  const displayedProducts = filteredProducts.slice(0, productsToShow);
-  // هل مازال هناك منتجات لإظهارها؟ (تستخدم في منطق زر "إظهار المزيد")
-  const hasMoreProducts = filteredProducts.length > productsToShow;
+  const displayedProducts = filteredProducts.slice(0, productsToShow)
+  const hasMoreProducts = filteredProducts.length > productsToShow
 
   return (
     <div className="min-h-screen bg-background arabic-font" dir="rtl">
-      {/* قسم الرئيسية - تأكد من وجود id="home" */}
-      <section
-        id="home"
-        className="pt-24 pb-16 bg-gradient-to-br from-red-50 to-white"
-      >
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[70vh]">
-            <div className="text-center lg:text-right">
-              <Badge className="mb-6 bg-red-100 text-red-700 border-red-200 px-4 py-2">
-                <Award className="h-4 w-4 ml-2" />
-                {t("best_in_town")}
-              </Badge>
+      <FloatingCertificates />
 
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gray-900">
-                <span className="text-red-700"> {t("resturant_name")}</span>
-                <br />
-                {t("taste_unforgettable")}
-              </h1>
-
-              <p className="text-lg text-gray-600 mb-8 max-w-lg mx-auto lg:mx-0">
-                {t("welcome_description")}
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button
-                  size="lg"
-                  className="bg-red-700 hover:bg-red-800 text-white px-8 py-3"
-                >
-                  {t("order_now")}
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="relative">
-              <img
-                src={home_logo}
-                alt="شاورما شيش"
-                className="rounded-2xl shadow-xl w-full "
-              />
-              <div className="absolute top-4 right-4">
-                <Badge className="bg-red-700 text-white px-3 py-1">
-                  {t("fresh_daily")}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </div>
+      <section id="home" className="pt-16">
+        <ImageCarousel />
       </section>
 
-      {/* قسم الإحصائيات (لم يتم تغيير ID) */}
-      <section className="py-16 bg-red-700 text-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <section id="about" className="py-12 sm:py-16 md:py-20 bg-white">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             <div>
-              <div className="text-3xl font-bold mb-2">15+</div>
-              <div className="text-red-100">{t("years_of_experience")}</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2">100k+</div>
-              <div className="text-red-100">{t("happy_customers")}</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2">100%</div>
-              <div className="text-red-100">{t("fresh_ingredients")}</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2">09:00AM - 03:00AM</div>
-              <div className="text-red-100">{t("delivery_service")}</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* قسم القائمة - تأكد من وجود id="menu" */}
-      <section id="menu" className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-red-100 text-red-700 border-red-200 px-4 py-2">
-              <ChefHat className="h-4 w-4 ml-2" />
-              {t("menu")}
-            </Badge>
-            <h2 className="text-4xl font-bold mb-4 text-gray-900">
-              {t("menu_title")}
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              {t("menu_description")}
-            </p>
-          </div>
-
-          <div className="flex flex-col lg:flex-row justify-between items-center mb-12 gap-6">
-            <div className="w-full lg:w-80">
-              <input
-                type="text"
-                placeholder={t("search_your_favorite_dish")}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {categories.map((cat, i) => (
-                <Button
-                  key={i}
-                  variant={selectedCategory === cat ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`rounded-full px-4 py-2 ${
-                    selectedCategory === cat
-                      ? "bg-red-700 hover:bg-red-800 text-white"
-                      : "border-red-700 text-red-700 hover:bg-red-50"
-                  }`}
-                >
-                  {cat}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* حالة التحميل */}
-          {isLoading ? (
-            <div className="text-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-red-700 mx-auto mb-4" />
-              <p className="text-gray-600">{t("loading_products")}</p>
-            </div>
-          ) : filteredProducts.length > 0 ? (
-            <>
-              {/* عرض المنتجات */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {displayedProducts.map((product) => (
-                  <Card
-                    key={product._id}
-                    className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow bg-white"
-                  >
-                    <div className="relative">
-                      <img
-                        src={product.image || product_placeholder}
-                        alt={product.name[selectedLanguage]}
-                        className="w-full h-48 object-cover"
-                      />
-                      <div className="absolute top-3 right-3">
-                        <Badge className="bg-red-700 text-white">
-                          {product.category?.[selectedLanguage] ||
-                            product.category}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <CardContent className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-gray-900">
-                        {product.name[selectedLanguage]}
-                      </h3>
-                      <p className="text-gray-600 mb-4 text-sm">
-                        {product.description[selectedLanguage]}
-                      </p>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          {product.discount > 0 ? (
-                            <>
-                              {/* السعر الأصلي مع خط */}
-                              <p className="text-gray-500 line-through text-sm">
-                                {product.price} د.أ
-                              </p>
-
-                              {/* السعر بعد الخصم */}
-                              <p className="text-2xl font-bold text-red-700">
-{product.discountedPrice
-  ? product.discountedPrice.toFixed(2)
-  : (product.price - (product.price * product.discount) / 100).toFixed(2)} د.أ
-
-                              </p>
-
-                              {/* نسبة الخصم */}
-                              <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
-                                خصم {product.discount}%
-                              </span>
-                            </>
-                          ) : (
-                            <p className="text-2xl font-bold text-red-700">
-                              {product.price} د.أ
-                            </p>
-                          )}
-                        </div>
-
-                        <ProductDialog id={product._id} />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              {/* زر "إظهار المزيد" يظهر فقط إذا كان هناك المزيد من المنتجات */}
-              {hasMoreProducts && (
-                <div className="text-center mt-12">
-                  <Button
-                    onClick={handleShowMore}
-                    size="lg"
-                    className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-3"
-                  >
-                    {t("show_more_products", {
-                      count: filteredProducts.length - productsToShow,
-                    })}
-                  </Button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl font-bold mb-2">
-                {t("no_results_title")}
-              </h3>
-              <p className="text-gray-600">{t("no_results_description")}</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* قسم من نحن - تأكد من وجود id="about" */}
-      <section id="about" className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <Badge className="mb-6 bg-red-100 text-red-700 border-red-200 px-4 py-2">
-                <Heart className="h-4 w-4 ml-2" />
+              <Badge
+                className="mb-4 sm:mb-6 bg-red-100 border-red-200 px-3 sm:px-4 py-1.5 sm:py-2"
+                style={{ color: "#dc0606" }}
+              >
+                <Heart className="h-3 w-3 sm:h-4 sm:w-4 ml-2" />
                 {t("our_story")}
               </Badge>
-              <h2 className="text-4xl font-bold mb-6 text-gray-900">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-gray-900">
                 {t("story_title")}
               </h2>
-              <p className="text-lg text-gray-600 mb-8">
-                {t("story_description")}
-              </p>
+              <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">{t("story_description")}</p>
 
-              <div className="grid grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
                 <div className="text-center">
-                  <div className="bg-red-100 rounded-lg p-4 mb-3">
-                    <Award className="h-8 w-8 text-red-700 mx-auto" />
-                    <h4 className="font-bold text-sm">{t("high_quality")}</h4>
+                  <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
+                    <Award className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto" style={{ color: "#dc0606" }} />
+                    <h4 className="font-bold text-xs sm:text-sm mt-1">{t("high_quality")}</h4>
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="bg-red-100 rounded-lg p-4 mb-3">
-                    <Users className="h-8 w-8 text-red-700 mx-auto" />
-                    <h4 className="font-bold text-sm">
-                      {" "}
-                      {t("professional_team")}
-                    </h4>
+                  <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
+                    <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto" style={{ color: "#dc0606" }} />
+                    <h4 className="font-bold text-xs sm:text-sm mt-1">{t("professional_team")}</h4>
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="bg-red-100 rounded-lg p-4 mb-3">
-                    <Clock className="h-8 w-8 text-red-700 mx-auto" />
-                    <h4 className="font-bold text-sm"> {t("fast_service")}</h4>
+                  <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
+                    <Clock className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto" style={{ color: "#dc0606" }} />
+                    <h4 className="font-bold text-xs sm:text-sm mt-1">{t("fast_service")}</h4>
                   </div>
                 </div>
               </div>
@@ -383,45 +238,43 @@ export default function Home() {
 
             <div>
               <img
-                src={home_logo2}
+                src={home_logo2 || "/placeholder.svg"}
                 alt="مطبخنا"
-                className="rounded-2xl shadow-xl w-full h-[500px] object-cover"
+                className="rounded-2xl shadow-xl w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* قسم اتصل بنا - تأكد من وجود id="contact" */}
-      <section id="contact" className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-red-100 text-red-700 border-red-200 px-4 py-2">
-              <Phone className="h-4 w-4 ml-2" />
+      <section id="contact" className="py-12 sm:py-16 md:py-20 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center mb-10 sm:mb-12 md:mb-16">
+            <Badge
+              className="mb-3 sm:mb-4 bg-red-100 border-red-200 px-3 sm:px-4 py-1.5 sm:py-2"
+              style={{ color: "#dc0606" }}
+            >
+              <Phone className="h-3 w-3 sm:h-4 sm:w-4 ml-2" />
               {t("contact_us")}
             </Badge>
-            <h2 className="text-4xl font-bold mb-4 text-gray-900">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-gray-900">
               {t("contact_section_title")}
             </h2>
-            <p className="text-lg text-gray-600">
-              {" "}
-              {t("contact_section_description")}
-            </p>
+            <p className="text-base sm:text-lg text-gray-600">{t("contact_section_description")}</p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            <Card className="text-center p-8 border-0 shadow-lg bg-white">
-              <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                <a
-                  href="https://maps.app.goo.gl/krQ9B5eYkjgVz9es6?g_st=iw"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MapPin className="h-8 w-8 text-red-700 cursor-pointer hover:scale-110 transition" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white">
+              <div className="bg-red-100 rounded-full p-4 sm:p-5 md:p-6 w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 aspect-square mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+                <a href="https://maps.app.goo.gl/krQ9B5eYkjgVz9es6?g_st=iw" target="_blank" rel="noopener noreferrer">
+                  <MapPin
+                    className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 cursor-pointer hover:scale-110 transition"
+                    style={{ color: "#dc0606" }}
+                  />
                 </a>
               </div>
-              <h3 className="text-xl font-bold mb-4">{t("our_location")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{t("our_location")}</h3>
+              <p className="text-sm sm:text-base text-gray-600">
                 {t("location_line1")}
                 <br />
                 {t("location_line2")}
@@ -429,12 +282,12 @@ export default function Home() {
             </Card>
 
             <a href="tel:+96332019099">
-              <Card className="text-center p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition">
-                <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <Phone className="h-8 w-8 text-red-700" />
+              <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition">
+                <div className="bg-red-100 rounded-full p-4 sm:p-5 md:p-6 w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 aspect-square mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+                  <Phone className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" style={{ color: "#dc0606" }} />
                 </div>
-                <h3 className="text-xl font-bold mb-4"> {t("call_us")}</h3>
-                <p className="text-gray-600">
+                <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{t("call_us")}</h3>
+                <p className="text-sm sm:text-base text-gray-600">
                   (03) 201 9099
                   <br />
                   {t("contact_info")}
@@ -442,12 +295,12 @@ export default function Home() {
               </Card>
             </a>
 
-            <Card className="text-center p-8 border-0 shadow-lg bg-white">
-              <div className="bg-red-100 rounded-full p-6 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                <Clock className="h-8 w-8 text-red-700" />
+            <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white sm:col-span-2 lg:col-span-1">
+              <div className="bg-red-100 rounded-full p-4 sm:p-5 md:p-6 w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 aspect-square mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+                <Clock className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" style={{ color: "#dc0606" }} />
               </div>
-              <h3 className="text-xl font-bold mb-4"> {t("working_hours")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{t("working_hours")}</h3>
+              <p className="text-sm sm:text-base text-gray-600">
                 {t("working_hours_start")}
                 <br />
                 {t("working_hours_end")}
@@ -459,44 +312,61 @@ export default function Home() {
 
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-red-700 rounded-full flex items-center justify-center">
-                <ChefHat className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold">{t("resturant_name")}</h3>
-                <p className="text-gray-400 text-sm">
-                  {" "}
-                  {t("resturant_tagline")}{" "}
-                </p>
+          <div className="flex flex-col md:flex-row items-center justify-between relative">
+            {/* Yalla Sheesh على اليسار */}
+            <div className="flex flex-col items-center md:items-start mb-8 md:mb-0">
+              <img
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/yalla%20sheesh-wYD9LCTpwgPKc6YoFDJwUVLwLBnmMW.png"
+                alt="Yalla Sheesh"
+                className="h-16 sm:h-20 w-auto object-contain"
+              />
+
+              {/* مواقع التواصل في منتصف كلمة Yalla Sheesh */}
+              <div className="flex gap-3 sm:gap-4 mt-4 justify-center w-full">
+                {/* Facebook */}
+                <a
+                  href="https://www.facebook.com/sheesh.jo?mibextid=wwXIfr&rdid=3j0Reo6yOi0oZhpd&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1FZvBdU7Ej%2F%3Fmibextid%3DwwXIfr#"
+                  className="w-9 h-9 sm:w-10 sm:h-10 aspect-square rounded-full bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                >
+                  <Facebook className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </a>
+
+                {/* WhatsApp */}
+                <a
+                  href="https://api.whatsapp.com/send?phone=96232019099"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 aspect-square rounded-full bg-gray-800 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                >
+                  <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </a>
+
+                {/* Instagram */}
+                <a
+                  href="https://www.instagram.com/SHAWERMASHEESH/"
+                  className="w-9 h-9 sm:w-10 sm:h-10 aspect-square rounded-full bg-gray-800 hover:bg-pink-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                >
+                  <Instagram className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </a>
               </div>
             </div>
 
-            <p className="text-gray-400 mb-6"> {t("taste_unforgettable")}</p>
-
-            <div className="flex justify-center items-center gap-6 mb-6">
-              <div className="flex items-center gap-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-5 w-5 text-yellow-400 fill-current"
-                    />
-                  ))}
-                </div>
-                <span className="text-gray-400"> {t("rating")} </span>
-              </div>
+            {/* حقوق النشر في المنتصف تماماً بين الشعار والصورة */}
+            <div className="text-center md:absolute md:left-[35%] md:top-[50%]">
+              <p className="text-gray-100 text-xs sm:text-sm">{t("all_rights_reserved")}</p>
             </div>
 
-            <div className="border-t border-gray-800 pt-6">
-              <p className="text-gray-500 text-sm">
-                {t("all_rights_reserved")}
-              </p>
+            {/* الشعار على اليمين */}
+            <div className="flex justify-center md:justify-end mt-8 md:mt-0">
+              <img
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png"
+                alt="Restaurant Logo"
+                className="h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 object-contain"
+              />
             </div>
           </div>
         </div>
       </footer>
     </div>
-  );
+  )
 }
