@@ -47,7 +47,7 @@ const ImageCarousel = () => {
   }, [])
 
   return (
-    <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[70vh] overflow-hidden">
+    <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[70vh] overflow-hidden ">
       {slides.map((slide, index) => (
         <div
           key={index}
@@ -194,7 +194,7 @@ export default function Home() {
     <div className="min-h-screen bg-background arabic-font" dir="rtl">
       <FloatingCertificates />
 
-      <section id="home" className="pt-16">
+      <section id="home" className="pt-11">
         <ImageCarousel />
       </section>
 
