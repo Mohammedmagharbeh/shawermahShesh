@@ -45,18 +45,10 @@ function App() {
         {isAuthenticated && <Header />}
         <main className="pt-14">
           <Routes>
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/" element={<Home />} />
             <Route path="/Login" element={<Login />} />
             <Route path="/newproduct" element={<Newproduct />} />
             <Route path="/admin/users-control" element={<AdminUsersPage />} />
-
             <Route
               path="/admin/statistics"
               element={
