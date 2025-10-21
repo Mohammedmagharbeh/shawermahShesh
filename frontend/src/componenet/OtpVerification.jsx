@@ -13,7 +13,7 @@ function OtpVerification() {
   const location = useLocation();
   const phone = location.state?.phone;
   const newPhone = location.state?.newPhone;
-  const { login } = useUser();
+  const { login, user } = useUser();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
@@ -76,6 +76,11 @@ function OtpVerification() {
       toast.error(t("otp_resend_failed"));
     }
   };
+
+  if (user) {
+    navigate("/");
+    return null;
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-amber-50">

@@ -24,7 +24,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 
 function Header() {
@@ -98,7 +97,7 @@ function Header() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 md:gap-2">
-            {user.role === "user" && (
+            {user && user.role === "user" && (
               <div className="flex items-center gap-1 sm:gap-2 md:gap-2">
                 <Link to="/cart">
                   <Button
@@ -117,7 +116,7 @@ function Header() {
               </div>
             )}
 
-            {(user.role === "admin" || user.role === "employee") && (
+            {user && (user.role === "admin" || user.role === "employee") && (
               <div className="hidden lg:block">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -189,17 +188,19 @@ function Header() {
               </div>
             )}
 
-            <Link to="/settings">
-              <Button
-                variant="outline"
-                size="sm"
-                className="relative border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white bg-white h-10 w-10 md:h-11 md:w-11 p-0 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-200 flex-shrink-0"
-              >
-                <Settings className="size-5" />
-              </Button>
-            </Link>
+            {user && (
+              <Link to="/settings">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="relative border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white bg-white h-10 w-10 md:h-11 md:w-11 p-0 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-200 flex-shrink-0"
+                >
+                  <Settings className="size-5" />
+                </Button>
+              </Link>
+            )}
 
-            {user?._id ? (
+            {user ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -271,7 +272,7 @@ function Header() {
                 {t("contact_us")}
               </Link>
 
-              {(user.role === "admin" || user.role === "employee") && (
+              {user && (user.role === "admin" || user.role === "employee") && (
                 <div className="flex flex-col gap-2 pt-3 mt-2 border-t-2 border-yellow-200">
                   <div className="flex items-center gap-2 px-4 mb-1">
                     <Settings className="h-4 w-4 text-red-900" />
@@ -279,15 +280,16 @@ function Header() {
                       {t("control_panel")}
                     </p>
                   </div>
-                  {(user.role === "admin" || user.role === "employee") && (
-                    <Link to="/admin/dashboard" onClick={handleLinkClick}>
-                      <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                        <LayoutDashboard className="h-5 w-5 text-red-600" />
-                        <span> {t("dashboard")}</span>
-                      </div>
-                    </Link>
-                  )}
-                  {user.role === "admin" && (
+                  {user &&
+                    (user.role === "admin" || user.role === "employee") && (
+                      <Link to="/admin/dashboard" onClick={handleLinkClick}>
+                        <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                          <LayoutDashboard className="h-5 w-5 text-red-600" />
+                          <span> {t("dashboard")}</span>
+                        </div>
+                      </Link>
+                    )}
+                  {user && user.role === "admin" && (
                     <Link to="/orders" onClick={handleLinkClick}>
                       <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
                         <Package className="h-5 w-5 text-red-600" />
@@ -295,7 +297,7 @@ function Header() {
                       </div>
                     </Link>
                   )}
-                  {user.role === "admin" && (
+                  {user && user.role === "admin" && (
                     <Link to="/admin/add-product" onClick={handleLinkClick}>
                       <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
                         <Plus className="h-5 w-5 text-red-600" />
@@ -304,7 +306,7 @@ function Header() {
                     </Link>
                   )}
 
-                  {user.role === "admin" && (
+                  {user && user.role === "admin" && (
                     <Link to="/admin/statistics" onClick={handleLinkClick}>
                       <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
                         <ChartNoAxesCombined className="h-5 w-5 text-red-600" />
@@ -312,7 +314,7 @@ function Header() {
                       </div>
                     </Link>
                   )}
-                  {user.role === "admin" && (
+                  {user && user.role === "admin" && (
                     <Link to="/admin/users-control" onClick={handleLinkClick}>
                       <div className="flex items-center gap-3 text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-3 px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
                         <Users2 className="h-5 w-5 text-red-600" />
@@ -324,7 +326,7 @@ function Header() {
               )}
 
               <div className="sm:hidden pt-3 mt-2 border-t-2 border-yellow-200">
-                {user?._id ? (
+                {user ? (
                   <Button
                     variant="outline"
                     size="sm"

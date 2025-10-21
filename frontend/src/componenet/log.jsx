@@ -1,54 +1,40 @@
-
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import axios from "axios"
-import { motion } from "framer-motion"
-import { useUser } from "@/contexts/UserContext"
-import toast from "react-hot-toast"
-import { useTranslation } from "react-i18next"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { useUser } from "@/contexts/UserContext";
+import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 function Login() {
-  const [phone, setphone] = useState("")
-  const navigate = useNavigate()
-  const { login } = useUser()
-  const { t } = useTranslation()
-  const [loading, setLoading] = useState(false)
+  const [phone, setphone] = useState("");
+  const navigate = useNavigate();
+  const { login, user } = useUser();
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
 
   // إصلاح الخلفية والمركزية
   useEffect(() => {
-    document.body.style.margin = "0"
-    document.body.style.padding = "0"
-    document.body.style.background = "#b80505"
-    document.body.style.minHeight = "100vh"
-    document.body.style.display = "flex"
-    document.body.style.alignItems = "center"
-    document.body.style.justifyContent = "center"
-    
+    document.body.style.background = "#b80505";
     return () => {
-      document.body.style.margin = ""
-      document.body.style.padding = ""
-      document.body.style.background = ""
-      document.body.style.minHeight = ""
-      document.body.style.display = ""
-      document.body.style.alignItems = ""
-      document.body.style.justifyContent = ""
-    }
-  }, [])
+      document.body.style.background = "";
+    };
+  }, []);
 
   const Loginhandler = async (e) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     if (phone.length !== 10 || !/^(079|078|077)\d{7}$/.test(phone)) {
-      toast.error(t("invalid_phone"))
-      setLoading(false)
-      return
+      toast.error(t("invalid_phone"));
+      setLoading(false);
+      return;
     }
 
     try {
       const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, {
         phone: phone,
-      })
+      });
 
       if (res.data.token) {
         login({
@@ -56,26 +42,31 @@ function Login() {
           phone: phone,
           token: res.data.token,
           role: res.data.role,
-        })
-        toast.success(t("login_success"))
-        navigate("/")
-        return
+        });
+        toast.success(t("login_success"));
+        navigate("/");
+        return;
       }
 
       if (res.data.msg === "OTP sent to your phone") {
-        toast.success(t("otp_sent"))
-        navigate("/otp-verification", { state: { phone: phone } })
+        toast.success(t("otp_sent"));
+        navigate("/otp-verification", { state: { phone: phone } });
       }
     } catch (error) {
-      console.error(error)
-      toast.error(t("login_error"))
+      console.error(error);
+      toast.error(t("login_error"));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
+  };
+
+  if (user) {
+    navigate("/");
+    return null;
   }
 
   return (
-    <div className="w-full flex justify-center items-center p-4">
+    <div className="min-h-screen flex justify-center items-center bg-[#b80505]">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -94,21 +85,21 @@ function Login() {
         >
           <div className="relative inline-block">
             <div className="flex justify-center">
-              <img 
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png" 
-                alt="Restaurant Logo" 
-                className="h-56 w-56 object-contain" 
+              <img
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png"
+                alt="Restaurant Logo"
+                className="h-56 w-56 object-contain"
               />
             </div>
             <motion.div
               className="absolute inset-0 -z-10 rounded-full blur-2xl"
               style={{
-                width: '224px',
-                height: '224px',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                borderRadius: '50%'
+                width: "224px",
+                height: "224px",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                borderRadius: "50%",
               }}
               animate={{
                 opacity: [0.3, 0.6, 0.3],
@@ -165,7 +156,9 @@ function Login() {
           <div className="flex flex-col gap-3 mt-2">
             <motion.button
               type="submit"
-              whileHover={!loading && phone.length === 10 ? { scale: 1.02, y: -2 } : {}}
+              whileHover={
+                !loading && phone.length === 10 ? { scale: 1.02, y: -2 } : {}
+              }
               whileTap={!loading && phone.length === 10 ? { scale: 0.98 } : {}}
               className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200
                 bg-yellow-400 black shadow-yellow-500/30 hover:bg-yellow-500 hover:shadow-xl hover:shadow-yellow-600/50 active:bg-yellow-600
@@ -178,7 +171,7 @@ function Login() {
         </form>
       </motion.div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;
