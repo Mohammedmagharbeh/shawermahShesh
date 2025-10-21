@@ -13,7 +13,7 @@ function OtpVerification() {
   const location = useLocation();
   const phone = location.state?.phone;
   const newPhone = location.state?.newPhone;
-  const { login } = useUser();
+  const { login, user } = useUser();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +53,7 @@ function OtpVerification() {
       toast.success(t("otp_verified"));
       if (res.data.role === "employee") navigate("/admin/dashboard");
 
-      navigate("/");
+      navigate("/products");
     } catch (error) {
       toast.error(t("otp_invalid"));
       console.error(error);
@@ -76,6 +76,11 @@ function OtpVerification() {
       toast.error(t("otp_resend_failed"));
     }
   };
+
+  if (user) {
+    navigate("/products");
+    return null;
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-amber-50">

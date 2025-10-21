@@ -308,7 +308,7 @@ export function ProductDialog({ id, triggerLabel }) {
   const [spicy, setSpicy] = useState(null);
   const [notes, setNotes] = useState("");
   const { addToCart } = useCart();
-  const selectedLanguage = localStorage.getItem("language") || "ar";
+  const selectedLanguage = localStorage.getItem("i18nextLng");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -334,7 +334,9 @@ export function ProductDialog({ id, triggerLabel }) {
   useEffect(() => {
     const fetchAdditions = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/additions`);
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/additions`
+        );
         if (!response.ok) throw new Error(t("fetch_additions_failed"));
         const data = await response.json();
         setAdditions(data.additions);
@@ -364,7 +366,9 @@ export function ProductDialog({ id, triggerLabel }) {
     );
 
     addToCart(product._id, quantity, spicy, selectedFullAdditions, notes);
-    toast.success(`${t("added_successfully")} ${quantity} ${t("of")} ${product.name[selectedLanguage]}`);
+    toast.success(
+      `${t("added_successfully")} ${quantity} ${t("of")} ${product.name[selectedLanguage]}`
+    );
     setOpen(false);
   };
 
@@ -376,7 +380,9 @@ export function ProductDialog({ id, triggerLabel }) {
 
       <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{product.name[selectedLanguage] || t("product_details")}</DialogTitle>
+          <DialogTitle>
+            {product.name[selectedLanguage] || t("product_details")}
+          </DialogTitle>
           <DialogDescription>{product.category}</DialogDescription>
         </DialogHeader>
 
@@ -411,7 +417,7 @@ export function ProductDialog({ id, triggerLabel }) {
                 {product.discount > 0 ? (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <p className="text-4xl font-bold text-red-500">
-                     💸 {getFinalPrice().toFixed(2)}
+                      💸 {getFinalPrice().toFixed(2)}
                     </p>
                     <p className="text-xl text-gray-400 line-through">
                       {product.price.toFixed(2)}
@@ -468,7 +474,10 @@ export function ProductDialog({ id, triggerLabel }) {
                         value={addition._id}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedAdditions((prev) => [...prev, addition._id]);
+                            setSelectedAdditions((prev) => [
+                              ...prev,
+                              addition._id,
+                            ]);
                           } else {
                             setSelectedAdditions((prev) =>
                               prev.filter((id) => id !== addition._id)
@@ -520,9 +529,8 @@ export function ProductDialog({ id, triggerLabel }) {
                     className="flex-1 bg-red-500 hover:bg-red-600 text-white h-12 text-lg font-semibold"
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
-                    {t("add_to_cart")} 💸{(
-                      getFinalPrice() * quantity
-                    ).toFixed(2)}
+                    {t("add_to_cart")} 💸
+                    {(getFinalPrice() * quantity).toFixed(2)}
                   </Button>
                 </div>
               </div>

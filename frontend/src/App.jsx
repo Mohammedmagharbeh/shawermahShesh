@@ -15,17 +15,16 @@ import MyOrders from "./pages/MyOrders";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import { useTranslation } from "react-i18next";
-import { useUser } from "./contexts/UserContext";
 import Settings from "./pages/Settings";
 import { useEffect } from "react";
 import StatisticsPage from "./pages/statistic";
 import AdminUsersPage from "./pages/adminusers";
-import Newproduct from "./pages/newproduct";
-// import LanguageProvider from "./contexts/LanguageContext";
+import Products from "./pages/Products";
+import { useUser } from "./contexts/UserContext";
 
 function App() {
   const { i18n } = useTranslation();
-  const { isAuthenticated } = useUser();
+  const { user } = useUser();
 
   useEffect(() => {
     const currentLang = localStorage.getItem("i18nextLng") || "ar";
@@ -42,21 +41,20 @@ function App() {
     >
       {/* <LanguageProvider> */}
       <BrowserRouter>
-        {isAuthenticated && <Header />}
+        <Header />
         <main className="pt-14">
           <Routes>
+            {!user && <Route path="/" element={<Home />} />}
+            <Route path="/login" element={<Login />} />
             <Route
-              path="/"
+              path="/products"
               element={
                 <ProtectedRoute>
-                  <Home />
+                  <Products />
                 </ProtectedRoute>
               }
             />
-            <Route path="/Login" element={<Login />} />
-            <Route path="/newproduct" element={<Newproduct />} />
             <Route path="/admin/users-control" element={<AdminUsersPage />} />
-
             <Route
               path="/admin/statistics"
               element={

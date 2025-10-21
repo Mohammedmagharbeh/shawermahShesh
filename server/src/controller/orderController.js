@@ -6,39 +6,6 @@ const additionsModel = require("../models/additions");
 const { default: mongoose } = require("mongoose");
 const counterModel = require("../models/counter");
 
-// get all orders
-// exports.getAllOrders = async (req, res) => {
-//   try {
-//     const orders = await Order.find({})
-//       .populate({
-//         path: "products.productId",
-//         options: { lean: true },
-//       })
-//       .populate({
-//         path: "products.additions",
-//         options: { lean: true },
-//       })
-//       .populate({
-//         path: "userId",
-//         select: "phone role",
-//         options: { lean: true },
-//       })
-//       .populate({
-//         path: "shippingAddress",
-//         options: { lean: true },
-//       })
-//       .populate({ path: "payment" })
-//       .lean() // 2️⃣ Use lean() to skip Mongoose doc overhead and improve speed
-//       .limit(100) // 3️⃣ Prevent fetching thousands at once — use pagination
-//       .sort({ createdAt: -1 }); // 4️⃣ Sort newest first
-
-//     res.status(200).json({ success: true, count: orders.length, data: orders });
-//   } catch (error) {
-//     console.error("Error in getAllOrders:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// };
-
 // get order by id
 exports.getOrderById = async (req, res) => {
   try {
@@ -121,7 +88,6 @@ exports.getAllOrders = async (req, res) => {
       .populate("userId", "phone name") // 🟢 جلب الاسم والهاتف مباشرة
       .populate("shippingAddress")
       .lean()
-      .limit(100)
       .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, count: orders.length, data: orders });

@@ -1,24 +1,32 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { useLocation } from "react-router-dom"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Clock, MapPin, Phone, Award, Users, Heart, Facebook, Instagram } from "lucide-react"
-import { useCart } from "../contexts/CartContext"
-import product_placeholder from "../assets/product_placeholder.jpeg"
-import home_logo from "../assets/home_logo.jpeg"
-import home_logo2 from "../assets/home_logo2.jpeg"
-import toast from "react-hot-toast"
-import { useTranslation } from "react-i18next"
-import c from "../assets/c.jpeg"
-import c2 from "../assets/c.jpeg"
-import c3 from "../assets/c.jpeg"
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Clock,
+  MapPin,
+  Phone,
+  Award,
+  Users,
+  Heart,
+  Facebook,
+  Instagram,
+} from "lucide-react";
+import product_placeholder from "../assets/product_placeholder.jpeg";
+import home_logo from "../assets/home_logo.jpeg";
+import home_logo2 from "../assets/home_logo2.jpeg";
+import { useTranslation } from "react-i18next";
+import c from "../assets/c.jpeg";
+import c2 from "../assets/c2.jpeg";
+import c3 from "../assets/c3.jpg";
+import { useUser } from "@/contexts/UserContext";
 
 const ImageCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const { t } = useTranslation()
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { t } = useTranslation();
+  const { isAuthenticated } = useUser();
+  const navigate = useNavigate();
 
   const slides = [
     {
@@ -36,15 +44,20 @@ const ImageCarousel = () => {
       title: t("fast_delivery"),
       subtitle: t("order_now"),
     },
-  ]
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length)
-    }, 3000)
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+    }, 3000);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
+
+  if (isAuthenticated) {
+    navigate("/products");
+    return null;
+  }
 
   return (
     <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[70vh] overflow-hidden ">
@@ -70,16 +83,15 @@ const ImageCarousel = () => {
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white mb-6 sm:mb-8 drop-shadow-lg">
               {slide.subtitle}
             </p>
-            <Button
-              size="lg"
-              className="text-sm sm:text-base md:text-lg px-6 sm:px-8 py-4 sm:py-6 text-white font-bold shadow-xl hover:scale-105 transition-transform"
-              style={{ backgroundColor: "#dc0606" }}
-              onClick={() => {
-                window.location.href = "/Login"
-              }}
-            >
-              {t("products_and_shopping")}
-            </Button>
+            <Link to={"/login"}>
+              <Button
+                size="lg"
+                className="text-sm sm:text-base md:text-lg px-6 sm:px-8 py-4 sm:py-6 text-white font-bold shadow-xl hover:scale-105 transition-transform"
+                style={{ backgroundColor: "#dc0606" }}
+              >
+                {t("products_and_shopping")}
+              </Button>
+            </Link>
           </div>
         </div>
       ))}
@@ -96,99 +108,59 @@ const ImageCarousel = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const FloatingCertificates = () => {
   return (
-    <div className="fixed top-1/2 right-2 sm:right-3 md:right-4 transform -translate-y-1/2 z-50 flex flex-col gap-2 sm:gap-3 items-end">
+    <div className="fixed top-1/2 right-2 sm:right-3 md:right-4 transform -translate-y-1/2 z-40 flex flex-col gap-2 sm:gap-3 items-end">
       <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white">
-        <img src={c3 || "/placeholder.svg"} alt="certificate" className="w-full h-full object-cover" />
+        <img
+          src={c3 || "/placeholder.svg"}
+          alt="certificate"
+          className="w-full h-full object-cover"
+        />
       </div>
 
       <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white mr-1 sm:mr-2">
-        <img src={c2 || "/placeholder.svg"} alt="certificate" className="w-full h-full object-cover" />
+        <img
+          src={c2 || "/placeholder.svg"}
+          alt="certificate"
+          className="w-full h-full object-cover"
+        />
       </div>
 
       <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white mr-2 sm:mr-3 md:mr-4">
-        <img src={c || "/placeholder.svg"} alt="certificate" className="w-full h-full object-cover" />
+        <img
+          src={c || "/placeholder.svg"}
+          alt="certificate"
+          className="w-full h-full object-cover"
+        />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default function Home() {
-  const [products, setProducts] = useState([])
-  const [filteredProducts, setFilteredProducts] = useState([])
-  const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState("الكل")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [productsToShow, setProductsToShow] = useState(6)
-  const [isLoading, setIsLoading] = useState(true)
-  const { addToCart } = useCart()
-  const location = useLocation()
-  const { t } = useTranslation()
-  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar"
+  const location = useLocation();
+  const { t } = useTranslation();
 
   useEffect(() => {
-    setIsLoading(true)
-    fetch(`${import.meta.env.VITE_BASE_URL}/products`)
-      .then((res) => res.json())
-      .then((data) => {
-        const allProducts = data.data || []
-        setProducts(allProducts)
-        setFilteredProducts(allProducts)
-        const cats = ["الكل", ...new Set(allProducts.map((p) => p.category[selectedLanguage] || p.category))]
-        setCategories(cats)
-        setIsLoading(false)
-      })
-      .catch((err) => {
-        toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.")
-        setIsLoading(false)
-      })
-  }, [])
-
-  useEffect(() => {
-    if (location.hash && !isLoading) {
-      const id = location.hash.substring(1)
-      const element = document.getElementById(id)
+    if (location.hash) {
+      const id = location.hash.substring(1);
+      const element = document.getElementById(id);
 
       const timer = setTimeout(() => {
         if (element) {
-          element.scrollIntoView({ behavior: "smooth" })
+          element.scrollIntoView({ behavior: "smooth" });
         }
-      }, 100)
+      }, 100);
 
-      return () => clearTimeout(timer)
+      return () => clearTimeout(timer);
     } else if (!location.hash) {
-      window.scrollTo({ top: 0, behavior: "smooth" })
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }, [location.hash, isLoading])
-
-  useEffect(() => {
-    let filtered = products
-
-    if (searchTerm.trim() !== "") {
-      filtered = filtered.filter((p) => p.name[selectedLanguage].toLowerCase().includes(searchTerm.toLowerCase()))
-    }
-
-    if (selectedCategory !== "الكل") {
-      filtered = filtered.filter((p) => {
-        const categoryName = typeof p.category === "object" ? p.category[selectedLanguage] : p.category
-        return categoryName === selectedCategory
-      })
-    }
-
-    setFilteredProducts(filtered)
-    setProductsToShow(6)
-  }, [products, searchTerm, selectedCategory, selectedLanguage])
-
-  const handleShowMore = () => {
-    setProductsToShow(filteredProducts.length)
-  }
-
-  const displayedProducts = filteredProducts.slice(0, productsToShow)
-  const hasMoreProducts = filteredProducts.length > productsToShow
+  }, [location.hash]);
 
   return (
     <div className="min-h-screen bg-background arabic-font" dir="rtl">
@@ -212,25 +184,42 @@ export default function Home() {
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-gray-900">
                 {t("story_title")}
               </h2>
-              <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">{t("story_description")}</p>
+              <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
+                {t("story_description")}
+              </p>
 
               <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
-                    <Award className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto" style={{ color: "#dc0606" }} />
-                    <h4 className="font-bold text-xs sm:text-sm mt-1">{t("high_quality")}</h4>
+                    <Award
+                      className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto"
+                      style={{ color: "#dc0606" }}
+                    />
+                    <h4 className="font-bold text-xs sm:text-sm mt-1">
+                      {t("high_quality")}
+                    </h4>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
-                    <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto" style={{ color: "#dc0606" }} />
-                    <h4 className="font-bold text-xs sm:text-sm mt-1">{t("professional_team")}</h4>
+                    <Users
+                      className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto"
+                      style={{ color: "#dc0606" }}
+                    />
+                    <h4 className="font-bold text-xs sm:text-sm mt-1">
+                      {t("professional_team")}
+                    </h4>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
-                    <Clock className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto" style={{ color: "#dc0606" }} />
-                    <h4 className="font-bold text-xs sm:text-sm mt-1">{t("fast_service")}</h4>
+                    <Clock
+                      className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto"
+                      style={{ color: "#dc0606" }}
+                    />
+                    <h4 className="font-bold text-xs sm:text-sm mt-1">
+                      {t("fast_service")}
+                    </h4>
                   </div>
                 </div>
               </div>
@@ -260,20 +249,28 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-gray-900">
               {t("contact_section_title")}
             </h2>
-            <p className="text-base sm:text-lg text-gray-600">{t("contact_section_description")}</p>
+            <p className="text-base sm:text-lg text-gray-600">
+              {t("contact_section_description")}
+            </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white">
               <div className="bg-red-100 rounded-full p-4 sm:p-5 md:p-6 w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 aspect-square mx-auto mb-4 sm:mb-6 flex items-center justify-center">
-                <a href="https://maps.app.goo.gl/krQ9B5eYkjgVz9es6?g_st=iw" target="_blank" rel="noopener noreferrer">
+                <a
+                  href="https://maps.app.goo.gl/krQ9B5eYkjgVz9es6?g_st=iw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <MapPin
                     className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 cursor-pointer hover:scale-110 transition"
                     style={{ color: "#dc0606" }}
                   />
                 </a>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{t("our_location")}</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+                {t("our_location")}
+              </h3>
               <p className="text-sm sm:text-base text-gray-600">
                 {t("location_line1")}
                 <br />
@@ -284,9 +281,14 @@ export default function Home() {
             <a href="tel:+96332019099">
               <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition">
                 <div className="bg-red-100 rounded-full p-4 sm:p-5 md:p-6 w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 aspect-square mx-auto mb-4 sm:mb-6 flex items-center justify-center">
-                  <Phone className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" style={{ color: "#dc0606" }} />
+                  <Phone
+                    className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8"
+                    style={{ color: "#dc0606" }}
+                  />
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{t("call_us")}</h3>
+                <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+                  {t("call_us")}
+                </h3>
                 <p className="text-sm sm:text-base text-gray-600">
                   (03) 201 9099
                   <br />
@@ -297,9 +299,14 @@ export default function Home() {
 
             <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white sm:col-span-2 lg:col-span-1">
               <div className="bg-red-100 rounded-full p-4 sm:p-5 md:p-6 w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 aspect-square mx-auto mb-4 sm:mb-6 flex items-center justify-center">
-                <Clock className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" style={{ color: "#dc0606" }} />
+                <Clock
+                  className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8"
+                  style={{ color: "#dc0606" }}
+                />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{t("working_hours")}</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+                {t("working_hours")}
+              </h3>
               <p className="text-sm sm:text-base text-gray-600">
                 {t("working_hours_start")}
                 <br />
@@ -353,7 +360,9 @@ export default function Home() {
 
             {/* حقوق النشر في المنتصف تماماً بين الشعار والصورة */}
             <div className="text-center md:absolute md:left-[35%] md:top-[50%]">
-              <p className="text-gray-100 text-xs sm:text-sm">{t("all_rights_reserved")}</p>
+              <p className="text-gray-100 text-xs sm:text-sm">
+                {t("all_rights_reserved")}
+              </p>
             </div>
 
             {/* الشعار على اليمين */}
@@ -368,5 +377,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

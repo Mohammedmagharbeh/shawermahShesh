@@ -9,7 +9,7 @@ import product_placeholder from "../assets/product_placeholder.jpeg";
 
 const PRODUCTS_PER_PAGE = 6;
 
-export default function Newproduct() {
+export default function Products() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -30,7 +30,12 @@ export default function Newproduct() {
         setProducts(allProducts);
         setFilteredProducts(allProducts);
 
-        const cats = ["الكل", ...new Set(allProducts.map(p => p.category[selectedLanguage] || p.category))];
+        const cats = [
+          "الكل",
+          ...new Set(
+            allProducts.map((p) => p.category[selectedLanguage] || p.category)
+          ),
+        ];
         setCategories(cats);
         setIsLoading(false);
       })
@@ -45,14 +50,19 @@ export default function Newproduct() {
     let filtered = products;
 
     if (searchTerm.trim() !== "") {
-      filtered = filtered.filter(p =>
-        p.name[selectedLanguage].toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter((p) =>
+        p.name[selectedLanguage]
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
       );
     }
 
     if (selectedCategory !== "الكل") {
-      filtered = filtered.filter(p => {
-        const categoryName = typeof p.category === "object" ? p.category[selectedLanguage] : p.category;
+      filtered = filtered.filter((p) => {
+        const categoryName =
+          typeof p.category === "object"
+            ? p.category[selectedLanguage]
+            : p.category;
         return categoryName === selectedCategory;
       });
     }
@@ -71,7 +81,9 @@ export default function Newproduct() {
   return (
     <div className="min-h-screen bg-gray-50 arabic-font" dir="rtl">
       <div className="container mx-auto px-4 py-10">
-        <h2 className="text-3xl font-bold mb-6 text-gray-900">{t("menu_title")}</h2>
+        <h2 className="text-3xl font-bold mb-6 text-gray-900">
+          {t("menu_title")}
+        </h2>
 
         {/* البحث والتصنيفات */}
         <div className="flex flex-col lg:flex-row justify-between items-center mb-8 gap-4">
@@ -110,7 +122,10 @@ export default function Newproduct() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {displayedProducts.map((product) => (
-                <Card key={product._id} className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition bg-white">
+                <Card
+                  key={product._id}
+                  className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition bg-white"
+                >
                   <div className="relative">
                     <img
                       src={product.image || product_placeholder}
@@ -119,7 +134,8 @@ export default function Newproduct() {
                     />
                     <div className="absolute top-3 right-3">
                       <Badge className="bg-red-700 text-white">
-                        {product.category?.[selectedLanguage] || product.category}
+                        {product.category?.[selectedLanguage] ||
+                          product.category}
                       </Badge>
                     </div>
                   </div>
@@ -136,18 +152,26 @@ export default function Newproduct() {
                       <div>
                         {product.discount > 0 ? (
                           <>
-                            <p className="text-gray-500 line-through text-sm">{product.price} د.أ</p>
+                            <p className="text-gray-500 line-through text-sm">
+                              {product.price} د.أ
+                            </p>
                             <p className="text-2xl font-bold text-red-700">
                               {product.discountedPrice
                                 ? product.discountedPrice.toFixed(2)
-                                : (product.price - (product.price * product.discount) / 100).toFixed(2)} د.أ
+                                : (
+                                    product.price -
+                                    (product.price * product.discount) / 100
+                                  ).toFixed(2)}{" "}
+                              د.أ
                             </p>
                             <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
                               خصم {product.discount}%
                             </span>
                           </>
                         ) : (
-                          <p className="text-2xl font-bold text-red-700">{product.price} د.أ</p>
+                          <p className="text-2xl font-bold text-red-700">
+                            {product.price} د.أ
+                          </p>
                         )}
                       </div>
 
@@ -164,7 +188,9 @@ export default function Newproduct() {
                   onClick={handleShowMore}
                   className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-3 rounded-lg"
                 >
-                  {t("show_more_products", { count: filteredProducts.length - productsToShow })}
+                  {t("show_more_products", {
+                    count: filteredProducts.length - productsToShow,
+                  })}
                 </button>
               </div>
             )}
