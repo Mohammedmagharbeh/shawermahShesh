@@ -18,8 +18,8 @@ import home_logo from "../assets/home_logo.jpeg";
 import home_logo2 from "../assets/home_logo2.jpeg";
 import { useTranslation } from "react-i18next";
 import c from "../assets/c.jpeg";
-import c2 from "../assets/c.jpeg";
-import c3 from "../assets/c.jpeg";
+import c2 from "../assets/c2.jpeg";
+import c3 from "../assets/c3.jpg";
 import { useUser } from "@/contexts/UserContext";
 
 const ImageCarousel = () => {

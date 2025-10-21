@@ -45,7 +45,7 @@ function App() {
         <main className="pt-14">
           <Routes>
             {!user && <Route path="/" element={<Home />} />}
-            <Route path="/Login" element={<Login />} />
+            <Route path="/login" element={<Login />} />
             <Route
               path="/products"
               element={
