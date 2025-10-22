@@ -16,7 +16,6 @@ exports.getuser = async (req, res) => {
   }
 };
 
-
 exports.userLogin = async (req, res) => {
   const { phone } = req.body;
   try {
@@ -63,18 +62,33 @@ exports.home = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-// for home page to get all products
+
 exports.getAllProducts = async (req, res) => {
-  const { category } = req.query;
-  const normalizedCategory = category ? category.toLowerCase() : null;
-  if (category && !CATEGORIES.includes(normalizedCategory)) {
-    return res.status(400).json({ message: "Invalid category" });
+  try {
+    const { category } = req.query;
+
+    // Validate category if provided
+    if (category) {
+      const isValidCategory = CATEGORIES.some((c) => c.en === category);
+      if (!isValidCategory) {
+        return res.status(400).json({ message: "Invalid category" });
+      }
+    }
+
+    // Build query
+    const query = category ? { category } : {};
+
+    // Fetch products
+    const result = await products.find(query).sort({ _id: -1 }); // newest first
+
+    res.status(200).json({
+      message: "Products fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
-  const query = normalizedCategory ? { category: normalizedCategory } : {};
-  const result = await products.find(query);
-  res
-    .status(200)
-    .json({ message: "products fetched successfully", data: result });
 };
 
 exports.getSingleProduct = async (req, res) => {

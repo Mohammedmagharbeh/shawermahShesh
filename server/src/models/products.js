@@ -10,8 +10,9 @@ const productSchema = new mongoose.Schema({
   discount: { type: Number, default: 0, min: 0, max: 100 },
   image: { type: String, required: false, default: "" },
   category: {
-    ar: { type: String, enum: CATEGORIES, required: true },
-    en: { type: String, enum: CATEGORIES, required: true },
+    type: String,
+    enum: CATEGORIES.map((c) => c.en),
+    required: true,
   },
   description: {
     ar: { type: String, required: true },

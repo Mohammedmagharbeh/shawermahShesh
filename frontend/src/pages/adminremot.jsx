@@ -1,23 +1,36 @@
-
-import { useState, useEffect } from "react"
-import axios from "axios"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Search, Edit2, Trash2, Package, Loader2 } from "lucide-react"
-import { useTranslation } from "react-i18next"
-import toast from "react-hot-toast"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Search, Edit2, Trash2, Package, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 import product_placeholder from "../assets/product_placeholder.jpeg";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CATEGORIES } from "@/constants";
 
-const PRODUCTS_PER_PAGE = 20
+const PRODUCTS_PER_PAGE = 20;
 
 export default function AdminProductPanel() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     arName: "",
     enName: "",
@@ -26,85 +39,90 @@ export default function AdminProductPanel() {
     arDescription: "",
     enDescription: "",
     image: "",
-    arCategory: "",
-    enCategory: "",
-  })
-  const [editingId, setEditingId] = useState(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [displayedCount, setDisplayedCount] = useState(PRODUCTS_PER_PAGE)
-  const [loading, setLoading] = useState(true)
-  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar"
-
-  // الإضافات
-  const [additions, setAdditions] = useState([])
-  const [additionForm, setAdditionForm] = useState({ name: "", price: "" })
-  const [editingAdditionId, setEditingAdditionId] = useState(null)
+    category: "",
+  });
+  const [editingId, setEditingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState(["all", ...CATEGORIES]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [displayedCount, setDisplayedCount] = useState(PRODUCTS_PER_PAGE);
+  const [loading, setLoading] = useState(true);
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const [additions, setAdditions] = useState([]);
+  const [additionForm, setAdditionForm] = useState({ name: "", price: "" });
+  const [editingAdditionId, setEditingAdditionId] = useState(null);
+  const { i18n } = useTranslation();
 
   // جلب المنتجات
   useEffect(() => {
     const fetchProducts = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
-        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`)
-        const allProducts = res.data.data || []
-        setProducts(allProducts)
-        const uniqueCategories = [...new Set(allProducts.map((p) => p.category[selectedLanguage] || p.category))]
-        setCategories(["all", ...uniqueCategories])
-        setSelectedCategory("all")
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/products`
+        );
+        const allProducts = res.data.data || [];
+        setProducts(allProducts);
+
+        setSelectedCategory("all");
       } catch (err) {
-        console.error("Error fetching products:", err)
-        alert(t("fetch_products_error"))
+        console.error("Error fetching products:", err);
+        alert(t("fetch_products_error"));
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchProducts()
-  }, [])
+    };
+    fetchProducts();
+  }, []);
 
   // جلب الإضافات
   useEffect(() => {
     const fetchAdditions = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/additions`)
-        setAdditions(res.data.additions)
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/additions`
+        );
+        setAdditions(res.data.additions);
       } catch (error) {
-        console.error("Error fetching additions:", error)
+        console.error("Error fetching additions:", error);
       }
-    }
-    fetchAdditions()
-  }, [])
+    };
+    fetchAdditions();
+  }, []);
 
   // دوال المنتجات
   const handleInputChange = (e) => {
-    const { id, value } = e.target
-    setFormData({ ...formData, [id]: value })
-  }
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       if (editingId) {
-        const res = await axios.put(`${import.meta.env.VITE_BASE_URL}/admin/updatefood/${editingId}`, {
-          ...formData,
-          price: Number(formData.price),
-          discount: formData.discount ? Number(formData.discount) : 0,
-        })
-        setProducts(products.map((p) => (p._id === editingId ? res.data : p)))
-        setEditingId(null)
+        const res = await axios.put(
+          `${import.meta.env.VITE_BASE_URL}/admin/updatefood/${editingId}`,
+          {
+            ...formData,
+            price: Number(formData.price),
+            discount: formData.discount ? Number(formData.discount) : 0,
+          }
+        );
+        setProducts(products.map((p) => (p._id === editingId ? res.data : p)));
+        setEditingId(null);
       } else {
-        const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/admin/postfood`, {
-          ...formData,
-          name: { ar: formData.arName, en: formData.enName },
-          description: {
-            ar: formData.arDescription,
-            en: formData.enDescription,
-          },
-          price: Number(formData.price),
-          discount: formData.discount ? Number(formData.discount) : 0,
-        })
-        setProducts([res.data, ...products])
+        const res = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/admin/postfood`,
+          {
+            ...formData,
+            name: { ar: formData.arName, en: formData.enName },
+            arDescription: formData.arDescription,
+            enDescription: formData.enDescription,
+            price: Number(formData.price),
+            discount: formData.discount ? Number(formData.discount) : 0,
+          }
+        );
+        setProducts([res.data, ...products]);
       }
 
       setFormData({
@@ -116,32 +134,36 @@ export default function AdminProductPanel() {
         enDescription: "",
         image: "",
         category: "",
-      })
+      });
 
-      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`)
-      const allProducts = res.data.data || []
-      const uniqueCategories = [...new Set(allProducts.map((p) => p.category[selectedLanguage] || p.category))]
-      setCategories(["all", ...uniqueCategories])
-      toast.success(editingId ? t("product_updated") : t("product_added"))
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`);
+      const allProducts = res.data.data || [];
+      const uniqueCategories = [
+        ...new Set(
+          allProducts.map((p) => p.category[selectedLanguage] || p.category)
+        ),
+      ];
+      // setCategories(["all", ...uniqueCategories]);
+      toast.success(editingId ? t("product_updated") : t("product_added"));
     } catch (error) {
-      console.error("خطأ في الإرسال:", error.response?.data || error.message)
-      alert(t("submit_error"))
+      console.error("خطأ في الإرسال:", error.response?.data || error.message);
+      alert(t("submit_error"));
     }
-  }
+  };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        const imageData = reader.result
-        setFormData({ ...formData, image: imageData })
-      }
-      reader.readAsDataURL(file)
+        const imageData = reader.result;
+        setFormData({ ...formData, image: imageData });
+      };
+      reader.readAsDataURL(file);
     } else {
-      alert(t("choose_image"))
+      alert(t("choose_image"));
     }
-  }
+  };
 
   const handleEdit = (product) => {
     setFormData({
@@ -154,9 +176,9 @@ export default function AdminProductPanel() {
       image: product.image,
       arCategory: product.category.ar,
       enCategory: product.category.en,
-    })
-    setEditingId(product._id)
-  }
+    });
+    setEditingId(product._id);
+  };
 
   const handleDelete = async (id) => {
     toast((toastInstance) => (
@@ -175,42 +197,55 @@ export default function AdminProductPanel() {
             variant="destructive"
             onClick={async () => {
               try {
-                await axios.delete(`${import.meta.env.VITE_BASE_URL}/admin/deletefood/${id}`)
-                setProducts(products.filter((p) => p._id !== id))
-                toast.success(t("product_deleted"))
-                toast.dismiss(toastInstance.id)
+                await axios.delete(
+                  `${import.meta.env.VITE_BASE_URL}/admin/deletefood/${id}`
+                );
+                setProducts(products.filter((p) => p._id !== id));
+                toast.success(t("product_deleted"));
+                toast.dismiss(toastInstance.id);
               } catch (error) {
-                console.error("خطأ في الحذف:", error.response?.data || error.message)
-                toast.error(t("delete_error"))
+                console.error(
+                  "خطأ في الحذف:",
+                  error.response?.data || error.message
+                );
+                toast.error(t("delete_error"));
               }
-            }}  
+            }}
           >
             {t("delete")}
           </Button>
         </div>
       </div>
-    ))
-  }
+    ));
+  };
 
   // دوال الإضافات
   const handleAdditionSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       if (editingAdditionId) {
-        const res = await axios.put(`${import.meta.env.VITE_BASE_URL}/additions/${editingAdditionId}`, additionForm)
-        setAdditions(additions.map((a) => (a._id === editingAdditionId ? res.data : a)))
-        setEditingAdditionId(null)
+        const res = await axios.put(
+          `${import.meta.env.VITE_BASE_URL}/additions/${editingAdditionId}`,
+          additionForm
+        );
+        setAdditions(
+          additions.map((a) => (a._id === editingAdditionId ? res.data : a))
+        );
+        setEditingAdditionId(null);
       } else {
-        const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/additions`, additionForm)
-        setAdditions([res.data, ...additions])
+        const res = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/additions`,
+          additionForm
+        );
+        setAdditions([res.data, ...additions]);
       }
-      setAdditionForm({ name: "", price: "" })
-      toast.success(editingAdditionId ? t("edit_addition") : t("Add Addition"))
+      setAdditionForm({ name: "", price: "" });
+      toast.success(editingAdditionId ? t("edit_addition") : t("Add Addition"));
     } catch (error) {
-      console.error("Error submitting addition:", error)
-      toast.error(t("submit_error"))
+      console.error("Error submitting addition:", error);
+      toast.error(t("submit_error"));
     }
-  }
+  };
 
   const handleAdditionDelete = async (id) => {
     toast((toastInstance) => (
@@ -229,13 +264,15 @@ export default function AdminProductPanel() {
             variant="destructive"
             onClick={async () => {
               try {
-                await axios.delete(`${import.meta.env.VITE_BASE_URL}/additions/${id}`)
-                setAdditions(additions.filter((a) => a._id !== id))
-                toast.success(t("addition_deleted"))
-                toast.dismiss(toastInstance.id)
+                await axios.delete(
+                  `${import.meta.env.VITE_BASE_URL}/additions/${id}`
+                );
+                setAdditions(additions.filter((a) => a._id !== id));
+                toast.success(t("addition_deleted"));
+                toast.dismiss(toastInstance.id);
               } catch (error) {
-                console.error("خطأ في الحذف:", error)
-                toast.error(t("delete_error"))
+                console.error("خطأ في الحذف:", error);
+                toast.error(t("delete_error"));
               }
             }}
           >
@@ -243,35 +280,42 @@ export default function AdminProductPanel() {
           </Button>
         </div>
       </div>
-    ))
-  }
+    ));
+  };
 
   const handleAdditionEdit = (addition) => {
-    setAdditionForm({ name: addition.name, price: addition.price })
-    setEditingAdditionId(addition._id)
-  }
+    setAdditionForm({ name: addition.name, price: addition.price });
+    setEditingAdditionId(addition._id);
+  };
 
   // فلترة المنتجات
   const filteredProducts = products.filter((p) => {
-    const name = p.name?.[selectedLanguage] || ""
-    const categoryLang = typeof p.category === "object" ? p.category?.[selectedLanguage] || "" : p.category || ""
+    const name = p.name?.[selectedLanguage] || "";
+    const categoryLang =
+      typeof p.category === "string"
+        ? p.category
+        : p.category?.[selectedLanguage] || "";
 
     const matchesSearch =
       name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      categoryLang.toLowerCase().includes(searchTerm.toLowerCase())
+      categoryLang.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory = selectedCategory === "all" || categoryLang.toLowerCase() === selectedCategory.toLowerCase()
+    const matchesCategory =
+      selectedCategory === "all" ||
+      categoryLang.toLowerCase() === selectedCategory.toLowerCase();
 
-    return matchesSearch && matchesCategory
-  })
+    return matchesSearch && matchesCategory;
+  });
 
-  const displayedProducts = filteredProducts.slice(0, displayedCount)
-  const hasMoreProducts = filteredProducts.length > displayedCount
+  const displayedProducts = filteredProducts.slice(0, displayedCount);
+  const hasMoreProducts = filteredProducts.length > displayedCount;
 
   const handleCategoryChange = (cat) => {
-    setSelectedCategory(cat)
-    setDisplayedCount(PRODUCTS_PER_PAGE)
-  }
+    setSelectedCategory(cat);
+    setDisplayedCount(PRODUCTS_PER_PAGE);
+  };
+
+  console.log(categories);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
@@ -283,8 +327,12 @@ export default function AdminProductPanel() {
               <Package className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t("admin_panel")}</h1>
-              <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">{t("admin_panel_desc")}</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                {t("admin_panel")}
+              </h1>
+              <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">
+                {t("admin_panel_desc")}
+              </p>
             </div>
           </div>
         </div>
@@ -297,13 +345,20 @@ export default function AdminProductPanel() {
           <div className="lg:col-span-1">
             <Card className="shadow-xl lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto rounded-md">
               <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-lg sm:text-xl">{editingId ? t("edit_product") : t("add_product")}</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">
+                  {editingId ? t("edit_product") : t("add_product")}
+                </CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  {editingId ? t("edit_existing_product") : t("add_new_product")}
+                  {editingId
+                    ? t("edit_existing_product")
+                    : t("add_new_product")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
-                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-4 sm:space-y-5"
+                >
                   <div className="flex flex-col">
                     <Label htmlFor="arName" className="text-sm">
                       {t("arabic_name")}
@@ -364,35 +419,49 @@ export default function AdminProductPanel() {
                   </div>
 
                   <div className="flex flex-col">
-                    <Label htmlFor="arCategory" className="text-sm">
-                      {t("ar_category")}
+                    <Label htmlFor="category" className="text-sm">
+                      {t("category")}
                     </Label>
-                    <Input
-                      id="arCategory"
-                      value={formData.arCategory}
-                      onChange={handleInputChange}
-                      required
+                    <Select
+                      onValueChange={(value) => {
+                        const selectedCategory = CATEGORIES.find(
+                          (cat) =>
+                            cat[i18n.language === "ar" ? "ar" : "en"] === value
+                        );
+                        setFormData({
+                          ...formData,
+                          category: selectedCategory?.en, // always store English value for backend
+                        });
+                      }}
                       className="mt-1.5"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <Label htmlFor="enCategory" className="text-sm">
-                      {t("en_category")}
-                    </Label>
-                    <Input
-                      id="enCategory"
-                      value={formData.enCategory}
-                      onChange={handleInputChange}
-                      required
-                      className="mt-1.5"
-                    />
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t("choose_category")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIES.map((cat, index) => (
+                          <SelectItem
+                            key={index}
+                            value={i18n.language === "ar" ? cat.ar : cat.en}
+                          >
+                            {i18n.language === "ar" ? cat.ar : cat.en}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="flex flex-col">
                     <Label htmlFor="image" className="text-sm">
                       {t("product_image")}
                     </Label>
-                    <Input id="image" type="file" accept="image/*" onChange={handleImageChange} className="mt-1.5" />
+                    <Input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="mt-1.5"
+                    />
                   </div>
 
                   <div className="flex flex-col">
@@ -433,7 +502,7 @@ export default function AdminProductPanel() {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        setEditingId(null)
+                        setEditingId(null);
                         setFormData({
                           arName: "",
                           enName: "",
@@ -443,7 +512,7 @@ export default function AdminProductPanel() {
                           enDescription: "",
                           image: "",
                           category: "",
-                        })
+                        });
                       }}
                       className="w-full"
                     >
@@ -465,39 +534,66 @@ export default function AdminProductPanel() {
               </CardHeader>
               <CardContent>
                 {/* نموذج إضافة أو تعديل الإضافة */}
-                <form onSubmit={handleAdditionSubmit} className="flex flex-col sm:flex-row gap-3 mb-4">
+                <form
+                  onSubmit={handleAdditionSubmit}
+                  className="flex flex-col sm:flex-row gap-3 mb-4"
+                >
                   <Input
                     placeholder={t("addition_name")}
                     value={additionForm.name}
-                    onChange={(e) => setAdditionForm({...additionForm, name: e.target.value})}
+                    onChange={(e) =>
+                      setAdditionForm({ ...additionForm, name: e.target.value })
+                    }
                     required
                   />
                   <Input
                     placeholder={t("addition_price")}
                     type="number"
                     value={additionForm.price}
-                    onChange={(e) => setAdditionForm({...additionForm, price: e.target.value})}
+                    onChange={(e) =>
+                      setAdditionForm({
+                        ...additionForm,
+                        price: e.target.value,
+                      })
+                    }
                     required
                   />
-                  <Button type="submit">{editingAdditionId ? t("save_changes") : t("add_addition")}</Button>
+                  <Button type="submit">
+                    {editingAdditionId ? t("save_changes") : t("add_addition")}
+                  </Button>
                 </form>
 
                 {/* قائمة الإضافات */}
                 {additions.length === 0 ? (
-                  <p className="text-muted-foreground text-center">{t("no_additions")}</p>
+                  <p className="text-muted-foreground text-center">
+                    {t("no_additions")}
+                  </p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {additions.map((addition) => (
-                      <Card key={addition._id} className="p-3 flex flex-col justify-between">
+                      <Card
+                        key={addition._id}
+                        className="p-3 flex flex-col justify-between"
+                      >
                         <div>
                           <h3 className="font-semibold">{addition.name}</h3>
-                          <p className="text-sm text-muted-foreground">{addition.price} {t("jod")}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {addition.price} {t("jod")}
+                          </p>
                         </div>
                         <div className="flex gap-2 mt-3">
-                          <Button variant="outline" size="sm" onClick={() => handleAdditionEdit(addition)}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAdditionEdit(addition)}
+                          >
                             {t("edit")}
                           </Button>
-                          <Button variant="destructive" size="sm" onClick={() => handleAdditionDelete(addition._id)}>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleAdditionDelete(addition._id)}
+                          >
                             {t("delete")}
                           </Button>
                         </div>
@@ -521,17 +617,24 @@ export default function AdminProductPanel() {
                 </div>
 
                 <div className="flex gap-2 mb-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-                  {categories.map((cat, i) => (
-                    <Button
-                      key={i}
-                      variant={selectedCategory === cat ? "default" : "outline"}
-                      onClick={() => handleCategoryChange(cat)}
-                      className="whitespace-nowrap text-xs sm:text-sm flex-shrink-0"
-                      size="sm"
-                    >
-                      {cat === "all" ? t("all") : cat}
-                    </Button>
-                  ))}
+                  {categories.map((cat, i) => {
+                    const catValue = cat === "all" ? "all" : cat.en; // always compare using English
+                    return (
+                      <Button
+                        key={i}
+                        variant={
+                          selectedCategory === catValue ? "default" : "outline"
+                        }
+                        onClick={() => handleCategoryChange(catValue)}
+                        className="whitespace-nowrap text-xs sm:text-sm flex-shrink-0"
+                        size="sm"
+                      >
+                        {cat === "all"
+                          ? t("all")
+                          : cat[selectedLanguage] || cat.en}
+                      </Button>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -544,7 +647,9 @@ export default function AdminProductPanel() {
               <Card className="border-dashed border-2">
                 <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16">
                   <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/50 mb-3 sm:mb-4" />
-                  <p className="text-base sm:text-lg text-muted-foreground">{t("no_products")}</p>
+                  <p className="text-base sm:text-lg text-muted-foreground">
+                    {t("no_products")}
+                  </p>
                 </CardContent>
               </Card>
             ) : (
@@ -558,7 +663,10 @@ export default function AdminProductPanel() {
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
-                        <Badge className="text-xs">{product.category[selectedLanguage] || product.category}</Badge>
+                        <Badge className="text-xs">
+                          {product.category?.[selectedLanguage] ||
+                            product.category}
+                        </Badge>
                       </div>
                     </div>
                     <CardContent className="p-3 sm:p-5">
@@ -586,7 +694,8 @@ export default function AdminProductPanel() {
                           size="sm"
                           className="flex-1 text-xs sm:text-sm"
                         >
-                          <Edit2 className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("edit")}
+                          <Edit2 className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          {t("edit")}
                         </Button>
                         <Button
                           onClick={() => handleDelete(product._id)}
@@ -594,7 +703,8 @@ export default function AdminProductPanel() {
                           size="sm"
                           className="flex-1 text-xs sm:text-sm"
                         >
-                          <Trash2 className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("delete")}
+                          <Trash2 className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          {t("delete")}
                         </Button>
                       </div>
                     </CardContent>
@@ -605,7 +715,12 @@ export default function AdminProductPanel() {
 
             {hasMoreProducts && (
               <div className="text-center mt-4 sm:mt-6">
-                <Button variant="outline" onClick={() => setDisplayedCount((prev) => prev + PRODUCTS_PER_PAGE)}>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setDisplayedCount((prev) => prev + PRODUCTS_PER_PAGE)
+                  }
+                >
                   {t("show_more")}
                 </Button>
               </div>
@@ -614,5 +729,5 @@ export default function AdminProductPanel() {
         </div>
       </div>
     </div>
-  )
+  );
 }

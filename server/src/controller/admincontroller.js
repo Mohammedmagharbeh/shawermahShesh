@@ -8,88 +8,113 @@ exports.postEat = async (req, res) => {
       arName,
       enName,
       price,
-      arCategory,
-      enCategory,
+      category, // only send English category from frontend
       image,
       arDescription,
       enDescription,
+      discount,
+      isSpicy,
     } = req.body;
+
+    // Validate required fields
     if (
       !arName ||
       !enName ||
       !price ||
-      !arCategory ||
-      !enCategory ||
+      !category ||
       !arDescription ||
       !enDescription
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (
-      !EN_CATEGORIES.includes(enCategory) ||
-      !AR_CATEGORIES.includes(arCategory)
-    ) {
+    // Validate category
+    const matchedCategory = CATEGORIES.find((c) => c.en === category);
+    if (!matchedCategory) {
       return res.status(400).json({ message: "Invalid category" });
     }
 
-    const creatfood = await products.create({
-      name: {
-        ar: arName,
-        en: enName,
-      },
-      price: price,
-      category: {
-        ar: arCategory,
-        en: enCategory,
-      },
-      image: image,
-      description: {
-        ar: arDescription,
-        en: enDescription,
-      },
+    // Create product
+    const createdFood = await products.create({
+      name: { ar: arName, en: enName },
+      price,
+      discount: discount || 0,
+      image: image || "",
+      category: matchedCategory.en, // save only the English version
+      description: { ar: arDescription, en: enDescription },
+      isSpicy: isSpicy || false,
     });
-    res.status(200).json(creatfood);
+
+    res.status(201).json(createdFood);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
 // for update
 exports.updatedfood = async (req, res) => {
   try {
-    const id = req.params.id;
-    const body = req.body;
+    const { id } = req.params;
+    const {
+      arName,
+      enName,
+      arDescription,
+      enDescription,
+      price,
+      discount,
+      image,
+      category,
+      isSpicy,
+    } = req.body;
 
-    const updatedData = {
-      name: {
-        ar: body.arName,
-        en: body.enName,
-      },
-      description: {
-        ar: body.arDescription,
-        en: body.enDescription,
-      },
-      price: body.price,
-      discount: body.discount,
-      image: body.image,
-      category: body.category,
-    };
-
-    const newfood = await products.findByIdAndUpdate(id, updatedData, {
-      new: true,
-    });
-
-    if (!newfood) {
-      return res.status(404).json({ message: "Item not found" });
+    // Validate required fields
+    if (
+      !arName ||
+      !enName ||
+      !arDescription ||
+      !enDescription ||
+      !price ||
+      !category
+    ) {
+      return res
+        .status(400)
+        .json({ message: "All required fields must be provided" });
     }
 
-    res.status(200).json(newfood);
+    // Validate category
+    const matchedCategory = CATEGORIES.find((c) => c.en === category);
+    if (!matchedCategory) {
+      return res.status(400).json({ message: "Invalid category" });
+    }
+
+    // Prepare updated data
+    const updatedData = {
+      name: { ar: arName, en: enName },
+      description: { ar: arDescription, en: enDescription },
+      price,
+      discount: discount ?? 0,
+      image: image || "",
+      category: matchedCategory.en, // store only English version
+      isSpicy: isSpicy ?? false,
+    };
+
+    // Update the product
+    const updatedProduct = await products.findByIdAndUpdate(id, updatedData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(updatedProduct);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
-
 // for delete
 exports.deletefood = async (req, res) => {
   try {
