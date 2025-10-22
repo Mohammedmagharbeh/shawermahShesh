@@ -421,14 +421,14 @@ export function ProductDialog({ id, triggerLabel }) {
 
                 {product.discount > 0 ? (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <p className="text-4xl font-bold text-orange-500">JOD {getFinalPrice().toFixed(2)}</p>
+                    <p className="text-4xl font-bold">JOD {getFinalPrice().toFixed(2)}</p>
                     <p className="text-xl text-gray-400 line-through">JOD {product.price.toFixed(2)}</p>
                     <Badge className="bg-green-500 text-white">
                       {t("discount")} {product.discount}%
                     </Badge>
                   </div>
                 ) : (
-                  <p className="text-4xl font-bold text-orange-500 mb-4">JOD {product.price.toFixed(2)}</p>
+<p className="text-4xl font-bold text-red-600 mb-4">JOD {product.price.toFixed(2)}</p>
                 )}
               </div>
 
@@ -498,7 +498,7 @@ export function ProductDialog({ id, triggerLabel }) {
 
                   <Button
                     onClick={handleAddToCart}
-                    className="flex-1 bg-orange-500 hover:bg-orange-600 text-white h-12 text-lg font-semibold"
+                    className="flex-1 bg-red-600  text-white h-12 text-lg font-semibold"
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
                     {t("add_to_cart")} JOD {(getFinalPrice() * quantity).toFixed(2)}

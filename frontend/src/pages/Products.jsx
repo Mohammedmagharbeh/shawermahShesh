@@ -354,7 +354,7 @@ export default function Products() {
                                 <p className="text-gray-400 line-through text-sm">{product.price}</p>
                               </div>
                             ) : (
-                              <p className="text-xl font-bold text-orange-500">JOD {product.price}</p>
+                              <p className="text-xl font-bold text-red-600">JOD {product.price}</p>
                             )}
                           </div>
 
