@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { ProductDialog } from "@/componenet/common/ProductDialog";
 import product_placeholder from "../assets/product_placeholder.jpeg";
+import { CATEGORIES } from "@/constants";
 
 // أيقونة واتساب مخصصة إذا لم تكن موجودة
 
@@ -14,8 +15,8 @@ const PRODUCTS_PER_PAGE = 6;
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("الكل");
+  const [categories, setCategories] = useState(["All", ...CATEGORIES]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [productsToShow, setProductsToShow] = useState(PRODUCTS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,13 +33,6 @@ export default function Products() {
         setProducts(allProducts);
         setFilteredProducts(allProducts);
 
-        const cats = [
-          "الكل",
-          ...new Set(
-            allProducts.map((p) => p.category[selectedLanguage] || p.category)
-          ),
-        ];
-        setCategories(cats);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -59,7 +53,7 @@ export default function Products() {
       );
     }
 
-    if (selectedCategory !== "الكل") {
+    if (selectedCategory !== "all") {
       filtered = filtered.filter((p) => {
         const categoryName =
           typeof p.category === "object"
@@ -96,21 +90,26 @@ export default function Products() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-
           <div className="flex flex-wrap gap-2">
-            {categories.map((cat, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedCategory(cat)}
-                className={`rounded-full px-4 py-2 ${
-                  selectedCategory === cat
-                    ? "bg-red-700 hover:bg-red-800 text-white"
-                    : "border border-red-700 text-red-700 hover:bg-red-50"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+            {categories.map((cat, i) => {
+              const isAll = cat === "All";
+              const catValue = isAll ? "all" : cat.en;
+              const catLabel = isAll ? t("all") : cat[selectedLanguage];
+
+              return (
+                <button
+                  key={i}
+                  onClick={() => setSelectedCategory(catValue)}
+                  className={`rounded-full px-4 py-2 ${
+                    selectedCategory === catValue
+                      ? "bg-red-700 hover:bg-red-800 text-white"
+                      : "border border-red-700 text-red-700 hover:bg-red-50"
+                  }`}
+                >
+                  {catLabel}
+                </button>
+              );
+            })}
           </div>
         </div>
 

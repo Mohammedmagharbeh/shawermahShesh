@@ -49,7 +49,11 @@ export default function AdminProductPanel() {
   const [loading, setLoading] = useState(true);
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const [additions, setAdditions] = useState([]);
-  const [additionForm, setAdditionForm] = useState({ name: "", price: "" });
+  const [additionForm, setAdditionForm] = useState({
+    name: "",
+    price: "",
+    category: "",
+  });
   const [editingAdditionId, setEditingAdditionId] = useState(null);
   const { i18n } = useTranslation();
 
@@ -558,6 +562,33 @@ export default function AdminProductPanel() {
                     }
                     required
                   />
+                  <Select
+                    onValueChange={(value) => {
+                      const selectedCategory = CATEGORIES.find(
+                        (cat) =>
+                          cat[i18n.language === "ar" ? "ar" : "en"] === value
+                      );
+                      setAdditionForm({
+                        ...additionForm,
+                        category: selectedCategory?.en, // always store English value for backend
+                      });
+                    }}
+                    className="mt-1.5"
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("choose_category")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((cat, index) => (
+                        <SelectItem
+                          key={index}
+                          value={i18n.language === "ar" ? cat.ar : cat.en}
+                        >
+                          {i18n.language === "ar" ? cat.ar : cat.en}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button type="submit">
                     {editingAdditionId ? t("save_changes") : t("add_addition")}
                   </Button>
