@@ -13,6 +13,7 @@ import {
   Facebook,
   Instagram,
 } from "lucide-react";
+
 import product_placeholder from "../assets/product_placeholder.jpeg";
 import home_logo from "../assets/home_logo.jpeg";
 import home_logo2 from "../assets/home_logo2.jpeg";
@@ -21,6 +22,7 @@ import c from "../assets/c.jpeg";
 import c2 from "../assets/c2.jpeg";
 import c3 from "../assets/c3.jpg";
 import { useUser } from "@/contexts/UserContext";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 const ImageCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -338,15 +340,16 @@ export default function Home() {
                   <Facebook className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </a>
 
-                {/* WhatsApp */}
-                <a
-                  href="https://api.whatsapp.com/send?phone=96232019099"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 sm:w-10 sm:h-10 aspect-square rounded-full bg-gray-800 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
-                >
-                  <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </a>
+{/* WhatsApp */}
+<a
+  href="https://api.whatsapp.com/send?phone=96232019099"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="w-9 h-9 sm:w-10 sm:h-10 aspect-square rounded-full bg-gray-800 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+>
+  <WhatsAppIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+</a>
+
 
                 {/* Instagram */}
                 <a
@@ -366,13 +369,13 @@ export default function Home() {
             </div>
 
             {/* الشعار على اليمين */}
-            <div className="flex justify-center md:justify-end mt-8 md:mt-0">
-              <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png"
-                alt="Restaurant Logo"
-                className="h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 object-contain"
-              />
-            </div>
+     <div className="flex justify-center md:justify-end mt-8 md:mt-0">
+  <img
+    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png"
+    alt="Restaurant Logo"
+    className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 object-contain"
+  />
+</div>
           </div>
         </div>
       </footer>
