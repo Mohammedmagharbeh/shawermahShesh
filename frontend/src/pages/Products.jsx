@@ -474,12 +474,13 @@ export default function Products() {
 
             {/* الشعار على اليمين */}
             <div className="flex justify-center md:justify-end mt-8 md:mt-0">
-              <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png"
-                alt="Restaurant Logo"
-                className="h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 object-contain"
-              />
-            </div>
+  <img
+    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png"
+    alt="Restaurant Logo"
+    className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 object-contain"
+  />
+</div>
+
           </div>
         </div>
       </footer>
