@@ -121,7 +121,7 @@ const FloatingCertificates = () => (
     {[c3, c2, c].map((cert, i) => (
       <div
         key={i}
-        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white"
+        className="w-10 h-10 sm:w-12 sm:h-12 md:w-20 md:h-20 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white"
       >
         <img src={cert || "/placeholder.svg"} alt="certificate" className="w-full h-full object-cover" />
       </div>
