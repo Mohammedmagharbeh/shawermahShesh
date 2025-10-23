@@ -39,7 +39,7 @@ const ImageCarousel = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/slides");
+        const res = await fetch(`${import.meta.env.VITE_BASE_URL}/slides`);
         const data = await res.json();
         setSlides(data);
       } catch (error) {
@@ -76,7 +76,7 @@ const ImageCarousel = () => {
           <img
             src={slide.image || "/placeholder.svg"}
             alt={`Slide ${index + 1}`}
-            className="w-full h-full object-cover h-full"
+            className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/40" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6">
@@ -123,7 +123,11 @@ const FloatingCertificates = () => (
         key={i}
         className="w-10 h-10 sm:w-12 sm:h-12 md:w-20 md:h-20 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white"
       >
-        <img src={cert || "/placeholder.svg"} alt="certificate" className="w-full h-full object-cover" />
+        <img
+          src={cert || "/placeholder.svg"}
+          alt="certificate"
+          className="w-full h-full object-cover"
+        />
       </div>
     ))}
   </div>
@@ -149,7 +153,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background arabic-font" dir="rtl">
       <FloatingCertificates />
-<section id="home" className="pt-1">
+      <section id="home" className="pt-1">
         <ImageCarousel />
       </section>
 
@@ -157,7 +161,10 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             <div>
-              <Badge className="mb-4 sm:mb-6 bg-red-100 border-red-200 px-3 sm:px-4 py-1.5 sm:py-2" style={{ color: "#dc0606" }}>
+              <Badge
+                className="mb-4 sm:mb-6 bg-red-100 border-red-200 px-3 sm:px-4 py-1.5 sm:py-2"
+                style={{ color: "#dc0606" }}
+              >
                 <Heart className="h-3 w-3 sm:h-4 sm:w-4 ml-2" />
                 {t("our_story")}
               </Badge>
@@ -168,18 +175,31 @@ export default function Home() {
                 {t("story_description")}
               </p>
               <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
-                {[{ icon: Award, text: t("high_quality") }, { icon: Users, text: t("professional_team") }, { icon: Clock, text: t("fast_service") }].map((item, idx) => (
+                {[
+                  { icon: Award, text: t("high_quality") },
+                  { icon: Users, text: t("professional_team") },
+                  { icon: Clock, text: t("fast_service") },
+                ].map((item, idx) => (
                   <div key={idx} className="text-center">
                     <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
-                      <item.icon className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto" style={{ color: "#dc0606" }} />
-                      <h4 className="font-bold text-xs sm:text-sm mt-1">{item.text}</h4>
+                      <item.icon
+                        className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto"
+                        style={{ color: "#dc0606" }}
+                      />
+                      <h4 className="font-bold text-xs sm:text-sm mt-1">
+                        {item.text}
+                      </h4>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <img src={home_logo2 || "/placeholder.svg"} alt="مطبخنا" className="rounded-2xl shadow-xl w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover" />
+              <img
+                src={home_logo2 || "/placeholder.svg"}
+                alt="مطبخنا"
+                className="rounded-2xl shadow-xl w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover"
+              />
             </div>
           </div>
         </div>
@@ -212,7 +232,7 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <MapPin 
+                  <MapPin
                     className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 cursor-pointer hover:scale-110 transition"
                     style={{ color: "#dc0606" }}
                   />
