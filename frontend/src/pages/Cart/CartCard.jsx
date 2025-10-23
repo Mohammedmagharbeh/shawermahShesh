@@ -54,7 +54,7 @@ function CartCard({ product }) {
                 {t("additions")}:
                 {product.additions.map((addition) => (
                   <Badge key={addition._id} className="p-1">
-                    {addition.name}
+                    {addition.name[selectedLanguage]}
                   </Badge>
                 ))}
               </div>

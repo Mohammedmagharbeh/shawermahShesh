@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -74,7 +74,6 @@ export default function StatisticsPage() {
       setNotOrderedUsers(notOrdered);
       setTotalRevenue(revenue);
       setTotalVisitors(totalVisitorsCount);
-      
     };
 
     fetchData();
@@ -145,24 +144,28 @@ export default function StatisticsPage() {
   };
 
   // ✅ البحث بالاسم أو الهاتف
-  const filteredUsers = (
-    filterStatus === "ordered"
-      ? orderedUsers
-      : filterStatus === "not-ordered"
-        ? notOrderedUsers
-        : allUsers
-  ).filter((user) => {
+  const filteredUsers = useMemo(() => {
+    const users =
+      filterStatus === "ordered"
+        ? orderedUsers
+        : filterStatus === "not-ordered"
+          ? notOrderedUsers
+          : allUsers;
+
     const term = searchTerm.trim().toLowerCase();
-    if (!term) return true;
-    return (
-      (user.phone && user.phone.toLowerCase().includes(term)) ||
-      (user.name && user.name.toLowerCase().includes(term))
+    if (!term) return users;
+
+    return users.filter(
+      (user) =>
+        (user.phone && user.phone.toLowerCase().includes(term)) ||
+        (user.name && user.name.toLowerCase().includes(term))
     );
-  });
+  }, [filterStatus, orderedUsers, notOrderedUsers, allUsers, searchTerm]);
 
-  const filteredOrders = applyDateFilter(orders, dateFilter);
-console.log("⚠️ Orders with null userId:", filteredOrders.filter(o => !o.userId));
-
+  const filteredOrders = useMemo(
+    () => applyDateFilter(orders, dateFilter),
+    [orders, dateFilter]
+  );
   const exportToExcel = () => {
     const stats = [
       { Metric: "إجمالي الزوار", Value: totalVisitors },
