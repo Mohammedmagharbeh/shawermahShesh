@@ -332,7 +332,7 @@ function Checkout() {
                         <ul className="mt-2 text-sm text-gray-600 list-disc list-inside flex gap-2">
                           {product.additions.map((addition, i) => (
                             <Badge key={i}>
-                              {addition.name || "Addition"} (
+                              {addition.name[selectedLanguage] || "Addition"} (
                               {addition.price?.toFixed(2) || "0.00"} JOD)
                             </Badge>
                           ))}

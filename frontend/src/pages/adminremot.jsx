@@ -50,7 +50,7 @@ export default function AdminProductPanel() {
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const [additions, setAdditions] = useState([]);
   const [additionForm, setAdditionForm] = useState({
-    name: "",
+    name: { ar: "", en: "" },
     price: "",
     category: "",
   });
@@ -243,7 +243,7 @@ export default function AdminProductPanel() {
         );
         setAdditions([res.data, ...additions]);
       }
-      setAdditionForm({ name: "", price: "" });
+      setAdditionForm({ arName: "", enName: "", price: "", category: "" });
       toast.success(editingAdditionId ? t("edit_addition") : t("Add Addition"));
     } catch (error) {
       console.error("Error submitting addition:", error);
@@ -288,7 +288,12 @@ export default function AdminProductPanel() {
   };
 
   const handleAdditionEdit = (addition) => {
-    setAdditionForm({ name: addition.name, price: addition.price });
+    setAdditionForm({
+      arName: addition.name.ar || "",
+      enName: addition.name.en || "",
+      price: addition.price,
+      category: addition.category,
+    });
     setEditingAdditionId(addition._id);
   };
 
@@ -318,8 +323,6 @@ export default function AdminProductPanel() {
     setSelectedCategory(cat);
     setDisplayedCount(PRODUCTS_PER_PAGE);
   };
-
-  console.log(categories);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
@@ -543,10 +546,27 @@ export default function AdminProductPanel() {
                   className="flex flex-col sm:flex-row gap-3 mb-4"
                 >
                   <Input
-                    placeholder={t("addition_name")}
-                    value={additionForm.name}
+                    placeholder="اسم الاضافة عربي"
+                    value={additionForm.name?.ar || ""}
                     onChange={(e) =>
-                      setAdditionForm({ ...additionForm, name: e.target.value })
+                      setAdditionForm({
+                        ...additionForm,
+                        name: { ar: e.target.value, en: additionForm.name?.en },
+                      })
+                    }
+                    required
+                  />
+                  <Input
+                    placeholder="اسم الاضافة انجليزي"
+                    value={additionForm.name?.en || ""}
+                    onChange={(e) =>
+                      setAdditionForm({
+                        ...additionForm,
+                        name: {
+                          ar: additionForm.name?.ar,
+                          en: e.target.value,
+                        },
+                      })
                     }
                     required
                   />
@@ -607,9 +627,14 @@ export default function AdminProductPanel() {
                         className="p-3 flex flex-col justify-between"
                       >
                         <div>
-                          <h3 className="font-semibold">{addition.name}</h3>
+                          <h3 className="font-semibold">
+                            {addition.name[selectedLanguage]}
+                          </h3>
                           <p className="text-sm text-muted-foreground">
                             {addition.price} {t("jod")}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {addition.category}
                           </p>
                         </div>
                         <div className="flex gap-2 mt-3">
