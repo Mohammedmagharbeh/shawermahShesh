@@ -21,6 +21,7 @@ import StatisticsPage from "./pages/statistic";
 import AdminUsersPage from "./pages/adminusers";
 import Products from "./pages/Products";
 import { useUser } from "./contexts/UserContext";
+import AdminSlides from "./pages/AdminSlides";
 
 function App() {
   const { i18n } = useTranslation();
@@ -41,11 +42,16 @@ function App() {
     >
       {/* <LanguageProvider> */}
       <BrowserRouter>
+      
         <Header />
         <main className="pt-14">
           <Routes>
+
+            
             {!user && <Route path="/" element={<Home />} />}
             <Route path="/login" element={<Login />} />
+            <Route path="/slides" element={<AdminSlides />} />
+
             <Route
               path="/products"
               element={
@@ -55,6 +61,7 @@ function App() {
               }
             />
             <Route path="/admin/users-control" element={<AdminUsersPage />} />
+            
             <Route
               path="/admin/statistics"
               element={
@@ -144,6 +151,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            
           </Routes>
         </main>
       </BrowserRouter>

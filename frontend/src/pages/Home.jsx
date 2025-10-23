@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 import product_placeholder from "../assets/product_placeholder.jpeg";
-import home_logo from "../assets/home_logo.jpeg";
 import home_logo2 from "../assets/home_logo2.jpeg";
 import { useTranslation } from "react-i18next";
 import c from "../assets/c.jpeg";
@@ -31,43 +30,42 @@ const WhatsAppIcon = ({ className }) => (
 
 const ImageCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [slides, setSlides] = useState([]);
   const { t } = useTranslation();
   const { isAuthenticated } = useUser();
   const navigate = useNavigate();
 
-  const slides = [
-    {
-      image: home_logo,
-      title: t("shawarma_delicious"),
-      subtitle: t("authentic_taste"),
-    },
-    {
-      image: home_logo2,
-      title: t("fresh_meals"),
-      subtitle: t("high_quality"),
-    },
-    {
-      image: product_placeholder,
-      title: t("fast_delivery"),
-      subtitle: t("order_now"),
-    },
-  ];
+  // جلب البيانات من الباك
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/slides");
+        const data = await res.json();
+        setSlides(data);
+      } catch (error) {
+        console.error("Error fetching slides:", error);
+      }
+    };
+    fetchSlides();
+  }, []);
 
   useEffect(() => {
+    if (slides.length === 0) return;
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
     }, 3000);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [slides]);
 
   if (isAuthenticated) {
     navigate("/products");
     return null;
   }
 
+  if (!slides.length) return <p className="text-center py-20">Loading...</p>;
+
   return (
-    <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[70vh] overflow-hidden ">
+    <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[70vh] overflow-hidden">
       {slides.map((slide, index) => (
         <div
           key={index}
@@ -78,11 +76,9 @@ const ImageCarousel = () => {
           <img
             src={slide.image || "/placeholder.svg"}
             alt={`Slide ${index + 1}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover h-full"
           />
-
           <div className="absolute inset-0 bg-black/40" />
-
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6">
             <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
               {slide.title}
@@ -90,15 +86,17 @@ const ImageCarousel = () => {
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white mb-6 sm:mb-8 drop-shadow-lg">
               {slide.subtitle}
             </p>
-            <Link to={"/login"}>
-              <Button
-                size="lg"
-                className="text-sm sm:text-base md:text-lg px-6 sm:px-8 py-4 sm:py-6 text-white font-bold shadow-xl hover:scale-105 transition-transform"
-                style={{ backgroundColor: "#dc0606" }}
-              >
-                {t("products_and_shopping")}
-              </Button>
-            </Link>
+            <div className="absolute bottom-10 sm:bottom-14 w-full flex justify-center z-20">
+              <Link to={"/login"}>
+                <Button
+                  size="lg"
+                  className="text-sm sm:text-base md:text-lg px-6 sm:px-8 py-4 sm:py-6 text-white font-bold shadow-xl hover:scale-105 transition-transform"
+                  style={{ backgroundColor: "#dc0606" }}
+                >
+                  {t("products_and_shopping")}
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       ))}
@@ -118,35 +116,18 @@ const ImageCarousel = () => {
   );
 };
 
-const FloatingCertificates = () => {
-  return (
-    <div className="fixed top-1/2 right-2 sm:right-3 md:right-4 transform -translate-y-1/2 z-40 flex flex-col gap-2 sm:gap-3 items-end">
-      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white">
-        <img
-          src={c3 || "/placeholder.svg"}
-          alt="certificate"
-          className="w-full h-full object-cover"
-        />
+const FloatingCertificates = () => (
+  <div className="fixed top-1/2 right-2 sm:right-3 md:right-4 transform -translate-y-1/2 z-40 flex flex-col gap-2 sm:gap-3 items-end">
+    {[c3, c2, c].map((cert, i) => (
+      <div
+        key={i}
+        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white"
+      >
+        <img src={cert || "/placeholder.svg"} alt="certificate" className="w-full h-full object-cover" />
       </div>
-
-      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white mr-1 sm:mr-2">
-        <img
-          src={c2 || "/placeholder.svg"}
-          alt="certificate"
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white mr-2 sm:mr-3 md:mr-4">
-        <img
-          src={c || "/placeholder.svg"}
-          alt="certificate"
-          className="w-full h-full object-cover"
-        />
-      </div>
-    </div>
-  );
-};
+    ))}
+  </div>
+);
 
 export default function Home() {
   const location = useLocation();
@@ -156,15 +137,11 @@ export default function Home() {
     if (location.hash) {
       const id = location.hash.substring(1);
       const element = document.getElementById(id);
-
       const timer = setTimeout(() => {
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
+        if (element) element.scrollIntoView({ behavior: "smooth" });
       }, 100);
-
       return () => clearTimeout(timer);
-    } else if (!location.hash) {
+    } else {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [location.hash]);
@@ -172,8 +149,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background arabic-font" dir="rtl">
       <FloatingCertificates />
-
-      <section id="home" className="pt-11">
+<section id="home" className="pt-1">
         <ImageCarousel />
       </section>
 
@@ -181,10 +157,7 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             <div>
-              <Badge
-                className="mb-4 sm:mb-6 bg-red-100 border-red-200 px-3 sm:px-4 py-1.5 sm:py-2"
-                style={{ color: "#dc0606" }}
-              >
+              <Badge className="mb-4 sm:mb-6 bg-red-100 border-red-200 px-3 sm:px-4 py-1.5 sm:py-2" style={{ color: "#dc0606" }}>
                 <Heart className="h-3 w-3 sm:h-4 sm:w-4 ml-2" />
                 {t("our_story")}
               </Badge>
@@ -194,55 +167,25 @@ export default function Home() {
               <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
                 {t("story_description")}
               </p>
-
               <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
-                <div className="text-center">
-                  <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
-                    <Award
-                      className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto"
-                      style={{ color: "#dc0606" }}
-                    />
-                    <h4 className="font-bold text-xs sm:text-sm mt-1">
-                      {t("high_quality")}
-                    </h4>
+                {[{ icon: Award, text: t("high_quality") }, { icon: Users, text: t("professional_team") }, { icon: Clock, text: t("fast_service") }].map((item, idx) => (
+                  <div key={idx} className="text-center">
+                    <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
+                      <item.icon className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto" style={{ color: "#dc0606" }} />
+                      <h4 className="font-bold text-xs sm:text-sm mt-1">{item.text}</h4>
+                    </div>
                   </div>
-                </div>
-                <div className="text-center">
-                  <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
-                    <Users
-                      className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto"
-                      style={{ color: "#dc0606" }}
-                    />
-                    <h4 className="font-bold text-xs sm:text-sm mt-1">
-                      {t("professional_team")}
-                    </h4>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="bg-red-100 rounded-lg p-2 sm:p-3 md:p-4 mb-2 sm:mb-3">
-                    <Clock
-                      className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mx-auto"
-                      style={{ color: "#dc0606" }}
-                    />
-                    <h4 className="font-bold text-xs sm:text-sm mt-1">
-                      {t("fast_service")}
-                    </h4>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
-
             <div>
-              <img
-                src={home_logo2 || "/placeholder.svg"}
-                alt="مطبخنا"
-                className="rounded-2xl shadow-xl w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover"
-              />
+              <img src={home_logo2 || "/placeholder.svg"} alt="مطبخنا" className="rounded-2xl shadow-xl w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover" />
             </div>
           </div>
         </div>
       </section>
 
+      {/* قسم الاتصال */}
       <section id="contact" className="py-12 sm:py-16 md:py-20 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-10 sm:mb-12 md:mb-16">
@@ -269,7 +212,7 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <MapPin
+                  <MapPin 
                     className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 cursor-pointer hover:scale-110 transition"
                     style={{ color: "#dc0606" }}
                   />
@@ -324,6 +267,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* الفوتر */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between relative">
