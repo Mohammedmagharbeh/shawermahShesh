@@ -11,9 +11,9 @@ export default function LanguageSwitcher() {
     document.documentElement.dir = dir;
     // optional: change font for Arabic
     if (i18n.language === "ar") {
-      document.documentElement.style.fontFamily = "'Cairo', sans-serif";
+  document.documentElement.style.fontFamily = "'STC', sans-serif";
     } else {
-      document.documentElement.style.fontFamily = "'Inter', sans-serif";
+  document.documentElement.style.fontFamily = "'Baloo Tammudu 2', sans-serif";
     }
   }, [i18n.language]);
 
