@@ -1,8 +1,13 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useCart } from "@/contexts/CartContext"
-import { useUser } from "@/contexts/UserContext"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useCart } from "@/contexts/CartContext";
+import { useUser } from "@/contexts/UserContext";
 import {
   LogIn,
   LogOut,
@@ -16,27 +21,28 @@ import {
   MonitorIcon as MonitorCog,
   ArrowUpFromLine as ChartNoAxesCombined,
   Users2,
-} from "lucide-react"
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { useTranslation } from "react-i18next"
-import yallaSheesh from "../assets/YallaSheeshHeader.png"
-import LanguageSwitcher from "@/componenet/LanguageSwitcher"
+  Image,
+} from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import yallaSheesh from "../assets/YallaSheeshHeader.png";
+import LanguageSwitcher from "@/componenet/LanguageSwitcher";
 
 function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { cart } = useCart()
-  const { user, logout } = useUser()
-  const { t } = useTranslation()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { cart } = useCart();
+  const { user, logout } = useUser();
+  const { t } = useTranslation();
 
   const handleLinkClick = () => {
-    setIsMenuOpen(false)
-  }
+    setIsMenuOpen(false);
+  };
 
   const handleLogout = () => {
-    logout()
-    setIsMenuOpen(false)
-  }
+    logout();
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav
@@ -44,7 +50,10 @@ function Header() {
     >
       <div className="container mx-auto px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-2 xs:py-3 sm:py-4">
         <div className="flex items-center justify-between gap-1 xs:gap-2 sm:gap-4 md:gap-6">
-          <Link to={user ? "/products" : "/"} className="flex-shrink-0 group min-w-0">
+          <Link
+            to={user ? "/products" : "/"}
+            className="flex-shrink-0 group min-w-0"
+          >
             <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
               <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center flex-shrink-0 ring-2 ring-yellow-400 ring-offset-2 transition-transform group-hover:scale-105 duration-300">
                 <img
@@ -129,7 +138,9 @@ function Header() {
                       className="bg-white border-red-600 border-2 text-red-900 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
                     >
                       <MonitorCog className="h-4 w-4" />
-                      <span className="hidden xl:inline">{t("control_panel")}</span>
+                      <span className="hidden xl:inline">
+                        {t("control_panel")}
+                      </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
@@ -139,14 +150,18 @@ function Header() {
                     <Link to="/admin/dashboard">
                       <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                         <LayoutDashboard className="h-4 w-4 ml-2 text-red-600" />
-                        <span className="font-semibold text-gray-700">{t("dashboard")}</span>
+                        <span className="font-semibold text-gray-700">
+                          {t("dashboard")}
+                        </span>
                       </DropdownMenuItem>
                     </Link>
                     {user.role === "admin" && (
                       <Link to="/orders">
                         <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                           <Package className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">{t("orders")}</span>
+                          <span className="font-semibold text-gray-700">
+                            {t("orders")}
+                          </span>
                         </DropdownMenuItem>
                       </Link>
                     )}
@@ -154,7 +169,9 @@ function Header() {
                       <Link to="/admin/add-product">
                         <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                           <Plus className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">{t("products")}</span>
+                          <span className="font-semibold text-gray-700">
+                            {t("products")}
+                          </span>
                         </DropdownMenuItem>
                       </Link>
                     )}
@@ -162,7 +179,9 @@ function Header() {
                       <Link to="/admin/statistics">
                         <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                           <ChartNoAxesCombined className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">{t("Statistics")}</span>
+                          <span className="font-semibold text-gray-700">
+                            {t("Statistics")}
+                          </span>
                         </DropdownMenuItem>
                       </Link>
                     )}
@@ -170,7 +189,19 @@ function Header() {
                       <Link to="/admin/users-control">
                         <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                           <Users2 className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">Users Control</span>
+                          <span className="font-semibold text-gray-700">
+                            Users Control
+                          </span>
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
+                    {user.role === "admin" && (
+                      <Link to="/slides">
+                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                          <Image className="h-4 w-4 ml-2 text-red-600" />
+                          <span className="font-semibold text-gray-700">
+                            Control Images
+                          </span>
                         </DropdownMenuItem>
                       </Link>
                     )}
@@ -227,7 +258,11 @@ function Header() {
               className="lg:hidden h-9 w-9 xs:h-10 xs:w-10 p-0 hover:bg-red-100 text-red-700 transition-all duration-300 flex-shrink-0"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="h-5 w-5 xs:h-6 xs:w-6" /> : <Menu className="h-5 w-5 xs:h-6 xs:w-6" />}
+              {isMenuOpen ? (
+                <X className="h-5 w-5 xs:h-6 xs:w-6" />
+              ) : (
+                <Menu className="h-5 w-5 xs:h-6 xs:w-6" />
+              )}
             </Button>
           </div>
         </div>
@@ -270,58 +305,67 @@ function Header() {
                 <LanguageSwitcher />
               </div>
 
-              <div className={`sm:hidden pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}>
-                {user && (user.role === "admin" || user.role === "employee") && (
-                  <div
-                    className={`flex flex-col gap-1.5 xs:gap-2 pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}
-                  >
-                    <div className="flex items-center gap-2 px-3 xs:px-4 mb-1">
-                      <Settings className="h-3.5 w-3.5 xs:h-4 xs:w-4 text-red-900" />
-                      <p className="text-[10px] xs:text-xs font-bold text-red-900">{t("control_panel")}</p>
-                    </div>
-                    {user && (user.role === "admin" || user.role === "employee") && (
-                      <Link to="/admin/dashboard" onClick={handleLinkClick}>
-                        <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                          <LayoutDashboard className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                          <span className="truncate">{t("dashboard")}</span>
-                        </div>
-                      </Link>
-                    )}
-                    {user && user.role === "admin" && (
-                      <Link to="/orders" onClick={handleLinkClick}>
-                        <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                          <Package className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                          <span className="truncate">{t("orders")}</span>
-                        </div>
-                      </Link>
-                    )}
-                    {user && user.role === "admin" && (
-                      <Link to="/admin/add-product" onClick={handleLinkClick}>
-                        <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                          <Plus className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                          <span className="truncate">{t("products")}</span>
-                        </div>
-                      </Link>
-                    )}
+              <div
+                className={`sm:hidden pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}
+              >
+                {user &&
+                  (user.role === "admin" || user.role === "employee") && (
+                    <div
+                      className={`flex flex-col gap-1.5 xs:gap-2 pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}
+                    >
+                      <div className="flex items-center gap-2 px-3 xs:px-4 mb-1">
+                        <Settings className="h-3.5 w-3.5 xs:h-4 xs:w-4 text-red-900" />
+                        <p className="text-[10px] xs:text-xs font-bold text-red-900">
+                          {t("control_panel")}
+                        </p>
+                      </div>
+                      {user &&
+                        (user.role === "admin" || user.role === "employee") && (
+                          <Link to="/admin/dashboard" onClick={handleLinkClick}>
+                            <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                              <LayoutDashboard className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
+                              <span className="truncate">{t("dashboard")}</span>
+                            </div>
+                          </Link>
+                        )}
+                      {user && user.role === "admin" && (
+                        <Link to="/orders" onClick={handleLinkClick}>
+                          <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                            <Package className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
+                            <span className="truncate">{t("orders")}</span>
+                          </div>
+                        </Link>
+                      )}
+                      {user && user.role === "admin" && (
+                        <Link to="/admin/add-product" onClick={handleLinkClick}>
+                          <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                            <Plus className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
+                            <span className="truncate">{t("products")}</span>
+                          </div>
+                        </Link>
+                      )}
 
-                    {user && user.role === "admin" && (
-                      <Link to="/admin/statistics" onClick={handleLinkClick}>
-                        <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                          <ChartNoAxesCombined className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                          <span className="truncate">{t("Statistics")}</span>
-                        </div>
-                      </Link>
-                    )}
-                    {user && user.role === "admin" && (
-                      <Link to="/admin/users-control" onClick={handleLinkClick}>
-                        <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                          <Users2 className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                          <span className="truncate">Users Control</span>
-                        </div>
-                      </Link>
-                    )}
-                  </div>
-                )}
+                      {user && user.role === "admin" && (
+                        <Link to="/admin/statistics" onClick={handleLinkClick}>
+                          <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                            <ChartNoAxesCombined className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
+                            <span className="truncate">{t("Statistics")}</span>
+                          </div>
+                        </Link>
+                      )}
+                      {user && user.role === "admin" && (
+                        <Link
+                          to="/admin/users-control"
+                          onClick={handleLinkClick}
+                        >
+                          <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
+                            <Users2 className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
+                            <span className="truncate">Users Control</span>
+                          </div>
+                        </Link>
+                      )}
+                    </div>
+                  )}
                 {user ? (
                   <Button
                     variant="outline"
@@ -349,7 +393,7 @@ function Header() {
         )}
       </div>
     </nav>
-  )
+  );
 }
 
-export default Header
+export default Header;
