@@ -28,6 +28,8 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import yallaSheesh from "../assets/YallaSheeshHeader.png";
 import LanguageSwitcher from "@/componenet/LanguageSwitcher";
+import NavLink from "./common/NavLink";
+import { ADMIN_LINKS } from "@/constants";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -66,44 +68,28 @@ function Header() {
                 <h1 className="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-700 via-red-600 to-red-700 bg-clip-text text-transparent drop-shadow-sm truncate">
                   {t("resturant_name")}
                 </h1>
-                <p className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic truncate">
-                  <h1> يلا شيش </h1>
-                </p>
+                <h2 className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic truncate">
+                  يلا شيش
+                </h2>
               </div>
             </div>
           </Link>
-
-          {!user ? (
-            <div className="hidden lg:flex items-center gap-6 xl:gap-10">
-              <Link
+          {!user && (
+            <div className="hidden lg:flex items-center gap-6">
+              <NavLink
                 to="/#home"
+                label={t("home")}
                 onClick={handleLinkClick}
-                className="text-sm xl:text-base text-gray-700 hover:text-red-700 font-semibold transition-all duration-300 whitespace-nowrap relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-red-600 after:to-yellow-500 hover:after:w-full after:transition-all after:duration-300"
-              >
-                {t("home")}
-              </Link>
-
-              <Link
+              />
+              <NavLink
                 to="/#about"
+                label={t("about_us")}
                 onClick={handleLinkClick}
-                className="text-sm xl:text-base text-gray-700 hover:text-red-700 font-semibold transition-all duration-300 whitespace-nowrap relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-red-600 after:to-yellow-500 hover:after:w-full after:transition-all after:duration-300"
-              >
-                {t("about_us")}
-              </Link>
-              <Link
+              />
+              <NavLink
                 to="/#contact"
+                label={t("contact_us")}
                 onClick={handleLinkClick}
-                className="text-sm xl:text-base text-gray-700 hover:text-red-700 font-semibold transition-all duration-300 whitespace-nowrap relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-red-600 after:to-yellow-500 hover:after:w-full after:transition-all after:duration-300"
-              >
-                {t("contact_us")}
-              </Link>
-            </div>
-          ) : (
-            <div className="hidden sm:flex flex-col items-center md:items-start flex-1 max-w-[200px] sm:max-w-[250px] md:max-w-xs lg:max-w-sm xl:max-w-md mx-auto">
-              <img
-                src={yallaSheesh || "/placeholder.svg"}
-                alt="Yalla Sheesh"
-                className="h-10 sm:h-12 md:h-14 w-full object-contain"
               />
             </div>
           )}
@@ -147,63 +133,18 @@ function Header() {
                     align="end"
                     className="w-56 bg-white border-2 border-red-200 shadow-xl rounded-lg p-2"
                   >
-                    <Link to="/admin/dashboard">
-                      <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                        <LayoutDashboard className="h-4 w-4 ml-2 text-red-600" />
-                        <span className="font-semibold text-gray-700">
-                          {t("dashboard")}
-                        </span>
-                      </DropdownMenuItem>
-                    </Link>
-                    {user.role === "admin" && (
-                      <Link to="/orders">
-                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                          <Package className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">
-                            {t("orders")}
-                          </span>
-                        </DropdownMenuItem>
-                      </Link>
-                    )}
-                    {user.role === "admin" && (
-                      <Link to="/admin/add-product">
-                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                          <Plus className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">
-                            {t("products")}
-                          </span>
-                        </DropdownMenuItem>
-                      </Link>
-                    )}
-                    {user.role === "admin" && (
-                      <Link to="/admin/statistics">
-                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                          <ChartNoAxesCombined className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">
-                            {t("Statistics")}
-                          </span>
-                        </DropdownMenuItem>
-                      </Link>
-                    )}
-                    {user.role === "admin" && (
-                      <Link to="/admin/users-control">
-                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                          <Users2 className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">
-                            Users Control
-                          </span>
-                        </DropdownMenuItem>
-                      </Link>
-                    )}
-                    {user.role === "admin" && (
-                      <Link to="/slides">
-                        <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                          <Image className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">
-                            Control Images
-                          </span>
-                        </DropdownMenuItem>
-                      </Link>
+                    {ADMIN_LINKS.map(
+                      (link) =>
+                        link.roles.includes(user.role) && (
+                          <Link to={link.to} key={link.to}>
+                            <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                              <link.icon className="h-4 w-4 ml-2 text-red-600" />
+                              <span className="font-semibold text-gray-700">
+                                {t(link.label)}
+                              </span>
+                            </DropdownMenuItem>
+                          </Link>
+                        )
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -308,64 +249,19 @@ function Header() {
               <div
                 className={`sm:hidden pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}
               >
-                {user &&
-                  (user.role === "admin" || user.role === "employee") && (
-                    <div
-                      className={`flex flex-col gap-1.5 xs:gap-2 pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}
-                    >
-                      <div className="flex items-center gap-2 px-3 xs:px-4 mb-1">
-                        <Settings className="h-3.5 w-3.5 xs:h-4 xs:w-4 text-red-900" />
-                        <p className="text-[10px] xs:text-xs font-bold text-red-900">
-                          {t("control_panel")}
-                        </p>
-                      </div>
-                      {user &&
-                        (user.role === "admin" || user.role === "employee") && (
-                          <Link to="/admin/dashboard" onClick={handleLinkClick}>
-                            <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                              <LayoutDashboard className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                              <span className="truncate">{t("dashboard")}</span>
-                            </div>
-                          </Link>
-                        )}
-                      {user && user.role === "admin" && (
-                        <Link to="/orders" onClick={handleLinkClick}>
-                          <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                            <Package className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                            <span className="truncate">{t("orders")}</span>
-                          </div>
-                        </Link>
-                      )}
-                      {user && user.role === "admin" && (
-                        <Link to="/admin/add-product" onClick={handleLinkClick}>
-                          <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                            <Plus className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                            <span className="truncate">{t("products")}</span>
-                          </div>
-                        </Link>
-                      )}
-
-                      {user && user.role === "admin" && (
-                        <Link to="/admin/statistics" onClick={handleLinkClick}>
-                          <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                            <ChartNoAxesCombined className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                            <span className="truncate">{t("Statistics")}</span>
-                          </div>
-                        </Link>
-                      )}
-                      {user && user.role === "admin" && (
-                        <Link
-                          to="/admin/users-control"
-                          onClick={handleLinkClick}
-                        >
-                          <div className="flex items-center gap-2.5 xs:gap-3 text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600">
-                            <Users2 className="h-4 w-4 xs:h-5 xs:w-5 text-red-600 flex-shrink-0" />
-                            <span className="truncate">Users Control</span>
-                          </div>
-                        </Link>
-                      )}
-                    </div>
-                  )}
+                {ADMIN_LINKS.map(
+                  (link) =>
+                    link.roles.includes(user.role) && (
+                      <Link to={link.to} key={link.to}>
+                        <div className="cursor-pointer flex items-center hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                          <link.icon className="h-4 w-4 ml-2 text-red-600" />
+                          <span className="font-semibold text-gray-700">
+                            {t(link.label)}
+                          </span>
+                        </div>
+                      </Link>
+                    )
+                )}
                 {user ? (
                   <Button
                     variant="outline"

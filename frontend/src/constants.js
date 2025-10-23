@@ -1,3 +1,12 @@
+import {
+  ChartNoAxesCombined,
+  Image,
+  LayoutDashboard,
+  Package,
+  Plus,
+  Users2,
+} from "lucide-react";
+
 export const CATEGORIES = [
   { en: "Burgers", ar: "برجر" },
   { en: "Snacks", ar: "وجبات خفيفة" },
@@ -10,4 +19,43 @@ export const CATEGORIES = [
   { en: "Kids", ar: "أطفال" },
   { en: "Sauces", ar: "صلصات" },
   { en: "Sides", ar: "جانبية" },
+];
+
+export const ADMIN_LINKS = [
+  {
+    to: "/admin/dashboard",
+    label: "dashboard",
+    icon: LayoutDashboard,
+    roles: ["admin", "employee"],
+  },
+  {
+    to: "/orders",
+    label: "orders",
+    icon: Package,
+    roles: ["admin"],
+  },
+  {
+    to: "/admin/add-product",
+    label: "Products",
+    icon: Plus,
+    roles: ["admin"],
+  },
+  {
+    to: "/admin/statistics",
+    label: "Statistics",
+    icon: ChartNoAxesCombined,
+    roles: ["admin"],
+  },
+  {
+    to: "/admin/users-control",
+    label: "Users Control",
+    icon: Users2,
+    roles: ["admin"],
+  },
+  {
+    to: "/slides",
+    label: "Control Images",
+    icon: Image,
+    roles: ["admin"],
+  },
 ];

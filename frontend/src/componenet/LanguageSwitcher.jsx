@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-export default function LanguageSwitcher() {
+function LanguageSwitcher() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
@@ -11,9 +11,10 @@ export default function LanguageSwitcher() {
     document.documentElement.dir = dir;
     // optional: change font for Arabic
     if (i18n.language === "ar") {
-  document.documentElement.style.fontFamily = "'STC', sans-serif";
+      document.documentElement.style.fontFamily = "'STC', sans-serif";
     } else {
-  document.documentElement.style.fontFamily = "'Baloo Tammudu 2', sans-serif";
+      document.documentElement.style.fontFamily =
+        "'Baloo Tammudu 2', sans-serif";
     }
   }, [i18n.language]);
 
@@ -64,3 +65,5 @@ export default function LanguageSwitcher() {
     </div>
   );
 }
+
+export default React.memo(LanguageSwitcher);
