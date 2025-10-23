@@ -58,7 +58,7 @@ function Header() {
                   {t("resturant_name")}
                 </h1>
                 <p className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic truncate">
-                  {t("resturant_tagline")}
+                  <h1> يلا شيش </h1>
                 </p>
               </div>
             </div>
