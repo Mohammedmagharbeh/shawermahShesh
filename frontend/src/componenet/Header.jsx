@@ -15,21 +15,14 @@ import {
   ShoppingCart,
   X,
   Settings,
-  LayoutDashboard,
-  Package,
-  Plus,
   MonitorIcon as MonitorCog,
-  ArrowUpFromLine as ChartNoAxesCombined,
-  Users2,
-  Image,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import yallaSheesh from "../assets/YallaSheeshHeader.png";
 import LanguageSwitcher from "@/componenet/LanguageSwitcher";
 import NavLink from "./common/NavLink";
-import { ADMIN_LINKS } from "@/constants";
+import { ADMIN_LINKS, PUBLIC_LINKS } from "@/constants";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -45,6 +38,8 @@ function Header() {
     logout();
     setIsMenuOpen(false);
   };
+
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   return (
     <nav
@@ -74,25 +69,18 @@ function Header() {
               </div>
             </div>
           </Link>
-          {!user && (
-            <div className="hidden lg:flex items-center gap-6">
-              <NavLink
-                to="/#home"
-                label={t("home")}
-                onClick={handleLinkClick}
-              />
-              <NavLink
-                to="/#about"
-                label={t("about_us")}
-                onClick={handleLinkClick}
-              />
-              <NavLink
-                to="/#contact"
-                label={t("contact_us")}
-                onClick={handleLinkClick}
-              />
-            </div>
-          )}
+          <div className="hidden lg:flex items-center gap-6">
+            {!user &&
+              PUBLIC_LINKS.map((key) => (
+                <NavLink
+                  key={key}
+                  to={`/#${key.label === "home" ? "home" : key.label.split("_")[0]}`}
+                  label={t(key.label)}
+                  onClick={handleLinkClick}
+                  className="text-sm xl:text-base text-gray-700 hover:text-red-700 font-semibold transition-all duration-300 whitespace-nowrap relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-red-600 after:to-yellow-500 hover:after:w-full after:transition-all after:duration-300"
+                />
+              ))}
+          </div>
 
           <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-2">
             {user && user.role === "user" && (
@@ -197,7 +185,7 @@ function Header() {
               variant="ghost"
               size="sm"
               className="lg:hidden h-9 w-9 xs:h-10 xs:w-10 p-0 hover:bg-red-100 text-red-700 transition-all duration-300 flex-shrink-0"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={toggleMenu}
             >
               {isMenuOpen ? (
                 <X className="h-5 w-5 xs:h-6 xs:w-6" />
@@ -213,33 +201,16 @@ function Header() {
             className={`lg:hidden mt-3 xs:mt-4 pb-3 xs:pb-4 border-t-2 ${!user && "border-yellow-300"} animate-in slide-in-from-top-2 duration-300 bg-gradient-to-b from-yellow-50/50 to-transparent rounded-b-lg`}
           >
             <div className="flex flex-col gap-1.5 xs:gap-2 pt-3 xs:pt-4">
-              {!user && (
-                <Link
-                  to="/#home"
-                  onClick={handleLinkClick}
-                  className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
-                >
-                  {t("home")}
-                </Link>
-              )}
-              {!user && (
-                <Link
-                  to="/#about"
-                  onClick={handleLinkClick}
-                  className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
-                >
-                  {t("about_us")}
-                </Link>
-              )}
-              {!user && (
-                <Link
-                  to="/#contact"
-                  onClick={handleLinkClick}
-                  className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
-                >
-                  {t("contact_us")}
-                </Link>
-              )}
+              {!user &&
+                PUBLIC_LINKS.map((key) => (
+                  <NavLink
+                    className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
+                    key={key}
+                    to={`/#${key.label === "home" ? "home" : key.label.split("_")[0]}`}
+                    label={t(key.label)}
+                    onClick={handleLinkClick}
+                  />
+                ))}
 
               {/* Language Switcher - Mobile */}
               <div className="sm:hidden px-3 xs:px-4 py-2">
@@ -249,19 +220,17 @@ function Header() {
               <div
                 className={`sm:hidden pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}
               >
-                {ADMIN_LINKS.map(
-                  (link) =>
-                    link.roles.includes(user.role) && (
-                      <Link to={link.to} key={link.to}>
-                        <div className="cursor-pointer flex items-center hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                          <link.icon className="h-4 w-4 ml-2 text-red-600" />
-                          <span className="font-semibold text-gray-700">
-                            {t(link.label)}
-                          </span>
-                        </div>
-                      </Link>
-                    )
-                )}
+                {user &&
+                  ADMIN_LINKS.map((link) => (
+                    <Link to={link.to} key={link.to} onClick={toggleMenu}>
+                      <div className="cursor-pointer flex items-center hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                        <link.icon className="h-4 w-4 ml-2 text-red-600" />
+                        <span className="font-semibold text-gray-700">
+                          {t(link.label)}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
                 {user ? (
                   <Button
                     variant="outline"

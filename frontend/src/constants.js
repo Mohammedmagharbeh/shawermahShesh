@@ -59,3 +59,9 @@ export const ADMIN_LINKS = [
     roles: ["admin"],
   },
 ];
+
+export const PUBLIC_LINKS = [
+  { label: "home" },
+  { label: "about_us" },
+  { label: "contact_us" },
+];
