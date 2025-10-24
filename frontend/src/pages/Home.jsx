@@ -13,8 +13,6 @@ import {
   Facebook,
   Instagram,
 } from "lucide-react";
-
-import product_placeholder from "../assets/product_placeholder.jpeg";
 import home_logo2 from "../assets/home_logo2.jpeg";
 import { useTranslation } from "react-i18next";
 import c from "../assets/c.jpeg";
@@ -39,13 +37,16 @@ const ImageCarousel = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_BASE_URL}/slides`);
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section1`
+        );
         const data = await res.json();
         setSlides(data);
       } catch (error) {
         console.error("Error fetching slides:", error);
       }
     };
+
     fetchSlides();
   }, []);
 
@@ -62,11 +63,12 @@ const ImageCarousel = () => {
     return null;
   }
 
-  if (!slides.length) return <p className="text-center py-20">Loading...</p>;
+  if (slides.length === 0)
+    return <p className="text-center py-20">Loading...</p>;
 
   return (
     <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[70vh] overflow-hidden">
-      {slides.map((slide, index) => (
+      {slides?.map((slide, index) => (
         <div
           key={index}
           className={`absolute inset-0 transition-opacity duration-1000 ${
@@ -135,7 +137,23 @@ const FloatingCertificates = () => (
 
 export default function Home() {
   const location = useLocation();
+  const [section2Img, setSection2Img] = useState();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const fetchSection2Imgs = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section2`
+        );
+        const data = await res.json();
+        setSection2Img(data[0]);
+      } catch (error) {
+        console.error("Error fetching section 2 images:", error);
+      }
+    };
+    fetchSection2Imgs();
+  }, []);
 
   useEffect(() => {
     if (location.hash) {
@@ -196,7 +214,7 @@ export default function Home() {
             </div>
             <div>
               <img
-                src={home_logo2 || "/placeholder.svg"}
+                src={section2Img?.image || home_logo2}
                 alt="مطبخنا"
                 className="rounded-2xl shadow-xl w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover"
               />
@@ -288,67 +306,65 @@ export default function Home() {
       </section>
 
       {/* الفوتر */}
-     <footer className="bg-gray-900 text-white py-12">
-  <div className="container mx-auto px-4">
-    <div className="flex flex-col-reverse md:flex-row items-center justify-between relative text-center md:text-left">
-      
-      {/* شعار Yalla Sheesh — تحت في الهاتف، يسار في الكمبيوتر */}
-      <div className="flex flex-col items-center md:items-start mt-8 md:mt-0">
-        <img
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/yalla%20sheesh-wYD9LCTpwgPKc6YoFDJwUVLwLBnmMW.png"
-          alt="Yalla Sheesh"
-          className="h-10 sm:h-16 w-auto object-contain"
-        />
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col-reverse md:flex-row items-center justify-between relative text-center md:text-left">
+            {/* شعار Yalla Sheesh — تحت في الهاتف، يسار في الكمبيوتر */}
+            <div className="flex flex-col items-center md:items-start mt-8 md:mt-0">
+              <img
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/yalla%20sheesh-wYD9LCTpwgPKc6YoFDJwUVLwLBnmMW.png"
+                alt="Yalla Sheesh"
+                className="h-10 sm:h-16 w-auto object-contain"
+              />
 
-        {/* مواقع التواصل */}
-        <div className="flex gap-3 sm:gap-4 mt-4 justify-center md:justify-start w-full flex-wrap">
-          {/* Facebook */}
-          <a
-            href="https://www.facebook.com/sheesh.jo"
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
-          >
-            <Facebook className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-          </a>
+              {/* مواقع التواصل */}
+              <div className="flex gap-3 sm:gap-4 mt-4 justify-center md:justify-start w-full flex-wrap">
+                {/* Facebook */}
+                <a
+                  href="https://www.facebook.com/sheesh.jo"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                >
+                  <Facebook className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </a>
 
-          {/* WhatsApp */}
-          <a
-            href="https://api.whatsapp.com/send?phone=96232019099"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
-          >
-            <WhatsAppIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-          </a>
+                {/* WhatsApp */}
+                <a
+                  href="https://api.whatsapp.com/send?phone=96232019099"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                >
+                  <WhatsAppIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                </a>
 
-          {/* Instagram */}
-          <a
-            href="https://www.instagram.com/SHAWERMASHEESH/"
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-pink-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
-          >
-            <Instagram className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-          </a>
+                {/* Instagram */}
+                <a
+                  href="https://www.instagram.com/SHAWERMASHEESH/"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-pink-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                >
+                  <Instagram className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </a>
+              </div>
+            </div>
+
+            {/* النص في المنتصف */}
+            <div className="text-center md:absolute md:left-[35%] md:top-[50%] mt-4 md:mt-0">
+              <p className="text-gray-100 text-xs sm:text-sm">
+                {t("all_rights_reserved")}
+              </p>
+            </div>
+
+            {/* الصورة — فوق في الهاتف، يمين في الكمبيوتر */}
+            <div className="flex justify-center md:justify-end mb-8 md:mb-0">
+              <img
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png"
+                alt="Restaurant Logo"
+                className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 object-contain"
+              />
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* النص في المنتصف */}
-      <div className="text-center md:absolute md:left-[35%] md:top-[50%] mt-4 md:mt-0">
-        <p className="text-gray-100 text-xs sm:text-sm">
-          {t("all_rights_reserved")}
-        </p>
-      </div>
-
-      {/* الصورة — فوق في الهاتف، يمين في الكمبيوتر */}
-      <div className="flex justify-center md:justify-end mb-8 md:mb-0">
-        <img
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png"
-          alt="Restaurant Logo"
-          className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 object-contain"
-        />
-      </div>
-    </div>
-  </div>
-</footer>
-
+      </footer>
     </div>
   );
 }
