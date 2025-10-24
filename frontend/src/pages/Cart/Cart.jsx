@@ -28,7 +28,7 @@ const Cart = () => {
           </h2>
           <p className="text-gray-600 mb-6">{t("cart_empty_desc")}</p>
           <Link
-            to="/"
+            to="/products"
             className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             {t("cart_start_shopping")}
