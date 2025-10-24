@@ -43,7 +43,9 @@ function Header() {
 
   return (
     <nav
-      className={`fixed top-0 w-full bg-gradient-to-r from-white via-yellow-50/30 to-white backdrop-blur-md border-b-2 ${!user && "border-yellow-300"} z-50 shadow-lg shadow-yellow-100/50`}
+      className={`fixed top-0 w-full bg-gradient-to-r from-white via-yellow-50/30 to-white backdrop-blur-md border-b-2 ${
+        !user && "border-yellow-300"
+      } z-50 shadow-lg shadow-yellow-100/50`}
     >
       <div className="container mx-auto px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-2 xs:py-3 sm:py-4">
         <div className="flex items-center justify-between gap-1 xs:gap-2 sm:gap-4 md:gap-6">
@@ -74,7 +76,9 @@ function Header() {
               PUBLIC_LINKS.map((key) => (
                 <NavLink
                   key={key}
-                  to={`/#${key.label === "home" ? "home" : key.label.split("_")[0]}`}
+                  to={`/#${
+                    key.label === "home" ? "home" : key.label.split("_")[0]
+                  }`}
                   label={t(key.label)}
                   onClick={handleLinkClick}
                   className="text-sm xl:text-base text-gray-700 hover:text-red-700 font-semibold transition-all duration-300 whitespace-nowrap relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-red-600 after:to-yellow-500 hover:after:w-full after:transition-all after:duration-300"
@@ -198,7 +202,9 @@ function Header() {
 
         {isMenuOpen && (
           <div
-            className={`lg:hidden mt-3 xs:mt-4 pb-3 xs:pb-4 border-t-2 ${!user && "border-yellow-300"} animate-in slide-in-from-top-2 duration-300 bg-gradient-to-b from-yellow-50/50 to-transparent rounded-b-lg`}
+            className={`lg:hidden mt-3 xs:mt-4 pb-3 xs:pb-4 border-t-2 ${
+              !user && "border-yellow-300"
+            } animate-in slide-in-from-top-2 duration-300 bg-gradient-to-b from-yellow-50/50 to-transparent rounded-b-lg`}
           >
             <div className="flex flex-col gap-1.5 xs:gap-2 pt-3 xs:pt-4">
               {!user &&
@@ -206,7 +212,9 @@ function Header() {
                   <NavLink
                     className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
                     key={key}
-                    to={`/#${key.label === "home" ? "home" : key.label.split("_")[0]}`}
+                    to={`/#${
+                      key.label === "home" ? "home" : key.label.split("_")[0]
+                    }`}
                     label={t(key.label)}
                     onClick={handleLinkClick}
                   />
@@ -218,7 +226,9 @@ function Header() {
               </div>
 
               <div
-                className={`sm:hidden pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}
+                className={`sm:hidden pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${
+                  !user && "border-yellow-300"
+                }`}
               >
                 {user &&
                   ADMIN_LINKS.map((link) => (
