@@ -1,14 +1,25 @@
-"use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const SERVER_URL = import.meta.env.VITE_BASE_URL;
 
 export default function AdminSlides() {
   const [slides, setSlides] = useState([]);
-  const [form, setForm] = useState({ title: "", subtitle: "", image: "" });
+  const [form, setForm] = useState({
+    title: "",
+    subtitle: "",
+    image: "",
+    relatedTo: "",
+  });
   const [editId, setEditId] = useState(null);
 
   const fetchSlides = async () => {
@@ -33,7 +44,7 @@ export default function AdminSlides() {
       } else {
         await axios.post(`${SERVER_URL}/slides`, form);
       }
-      setForm({ title: "", subtitle: "", image: "" });
+      setForm({ title: "", subtitle: "", image: "", relatedTo: "" });
       setEditId(null);
       fetchSlides();
     } catch (error) {
@@ -96,6 +107,25 @@ export default function AdminSlides() {
                 className="w-full"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                تابعة ل
+              </label>
+              <Select
+                value={form.relatedTo}
+                onValueChange={(value) =>
+                  setForm({ ...form, relatedTo: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر القسم" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="home-section1">Home Section 1</SelectItem>
+                  <SelectItem value="home-section2">Home Section 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -118,7 +148,7 @@ export default function AdminSlides() {
                   src={form.image || "/placeholder.svg"}
                   alt="Preview"
                   className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200"
-                />
+                />{" "}
               </div>
             )}
 

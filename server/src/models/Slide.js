@@ -4,8 +4,9 @@ const slideSchema = new mongoose.Schema({
   image: { type: String, required: true },
   title: { type: String, required: true },
   subtitle: { type: String },
-}, { timestamps: true });
+  relatedTo: { type: String },
+});
 
 const Slide = mongoose.model("Slide", slideSchema);
 
-module.exports = Slide; // لازم مع require
+module.exports = Slide;

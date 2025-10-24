@@ -65,12 +65,24 @@ function AdminDashboard() {
     return () => clearInterval(interval);
   }, [filterDate]);
 
+  const fetchPendingOrders = async () => {
+    const res = await fetch(
+      `${import.meta.env.VITE_BASE_URL}/order/get?status=Processing`
+    );
+    const data = await res.json();
+    setIncomingOrder(data.data);
+  };
+
   useEffect(() => {
     // Preload the sound
     const audio = new Audio(newOrderSound);
     audio.loop = true;
     setSound(audio);
   }, []);
+
+  useEffect(() => {
+    fetchPendingOrders();
+  }, [orders]);
 
   const enableSound = () => {
     if (sound) {
@@ -234,7 +246,7 @@ function AdminDashboard() {
               </DialogContent>
             </Dialog>
 
-            {incomingOrder.length > 0 &&
+            {incomingOrder?.length > 0 &&
               incomingOrder.map((o) => (
                 <Dialog
                   open={incomingOrder.length > 0}

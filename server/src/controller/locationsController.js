@@ -2,7 +2,7 @@ const locationsModel = require("../models/locations");
 
 exports.getLocations = async (req, res) => {
   try {
-    const locations = await locationsModel.find();
+    const locations = await locationsModel.find().lean();
     res.status(200).json({ locations });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -10,7 +10,7 @@ exports.getLocations = async (req, res) => {
 };
 exports.getLocationById = async (req, res) => {
   try {
-    const location = await locationsModel.findById(req.params.id);
+    const location = await locationsModel.findById(req.params.id).lean();
     res.status(200).json(location);
   } catch (error) {
     res.status(400).json({ message: error.message });

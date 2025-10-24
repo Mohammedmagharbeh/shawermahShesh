@@ -137,7 +137,7 @@ function Checkout() {
 
         toast.success(t("checkout_success"));
         clearCart();
-        navigate("/");
+        navigate("/products");
       } catch (error) {
         toast.error(t("checkout_failed"));
       }
