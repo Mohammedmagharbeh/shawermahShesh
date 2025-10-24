@@ -73,7 +73,7 @@ function Header() {
             {!user &&
               PUBLIC_LINKS.map((key) => (
                 <NavLink
-                  key={key}
+                  key={key.label}
                   to={`/#${key.label === "home" ? "home" : key.label.split("_")[0]}`}
                   label={t(key.label)}
                   onClick={handleLinkClick}
