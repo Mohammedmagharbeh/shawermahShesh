@@ -1,4 +1,4 @@
-const { CATEGORIES, AR_CATEGORIES, EN_CATEGORIES } = require("../constants");
+const { CATEGORIES } = require("../constants");
 const products = require("../models/products");
 
 // for post

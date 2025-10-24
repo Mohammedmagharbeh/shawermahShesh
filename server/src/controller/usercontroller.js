@@ -67,19 +67,11 @@ exports.getAllProducts = async (req, res) => {
   try {
     const { category } = req.query;
 
-    // Validate category if provided
-    if (category) {
-      const isValidCategory = CATEGORIES.some((c) => c.en === category);
-      if (!isValidCategory) {
-        return res.status(400).json({ message: "Invalid category" });
-      }
-    }
-
     // Build query
     const query = category ? { category } : {};
 
     // Fetch products
-    const result = await products.find(query).sort({ _id: -1 }); // newest first
+    const result = await products.find(query).lean();
 
     res.status(200).json({
       message: "Products fetched successfully",
@@ -94,7 +86,7 @@ exports.getAllProducts = async (req, res) => {
 exports.getSingleProduct = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await products.findById(id);
+    const product = await products.findById(id).lean();
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }

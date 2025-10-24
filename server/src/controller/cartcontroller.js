@@ -206,7 +206,8 @@ exports.getCart = async (req, res) => {
     const userCart = await cart
       .findOne({ userId })
       .populate("products.productId")
-      .populate("products.additions");
+      .populate("products.additions")
+      .lean();
 
     if (!userCart) {
       return res

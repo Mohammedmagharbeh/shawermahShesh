@@ -20,7 +20,8 @@ exports.getOrderById = async (req, res) => {
       .populate("products.productId")
       .populate("products.additions")
       .populate("userId")
-      .populate("shippingAddress");
+      .populate("shippingAddress")
+      .lean();
 
     if (!order) {
       return res
@@ -126,7 +127,8 @@ exports.getOrdersByUserId = async (req, res) => {
       .populate("products.productId")
       .populate("products.additions")
       .populate("shippingAddress")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.status(200).json({ success: true, data: userOrders });
   } catch (error) {

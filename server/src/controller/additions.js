@@ -2,7 +2,7 @@ const additionsModel = require("../models/additions");
 
 exports.getAdditions = async (req, res) => {
   try {
-    const additions = await additionsModel.find();
+    const additions = await additionsModel.find().lean();
     res.status(200).json({ additions });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -19,7 +19,7 @@ exports.getAdditionsByCategory = async (req, res) => {
         .json({ message: "Category parameter is required" });
     }
 
-    const additions = await additionsModel.find({ category });
+    const additions = await additionsModel.find({ category }).lean();
     res.status(200).json({ additions });
   } catch (error) {
     res.status(400).json({ message: error.message });
