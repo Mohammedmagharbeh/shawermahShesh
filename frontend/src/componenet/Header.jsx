@@ -198,7 +198,7 @@ function Header() {
 
         {isMenuOpen && (
           <div
-            className={`lg:hidden mt-3 xs:mt-4 pb-3 xs:pb-4 border-t-2 ${!user && "border-yellow-300"} animate-in slide-in-from-top-2 duration-300 bg-gradient-to-b from-yellow-50/50 to-transparent rounded-b-lg`}
+            className={`mt-3 xs:mt-4 pb-3 xs:pb-4 border-t-2 ${!user && "border-yellow-300"} animate-in slide-in-from-top-2 duration-300 bg-gradient-to-b from-yellow-50/50 to-transparent rounded-b-lg`}
           >
             <div className="flex flex-col gap-1.5 xs:gap-2 pt-3 xs:pt-4">
               {!user &&
@@ -218,7 +218,7 @@ function Header() {
               </div>
 
               <div
-                className={`sm:hidden pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}
+                className={`pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!user && "border-yellow-300"}`}
               >
                 {user &&
                   ADMIN_LINKS.map((link) => (

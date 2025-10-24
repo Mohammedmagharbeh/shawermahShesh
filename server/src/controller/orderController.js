@@ -82,7 +82,13 @@ exports.getOrderById = async (req, res) => {
 // get all orders
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({})
+    const { status } = req.query;
+    let filter = {};
+    if (status) {
+      filter.status = status;
+    }
+
+    const orders = await Order.find(filter)
       .populate("products.productId")
       .populate("products.additions")
       .populate("userId", "phone name") // 🟢 جلب الاسم والهاتف مباشرة
