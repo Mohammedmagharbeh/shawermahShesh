@@ -80,26 +80,59 @@ export default function Products() {
           <>
             <div className="space-y-6">
               {products.map((product) => (
-                <Card key={product._id} className="shadow-sm">
-                  <CardContent>
-                    <div className="flex items-center">
-                      <img
-                        src={product.image || product_placeholder}
-                        alt={product.name[selectedLanguage]}
-                        className="w-24 h-24 object-cover rounded-lg ml-4"
-                      />
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold mb-2">
-                          {product.name[selectedLanguage]}
-                        </h3>
-                        <p className="text-gray-600 mb-2">
-                          {product.description[selectedLanguage]}
-                        </p>
-                        <div className="text-lg font-bold text-orange-500">
-                          ${product.price.toFixed(2)}
+                <Card
+                  key={product._id}
+                  className="overflow-hidden border-0 shadow-sm hover:shadow-md transition bg-white"
+                >
+                  <CardContent className="p-0">
+                    <div className="flex flex-row-reverse items-center gap-4 p-4">
+                      {/* الصورة على اليسار */}
+                      <div className="flex-shrink-0 w-32 h-32">
+                        <img
+                          src={product.image || product_placeholder}
+                          alt={product.name[selectedLanguage]}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      </div>
+
+                      {/* المحتوى على اليمين */}
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <h3 className="text-lg font-bold mb-1 text-gray-900">
+                            {product.name[selectedLanguage]}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                            {product.description[selectedLanguage]}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-2">
+                          <div>
+                            {product.discount > 0 ? (
+                              <div className="flex items-center gap-2">
+                                <p className="text-xl font-bold text-orange-500">
+                                  JOD{" "}
+                                  {product.discountedPrice
+                                    ? product.discountedPrice.toFixed(2)
+                                    : (
+                                        product.price -
+                                        (product.price * product.discount) / 100
+                                      ).toFixed(2)}
+                                </p>
+                                <p className="text-gray-400 line-through text-sm">
+                                  {product.price}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-xl font-bold text-red-600">
+                                JOD {product.price}
+                              </p>
+                            )}
+                          </div>
+
+                          <ProductDialog id={product._id} />
                         </div>
                       </div>
-                      <ProductDialog id={product._id} />
                     </div>
                   </CardContent>
                 </Card>
