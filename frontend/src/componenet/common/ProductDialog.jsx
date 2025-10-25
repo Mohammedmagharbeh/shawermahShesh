@@ -44,6 +44,7 @@ export function ProductDialog({ id, triggerLabel }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (!open) return;
     const fetchProductDetails = async () => {
       try {
         setLoading(true);
@@ -61,10 +62,11 @@ export function ProductDialog({ id, triggerLabel }) {
     };
 
     if (id) fetchProductDetails();
-  }, [id]);
+  }, [id, open]);
 
   useEffect(() => {
     if (!product?.category) return;
+    if (!open) return;
 
     const fetchAdditions = async () => {
       try {
@@ -81,7 +83,7 @@ export function ProductDialog({ id, triggerLabel }) {
     };
 
     fetchAdditions();
-  }, [product?.category]);
+  }, [product?.category, open]);
 
   const handleQuantityChange = (increment) => {
     setQuantity((prev) => Math.max(1, prev + increment));
