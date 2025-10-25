@@ -178,7 +178,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background arabic-font" dir="rtl">
       <FloatingCertificates />
-      <section id="home" className="pt-1">
+      <section id="home" className="pt-0">
         <ImageCarousel />
       </section>
 
