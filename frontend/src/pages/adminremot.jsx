@@ -178,11 +178,12 @@ export default function AdminProductPanel() {
       arDescription: product.description.ar,
       enDescription: product.description.en,
       image: product.image,
-      arCategory: product.category.ar,
-      enCategory: product.category.en,
+      category: product.category,
     });
     setEditingId(product._id);
   };
+
+  console.log(formData);
 
   const handleDelete = async (id) => {
     toast((toastInstance) => (
@@ -432,8 +433,9 @@ export default function AdminProductPanel() {
                     <Select
                       onValueChange={(value) => {
                         const selectedCategory = CATEGORIES.find(
-                          (cat) =>
-                            cat[i18n.language === "ar" ? "ar" : "en"] === value
+                          console.log(value, cat),
+
+                          (cat) => cat.en === value
                         );
                         setFormData({
                           ...formData,
@@ -443,14 +445,15 @@ export default function AdminProductPanel() {
                       className="mt-1.5"
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder={t("choose_category")} />
+                        <SelectValue
+                          placeholder={
+                            formData.category || t("choose_category")
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {CATEGORIES.map((cat, index) => (
-                          <SelectItem
-                            key={index}
-                            value={i18n.language === "ar" ? cat.ar : cat.en}
-                          >
+                          <SelectItem key={index} value={cat.en}>
                             {i18n.language === "ar" ? cat.ar : cat.en}
                           </SelectItem>
                         ))}
