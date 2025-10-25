@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import i18n from "@/i18n";
 
 const SERVER_URL = import.meta.env.VITE_BASE_URL;
 
@@ -21,7 +22,7 @@ export default function AdminSlides() {
     relatedTo: "",
   });
   const [editId, setEditId] = useState(null);
-
+  const selectedLanguage = i18n.language;
   const fetchSlides = async () => {
     try {
       const { data } = await axios.get(`${SERVER_URL}/slides`);
@@ -195,16 +196,16 @@ export default function AdminSlides() {
                   <div className="relative h-48 sm:h-56 bg-gray-100">
                     <img
                       src={slide.image || "/placeholder.svg"}
-                      alt={slide.title}
+                      alt={slide.title[selectedLanguage]}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div className="p-4">
                     <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">
-                      {slide.title}
+                      {slide.title[selectedLanguage]}
                     </h3>
                     <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                      {slide.subtitle}
+                      {slide.subtitle[selectedLanguage]}
                     </p>
                     <div className="flex gap-2">
                       <Button
