@@ -34,7 +34,7 @@ export default function Products() {
 
   useMemo(() => {
     fetchProducts();
-  }, [selectedLanguage, selectedCategory]);
+  }, [selectedCategory]);
 
   return (
     <div className="min-h-screen bg-gray-50 arabic-font" dir="rtl">
