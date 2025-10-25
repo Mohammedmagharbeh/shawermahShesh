@@ -19,6 +19,7 @@ import c from "../assets/c.jpeg";
 import c2 from "../assets/c2.jpeg";
 import c3 from "../assets/c3.jpg";
 import { useUser } from "@/contexts/UserContext";
+import i18n from "@/i18n";
 
 const WhatsAppIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -29,8 +30,9 @@ const WhatsAppIcon = ({ className }) => (
 const ImageCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slides, setSlides] = useState([]);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isAuthenticated } = useUser();
+  const selectedLanguage = i18n.language;
   const navigate = useNavigate();
 
   // جلب البيانات من الباك
@@ -83,10 +85,10 @@ const ImageCarousel = () => {
           <div className="absolute inset-0 bg-black/40" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6">
             <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
-              {slide.title}
+              {slide.title[selectedLanguage]}
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white mb-6 sm:mb-8 drop-shadow-lg">
-              {slide.subtitle}
+              {slide.subtitle[selectedLanguage]}
             </p>
             <div className="absolute bottom-10 sm:bottom-14 w-full flex justify-center z-20">
               <Link to={"/login"}>
@@ -137,22 +139,25 @@ const FloatingCertificates = () => (
 
 export default function Home() {
   const location = useLocation();
-  const [section2Img, setSection2Img] = useState();
-  const { t } = useTranslation();
+  const [section2, setSection2] = useState();
+  const { t, i18n } = useTranslation();
+  const selectedLanguage = i18n.language;
 
   useEffect(() => {
-    const fetchSection2Imgs = async () => {
+    const fetchSection2 = async () => {
+      console.log("Fetching section 2 images...");
+
       try {
         const res = await fetch(
           `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section2`
         );
         const data = await res.json();
-        setSection2Img(data[0]);
+        setSection2(data[0]);
       } catch (error) {
         console.error("Error fetching section 2 images:", error);
       }
     };
-    fetchSection2Imgs();
+    fetchSection2();
   }, []);
 
   useEffect(() => {
@@ -167,6 +172,8 @@ export default function Home() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [location.hash]);
+
+  console.log(section2);
 
   return (
     <div className="min-h-screen bg-background arabic-font" dir="rtl">
@@ -187,10 +194,10 @@ export default function Home() {
                 {t("our_story")}
               </Badge>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-gray-900">
-                {t("story_title")}
+                {section2?.title[selectedLanguage]}
               </h2>
               <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
-                {t("story_description")}
+                {section2?.subtitle[selectedLanguage]}
               </p>
               <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
                 {[
@@ -214,7 +221,7 @@ export default function Home() {
             </div>
             <div>
               <img
-                src={section2Img?.image || home_logo2}
+                src={section2?.image || home_logo2}
                 alt="مطبخنا"
                 className="rounded-2xl shadow-xl w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover"
               />
