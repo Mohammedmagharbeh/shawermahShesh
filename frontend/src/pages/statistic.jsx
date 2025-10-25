@@ -31,14 +31,16 @@ import {
   startOfMonth,
   endOfMonth,
   isWithinInterval,
+  set,
 } from "date-fns";
 import { Link } from "react-router-dom";
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import Loading from "@/componenet/common/Loading";
 
 export default function StatisticsPage() {
-  const { allUsers, getAllUsers } = useUser();
+  const { getAllUsers } = useUser();
   const { orders, getAllOrders } = useOrder();
   const [orderedUsers, setOrderedUsers] = useState([]);
   const [notOrderedUsers, setNotOrderedUsers] = useState([]);
@@ -46,11 +48,13 @@ export default function StatisticsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
-  const [totalVisitors, setTotalVisitors] = useState(0);
+  const [totalVisitors, setTotalVisitors] = useState();
+  const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const users = await getAllUsers();
       const allOrders = await getAllOrders();
 
@@ -60,20 +64,23 @@ export default function StatisticsPage() {
         filteredOrders.map((o) => o.userId._id || o.userDetails._id)
       );
 
-      const ordered = users.filter((u) => orderedUserIds.has(u._id));
-      const notOrdered = users.filter((u) => !orderedUserIds.has(u._id));
+      const totalVisitors = applyDateFilterToUsers(users, dateFilter);
+
+      const ordered = totalVisitors.filter((u) => orderedUserIds.has(u._id));
+      const notOrdered = totalVisitors.filter(
+        (u) => !orderedUserIds.has(u._id)
+      );
 
       const revenue = filteredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
 
-      const totalVisitorsCount = applyDateFilterToUsers(
-        users,
-        dateFilter
-      ).length;
+      console.log(totalVisitors);
 
       setOrderedUsers(ordered);
       setNotOrderedUsers(notOrdered);
       setTotalRevenue(revenue);
-      setTotalVisitors(totalVisitorsCount);
+      setTotalVisitors(totalVisitors);
+
+      setLoading(false);
     };
 
     fetchData();
@@ -150,7 +157,7 @@ export default function StatisticsPage() {
         ? orderedUsers
         : filterStatus === "not-ordered"
           ? notOrderedUsers
-          : allUsers;
+          : totalVisitors;
 
     const term = searchTerm.trim().toLowerCase();
     if (!term) return users;
@@ -160,7 +167,7 @@ export default function StatisticsPage() {
         (user.phone && user.phone.toLowerCase().includes(term)) ||
         (user.name && user.name.toLowerCase().includes(term))
     );
-  }, [filterStatus, orderedUsers, notOrderedUsers, allUsers, searchTerm]);
+  }, [filterStatus, orderedUsers, notOrderedUsers, totalVisitors, searchTerm]);
 
   const filteredOrders = useMemo(
     () => applyDateFilter(orders, dateFilter),
@@ -168,14 +175,14 @@ export default function StatisticsPage() {
   );
   const exportToExcel = () => {
     const stats = [
-      { Metric: "إجمالي الزوار", Value: totalVisitors },
+      { Metric: "إجمالي الزوار", Value: totalVisitors?.length },
       { Metric: "قاموا بالطلب", Value: orderedUsers.length },
       { Metric: "بدون طلبات", Value: notOrderedUsers.length },
       { Metric: "إجمالي الطلبات", Value: filteredOrders.length },
       { Metric: "إجمالي الإيرادات", Value: totalRevenue.toFixed(2) + " JOD" },
     ];
 
-    const usersData = allUsers.map((user) => ({
+    const usersData = totalVisitors.map((user) => ({
       الهاتف: user.phone,
       الاسم: user.name || "-",
       "تاريخ التسجيل": new Date(user.createdAt).toLocaleDateString("ar-SA"),
@@ -197,6 +204,8 @@ export default function StatisticsPage() {
     const file = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(file, "Statistics.xlsx");
   };
+
+  if (loading) return <Loading />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
@@ -265,7 +274,7 @@ export default function StatisticsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">
-                {totalVisitors}
+                {totalVisitors?.length}
               </div>
             </CardContent>
           </Card>
@@ -295,7 +304,7 @@ export default function StatisticsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-orange-600">
-                {totalVisitors - orderedUsers.length}
+                {totalVisitors?.length - orderedUsers.length}
               </div>
             </CardContent>
           </Card>
@@ -355,7 +364,7 @@ export default function StatisticsPage() {
                   onClick={() => setFilterStatus("all")}
                   size="sm"
                 >
-                  {t("filterAll")} ({allUsers.length})
+                  {t("filterAll")} ({totalVisitors?.length})
                 </Button>
                 <Button
                   variant={filterStatus === "ordered" ? "default" : "outline"}
@@ -378,14 +387,14 @@ export default function StatisticsPage() {
 
             {/* User Cards */}
             <div className="space-y-3">
-              {filteredUsers.length === 0 ? (
+              {filteredUsers?.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>{t("noResults")}</p>
                 </div>
               ) : (
                 <div className="space-y-3 flex flex-col">
-                  {filteredUsers.map((user) => (
+                  {filteredUsers?.map((user) => (
                     <Link to={`/orders/${user._id}`} key={user._id}>
                       <Card className="hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
