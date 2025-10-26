@@ -1,3 +1,4 @@
+const { default: cloudinary } = require("../config/cloudinary");
 const { CATEGORIES } = require("../constants");
 const products = require("../models/products");
 
@@ -34,12 +35,14 @@ exports.postEat = async (req, res) => {
       return res.status(400).json({ message: "Invalid category" });
     }
 
+    const uploadResponse = await cloudinary.uploader.upload(image);
+
     // Create product
     const createdFood = await products.create({
       name: { ar: arName, en: enName },
       price,
       discount: discount || 0,
-      image: image || "",
+      image: uploadResponse.secure_url,
       category: matchedCategory.en, // save only the English version
       description: { ar: arDescription, en: enDescription },
       isSpicy: isSpicy || false,
@@ -88,13 +91,20 @@ exports.updatedfood = async (req, res) => {
       return res.status(400).json({ message: "Invalid category" });
     }
 
+    console.log(image);
+
+    const updateResponse = await cloudinary.uploader.upload(image);
+
+    console.log(updateResponse);
+    console.log(updateResponse.secure_url);
+
     // Prepare updated data
     const updatedData = {
       name: { ar: arName, en: enName },
       description: { ar: arDescription, en: enDescription },
       price,
       discount: discount ?? 0,
-      image: image || "",
+      image: updateResponse.secure_url,
       category: matchedCategory.en, // store only English version
       isSpicy: isSpicy ?? false,
     };
