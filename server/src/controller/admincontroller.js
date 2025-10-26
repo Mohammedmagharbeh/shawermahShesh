@@ -91,12 +91,7 @@ exports.updatedfood = async (req, res) => {
       return res.status(400).json({ message: "Invalid category" });
     }
 
-    console.log(image);
-
     const updateResponse = await cloudinary.uploader.upload(image);
-
-    console.log(updateResponse);
-    console.log(updateResponse.secure_url);
 
     // Prepare updated data
     const updatedData = {
