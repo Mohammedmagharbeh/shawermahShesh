@@ -207,7 +207,7 @@ export default function Home() {
                 style={{ color: "#dc0606" }}
               >
                 <Heart className="h-3 w-3 sm:h-4 sm:w-4 ml-2" />
-                {t("our_story")}
+                {t("about_us")}
               </Badge>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-gray-900">
                 {section2?.title[selectedLanguage]}
@@ -259,12 +259,9 @@ export default function Home() {
             </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-gray-900">
               {t("contact_section_description")}
-
             </h2>
             <p className="text-base sm:text-lg text-gray-600">
-
               {t("contact_section_title")}
-
             </p>
           </div>
 
