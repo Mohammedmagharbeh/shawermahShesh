@@ -120,8 +120,24 @@ const ImageCarousel = () => {
   );
 };
 
+// const FloatingCertificates = () => (
+//   <div className="fixed top-1/2 right-2 sm:right-3 md:right-4 transform -translate-y-1/2 z-40 flex flex-col gap-2 sm:gap-3 items-end">
+//     {[c3, c2, c].map((cert, i) => (
+//       <div
+//         key={i}
+//         className="w-10 h-10 sm:w-12 sm:h-12 md:w-20 md:h-20 aspect-square rounded-full overflow-hidden border-2 border-white shadow-xl cursor-pointer hover:scale-110 transition-transform bg-white"
+//       >
+//         <img
+//           src={cert || "/placeholder.svg"}
+//           alt="certificate"
+//           className="w-full h-full object-cover"
+//         />
+//       </div>
+//     ))}
+//   </div>
+// );
 const FloatingCertificates = () => (
-  <div className="fixed top-1/2 right-2 sm:right-3 md:right-4 transform -translate-y-1/2 z-40 flex flex-col gap-2 sm:gap-3 items-end">
+  <div className="absolute top-24 right-2 sm:top-1/2 sm:right-3 md:right-4 transform sm:-translate-y-1/2 z-40 flex flex-col gap-2 sm:gap-3 items-end">
     {[c3, c2, c].map((cert, i) => (
       <div
         key={i}
@@ -242,10 +258,13 @@ export default function Home() {
               {t("contact_us")}
             </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-gray-900">
-              {t("contact_section_title")}
+              {t("contact_section_description")}
+
             </h2>
             <p className="text-base sm:text-lg text-gray-600">
-              {t("contact_section_description")}
+
+              {t("contact_section_title")}
+
             </p>
           </div>
 

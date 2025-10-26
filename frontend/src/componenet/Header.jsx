@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/componenet/LanguageSwitcher";
 import NavLink from "./common/NavLink";
 import { ADMIN_LINKS, PUBLIC_LINKS } from "@/constants";
+import logo from "../assets/Logo Sheesh 2025.png";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,9 +57,9 @@ function Header() {
             <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
               <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center flex-shrink-0 ring-2 ring-yellow-400 ring-offset-2 transition-transform group-hover:scale-105 duration-300">
                 <img
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDzGI9tRqzIVulcl3ghkfQ61TOgQmkuOt3gg&s"
+                  src={logo}
                   alt="شاورما شيش"
-                  className="w-full h-full object-cover"
+                  className="w-10px"
                 />
               </div>
               <div className="min-w-0 flex-1">

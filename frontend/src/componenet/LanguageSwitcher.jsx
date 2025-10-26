@@ -14,7 +14,7 @@ function LanguageSwitcher() {
       document.documentElement.style.fontFamily = "'STC', sans-serif";
     } else {
       document.documentElement.style.fontFamily =
-        "'Baloo Tammudu 2', sans-serif";
+        "'Baloo Tammudu 2'";
     }
   }, [i18n.language]);
 
