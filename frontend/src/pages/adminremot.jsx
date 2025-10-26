@@ -433,7 +433,6 @@ export default function AdminProductPanel() {
                     <Select
                       onValueChange={(value) => {
                         const selectedCategory = CATEGORIES.find(
-                          console.log(value, cat),
 
                           (cat) => cat.en === value
                         );
