@@ -62,6 +62,6 @@ export const ADMIN_LINKS = [
 
 export const PUBLIC_LINKS = [
   { label: "home" },
-  { label: "about_us" },
+  { label: "our_story" },
   { label: "contact_us" },
 ];
