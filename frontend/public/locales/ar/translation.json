@@ -28,7 +28,6 @@
   "login": "تسجيل الدخول",
   "dashboard": "لوحة التحكم",
   "orders": "الطلبات",
-  "products": "المنتجات",
   "control_panel": "لوحة الإدارة",
   "resturant_name": "شاورما شيش",
   "best_in_town": "أفضل شاورما في المدينة",
@@ -313,8 +312,11 @@
   "resturant_tagline": " يلا شيش",
   "fresh_meals": "وجبات طازجة يومياً",
   "fast_delivery": "خدمة توصيل سريعة",
-
   "products_and_shopping": "المنتجات والتسوق",
   "all_rights_reserved": "©شاورما شيش  2025–2026 | جميع الحقوق محفوظة.",
-  "choose_category": "اختر الفئة"
+  "choose_category": "اختر الفئة",
+  "products": "المنتجات",
+  "statistics": "الإحصائيات",
+  "users_management": "إدارة المستخدمين",
+  "images_upload": "رفع الصور"
 }
