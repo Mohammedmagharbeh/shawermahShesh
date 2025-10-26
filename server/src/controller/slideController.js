@@ -1,4 +1,5 @@
 const Slide = require("../models/Slide"); // تأكد من المسار
+const { default: cloudinary } = require("../config/cloudinary");
 
 // إحضار كل السلايدات
 const getSlides = async (req, res) => {
@@ -17,7 +18,14 @@ const createSlide = async (req, res) => {
   try {
     const { image, title, subtitle, relatedTo } = req.body;
 
-    const newSlide = new Slide({ image, title, subtitle, relatedTo });
+    const uploadResponse = await cloudinary.uploader.upload(image);
+
+    const newSlide = new Slide({
+      image: uploadResponse.secure_url,
+      title,
+      subtitle,
+      relatedTo,
+    });
     await newSlide.save();
     res.status(201).json(newSlide);
   } catch (error) {
@@ -28,7 +36,13 @@ const createSlide = async (req, res) => {
 // تعديل سلايد
 const updateSlide = async (req, res) => {
   try {
-    const updated = await Slide.findByIdAndUpdate(req.params.id, req.body, {
+    const { image, title, subtitle, relatedTo } = req.body;
+    const body = { title, subtitle, relatedTo };
+    if (image) {
+      const uploadResponse = await cloudinary.uploader.upload(image);
+      body.image = uploadResponse.secure_url;
+    }
+    const updated = await Slide.findByIdAndUpdate(req.params.id, body, {
       new: true,
     });
     res.json(updated);
