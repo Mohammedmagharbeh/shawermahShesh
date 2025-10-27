@@ -1,18 +1,57 @@
-import { useCart } from "@/contexts/CartContext";
-import product_placeholder from "../../assets/product_placeholder.jpeg";
-import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
+import productPlaceholderImg from "../../assets/product_placeholder.jpeg";
+import { useTranslation } from "react-i18next";
 
-function CartCard({ product }) {
-  const { updateQuantity, removeFromCart } = useCart();
-  const { t } = useTranslation();
+function CartCard({ product, updateQuantity, removeFromCart }) {
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const { t } = useTranslation();
 
-  const unitPrice =
-    product.productId.discount === 0
-      ? product.productId.price
-      : product.productId.price -
-        (product.productId.discount * product.productId.price) / 100;
+  const calculateSubtotal = () => {
+    // Determine base price
+    let basePrice = product.productId.basePrice;
+
+    // Case 1: has protein & type choices
+    if (
+      product.productId.hasProteinChoices &&
+      product.productId.hasTypeChoices
+    ) {
+      const protein = product.selectedProtein;
+      const type = product.selectedType;
+      if (
+        protein &&
+        type &&
+        product.productId.prices[protein] &&
+        product.productId.prices[protein][type] !== undefined
+      ) {
+        basePrice = product.productId.prices[protein][type];
+      }
+    }
+
+    // Case 2: has only type choices
+    else if (product.productId.hasTypeChoices) {
+      const type = product.selectedType;
+      if (type && product.productId.prices[type] !== undefined) {
+        basePrice = product.productId.prices[type];
+      }
+    }
+
+    // --- Calculate additions total ---
+    const additionsTotal =
+      product.additions?.reduce(
+        (sum, addition) => sum + (addition.price || 0),
+        0
+      ) || 0;
+
+    // --- Apply discount to base price only ---
+    const discount = product.productId.discount || 0;
+    const discountedPrice =
+      discount === 0 ? basePrice : basePrice - (discount * basePrice) / 100;
+
+    // --- Final unit price ---
+    return discountedPrice + additionsTotal;
+  };
+
+  const newTotal = calculateSubtotal();
 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
@@ -24,7 +63,9 @@ function CartCard({ product }) {
             onClick={() =>
               removeFromCart(
                 product.productId._id,
-                product.additions.map((a) => a._id)
+                product.additions.map((a) => a._id),
+                product.selectedProtein,
+                product.selectedType
               )
             }
             aria-label="Remove item"
@@ -39,7 +80,7 @@ function CartCard({ product }) {
           </button>
           <div className="size-16 rounded-lg overflow-hidden bg-gray-100">
             <img
-              src={product?.images?.[0] || product_placeholder}
+              src={product.productId.image || productPlaceholderImg}
               alt={product.productId.name[selectedLanguage]}
               className="w-full h-full object-cover"
             />
@@ -48,10 +89,19 @@ function CartCard({ product }) {
             <h3 className="font-semibold text-gray-800 text-lg">
               {product?.productId?.name[selectedLanguage] ?? "Product Name"}
             </h3>
-            <Badge>{product.isSpicy ? "حار" : "عادي"}</Badge>
+
+            <div className="grid w-full gap-1 text-white">
+              <Badge variant="secondary">
+                {product.isSpicy ? "حار" : "عادي"}
+              </Badge>
+
+              <Badge variant="secondary">{t(product.selectedType)}</Badge>
+              <Badge variant="secondary">{t(product.selectedProtein)}</Badge>
+            </div>
+
             {product.additions && product.additions.length > 0 && (
-              <div className="flex gap-1">
-                {t("additions")}:
+              <div className="flex gap-1 flex-wrap items-center">
+                <span className="text-sm text-gray-600">{t("additions")}:</span>
                 {product.additions.map((addition) => (
                   <Badge key={addition._id} className="p-1">
                     {addition.name[selectedLanguage]}
@@ -72,15 +122,16 @@ function CartCard({ product }) {
           <span className="lg:hidden font-medium text-gray-600">
             {t("price")}:
           </span>
-          <span className="text-xl font-bold text-red-600">
-            {product.productId.discount === 0
-              ? (product?.productId?.price).toFixed(2)
-              : ((
-                  product.productId.price -
-                  (product.productId.discount * product.productId.price) / 100
-                ).toFixed(2) ?? "Price Unavailable")}
-            JOD
-          </span>
+          <div className="flex flex-col items-end lg:items-center">
+            {product.productId.discount > 0 && (
+              <span className="text-sm text-gray-400 line-through">
+                {basePrice.toFixed(2)} JOD
+              </span>
+            )}
+            <span className="text-xl font-bold text-red-600">
+              {newTotal.toFixed(2)} JOD
+            </span>
+          </div>
         </div>
 
         {/* Quantity */}
@@ -98,6 +149,8 @@ function CartCard({ product }) {
                   additions: product.additions.map((a) => a._id),
                   isSpicy: product.isSpicy,
                   notes: product.notes,
+                  selectedProtein: product.selectedProtein,
+                  selectedType: product.selectedType,
                 })
               }
               className="w-20 px-3 py-2 border-2 border-red-200 rounded-lg text-center font-semibold focus:border-red-500 focus:outline-none transition-colors"
@@ -111,9 +164,8 @@ function CartCard({ product }) {
           <span className="lg:hidden font-medium text-gray-600">
             {t("total")}:
           </span>
-
           <span className="text-xl font-bold text-red-700">
-            {(unitPrice * product.quantity).toFixed(2)} JOD
+            {(newTotal * product.quantity).toFixed(2)} JOD
           </span>
         </div>
       </div>

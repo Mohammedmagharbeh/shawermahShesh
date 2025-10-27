@@ -20,9 +20,7 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     const fetchCart = async () => {
-      if (!user?._id) {
-        return;
-      }
+      if (!user?._id) return;
       setLoading(true);
       try {
         const res = await fetch(
@@ -48,26 +46,38 @@ export const CartProvider = ({ children }) => {
   // Calculate total whenever cart changes
   useEffect(() => {
     const newTotal = cart.products?.reduce((acc, item) => {
-      let basePrice = item.productId?.price || 0;
-      if (item.productId?.discount)
-        basePrice = basePrice - (basePrice * item.productId.discount) / 100;
-      const quantity = item.quantity || 0;
+      // Determine base price using protein/type selection
+      let basePrice = item.productId?.basePrice || 0;
 
-      // 🧀 حساب مجموع أسعار الإضافات
+      if (item.selectedProtein && item.selectedType) {
+        basePrice =
+          item.productId?.prices?.[item.selectedProtein]?.[item.selectedType] ||
+          basePrice;
+      }
+
+      // Apply discount if any
+      if (item.productId?.discount) {
+        basePrice = basePrice - (basePrice * item.productId.discount) / 100;
+      }
+
       const additionsPrice =
         item.additions?.reduce((sum, add) => sum + (add.price || 0), 0) || 0;
 
-      // 🧮 جمع السعر الكلي للمنتج مع الإضافات
-      const itemTotal = (basePrice + additionsPrice) * quantity;
-
-      return acc + itemTotal;
+      return acc + (basePrice + additionsPrice) * (item.quantity || 0);
     }, 0);
 
     setTotal(newTotal);
   }, [cart]);
 
   // Add product to cart
-  const addToCart = async (productId, quantity, isSpicy, additions, notes) => {
+  const addToCart = async (
+    productId,
+    quantity,
+    isSpicy,
+    additions,
+    notes,
+    { selectedProtein, selectedType } = {} // new selections
+  ) => {
     if (!user._id) {
       toast.error(t("please_login_to_add_items"));
       return;
@@ -84,6 +94,8 @@ export const CartProvider = ({ children }) => {
             isSpicy: isSpicy || false,
             additions: additions || [],
             notes: notes || "",
+            selectedProtein: selectedProtein || null,
+            selectedType: selectedType || null,
           }),
         }
       );
@@ -96,10 +108,10 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Update quantity
+  // Update quantity or selections
   const updateQuantity = async (
     productId,
-    { quantity, additions, isSpicy, notes }
+    { quantity, additions, isSpicy, notes, selectedProtein, selectedType }
   ) => {
     try {
       const res = await fetch(
@@ -113,6 +125,8 @@ export const CartProvider = ({ children }) => {
             additions,
             isSpicy,
             notes,
+            selectedProtein: selectedProtein || null,
+            selectedType: selectedType || null,
           }),
         }
       );
@@ -125,7 +139,12 @@ export const CartProvider = ({ children }) => {
   };
 
   // Remove product
-  const removeFromCart = async (productId, additions) => {
+  const removeFromCart = async (
+    productId,
+    additions,
+    selectedProtein,
+    selectedType
+  ) => {
     try {
       const user = JSON.parse(sessionStorage.getItem("user"));
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}/cart/remove`, {
@@ -135,6 +154,8 @@ export const CartProvider = ({ children }) => {
           userId: user._id,
           productId,
           additions: additions || [],
+          selectedProtein: selectedProtein || null,
+          selectedType: selectedType || null,
         }),
       });
       if (!res.ok) throw new Error("Failed to remove item");
@@ -153,9 +174,7 @@ export const CartProvider = ({ children }) => {
       const user = JSON.parse(sessionStorage.getItem("user"));
       const res = await fetch(
         `${import.meta.env.VITE_BASE_URL}/cart/clear/${user._id}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE" }
       );
       if (!res.ok) throw new Error("Failed to clear cart");
       const data = await res.json();

@@ -163,6 +163,7 @@ exports.createOrder = async (req, res) => {
       userDetails,
     } = req.body;
 
+    // 🛑 Basic validation
     if (
       !userId ||
       !products?.length ||
@@ -186,25 +187,25 @@ exports.createOrder = async (req, res) => {
 
     // ✅ Validate shipping address
     const location = await locationsModel.findById(shippingAddress);
-    if (!location) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid shipping address" });
-    }
+    if (!location)
+      return res.status(400).json({
+        success: false,
+        message: "Invalid shipping address",
+      });
 
-    // ✅ Extract unique product IDs from cart/order
+    // ✅ Get unique product IDs
     const productIds = products.map((p) =>
       typeof p.productId === "object" ? p.productId._id : p.productId
     );
     const uniqueProductIds = [...new Set(productIds)];
 
-    // ✅ Fetch products from DB
+    // ✅ Fetch from DB
     const dbProducts = await productsModel.find({
       _id: { $in: uniqueProductIds },
     });
     const dbProductIds = dbProducts.map((p) => p._id.toString());
 
-    // ✅ Check for missing products
+    // ✅ Check missing
     const missingProducts = uniqueProductIds.filter(
       (pid) => !dbProductIds.includes(pid)
     );
@@ -215,7 +216,7 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // ✅ Enrich each product item (handle duplicates with different additions/notes/spicy)
+    // ✅ Enrich products
     const enrichedProducts = await Promise.all(
       products.map(async (p) => {
         const productId =
@@ -224,6 +225,7 @@ exports.createOrder = async (req, res) => {
           (dp) => dp._id.toString() === productId.toString()
         );
 
+        // ✅ Fetch additions
         const dbAdditions = await additionsModel.find({
           _id: { $in: p.additions || [] },
         });
@@ -233,20 +235,47 @@ exports.createOrder = async (req, res) => {
           price: a.price,
         }));
 
+        // ✅ Determine price depending on type/protein
+        let basePrice = matchedProduct.basePrice;
+
+        if (matchedProduct.hasTypeChoices || matchedProduct.hasProteinChoices) {
+          const protein = p.selectedProtein || "chicken";
+          const type = p.selectedType || "sandwich";
+
+          // Use nested prices if available
+          const variationPrice =
+            matchedProduct.prices?.[protein]?.[type] ||
+            matchedProduct.prices?.[type] ||
+            matchedProduct.basePrice;
+
+          basePrice = variationPrice;
+        }
+
+        // ✅ Apply discount (if any)
+        const discountedPrice =
+          matchedProduct.discount && matchedProduct.discount > 0
+            ? basePrice - (matchedProduct.discount * basePrice) / 100
+            : basePrice;
+
+        // ✅ Final product price (without additions yet)
+        const priceAtPurchase = discountedPrice;
+
         return {
           productId,
           quantity: p.quantity,
           additions,
-          priceAtPurchase: matchedProduct.price,
+          priceAtPurchase,
           isSpicy: p.isSpicy || false,
           notes: p.notes || "",
           orderType,
           userDetails,
+          selectedProtein: p.selectedProtein || null,
+          selectedType: p.selectedType || null,
         };
       })
     );
 
-    // ✅ Calculate total (products + additions + delivery)
+    // ✅ Calculate total
     const productsTotal = enrichedProducts.reduce((sum, p) => {
       const additionsSum = p.additions.reduce(
         (aSum, add) => aSum + add.price,
@@ -257,7 +286,7 @@ exports.createOrder = async (req, res) => {
 
     const totalPrice = productsTotal + location.deliveryCost;
 
-    // ✅ Create the order
+    // ✅ Create order
     const newOrder = await Order.create({
       userId,
       products: enrichedProducts,
@@ -283,7 +312,7 @@ exports.createOrder = async (req, res) => {
       { path: "shippingAddress" },
     ]);
 
-    // ✅ Notify admins (if socket.io enabled)
+    // ✅ Notify admins if using socket.io
     const io = req.app.get("io");
     if (io) io.emit("newOrder", populatedOrder);
 

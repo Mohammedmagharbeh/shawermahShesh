@@ -6,7 +6,15 @@ const userModel = require("../models/user");
 exports.addToCart = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { productId, quantity, additions = [], isSpicy, notes } = req.body;
+    const {
+      productId,
+      quantity,
+      additions = [],
+      isSpicy,
+      notes,
+      selectedProtein,
+      selectedType,
+    } = req.body;
 
     if (!productId || !quantity || isNaN(quantity) || quantity <= 0) {
       return res.status(400).json({ message: "Invalid productId or quantity" });
@@ -33,7 +41,16 @@ exports.addToCart = async (req, res) => {
       const sameAdditions =
         JSON.stringify(normalizeIds(item.additions || [])) ===
         JSON.stringify(normalizeIds(additions || []));
-      return sameProduct && sameAdditions && sameSpicy && sameNotes;
+      const sameType = item.selectedType === selectedType;
+      const sameProtein = item.selectedProtein === selectedProtein;
+      return (
+        sameProduct &&
+        sameAdditions &&
+        sameSpicy &&
+        sameNotes &&
+        sameType &&
+        sameProtein
+      );
     });
 
     if (existingProductIndex > -1) {
@@ -47,6 +64,8 @@ exports.addToCart = async (req, res) => {
         additions,
         isSpicy,
         notes,
+        selectedProtein,
+        selectedType,
       });
     }
 
@@ -71,7 +90,15 @@ exports.addToCart = async (req, res) => {
 // ✅ Update Cart Item Quantity
 exports.updateCart = async (req, res) => {
   const cartId = req.params.id;
-  const { productId, additions = [], isSpicy, notes, quantity } = req.body;
+  const {
+    productId,
+    additions = [],
+    isSpicy,
+    notes,
+    quantity,
+    selectedProtein,
+    selectedType,
+  } = req.body;
 
   try {
     if (!productId || quantity == null || isNaN(quantity) || quantity <= 0) {
@@ -92,8 +119,16 @@ exports.updateCart = async (req, res) => {
       const sameAdditions =
         JSON.stringify(normalizeIds(p.additions || [])) ===
         JSON.stringify(normalizeIds(additions || []));
-
-      return sameProduct && sameAdditions && sameSpicy && sameNotes;
+      const sameType = p.selectedType === selectedType;
+      const sameProtein = p.selectedProtein === selectedProtein;
+      return (
+        sameProduct &&
+        sameAdditions &&
+        sameSpicy &&
+        sameNotes &&
+        sameType &&
+        sameProtein
+      );
     });
 
     if (productIndex === -1)
@@ -121,7 +156,8 @@ exports.updateCart = async (req, res) => {
 
 // ✅ Remove Specific Item from Cart
 exports.removeFromCart = async (req, res) => {
-  const { userId, productId, additions } = req.body; // include additions
+  const { userId, productId, additions, selectedProtein, selectedType } =
+    req.body; // include additions
 
   try {
     if (!userId || !productId) {
@@ -137,6 +173,8 @@ exports.removeFromCart = async (req, res) => {
     const productIndex = userCart.products.findIndex((p) => {
       const sameProduct = p.productId.toString() === productId;
 
+      console.log(p);
+
       // Compare additions as sets (to ensure same selections)
       const sameAdditions =
         (!additions && (!p.additions || p.additions.length === 0)) ||
@@ -146,8 +184,10 @@ exports.removeFromCart = async (req, res) => {
           additions.every((a) =>
             p.additions.map(String).includes(a.toString())
           ));
+      const sameType = p.selectedType === selectedType;
+      const sameProtein = p.selectedProtein === selectedProtein;
 
-      return sameProduct && sameAdditions;
+      return sameProduct && sameAdditions && sameType && sameProtein;
     });
 
     if (productIndex === -1) {

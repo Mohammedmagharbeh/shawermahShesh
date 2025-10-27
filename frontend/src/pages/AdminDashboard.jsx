@@ -504,7 +504,7 @@ function AdminDashboard() {
                                 ] || ""}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                {t("quantity")}:{" "}
+                                {t("quantity")}:
                                 <span className="font-medium">
                                   {item.quantity || 0}
                                 </span>
@@ -520,6 +520,14 @@ function AdminDashboard() {
                                   ))}
                                 </div>
                               )}
+                              <div className="flex gap-1">
+                                {item.selectedType && (
+                                  <Badge>{t(item.selectedType)}</Badge>
+                                )}
+                                {item.selectedProtein && (
+                                  <Badge>{t(item.selectedProtein)}</Badge>
+                                )}
+                              </div>
                               {item.notes && (
                                 <p className="text-sm text-gray-600 italic">
                                   {t("notes")}: {item.notes}

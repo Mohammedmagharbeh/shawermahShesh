@@ -34,14 +34,36 @@ export default function AdminProductPanel() {
   const [formData, setFormData] = useState({
     arName: "",
     enName: "",
-    price: "",
+    basePrice: "",
     discount: "",
     arDescription: "",
     enDescription: "",
     image: "",
     category: "",
     isSpicy: false,
+
+    hasTypeChoices: false, // sandwich vs meal
+    hasProteinChoices: false, // chicken vs meat
+
+    // flexible structure — strings for inputs (convert to Number on submit)
+    // note: these fields may be unused depending on toggles
+    prices: {
+      // single-type prices (when hasProteinChoices === false)
+      sandwich: "",
+      meal: "",
+
+      // single-protein prices (when hasTypeChoices === false)
+      chicken: "",
+      meat: "",
+
+      // matrix (when both true)
+      chicken_sandwich: "",
+      chicken_meal: "",
+      meat_sandwich: "",
+      meat_meal: "",
+    },
   });
+
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState(["all", ...CATEGORIES]);
@@ -97,50 +119,133 @@ export default function AdminProductPanel() {
 
   // دوال المنتجات
   const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setFormData({ ...formData, [id]: value });
+    const { id, value, type, checked } = e.target;
+
+    // checkbox handled separately
+    if (type === "checkbox") {
+      setFormData((prev) => ({ ...prev, [id]: checked }));
+      return;
+    }
+
+    // price nested keys like "prices.sandwich" or "prices.chicken_meal"
+    if (id.startsWith("prices.")) {
+      const key = id.replace(/^prices\./, "");
+      setFormData((prev) => ({
+        ...prev,
+        prices: {
+          ...prev.prices,
+          [key]: value,
+        },
+      }));
+      return;
+    }
+
+    // normal fields
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const buildPayload = (formData) => {
+        const payload = {
+          name: { ar: formData.arName, en: formData.enName },
+          description: {
+            ar: formData.arDescription,
+            en: formData.enDescription,
+          },
+          image: formData.image,
+          category: formData.category,
+          isSpicy: !!formData.isSpicy,
+          hasTypeChoices: !!formData.hasTypeChoices,
+          hasProteinChoices: !!formData.hasProteinChoices,
+          discount: formData.discount ? Number(formData.discount) : 0,
+          basePrice: Number(formData.basePrice || formData.price || 0),
+          prices: {},
+        };
+
+        // Both type & protein
+        if (formData.hasTypeChoices && formData.hasProteinChoices) {
+          payload.prices = {
+            chicken: {
+              sandwich: Number(
+                formData.prices.chicken_sandwich || payload.basePrice
+              ),
+              meal: Number(formData.prices.chicken_meal || payload.basePrice),
+            },
+            meat: {
+              sandwich: Number(
+                formData.prices.meat_sandwich || payload.basePrice
+              ),
+              meal: Number(formData.prices.meat_meal || payload.basePrice),
+            },
+          };
+        }
+        // Only type (sandwich/meal)
+        else if (formData.hasTypeChoices) {
+          payload.prices = {
+            sandwich: Number(formData.prices.sandwich || payload.basePrice),
+            meal: Number(formData.prices.meal || payload.basePrice),
+          };
+        }
+        // Only protein (chicken/meat)
+        else if (formData.hasProteinChoices) {
+          payload.prices = {
+            chicken: Number(formData.prices.chicken || payload.basePrice),
+            meat: Number(formData.prices.meat || payload.basePrice),
+          };
+        }
+
+        return payload;
+      };
+
+      const payload = buildPayload(formData);
+
       if (editingId) {
+        // update
         const res = await axios.put(
           `${import.meta.env.VITE_BASE_URL}/admin/updatefood/${editingId}`,
-          {
-            ...formData,
-            price: Number(formData.price),
-            discount: formData.discount ? Number(formData.discount) : 0,
-          }
+          payload
         );
-        setProducts(products.map((p) => (p._id === editingId ? res.data : p)));
+        setProducts((prev) =>
+          prev.map((p) => (p._id === editingId ? res.data : p))
+        );
         setEditingId(null);
       } else {
+        // add new
         const res = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/admin/postfood`,
-          {
-            ...formData,
-            name: { ar: formData.arName, en: formData.enName },
-            arDescription: formData.arDescription,
-            enDescription: formData.enDescription,
-            price: Number(formData.price),
-            discount: formData.discount ? Number(formData.discount) : 0,
-          }
+          payload
         );
-        setProducts([res.data, ...products]);
+        setProducts((prev) => [res.data, ...prev]);
       }
 
+      // reset form
       setFormData({
         arName: "",
         enName: "",
-        price: "",
+        basePrice: "",
         discount: "",
         arDescription: "",
         enDescription: "",
         image: "",
         category: "",
+        isSpicy: false,
+        hasTypeChoices: false,
+        hasProteinChoices: false,
+        prices: {
+          sandwich: "",
+          meal: "",
+          chicken: "",
+          meat: "",
+          chicken_sandwich: "",
+          chicken_meal: "",
+          meat_sandwich: "",
+          meat_meal: "",
+        },
       });
 
+      // refresh products
       const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`);
       const allProducts = res.data.data || [];
       const uniqueCategories = [
@@ -148,7 +253,7 @@ export default function AdminProductPanel() {
           allProducts.map((p) => p.category[selectedLanguage] || p.category)
         ),
       ];
-      // setCategories(["all", ...uniqueCategories]);
+
       toast.success(editingId ? t("product_updated") : t("product_added"));
     } catch (error) {
       console.error("خطأ في الإرسال:", error.response?.data || error.message);
@@ -172,19 +277,35 @@ export default function AdminProductPanel() {
 
   const handleEdit = (product) => {
     setFormData({
-      arName: product.name.ar,
-      enName: product.name.en,
-      price: product.price.toString(),
+      arName: product.name.ar || "",
+      enName: product.name.en || "",
+      basePrice:
+        product.basePrice?.toString() || product.price?.toString() || "",
       discount: product.discount?.toString() || "",
-      arDescription: product.description.ar,
-      enDescription: product.description.en,
-      image: product.image,
-      category: product.category,
+      arDescription: product.description.ar || "",
+      enDescription: product.description.en || "",
+      image: product.image || "",
+      category: product.category || "",
+      isSpicy: !!product.isSpicy,
+
+      hasTypeChoices: !!product.hasTypeChoices,
+      hasProteinChoices: !!product.hasProteinChoices,
+
+      prices: {
+        // fallback to empty strings
+        sandwich: product.prices?.sandwich?.toString() || "",
+        meal: product.prices?.meal?.toString() || "",
+        chicken: product.prices?.chicken?.toString() || "",
+        meat: product.prices?.meat?.toString() || "",
+        chicken_sandwich: product.prices?.chicken?.sandwich?.toString() || "",
+        chicken_meal: product.prices?.chicken?.meal?.toString() || "",
+        meat_sandwich: product.prices?.meat?.sandwich?.toString() || "",
+        meat_meal: product.prices?.meat?.meal?.toString() || "",
+      },
     });
+
     setEditingId(product._id);
   };
-
-  console.log(formData);
 
   const handleDelete = async (id) => {
     toast((toastInstance) => (
@@ -395,20 +516,174 @@ export default function AdminProductPanel() {
                     />
                   </div>
 
+                  {/* Base Price (always visible) */}
                   <div className="flex flex-col">
-                    <Label htmlFor="price" className="text-sm">
-                      {t("price_jod")}
+                    <Label htmlFor="basePrice" className="text-sm">
+                      {t("base_price")}
                     </Label>
                     <Input
-                      id="price"
+                      id="basePrice"
                       type="number"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      required
                       min="0"
                       step="0.01"
+                      value={formData.basePrice}
+                      onChange={handleInputChange}
                       className="mt-1.5"
+                      required
                     />
+                  </div>
+
+                  {/* Toggles */}
+                  <div className="flex gap-4 items-center mt-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="hasTypeChoices"
+                        type="checkbox"
+                        checked={!!formData.hasTypeChoices}
+                        onChange={handleInputChange}
+                      />
+                      <Label className="text-sm">{t("has_type_choices")}</Label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="hasProteinChoices"
+                        type="checkbox"
+                        checked={!!formData.hasProteinChoices}
+                        onChange={handleInputChange}
+                      />
+                      <Label className="text-sm">
+                        {t("has_protein_choices")}
+                      </Label>
+                    </div>
+                  </div>
+
+                  {/* Conditional Prices */}
+                  <div className="mt-3">
+                    {/* Case A: both toggles true => show 2x2 matrix */}
+                    {formData.hasTypeChoices && formData.hasProteinChoices && (
+                      <div className="space-y-3 border p-3 rounded-md">
+                        <p className="font-semibold text-sm">
+                          {t("variation_prices_matrix")}
+                        </p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <Label>{t("chicken_sandwich")}</Label>
+                            <Input
+                              id="prices.chicken_sandwich"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.prices.chicken_sandwich}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div>
+                            <Label>{t("chicken_meal")}</Label>
+                            <Input
+                              id="prices.chicken_meal"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.prices.chicken_meal}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div>
+                            <Label>{t("meat_sandwich")}</Label>
+                            <Input
+                              id="prices.meat_sandwich"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.prices.meat_sandwich}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div>
+                            <Label>{t("meat_meal")}</Label>
+                            <Input
+                              id="prices.meat_meal"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.prices.meat_meal}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Case B: only hasTypeChoices => sandwich & meal */}
+                    {formData.hasTypeChoices && !formData.hasProteinChoices && (
+                      <div className="space-y-2 border p-3 rounded-md">
+                        <p className="font-semibold text-sm">
+                          {t("type_prices")}
+                        </p>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <Label>{t("sandwich_price")}</Label>
+                            <Input
+                              id="prices.sandwich"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.prices.sandwich}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <Label>{t("meal_price")}</Label>
+                            <Input
+                              id="prices.meal"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.prices.meal}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Case C: only hasProteinChoices => chicken & meat single prices */}
+                    {!formData.hasTypeChoices && formData.hasProteinChoices && (
+                      <div className="space-y-2 border p-3 rounded-md">
+                        <p className="font-semibold text-sm">
+                          {t("protein_prices")}
+                        </p>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <Label>{t("chicken_price")}</Label>
+                            <Input
+                              id="prices.chicken"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.prices.chicken}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <Label>{t("meat_price")}</Label>
+                            <Input
+                              id="prices.meat"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.prices.meat}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col">
@@ -736,7 +1011,7 @@ export default function AdminProductPanel() {
                     <div className="relative h-40 sm:h-48 bg-muted">
                       <img
                         src={product.image || product_placeholder}
-                        alt={product.name[selectedLanguage]}
+                        alt={product.name?.[selectedLanguage]}
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute top-2 sm:top-3 left-2 sm:left-3">

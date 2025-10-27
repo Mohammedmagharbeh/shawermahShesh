@@ -20,6 +20,8 @@ const cartSchema = new moongoose.Schema(
         ],
         isSpicy: { type: Boolean, default: false },
         notes: { type: String, default: "" },
+        selectedProtein: { type: String },
+        selectedType: { type: String },
       },
     ],
   },

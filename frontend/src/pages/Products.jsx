@@ -115,17 +115,18 @@ export default function Products() {
                                   {product.discountedPrice
                                     ? product.discountedPrice.toFixed(2)
                                     : (
-                                        product.price -
-                                        (product.price * product.discount) / 100
+                                        product.basePrice -
+                                        (product.basePrice * product.discount) /
+                                          100
                                       ).toFixed(2)}
                                 </p>
                                 <p className="text-gray-400 line-through text-sm">
-                                  {product.price}
+                                  {product.basePrice}
                                 </p>
                               </div>
                             ) : (
                               <p className="text-xl font-bold text-red-600">
-                                JOD {product.price}
+                                JOD {product.basePrice?.toFixed(2)}
                               </p>
                             )}
                           </div>

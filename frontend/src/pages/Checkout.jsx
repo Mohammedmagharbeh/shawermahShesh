@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+
 function Checkout() {
   const { cart, total, clearCart } = useCart();
   const { createOrder } = useOrder();
@@ -127,6 +128,8 @@ function Checkout() {
             isSpicy: p.isSpicy || false,
             additions: p.additions || [],
             notes: p.notes || "",
+            selectedProtein: p.selectedProtein, // meat or chicken
+            selectedType: p.selectedType, // meal or sandwich
           })),
           userId: user?._id,
           shippingAddress: selectedArea._id,
@@ -142,6 +145,51 @@ function Checkout() {
         toast.error(t("checkout_failed"));
       }
     }
+  };
+
+  const calculateSubtotal = (product) => {
+    // Determine base price
+    let basePrice = product.productId.basePrice;
+
+    // Case 1: has protein & type choices
+    if (
+      product.productId.hasProteinChoices &&
+      product.productId.hasTypeChoices
+    ) {
+      const protein = product.selectedProtein;
+      const type = product.selectedType;
+      if (
+        protein &&
+        type &&
+        product.productId.prices[protein] &&
+        product.productId.prices[protein][type] !== undefined
+      ) {
+        basePrice = product.productId.prices[protein][type];
+      }
+    }
+
+    // Case 2: has only type choices
+    else if (product.productId.hasTypeChoices) {
+      const type = product.selectedType;
+      if (type && product.productId.prices[type] !== undefined) {
+        basePrice = product.productId.prices[type];
+      }
+    }
+
+    // --- Calculate additions total ---
+    const additionsTotal =
+      product.additions?.reduce(
+        (sum, addition) => sum + (addition.price || 0),
+        0
+      ) || 0;
+
+    // --- Apply discount to base price only ---
+    const discount = product.productId.discount || 0;
+    const discountedPrice =
+      discount === 0 ? basePrice : basePrice - (discount * basePrice) / 100;
+
+    // --- Final unit price ---
+    return discountedPrice + additionsTotal;
   };
 
   const totalWithDelivery =
@@ -321,11 +369,15 @@ function Checkout() {
                         {t("qty")}: {product.quantity}
                       </p>
 
-                      {product.isSpicy !== null && (
-                        <p className="text-sm text-gray-500">
-                          {product.isSpicy ? "حار" : "عادي"}
-                        </p>
-                      )}
+                      {/*order details*/}
+                      <div className="flex gap-1 mt-1">
+                        {product.isSpicy !== null && (
+                          <Badge>{product.isSpicy ? "حار" : "عادي"}</Badge>
+                        )}
+
+                        <Badge>{t(product.selectedType)}</Badge>
+                        <Badge>{t(product.selectedProtein)}</Badge>
+                      </div>
 
                       {/* 🧀 عرض الإضافات */}
                       {product.additions?.length > 0 && (
@@ -346,7 +398,7 @@ function Checkout() {
                     </div>
 
                     <span className="font-bold text-gray-900">
-                      {product.productId.price.toFixed(2)} JOD
+                      {calculateSubtotal(product)?.toFixed(2)} JOD
                     </span>
                   </div>
                 </div>

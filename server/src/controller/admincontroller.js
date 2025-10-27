@@ -6,25 +6,25 @@ const products = require("../models/products");
 exports.postEat = async (req, res) => {
   try {
     const {
-      arName,
-      enName,
-      price,
-      category, // only send English category from frontend
+      name,
+      description,
+      basePrice,
+      prices,
+      category,
       image,
-      arDescription,
-      enDescription,
       discount,
       isSpicy,
+      hasProteinChoices,
+      hasTypeChoices,
     } = req.body;
 
     // Validate required fields
     if (
-      !arName ||
-      !enName ||
-      !price ||
-      !category ||
-      !arDescription ||
-      !enDescription
+      !name?.ar ||
+      !name?.en ||
+      !description?.ar ||
+      !description?.en ||
+      !category
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -34,22 +34,32 @@ exports.postEat = async (req, res) => {
     if (!matchedCategory) {
       return res.status(400).json({ message: "Invalid category" });
     }
-    let uploadResponse = "";
-    if (image)
-      uploadResponse = (await cloudinary.uploader.upload(image)).secure_url;
+
+    // Upload image if provided
+    let imageUrl = "";
+    if (image) {
+      const uploadResponse = await cloudinary.uploader.upload(image);
+      imageUrl = uploadResponse.secure_url;
+    }
 
     // Create product
     const createdFood = await products.create({
-      name: { ar: arName, en: enName },
-      price,
+      name,
+      description,
+      basePrice: basePrice || 0,
+      prices: prices || {},
       discount: discount || 0,
-      image: uploadResponse,
-      category: matchedCategory.en, // save only the English version
-      description: { ar: arDescription, en: enDescription },
+      image: imageUrl,
+      category: matchedCategory.en,
       isSpicy: isSpicy || false,
+      hasProteinChoices: !!hasProteinChoices,
+      hasTypeChoices: !!hasTypeChoices,
     });
 
-    res.status(201).json(createdFood);
+    res.status(201).json({
+      message: "Product created successfully",
+      data: createdFood,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -61,24 +71,25 @@ exports.updatedfood = async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      arName,
-      enName,
-      arDescription,
-      enDescription,
-      price,
+      name,
+      description,
+      basePrice,
+      prices,
       discount,
       image,
       category,
       isSpicy,
+      hasTypeChoices,
+      hasProteinChoices,
     } = req.body;
 
     // Validate required fields
     if (
-      !arName ||
-      !enName ||
-      !arDescription ||
-      !enDescription ||
-      !price ||
+      !name.ar ||
+      !name.en ||
+      !description.ar ||
+      !description.en ||
+      !basePrice ||
       !category
     ) {
       return res
@@ -98,13 +109,16 @@ exports.updatedfood = async (req, res) => {
 
     // Prepare updated data
     const updatedData = {
-      name: { ar: arName, en: enName },
-      description: { ar: arDescription, en: enDescription },
-      price,
+      name,
+      description,
+      basePrice,
       discount: discount ?? 0,
       image: updateResponse,
       category: matchedCategory.en, // store only English version
       isSpicy: isSpicy ?? false,
+      hasProteinChoices,
+      hasTypeChoices,
+      prices,
     };
 
     // Update the product

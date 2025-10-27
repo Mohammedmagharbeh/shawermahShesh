@@ -26,15 +26,7 @@ export function ProductDialog({ id, triggerLabel }) {
 
   const buttonLabel = triggerLabel || t("View product");
 
-  const [product, setProduct] = useState({
-    _id: "",
-    name: "",
-    price: 0,
-    discount: 0,
-    image: "",
-    category: "",
-    description: "",
-  });
+  const [product, setProduct] = useState({});
   const [additions, setAdditions] = useState([]);
   const [selectedAdditions, setSelectedAdditions] = useState([]);
   const [spicy, setSpicy] = useState(null);
@@ -42,6 +34,10 @@ export function ProductDialog({ id, triggerLabel }) {
   const { addToCart } = useCart();
   const selectedLanguage = localStorage.getItem("i18nextLng");
   const [open, setOpen] = useState(false);
+
+  // new states for type/protein choices
+  const [selectedType, setSelectedType] = useState("sandwich");
+  const [selectedProtein, setSelectedProtein] = useState("chicken");
 
   useEffect(() => {
     if (!open) return;
@@ -65,8 +61,7 @@ export function ProductDialog({ id, triggerLabel }) {
   }, [id, open]);
 
   useEffect(() => {
-    if (!product?.category) return;
-    if (!open) return;
+    if (!product?.category || !open) return;
 
     const fetchAdditions = async () => {
       try {
@@ -89,11 +84,34 @@ export function ProductDialog({ id, triggerLabel }) {
     setQuantity((prev) => Math.max(1, prev + increment));
   };
 
-  const getFinalPrice = () => {
-    if (product.discount && product.discount > 0) {
-      return product.price - (product.price * product.discount) / 100;
+  // ✅ Determine the current price dynamically
+  const getCurrentPrice = () => {
+    // if both choices exist
+    if (product.hasProteinChoices && product.hasTypeChoices) {
+      return (
+        product.prices?.[selectedProtein]?.[selectedType] ||
+        product.basePrice ||
+        0
+      );
     }
-    return product.price;
+    // if only type choices
+    if (product.hasTypeChoices) {
+      return product.prices?.[selectedType] || product.basePrice || 0;
+    }
+    // if only protein choices
+    if (product.hasProteinChoices) {
+      return product.prices?.[selectedProtein] || product.basePrice || 0;
+    }
+    // otherwise just base price
+    return product.basePrice || 0;
+  };
+
+  const getFinalPrice = () => {
+    const price = getCurrentPrice();
+    if (product.discount && product.discount > 0) {
+      return price - (price * product.discount) / 100;
+    }
+    return price;
   };
 
   const handleAddToCart = () => {
@@ -106,8 +124,10 @@ export function ProductDialog({ id, triggerLabel }) {
       quantity,
       product.isSpicy ? spicy : false,
       selectedFullAdditions,
-      notes
+      notes,
+      { selectedProtein, selectedType } // 👈 store selections
     );
+
     toast.success(
       `${t("added_successfully")} ${quantity} ${t("of")} ${product.name[selectedLanguage]}`
     );
@@ -123,7 +143,7 @@ export function ProductDialog({ id, triggerLabel }) {
       <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {product.name[selectedLanguage] || t("product_details")}
+            {product.name?.[selectedLanguage] || t("product_details")}
           </DialogTitle>
           <DialogDescription>{product.category}</DialogDescription>
         </DialogHeader>
@@ -132,12 +152,12 @@ export function ProductDialog({ id, triggerLabel }) {
           <Loading />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 py-4">
-            {/* صورة المنتج */}
+            {/* Image */}
             <div className="relative">
               <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
                 <img
                   src={product.image || product_placeholder}
-                  alt={product.name[selectedLanguage]}
+                  alt={product.name?.[selectedLanguage]}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
               </div>
@@ -148,11 +168,11 @@ export function ProductDialog({ id, triggerLabel }) {
               )}
             </div>
 
-            {/* تفاصيل المنتج */}
+            {/* Product details */}
             <div className="flex flex-col space-y-6">
               <div>
                 <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                  {product.name[selectedLanguage]}
+                  {product.name?.[selectedLanguage]}
                 </h1>
 
                 {product.discount > 0 ? (
@@ -161,7 +181,7 @@ export function ProductDialog({ id, triggerLabel }) {
                       JOD {getFinalPrice().toFixed(2)}
                     </p>
                     <p className="text-xl text-gray-400 line-through">
-                      JOD {product.price.toFixed(2)}
+                      JOD {getCurrentPrice().toFixed(2)}
                     </p>
                     <Badge className="bg-green-500 text-white">
                       {t("discount")} {product.discount}%
@@ -169,17 +189,65 @@ export function ProductDialog({ id, triggerLabel }) {
                   </div>
                 ) : (
                   <p className="text-4xl font-bold text-red-600 mb-4">
-                    JOD {product.price.toFixed(2)}
+                    JOD {getCurrentPrice().toFixed(2)}
                   </p>
                 )}
               </div>
 
               <p className="text-gray-700 text-lg leading-relaxed">
-                {product.description[selectedLanguage]}
+                {product.description?.[selectedLanguage]}
               </p>
 
               <div className="space-y-4 mt-6">
-                {/* درجة الحارة */}
+                {/* Protein choice */}
+                {product.hasProteinChoices && (
+                  <div>
+                    <span className="text-lg font-medium text-gray-900 mb-2 block">
+                      {t("choose_protein")}
+                    </span>
+                    {["chicken", "meat"].map((option) => (
+                      <Label
+                        key={option}
+                        className="inline-flex gap-2 items-center mr-6"
+                      >
+                        <Input
+                          type="radio"
+                          name="protein"
+                          value={option}
+                          checked={selectedProtein === option}
+                          onChange={() => setSelectedProtein(option)}
+                        />
+                        <span>{t(option)}</span>
+                      </Label>
+                    ))}
+                  </div>
+                )}
+
+                {/* Type choice */}
+                {product.hasTypeChoices && (
+                  <div>
+                    <span className="text-lg font-medium text-gray-900 mb-2 block">
+                      {t("choose_type")}
+                    </span>
+                    {["sandwich", "meal"].map((option) => (
+                      <Label
+                        key={option}
+                        className="inline-flex gap-2 items-center mr-6"
+                      >
+                        <Input
+                          type="radio"
+                          name="type"
+                          value={option}
+                          checked={selectedType === option}
+                          onChange={() => setSelectedType(option)}
+                        />
+                        <span>{t(option)}</span>
+                      </Label>
+                    ))}
+                  </div>
+                )}
+
+                {/* Spicy level */}
                 {product.isSpicy && (
                   <div className="flex flex-col sm:flex-row items-center gap-4">
                     <span className="text-lg font-medium text-gray-900 mb-2">
@@ -207,36 +275,34 @@ export function ProductDialog({ id, triggerLabel }) {
                   </div>
                 )}
 
-                {/* الإضافات */}
-                <div>
-                  {additions?.map((addition) => (
-                    <div key={addition._id} className="flex items-center gap-2">
-                      <Input
-                        type="checkbox"
-                        id={addition._id}
-                        value={addition._id}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedAdditions((prev) => [
-                              ...prev,
-                              addition._id,
-                            ]);
-                          } else {
-                            setSelectedAdditions((prev) =>
-                              prev.filter((id) => id !== addition._id)
-                            );
-                          }
-                        }}
-                      />
-                      <Label htmlFor={addition._id} className="text-gray-700">
-                        {addition.name[selectedLanguage]} (JOD{" "}
-                        {addition.price.toFixed(2)})
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                {/* Additions */}
+                {additions?.map((addition) => (
+                  <div key={addition._id} className="flex items-center gap-2">
+                    <Input
+                      type="checkbox"
+                      id={addition._id}
+                      value={addition._id}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedAdditions((prev) => [
+                            ...prev,
+                            addition._id,
+                          ]);
+                        } else {
+                          setSelectedAdditions((prev) =>
+                            prev.filter((id) => id !== addition._id)
+                          );
+                        }
+                      }}
+                    />
+                    <Label htmlFor={addition._id} className="text-gray-700">
+                      {addition.name[selectedLanguage]} (JOD{" "}
+                      {addition.price.toFixed(2)})
+                    </Label>
+                  </div>
+                ))}
 
-                {/* ملاحظات */}
+                {/* Notes */}
                 <Label htmlFor="notes">{t("notes")}</Label>
                 <Textarea
                   id="notes"
@@ -244,6 +310,7 @@ export function ProductDialog({ id, triggerLabel }) {
                   onChange={(e) => setNotes(e.target.value)}
                 />
 
+                {/* Quantity & Add to cart */}
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                   <div className="flex items-center border-2 border-gray-200 rounded-lg">
                     <Button
@@ -269,7 +336,7 @@ export function ProductDialog({ id, triggerLabel }) {
 
                   <Button
                     onClick={handleAddToCart}
-                    className="flex-1 bg-red-600  text-white h-12 text-lg font-semibold"
+                    className="flex-1 bg-red-600 text-white h-12 text-lg font-semibold"
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
                     {t("add_to_cart")} JOD{" "}

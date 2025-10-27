@@ -313,5 +313,20 @@
   "choose_category": "Choose Category",
   "statistics": "Statistics",
   "users_management": "Users Management",
-  "images_upload": "Images Upload"
+  "images_upload": "Images Upload",
+  "variation_prices": "Variation Prices",
+  "chicken_meal": "Chicken Meal",
+  "chicken_sandwich": "Chicken Sandwich",
+  "meat_meal": "Meat Meal",
+  "meat_sandwich": "Meat Sandwich",
+  "meal_price": "Meal Price",
+  "sandwich_price": "Sandwich Price",
+  "type_prices": "Type Prices",
+  "variation_prices_matrix": "Variation Prices Matrix",
+  "meal": "Meal",
+  "meat": "Meat",
+  "chicken": "Chicken",
+  "sandwich": "Sandwich",
+  "choose_protein": "Choose the category",
+  "choose_type": "Choose Type"
 }
