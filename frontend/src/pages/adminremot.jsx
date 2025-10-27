@@ -742,14 +742,7 @@ export default function AdminProductPanel() {
                       id="isSpicy"
                       type="checkbox"
                       checked={formData.isSpicy || false}
-                      onChange={(e) =>
-                        handleInputChange({
-                          target: {
-                            id: "isSpicy",
-                            value: e.target.checked,
-                          },
-                        })
-                      }
+                      onChange={(e) => handleInputChange(e)}
                       className="mt-1.5 w-3"
                     />
                   </div>
