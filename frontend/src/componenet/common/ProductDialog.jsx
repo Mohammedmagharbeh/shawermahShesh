@@ -174,30 +174,32 @@ export function ProductDialog({ id, triggerLabel }) {
 
               <div className="space-y-4 mt-6">
                 {/* درجة الحارة */}
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <span className="text-lg font-medium text-gray-900 mb-2">
-                    {t("choose_spicy_level")}
-                  </span>
-                  <Label className="inline-flex gap-2 items-center">
-                    <Input
-                      type="radio"
-                      name="spicy"
-                      value="yes"
-                      onChange={() => setSpicy(true)}
-                    />
-                    <span>{t("spicy")}</span>
-                  </Label>
-                  <Label className="inline-flex gap-2 items-center ml-6">
-                    <Input
-                      type="radio"
-                      name="spicy"
-                      value="no"
-                      defaultChecked
-                      onChange={() => setSpicy(false)}
-                    />
-                    <span>{t("not_spicy")}</span>
-                  </Label>
-                </div>
+                {product.isSpicy && (
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <span className="text-lg font-medium text-gray-900 mb-2">
+                      {t("choose_spicy_level")}
+                    </span>
+                    <Label className="inline-flex gap-2 items-center">
+                      <Input
+                        type="radio"
+                        name="spicy"
+                        value="yes"
+                        onChange={() => setSpicy(true)}
+                      />
+                      <span>{t("spicy")}</span>
+                    </Label>
+                    <Label className="inline-flex gap-2 items-center ml-6">
+                      <Input
+                        type="radio"
+                        name="spicy"
+                        value="no"
+                        defaultChecked
+                        onChange={() => setSpicy(false)}
+                      />
+                      <span>{t("not_spicy")}</span>
+                    </Label>
+                  </div>
+                )}
 
                 {/* الإضافات */}
                 <div>

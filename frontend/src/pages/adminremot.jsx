@@ -40,6 +40,7 @@ export default function AdminProductPanel() {
     enDescription: "",
     image: "",
     category: "",
+    isSpicy: false,
   });
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -433,7 +434,6 @@ export default function AdminProductPanel() {
                     <Select
                       onValueChange={(value) => {
                         const selectedCategory = CATEGORIES.find(
-
                           (cat) => cat.en === value
                         );
                         setFormData({
@@ -458,6 +458,25 @@ export default function AdminProductPanel() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="flex flex-col">
+                    <Label htmlFor="category" className="text-sm">
+                      Has Spicy
+                    </Label>
+                    <Input
+                      id="isSpicy"
+                      type="checkbox"
+                      checked={formData.isSpicy || false}
+                      onChange={(e) =>
+                        handleInputChange({
+                          target: {
+                            id: "isSpicy",
+                            value: e.target.checked,
+                          },
+                        })
+                      }
+                      className="mt-1.5 w-3"
+                    />
                   </div>
 
                   <div className="flex flex-col">
