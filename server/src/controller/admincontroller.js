@@ -34,15 +34,16 @@ exports.postEat = async (req, res) => {
     if (!matchedCategory) {
       return res.status(400).json({ message: "Invalid category" });
     }
-
-    const uploadResponse = await cloudinary.uploader.upload(image);
+    let uploadResponse = "";
+    if (image)
+      uploadResponse = (await cloudinary.uploader.upload(image)).secure_url;
 
     // Create product
     const createdFood = await products.create({
       name: { ar: arName, en: enName },
       price,
       discount: discount || 0,
-      image: uploadResponse.secure_url,
+      image: uploadResponse,
       category: matchedCategory.en, // save only the English version
       description: { ar: arDescription, en: enDescription },
       isSpicy: isSpicy || false,
@@ -91,7 +92,9 @@ exports.updatedfood = async (req, res) => {
       return res.status(400).json({ message: "Invalid category" });
     }
 
-    const updateResponse = await cloudinary.uploader.upload(image);
+    let updateResponse = "";
+    if (image)
+      updateResponse = (await cloudinary.uploader.upload(image)).secure_url;
 
     // Prepare updated data
     const updatedData = {
@@ -99,7 +102,7 @@ exports.updatedfood = async (req, res) => {
       description: { ar: arDescription, en: enDescription },
       price,
       discount: discount ?? 0,
-      image: updateResponse.secure_url,
+      image: updateResponse,
       category: matchedCategory.en, // store only English version
       isSpicy: isSpicy ?? false,
     };
