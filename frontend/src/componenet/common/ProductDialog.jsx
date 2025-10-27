@@ -101,7 +101,13 @@ export function ProductDialog({ id, triggerLabel }) {
       selectedAdditions.includes(a._id)
     );
 
-    addToCart(product._id, quantity, spicy, selectedFullAdditions, notes);
+    addToCart(
+      product._id,
+      quantity,
+      product.isSpicy ? spicy : false,
+      selectedFullAdditions,
+      notes
+    );
     toast.success(
       `${t("added_successfully")} ${quantity} ${t("of")} ${product.name[selectedLanguage]}`
     );
