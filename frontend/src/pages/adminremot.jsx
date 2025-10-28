@@ -1017,10 +1017,12 @@ export default function AdminProductPanel() {
                     <CardContent className="p-3 sm:p-5">
                       <div className="flex justify-between items-start gap-2">
                         <h3 className="font-bold text-sm sm:text-base line-clamp-1">
-                          {product.name[selectedLanguage]}
+                          {product.name?.[selectedLanguage]}
                         </h3>
                         <span className="font-semibold text-primary text-sm sm:text-base whitespace-nowrap">
-                          {product.price} {t("jod")}
+                          {product.hasProteinChoices || product.hasTypeChoices
+                            ? "According To Your Choices"
+                            : `${product.basePrice} ${t("jod")}`}
                         </span>
                       </div>
                       {product.discount > 0 && (
@@ -1029,7 +1031,7 @@ export default function AdminProductPanel() {
                         </p>
                       )}
                       <p className="text-xs sm:text-sm text-muted-foreground mt-2 line-clamp-2">
-                        {product.description[selectedLanguage]}
+                        {product.description?.[selectedLanguage]}
                       </p>
                       {/* Action Buttons - تم إضافتها هنا */}
                       <div className="flex gap-2 mt-3 sm:mt-4">

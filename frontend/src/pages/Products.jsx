@@ -126,7 +126,10 @@ export default function Products() {
                               </div>
                             ) : (
                               <p className="text-xl font-bold text-red-600">
-                                JOD {product.basePrice?.toFixed(2)}
+                                {product.hasProteinChoices ||
+                                product.hasTypeChoices
+                                  ? "According To Your Choices"
+                                  : `${product.basePrice} ${t("jod")}`}
                               </p>
                             )}
                           </div>
