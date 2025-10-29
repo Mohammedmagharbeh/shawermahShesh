@@ -4,6 +4,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useUser } from "@/contexts/UserContext";
 import Loading from "@/componenet/common/Loading";
 import CartCard from "./CartCard";
+import { useTranslation } from "react-i18next";
 
 // Mock hooks - replace with actual imports
 
@@ -11,7 +12,7 @@ const Cart = () => {
   const { cart, total, loading, updateQuantity, removeFromCart } = useCart();
   const { user } = useUser();
 
-  const t = (key) => key; // Placeholder for translation
+  const { t } = useTranslation();
 
   if (!user || !user._id) {
     // toast.error(t("cart_login_required"));

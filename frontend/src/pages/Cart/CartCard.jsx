@@ -1,57 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import productPlaceholderImg from "../../assets/product_placeholder.jpeg";
 import { useTranslation } from "react-i18next";
+import { calculateSubtotal } from "@/lib/utils";
 
 function CartCard({ product, updateQuantity, removeFromCart }) {
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const { t } = useTranslation();
-
-  const calculateSubtotal = () => {
-    // Determine base price
-    let basePrice = product.productId.basePrice;
-
-    // Case 1: has protein & type choices
-    if (
-      product.productId.hasProteinChoices &&
-      product.productId.hasTypeChoices
-    ) {
-      const protein = product.selectedProtein;
-      const type = product.selectedType;
-      if (
-        protein &&
-        type &&
-        product.productId.prices[protein] &&
-        product.productId.prices[protein][type] !== undefined
-      ) {
-        basePrice = product.productId.prices[protein][type];
-      }
-    }
-
-    // Case 2: has only type choices
-    else if (product.productId.hasTypeChoices) {
-      const type = product.selectedType;
-      if (type && product.productId.prices[type] !== undefined) {
-        basePrice = product.productId.prices[type];
-      }
-    }
-
-    // --- Calculate additions total ---
-    const additionsTotal =
-      product.additions?.reduce(
-        (sum, addition) => sum + (addition.price || 0),
-        0
-      ) || 0;
-
-    // --- Apply discount to base price only ---
-    const discount = product.productId.discount || 0;
-    const discountedPrice =
-      discount === 0 ? basePrice : basePrice - (discount * basePrice) / 100;
-
-    // --- Final unit price ---
-    return discountedPrice + additionsTotal;
-  };
-
-  const newTotal = calculateSubtotal();
 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
@@ -129,7 +83,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
               </span>
             )}
             <span className="text-xl font-bold text-red-600">
-              {newTotal.toFixed(2)} JOD
+              {calculateSubtotal(product).toFixed(2)} JOD
             </span>
           </div>
         </div>
@@ -165,7 +119,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
             {t("total")}:
           </span>
           <span className="text-xl font-bold text-red-700">
-            {(newTotal * product.quantity).toFixed(2)} JOD
+            {(calculateSubtotal(product) * product.quantity).toFixed(2)} JOD
           </span>
         </div>
       </div>

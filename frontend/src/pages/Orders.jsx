@@ -15,6 +15,7 @@ import product_placeholder from "../assets/product_placeholder.jpeg";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useTranslation } from "react-i18next";
+import { calculateSubtotal } from "@/lib/utils";
 
 const statusColors = {
   processing: "bg-secondary text-secondary-foreground",
@@ -279,7 +280,6 @@ function Orders() {
                                 {item.quantity}
                               </span>
                             </p>
-                            <Badge>{item.isSpicy ? "حار" : "عادي"}</Badge>
                             {item.additions && item.additions.length > 0 && (
                               <div className="flex gap-1">
                                 {t("additions")}:
@@ -290,14 +290,19 @@ function Orders() {
                                 ))}
                               </div>
                             )}
+                            <div className="flex gap-1 mt-1">
+                              {item.isSpicy !== null && (
+                                <Badge>{item.isSpicy ? "حار" : "عادي"}</Badge>
+                              )}
+
+                              <Badge>{t(item.selectedType)}</Badge>
+                              <Badge>{t(item.selectedProtein)}</Badge>
+                            </div>{" "}
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold text-primary">
-                            {t("price_jod")}:
-                            {item.productId?.price.toFixed(2) ??
-                              item.priceAtPurchase ??
-                              0}
+                            {t("price_jod")}:{calculateSubtotal(item) ?? 0}
                           </p>
                         </div>
                       </div>
