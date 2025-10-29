@@ -9,7 +9,7 @@ import OtpVerification from "./componenet/OtpVerification";
 import { Toaster } from "react-hot-toast";
 import Header from "./componenet/Header";
 import Orders from "./pages/Orders";
-import AdminProductPanel from "./pages/adminremot";
+import AdminProductPanel from "./pages/menuManagement/AdminProductPanel";
 import PaymentFailed from "./pages/PaymentFailed";
 import MyOrders from "./pages/MyOrders";
 import AdminDashboard from "./pages/AdminDashboard";
