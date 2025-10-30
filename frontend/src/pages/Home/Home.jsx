@@ -46,7 +46,7 @@ export default function Home() {
     <div className="min-h-screen bg-background arabic-font" dir="rtl">
       <ImageCarousel />
 
-      <section id="about" className="py-12 sm:py-16 md:py-20 bg-white">
+      <section id="our_story" className="py-12 sm:py-16 md:py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             <div>
@@ -95,7 +95,7 @@ export default function Home() {
       </section>
 
       {/* قسم الاتصال */}
-      <section id="contact" className="py-12 sm:py-16 md:py-20 bg-gray-50">
+      <section id="contact_us" className="py-12 sm:py-16 md:py-20 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-10 sm:mb-12 md:mb-16">
             <Badge
