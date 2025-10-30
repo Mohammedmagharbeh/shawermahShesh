@@ -1,5 +1,5 @@
 import Login from "./componenet/log";
-import Home from "./pages/Home";
+import Home from "./pages/Home/Home";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Cart from "./pages/Cart/Cart";
 import Checkout from "./pages/Checkout";
