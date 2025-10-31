@@ -21,7 +21,7 @@ import AdminUsersPage from "./pages/adminusers";
 import Products from "./pages/Products";
 import { useUser } from "./contexts/UserContext";
 import AdminSlides from "./pages/AdminSlides";
-import AdminProductPanel from "./pages/menuManagement/AdminProductPanel.jsx";
+import AdminProductPanel from "./pages/MenuManagement/AdminProductPanel";
 
 function App() {
   const { i18n } = useTranslation();
