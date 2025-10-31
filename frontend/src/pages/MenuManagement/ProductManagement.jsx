@@ -16,12 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CATEGORIES } from "@/constants";
+import { CATEGORIES, INITIAL_FORM_DATA } from "@/constants";
 import axios from "axios";
-
-import React from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import useProductForm from "../../hooks/useProductForm";
+import { Switch } from "@/components/ui/switch";
 
 function ProductManagement({
   setProducts,
@@ -31,88 +32,16 @@ function ProductManagement({
   setEditingId,
 }) {
   const { t, i18n } = useTranslation();
-
-  const handleInputChange = (e) => {
-    const { id, value, type, checked } = e.target;
-
-    // checkbox handled separately
-    if (type === "checkbox") {
-      setFormData((prev) => ({ ...prev, [id]: checked }));
-      return;
-    }
-
-    // price nested keys like "prices.sandwich" or "prices.chicken_meal"
-    if (id.startsWith("prices.")) {
-      const key = id.replace(/^prices\./, "");
-      setFormData((prev) => ({
-        ...prev,
-        prices: {
-          ...prev.prices,
-          [key]: value,
-        },
-      }));
-      return;
-    }
-
-    // normal fields
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
+  const [loading, setLoading] = useState(false);
+  const { buildPayload, handleInputChange, handleImageChange } = useProductForm(
+    formData,
+    setFormData
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const buildPayload = (formData) => {
-        const payload = {
-          name: { ar: formData.arName, en: formData.enName },
-          description: {
-            ar: formData.arDescription,
-            en: formData.enDescription,
-          },
-          image: formData.image,
-          category: formData.category,
-          isSpicy: !!formData.isSpicy,
-          hasTypeChoices: !!formData.hasTypeChoices,
-          hasProteinChoices: !!formData.hasProteinChoices,
-          discount: formData.discount ? Number(formData.discount) : 0,
-          basePrice: Number(formData.basePrice || formData.price || 0),
-          prices: {},
-        };
-
-        // Both type & protein
-        if (formData.hasTypeChoices && formData.hasProteinChoices) {
-          payload.prices = {
-            chicken: {
-              sandwich: Number(
-                formData.prices.chicken_sandwich || payload.basePrice
-              ),
-              meal: Number(formData.prices.chicken_meal || payload.basePrice),
-            },
-            meat: {
-              sandwich: Number(
-                formData.prices.meat_sandwich || payload.basePrice
-              ),
-              meal: Number(formData.prices.meat_meal || payload.basePrice),
-            },
-          };
-        }
-        // Only type (sandwich/meal)
-        else if (formData.hasTypeChoices) {
-          payload.prices = {
-            sandwich: Number(formData.prices.sandwich || payload.basePrice),
-            meal: Number(formData.prices.meal || payload.basePrice),
-          };
-        }
-        // Only protein (chicken/meat)
-        else if (formData.hasProteinChoices) {
-          payload.prices = {
-            chicken: Number(formData.prices.chicken || payload.basePrice),
-            meat: Number(formData.prices.meat || payload.basePrice),
-          };
-        }
-
-        return payload;
-      };
-
       const payload = buildPayload(formData);
 
       if (editingId) {
@@ -135,50 +64,17 @@ function ProductManagement({
       }
 
       // reset form
-      setFormData({
-        arName: "",
-        enName: "",
-        basePrice: "",
-        discount: "",
-        arDescription: "",
-        enDescription: "",
-        image: "",
-        category: "",
-        isSpicy: false,
-        hasTypeChoices: false,
-        hasProteinChoices: false,
-        prices: {
-          sandwich: "",
-          meal: "",
-          chicken: "",
-          meat: "",
-          chicken_sandwich: "",
-          chicken_meal: "",
-          meat_sandwich: "",
-          meat_meal: "",
-        },
-      });
+      setFormData(INITIAL_FORM_DATA);
 
       toast.success(editingId ? t("product_updated") : t("product_added"));
     } catch (error) {
       console.error("خطأ في الإرسال:", error.response?.data || error.message);
-      alert(t("submit_error"));
+      toast.error(t("submit_error"));
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageData = reader.result;
-        setFormData({ ...formData, image: imageData });
-      };
-      reader.readAsDataURL(file);
-    } else {
-      alert(t("choose_image"));
-    }
-  };
   return (
     <div className="lg:col-span-1">
       <Card className="shadow-xl lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto rounded-md">
@@ -239,22 +135,28 @@ function ProductManagement({
             {/* Toggles */}
             <div className="flex gap-4 items-center mt-2">
               <div className="flex items-center gap-2">
-                <Input
+                <Switch
                   id="hasTypeChoices"
-                  type="checkbox"
-                  checked={!!formData.hasTypeChoices}
-                  onChange={handleInputChange}
+                  checked={formData.hasTypeChoices}
+                  onCheckedChange={(v) =>
+                    setFormData({ ...formData, hasTypeChoices: v })
+                  }
+                  className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
                 />
+
                 <Label className="text-sm">{t("has_type_choices")}</Label>
               </div>
 
               <div className="flex items-center gap-2">
-                <Input
+                <Switch
                   id="hasProteinChoices"
-                  type="checkbox"
-                  checked={!!formData.hasProteinChoices}
-                  onChange={handleInputChange}
+                  checked={formData.hasProteinChoices}
+                  onCheckedChange={(v) =>
+                    setFormData({ ...formData, hasProteinChoices: v })
+                  }
+                  className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
                 />
+
                 <Label className="text-sm">{t("has_protein_choices")}</Label>
               </div>
             </div>
@@ -433,12 +335,13 @@ function ProductManagement({
               <Label htmlFor="category" className="text-sm">
                 Has Spicy
               </Label>
-              <Input
+              <Switch
                 id="isSpicy"
-                type="checkbox"
                 checked={formData.isSpicy || false}
-                onChange={(e) => handleInputChange(e)}
-                className="mt-1.5 w-3"
+                onCheckedChange={(v) =>
+                  setFormData({ ...formData, isSpicy: v })
+                }
+                className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
               />
             </div>
 
@@ -453,6 +356,13 @@ function ProductManagement({
                 onChange={handleImageChange}
                 className="mt-1.5"
               />
+              {formData.image && (
+                <img
+                  src={formData.image}
+                  alt="preview"
+                  className="mt-2 rounded w-32"
+                />
+              )}
             </div>
 
             <div className="flex flex-col">
@@ -484,8 +394,12 @@ function ProductManagement({
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              {editingId ? t("save_changes") : t("add_product")}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading
+                ? t("saving")
+                : editingId
+                  ? t("save_changes")
+                  : t("add_product")}
             </Button>
 
             {editingId && (
