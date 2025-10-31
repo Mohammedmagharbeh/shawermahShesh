@@ -47,7 +47,7 @@ export default function useProductForm(formData, setFormData) {
       },
       image: formData.image,
       category: formData.category,
-      isSpicy: !!formData.isSpicy,
+      isSpicy: Boolean(formData.isSpicy),
       hasTypeChoices: !!formData.hasTypeChoices,
       hasProteinChoices: !!formData.hasProteinChoices,
       discount: formData.discount ? Number(formData.discount) : 0,

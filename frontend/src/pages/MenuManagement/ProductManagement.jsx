@@ -337,9 +337,9 @@ function ProductManagement({
               </Label>
               <Switch
                 id="isSpicy"
-                checked={formData.isSpicy || false}
+                checked={Boolean(formData.isSpicy)}
                 onCheckedChange={(v) =>
-                  setFormData({ ...formData, isSpicy: v })
+                  setFormData((prev) => ({ ...prev, isSpicy: Boolean(v) }))
                 }
                 className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
               />
