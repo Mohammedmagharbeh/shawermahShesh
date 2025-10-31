@@ -22,27 +22,43 @@ export default function ProductCard({
     return `${product.basePrice} ${t("jod")}`;
   };
 
-  const handleEdit = () => {
-    setFormData({
-      arName: product.name.ar || "",
-      enName: product.name.en || "",
-      basePrice: product.basePrice?.toString() || "",
-      discount: product.discount?.toString() || "",
-      arDescription: product.description.ar || "",
-      enDescription: product.description.en || "",
-      image: product.image || "",
-      category: product.category || "",
-      isSpicy: Boolean(product.isSpicy),
-      hasTypeChoices: !!product.hasTypeChoices,
-      hasProteinChoices: !!product.hasProteinChoices,
-      prices: {
-        sandwich: product.prices?.sandwich?.toString() || "",
-        meal: product.prices?.meal?.toString() || "",
-        chicken: product.prices?.chicken?.toString() || "",
-        meat: product.prices?.meat?.toString() || "",
-      },
-    });
-    setEditingId(product._id);
+  const handleEdit = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/products/${product._id}`
+      );
+      let data = await res.json();
+      if (!res.ok) {
+        toast.error(data.message);
+        return;
+      }
+      data = data.data;
+      setFormData({
+        arName: data.name?.ar || "",
+        enName: data.name?.en || "",
+        basePrice: data.basePrice?.toString() || "",
+        discount: data.discount?.toString() || "",
+        arDescription: data.description?.ar || "",
+        enDescription: data.description?.en || "",
+        image: data.image || "",
+        category: data.category || "",
+        isSpicy: Boolean(data.isSpicy),
+        hasTypeChoices: !!data.hasTypeChoices,
+        hasProteinChoices: !!data.hasProteinChoices,
+        additions: data.additions || [],
+        prices: {
+          sandwich: data.prices?.sandwich?.toString() || "",
+          meal: data.prices?.meal?.toString() || "",
+          chicken: data.prices?.chicken?.toString() || "",
+          meat: data.prices?.meat?.toString() || "",
+        },
+      });
+      setEditingId(data._id);
+    } catch (error) {
+      console.error(error);
+
+      toast.error("Something went wrong");
+    }
   };
 
   const handleDelete = (id) => {
