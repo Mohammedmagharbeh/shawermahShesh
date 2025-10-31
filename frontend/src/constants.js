@@ -65,3 +65,27 @@ export const PUBLIC_LINKS = [
   { label: "our_story" },
   { label: "contact_us" },
 ];
+
+export const INITIAL_FORM_DATA = {
+  arName: "",
+  enName: "",
+  basePrice: "",
+  discount: "",
+  arDescription: "",
+  enDescription: "",
+  image: "",
+  category: "",
+  isSpicy: false,
+  hasTypeChoices: false,
+  hasProteinChoices: false,
+  prices: {
+    sandwich: "",
+    meal: "",
+    chicken: "",
+    meat: "",
+    chicken_sandwich: "",
+    chicken_meal: "",
+    meat_sandwich: "",
+    meat_meal: "",
+  },
+};
