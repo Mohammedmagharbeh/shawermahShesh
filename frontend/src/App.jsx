@@ -1,5 +1,5 @@
 import Login from "./componenet/log";
-import Home from "./pages/Home";
+import Home from "./pages/Home/Home";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Cart from "./pages/Cart/Cart";
 import Checkout from "./pages/Checkout";
@@ -9,7 +9,6 @@ import OtpVerification from "./componenet/OtpVerification";
 import { Toaster } from "react-hot-toast";
 import Header from "./componenet/Header";
 import Orders from "./pages/Orders";
-import AdminProductPanel from "./pages/menuManagement/AdminProductPanel";
 import PaymentFailed from "./pages/PaymentFailed";
 import MyOrders from "./pages/MyOrders";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -22,6 +21,7 @@ import AdminUsersPage from "./pages/adminusers";
 import Products from "./pages/Products";
 import { useUser } from "./contexts/UserContext";
 import AdminSlides from "./pages/AdminSlides";
+import AdminProductPanel from "./pages/MenuManagement/AdminProductPanel";
 
 function App() {
   const { i18n } = useTranslation();

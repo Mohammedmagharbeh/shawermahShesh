@@ -56,11 +56,7 @@ function Header() {
           >
             <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
               <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center flex-shrink-0 ring-2 ring-yellow-400 ring-offset-2 transition-transform group-hover:scale-105 duration-300">
-                <img
-                  src={logo}
-                  alt="شاورما شيش"
-                  className="w-10px"
-                />
+                <img src={logo} alt="شاورما شيش" className="w-10px" />
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-700 via-red-600 to-red-700 bg-clip-text text-transparent drop-shadow-sm truncate">
@@ -78,9 +74,7 @@ function Header() {
               PUBLIC_LINKS.map((key) => (
                 <NavLink
                   key={key.label}
-                  to={`/#${
-                    key.label === "home" ? "home" : key.label.split("_")[0]
-                  }`}
+                  to={`/#${key.label}`}
                   label={t(key.label)}
                   onClick={handleLinkClick}
                   className="text-sm xl:text-base text-gray-700 hover:text-red-700 font-semibold transition-all duration-300 whitespace-nowrap relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-red-600 after:to-yellow-500 hover:after:w-full after:transition-all after:duration-300"

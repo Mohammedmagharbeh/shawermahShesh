@@ -108,10 +108,12 @@ export default function Products() {
 
                         <div className="flex items-center justify-between mt-2">
                           <div>
-                            {product.discount > 0 ? (
+                            {product.discount > 0 &&
+                            !product.hasProteinChoices &&
+                            !product.hasTypeChoices ? (
                               <div className="flex items-center gap-2">
                                 <p className="text-xl font-bold text-orange-500">
-                                  JOD{" "}
+                                  JOD
                                   {product.discountedPrice
                                     ? product.discountedPrice.toFixed(2)
                                     : (
