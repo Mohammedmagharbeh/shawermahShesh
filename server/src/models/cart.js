@@ -16,7 +16,13 @@ const cartSchema = new moongoose.Schema(
         },
         quantity: { type: Number, default: 1 },
         additions: [
-          { type: moongoose.Schema.Types.ObjectId, ref: "additions" },
+          {
+            addition: {
+              type: moongoose.Schema.Types.ObjectId,
+              ref: "additions",
+            },
+            quantity: { type: Number, default: 1 },
+          },
         ],
         isSpicy: { type: Boolean, default: false },
         notes: { type: String, default: "" },

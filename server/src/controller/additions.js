@@ -27,12 +27,12 @@ exports.getAdditionsByCategory = async (req, res) => {
 };
 
 exports.addAddition = async (req, res) => {
-  const { name, price, category } = req.body;
+  const { name, price, product } = req.body;
   try {
     const newAddition = new additionsModel({
       name,
       price,
-      category,
+      product,
     });
     await newAddition.save();
     res.status(201).json(newAddition);
@@ -56,11 +56,11 @@ exports.deleteAddition = async (req, res) => {
 };
 
 exports.updateAddition = async (req, res) => {
-  const { name, price, category } = req.body;
+  const { name, price, product } = req.body;
   try {
     const updatedAddition = await additionsModel.findByIdAndUpdate(
       req.params.id,
-      { name, price, category },
+      { name, price, product },
       { new: true }
     );
     if (!updatedAddition) {

@@ -11,7 +11,15 @@ const ordersSchema = new mongoose.Schema(
       {
         productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
         quantity: { type: Number, required: true, default: 1, min: 1 },
-        additions: [{ type: mongoose.Schema.Types.ObjectId, ref: "additions" }],
+        additions: [
+          {
+            addition: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "additions",
+            },
+            quantity: { type: Number, default: 1 },
+          },
+        ],
         priceAtPurchase: { type: Number, required: true },
         isSpicy: { type: Boolean, default: false },
         notes: { type: String, default: "" },

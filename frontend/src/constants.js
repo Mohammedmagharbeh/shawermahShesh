@@ -78,6 +78,7 @@ export const INITIAL_FORM_DATA = {
   isSpicy: false,
   hasTypeChoices: false,
   hasProteinChoices: false,
+  additions: [],
   prices: {
     sandwich: "",
     meal: "",

@@ -45,6 +45,9 @@ export default function useProductForm(formData, setFormData) {
         ar: formData.arDescription,
         en: formData.enDescription,
       },
+      additions: formData.additions.filter(
+        (a) => a.name.trim() !== "" && a.price !== ""
+      ),
       image: formData.image,
       category: formData.category,
       isSpicy: Boolean(formData.isSpicy),

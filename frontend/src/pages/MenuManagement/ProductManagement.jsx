@@ -23,6 +23,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import useProductForm from "../../hooks/useProductForm";
 import { Switch } from "@/components/ui/switch";
+import { Plus } from "lucide-react";
 
 function ProductManagement({
   setProducts,
@@ -73,6 +74,28 @@ function ProductManagement({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddAddition = () => {
+    setFormData((prev) => ({
+      ...prev,
+      additions: [...(prev.additions ?? []), { name: "", price: "" }],
+    }));
+  };
+
+  const handleRemoveAddition = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      additions: prev.additions.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleAdditionChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.additions];
+      updated[index][field] = value;
+      return { ...prev, additions: updated };
+    });
   };
 
   return (
@@ -285,6 +308,55 @@ function ProductManagement({
               )}
             </div>
 
+            <div className="space-y-2">
+              <div className="flex gap-2 items-center mb-2">
+                <Label className="text-sm font-semibold">Additions</Label>
+                <button
+                  type="button"
+                  onClick={handleAddAddition}
+                  className="p-1 rounded bg-primary text-white hover:bg-primary/90"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+
+              {formData.additions?.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {t("no_additions_yet")}
+                </p>
+              )}
+
+              {formData.additions?.map((addition, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <Input
+                    placeholder="Addition name"
+                    value={addition.name}
+                    onChange={(e) =>
+                      handleAdditionChange(index, "name", e.target.value)
+                    }
+                    className="flex-1"
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Price"
+                    value={addition.price}
+                    onChange={(e) =>
+                      handleAdditionChange(index, "price", e.target.value)
+                    }
+                    className="w-24"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => handleRemoveAddition(index)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ))}
+            </div>
+
             <div className="flex flex-col">
               <Label htmlFor="discount" className="text-sm">
                 {t("discount_percentage")}
@@ -408,16 +480,7 @@ function ProductManagement({
                 variant="outline"
                 onClick={() => {
                   setEditingId(null);
-                  setFormData({
-                    arName: "",
-                    enName: "",
-                    price: "",
-                    discount: "",
-                    arDescription: "",
-                    enDescription: "",
-                    image: "",
-                    category: "",
-                  });
+                  setFormData(INITIAL_FORM_DATA);
                 }}
                 className="w-full"
               >
