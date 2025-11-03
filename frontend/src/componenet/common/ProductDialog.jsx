@@ -92,7 +92,7 @@ export function ProductDialog({ id, triggerLabel }) {
   };
 
   const handleAddToCart = () => {
-    const selectedFullAdditions = product.additions.filter((a) =>
+    const selectedFullAdditions = product.additions?.filter((a) =>
       selectedAdditions.includes(a._id)
     );
 
