@@ -272,7 +272,7 @@ function Orders() {
                           <div className="flex flex-col gap-1">
                             <p className="font-semibold text-foreground">
                               {item.productId?.name[selectedLanguage] ??
-                                "Product unavailable"}
+                                "Deleted Product"}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {t("quantity")}:

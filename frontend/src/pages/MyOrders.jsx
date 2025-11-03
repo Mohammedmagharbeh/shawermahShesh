@@ -150,7 +150,7 @@ function MyOrders() {
                             src={burger}
                             alt={
                               item.productId?.name[selectedLanguage] ??
-                              "Unknown Product Image"
+                              "Deleted Product Image"
                             }
                             className="h-full w-full object-cover"
                           />
@@ -158,7 +158,7 @@ function MyOrders() {
                         <div>
                           <p className="font-semibold text-foreground">
                             {item.productId?.name[selectedLanguage] ??
-                              "Unknown Product Name"}
+                              "Deleted Product"}
                           </p>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>Quantity: {item.quantity}</span>

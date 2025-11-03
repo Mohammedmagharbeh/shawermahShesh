@@ -497,7 +497,7 @@ function AdminDashboard() {
                             <div className="flex flex-col gap-1">
                               <p className="font-semibold text-foreground">
                                 {item.productId?.name[selectedLanguage] ||
-                                  "Unknown Product"}
+                                  "Deleted Product"}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {item.productId?.description[
