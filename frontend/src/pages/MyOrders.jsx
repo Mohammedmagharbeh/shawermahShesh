@@ -29,7 +29,7 @@ function MyOrders() {
   useEffect(() => {
     const fetchUserOrders = async () => {
       const orders = await getOrdersByUserId(id);
-      console.log("getOrdersByUserId returned:", orders);
+
       setUserOrders(Array.isArray(orders) ? orders : []);
     };
 
@@ -182,7 +182,7 @@ function MyOrders() {
                               {t("additions")}:
                               {item.additions.map((addition) => (
                                 <Badge key={addition._id} className="p-1">
-                                  {addition.name[selectedLanguage]}
+                                  {addition.name}
                                 </Badge>
                               ))}
                             </div>

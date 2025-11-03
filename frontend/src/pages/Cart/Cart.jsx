@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-
 import { useCart } from "@/contexts/CartContext";
 import { useUser } from "@/contexts/UserContext";
 import Loading from "@/componenet/common/Loading";
@@ -24,7 +23,7 @@ const Cart = () => {
 
   if (loading) return <Loading />;
 
-  if (cart?.products?.length === 0)
+  if (!cart._id || cart?.products?.length === 0)
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 py-12 px-4">
         <div className="bg-white p-8 rounded-lg shadow-lg text-center">

@@ -38,16 +38,14 @@ export default function useProductForm(formData, setFormData) {
     }
   };
 
-  const buildPayload = (data) => {
+  const buildPayload = () => {
     const payload = {
       name: { ar: formData.arName, en: formData.enName },
       description: {
         ar: formData.arDescription,
         en: formData.enDescription,
       },
-      additions: formData.additions.filter(
-        (a) => a.name.trim() !== "" && a.price !== ""
-      ),
+      additions: formData.additions,
       image: formData.image,
       category: formData.category,
       isSpicy: Boolean(formData.isSpicy),

@@ -116,8 +116,6 @@ const AdminUsersPage = () => {
 
   if (loading) return <Loading />;
 
-  console.log(newUser);
-
   return (
     <div className="min-h-screen bg-white p-4 md:p-8" dir="rtl">
       <div className="max-w-7xl mx-auto space-y-8">

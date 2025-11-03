@@ -41,8 +41,10 @@ export function EditOrderDialog({ name, order, updateOrders }) {
   const [addresses, setAddresses] = useState([]);
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (!open) return;
     const fetchAddresses = async () => {
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}/locations/get`);
       const data = await res.json();
@@ -145,7 +147,7 @@ export function EditOrderDialog({ name, order, updateOrders }) {
   };
 
   return (
-    <DialogUi>
+    <DialogUi open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">{name}</Button>
       </DialogTrigger>

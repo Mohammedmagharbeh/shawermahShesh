@@ -1,37 +1,47 @@
-const moongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-const cartSchema = new moongoose.Schema(
+const cartSchema = new mongoose.Schema(
   {
     userId: {
-      type: moongoose.Schema.Types.ObjectId,
-      ref: "user",
-      require: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user", // capitalized for consistency with model name
+      required: true,
     },
+
     products: [
       {
         productId: {
-          type: moongoose.Schema.Types.ObjectId,
+          type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
-          require: true,
+          required: true,
         },
-        quantity: { type: Number, default: 1 },
+
+        quantity: { type: Number, default: 1, min: 1 },
+
+        // 🧂 Selected additions for this product (from Product.additions)
         additions: [
           {
-            addition: {
-              type: moongoose.Schema.Types.ObjectId,
-              ref: "additions",
-            },
-            quantity: { type: Number, default: 1 },
+            name: { type: String, required: true },
+            price: { type: Number, required: true, min: 0 },
+            quantity: { type: Number, default: 1, min: 1 },
           },
         ],
+
         isSpicy: { type: Boolean, default: false },
         notes: { type: String, default: "" },
-        selectedProtein: { type: String },
-        selectedType: { type: String },
+
+        selectedProtein: {
+          type: String,
+          enum: ["chicken", "meat", null],
+        },
+        selectedType: {
+          type: String,
+          enum: ["sandwich", "meal", null],
+        },
       },
     ],
   },
   { timestamps: true }
 );
-const cart = moongoose.model("cart", cartSchema);
-module.exports = cart;
+
+module.exports = mongoose.model("Cart", cartSchema);

@@ -94,14 +94,14 @@ function AdminDashboard() {
           setSoundAllowed(true);
           toast.success("🔔 Sound notifications enabled!");
         })
-        .catch((err) => console.log("Sound activation failed:", err));
+        .catch((err) => toast.error("Sound activation failed:", err));
     }
   };
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().then((permission) =>
-        console.log("Notification permission:", permission)
+        toast.error("Notification permission:", permission)
       );
     }
   }, []);
@@ -119,9 +119,9 @@ function AdminDashboard() {
       }
 
       if (soundAllowed && sound) {
-        console.log("Playing sound for incoming order");
+        toast.success("Playing sound for incoming order");
         sound.currentTime = 0;
-        sound.play().catch((err) => console.log("Play blocked:", err));
+        sound.play().catch((err) => toast.error("Play blocked:", err));
       }
     });
 
@@ -231,7 +231,7 @@ function AdminDashboard() {
             </p>
 
             <Dialog open={!soundAllowed}>
-              <DialogContent>
+              <DialogContent aria-describedby={undefined}>
                 <DialogHeader>
                   <DialogTitle>Allow Notifications</DialogTitle>
                 </DialogHeader>
@@ -250,6 +250,7 @@ function AdminDashboard() {
               incomingOrder.map((o) => (
                 <Dialog
                   open={incomingOrder.length > 0}
+                  key={o._id}
                   onOpenChange={(open) => {
                     if (!open && sound) {
                       sound.pause();
@@ -515,7 +516,7 @@ function AdminDashboard() {
                                   {t("additions")}:
                                   {item.additions.map((addition) => (
                                     <Badge key={addition._id} className="p-1">
-                                      {addition.name[selectedLanguage]}
+                                      {addition.name}
                                     </Badge>
                                   ))}
                                 </div>

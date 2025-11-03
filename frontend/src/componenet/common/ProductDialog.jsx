@@ -27,15 +27,12 @@ export function ProductDialog({ id, triggerLabel }) {
   const buttonLabel = triggerLabel || t("View product");
 
   const [product, setProduct] = useState({});
-  const [additions, setAdditions] = useState([]);
   const [selectedAdditions, setSelectedAdditions] = useState([]);
   const [spicy, setSpicy] = useState(null);
   const [notes, setNotes] = useState("");
   const { addToCart } = useCart();
   const selectedLanguage = localStorage.getItem("i18nextLng");
   const [open, setOpen] = useState(false);
-
-  // new states for type/protein choices
   const [selectedType, setSelectedType] = useState("sandwich");
   const [selectedProtein, setSelectedProtein] = useState("chicken");
 
@@ -59,26 +56,6 @@ export function ProductDialog({ id, triggerLabel }) {
 
     if (id) fetchProductDetails();
   }, [id, open]);
-
-  useEffect(() => {
-    if (!product?.category || !open) return;
-
-    const fetchAdditions = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/additions/category/${product.category}`
-        );
-        if (!response.ok) throw new Error(t("fetch_additions_failed"));
-        const data = await response.json();
-        setAdditions(data.additions);
-      } catch (error) {
-        console.error("Error fetching additions:", error);
-        setAdditions([]);
-      }
-    };
-
-    fetchAdditions();
-  }, [product?.category, open]);
 
   const handleQuantityChange = (increment) => {
     setQuantity((prev) => Math.max(1, prev + increment));
@@ -115,7 +92,7 @@ export function ProductDialog({ id, triggerLabel }) {
   };
 
   const handleAddToCart = () => {
-    const selectedFullAdditions = additions.filter((a) =>
+    const selectedFullAdditions = product.additions.filter((a) =>
       selectedAdditions.includes(a._id)
     );
 
@@ -125,9 +102,13 @@ export function ProductDialog({ id, triggerLabel }) {
       product.isSpicy ? spicy : false,
       selectedFullAdditions,
       notes,
-      { selectedProtein, selectedType } // 👈 store selections
+      { selectedProtein, selectedType }
     );
-
+    setSelectedAdditions([]);
+    setSpicy(null);
+    setSelectedProtein("chicken");
+    setSelectedType("sandwich");
+    setNotes("");
     toast.success(
       `${t("added_successfully")} ${quantity} ${t("of")} ${product.name[selectedLanguage]}`
     );
@@ -276,7 +257,7 @@ export function ProductDialog({ id, triggerLabel }) {
                 )}
 
                 {/* Additions */}
-                {additions?.map((addition) => (
+                {product.additions?.map((addition) => (
                   <div key={addition._id} className="flex items-center gap-2">
                     <Input
                       type="checkbox"
@@ -296,8 +277,7 @@ export function ProductDialog({ id, triggerLabel }) {
                       }}
                     />
                     <Label htmlFor={addition._id} className="text-gray-700">
-                      {addition.name[selectedLanguage]} (JOD{" "}
-                      {addition.price.toFixed(2)})
+                      {addition.name} (JOD {addition.price.toFixed(2)})
                     </Label>
                   </div>
                 ))}

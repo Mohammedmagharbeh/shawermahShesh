@@ -34,14 +34,14 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
           </button>
           <div className="size-16 rounded-lg overflow-hidden bg-gray-100">
             <img
-              src={product.productId.image || productPlaceholderImg}
-              alt={product.productId.name[selectedLanguage]}
+              src={product?.productId?.image || productPlaceholderImg}
+              alt={product?.productId?.name?.[selectedLanguage]}
               className="w-full h-full object-cover"
             />
           </div>
           <div className="flex flex-col space-y-1">
             <h3 className="font-semibold text-gray-800 text-lg">
-              {product?.productId?.name[selectedLanguage] ?? "Product Name"}
+              {product?.productId?.name[selectedLanguage] ?? "Deleted Product"}
             </h3>
 
             <div className="grid w-full gap-1 text-white">
@@ -58,7 +58,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
                 <span className="text-sm text-gray-600">{t("additions")}:</span>
                 {product.additions.map((addition) => (
                   <Badge key={addition._id} className="p-1">
-                    {addition.name[selectedLanguage]}
+                    {addition.name}
                   </Badge>
                 ))}
               </div>
@@ -77,7 +77,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
             {t("price")}:
           </span>
           <div className="flex flex-col items-end lg:items-center">
-            {product.productId.discount > 0 && (
+            {product?.productId?.discount > 0 && (
               <span className="text-sm text-gray-400 line-through">
                 {basePrice.toFixed(2)} JOD
               </span>

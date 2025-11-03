@@ -1,6 +1,19 @@
-const cart = require("../models/cart");
-const productsModel = require("../models/products");
-const userModel = require("../models/user");
+const Cart = require("../models/cart");
+const Product = require("../models/products");
+const User = require("../models/user");
+
+// ✅ Safe comparison for additions
+const sameAdditions = (a1 = [], a2 = []) => {
+  if (!Array.isArray(a1) || !Array.isArray(a2)) return false;
+  if (a1.length !== a2.length) return false;
+  if (a1.length === 0 && a2.length === 0) return true;
+
+  const getId = (a) => (a?._id ? a._id.toString() : a.toString());
+  const sortedA1 = a1.map(getId).sort();
+  const sortedA2 = a2.map(getId).sort();
+
+  return JSON.stringify(sortedA1) === JSON.stringify(sortedA2);
+};
 
 // ✅ Add to Cart
 exports.addToCart = async (req, res) => {
@@ -20,44 +33,29 @@ exports.addToCart = async (req, res) => {
       return res.status(400).json({ message: "Invalid productId or quantity" });
     }
 
-    const user = await userModel.findById(userId);
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const product = await productsModel.findById(productId);
+    const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    let userCart = await cart.findOne({ userId });
-    if (!userCart) {
-      userCart = await cart.create({ userId, products: [] });
-    }
-
-    // ✅ Compare additions by their IDs (sorted)
-    const normalizeIds = (ids) => ids.map(String).sort();
+    let userCart = await Cart.findOne({ userId });
+    if (!userCart) userCart = await Cart.create({ userId, products: [] });
 
     const existingProductIndex = userCart.products.findIndex((item) => {
-      const sameProduct = item.productId.toString() === productId;
-      const sameSpicy = item.isSpicy === isSpicy;
-      const sameNotes = (item.notes || "") === (notes || "");
-      const sameAdditions =
-        JSON.stringify(normalizeIds(item.additions || [])) ===
-        JSON.stringify(normalizeIds(additions || []));
-      const sameType = item.selectedType === selectedType;
-      const sameProtein = item.selectedProtein === selectedProtein;
       return (
-        sameProduct &&
-        sameAdditions &&
-        sameSpicy &&
-        sameNotes &&
-        sameType &&
-        sameProtein
+        item.productId.toString() === productId &&
+        item.isSpicy === isSpicy &&
+        (item.notes || "") === (notes || "") &&
+        item.selectedType === selectedType &&
+        item.selectedProtein === selectedProtein &&
+        sameAdditions(item.additions, additions)
       );
     });
 
     if (existingProductIndex > -1) {
-      // ✅ If exact same item (same additions, spicy, notes), increase quantity
       userCart.products[existingProductIndex].quantity += quantity;
     } else {
-      // ✅ Otherwise, add as new item
       userCart.products.push({
         productId,
         quantity,
@@ -70,12 +68,7 @@ exports.addToCart = async (req, res) => {
     }
 
     await userCart.save();
-
-    // ✅ Populate before sending
-    await userCart.populate([
-      { path: "products.productId" },
-      { path: "products.additions" },
-    ]);
+    await userCart.populate("products.productId");
 
     return res.status(200).json({
       message: "Cart updated successfully",
@@ -87,62 +80,44 @@ exports.addToCart = async (req, res) => {
   }
 };
 
-// ✅ Update Cart Item Quantity
+// ✅ Update Quantity
 exports.updateCart = async (req, res) => {
-  const cartId = req.params.id;
-  const {
-    productId,
-    additions = [],
-    isSpicy,
-    notes,
-    quantity,
-    selectedProtein,
-    selectedType,
-  } = req.body;
-
   try {
+    const cartId = req.params.id;
+    const {
+      productId,
+      additions = [],
+      isSpicy,
+      notes,
+      quantity,
+      selectedProtein,
+      selectedType,
+    } = req.body;
+
     if (!productId || quantity == null || isNaN(quantity) || quantity <= 0) {
-      return res
-        .status(400)
-        .json({ message: "productId and quantity are required" });
+      return res.status(400).json({ message: "Invalid productId or quantity" });
     }
 
-    const userCart = await cart.findById(cartId);
+    const userCart = await Cart.findById(cartId);
     if (!userCart) return res.status(404).json({ message: "Cart not found" });
 
-    const normalizeIds = (ids) => ids.map(String).sort();
-
     const productIndex = userCart.products.findIndex((p) => {
-      const sameProduct = p.productId.toString() === productId;
-      const sameSpicy = p.isSpicy === isSpicy;
-      const sameNotes = (p.notes || "") === (notes || "");
-      const sameAdditions =
-        JSON.stringify(normalizeIds(p.additions || [])) ===
-        JSON.stringify(normalizeIds(additions || []));
-      const sameType = p.selectedType === selectedType;
-      const sameProtein = p.selectedProtein === selectedProtein;
       return (
-        sameProduct &&
-        sameAdditions &&
-        sameSpicy &&
-        sameNotes &&
-        sameType &&
-        sameProtein
+        p.productId.toString() === productId &&
+        p.isSpicy === isSpicy &&
+        (p.notes || "") === (notes || "") &&
+        p.selectedType === selectedType &&
+        p.selectedProtein === selectedProtein &&
+        sameAdditions(p.additions, additions)
       );
     });
 
     if (productIndex === -1)
       return res.status(404).json({ message: "Product not found in cart" });
 
-    // ✅ Update quantity only for the exact item
     userCart.products[productIndex].quantity = quantity;
-
     await userCart.save();
-
-    await userCart.populate([
-      { path: "products.productId" },
-      { path: "products.additions" },
-    ]);
+    await userCart.populate("products.productId");
 
     return res.status(200).json({
       message: "Cart updated successfully",
@@ -154,55 +129,40 @@ exports.updateCart = async (req, res) => {
   }
 };
 
-// ✅ Remove Specific Item from Cart
+// ✅ Remove from Cart
 exports.removeFromCart = async (req, res) => {
-  const { userId, productId, additions, selectedProtein, selectedType } =
-    req.body; // include additions
-
   try {
-    if (!userId || !productId) {
+    const {
+      userId,
+      productId,
+      additions = [],
+      selectedProtein,
+      selectedType,
+    } = req.body;
+
+    if (!userId || !productId)
       return res
         .status(400)
         .json({ message: "userId and productId are required" });
-    }
 
-    const userCart = await cart.findOne({ userId });
+    const userCart = await Cart.findOne({ userId });
     if (!userCart) return res.status(404).json({ message: "Cart not found" });
 
-    // Find product that matches both productId and additions
-    const productIndex = userCart.products.findIndex((p) => {
-      const sameProduct = p.productId.toString() === productId;
-
-      console.log(p);
-
-      // Compare additions as sets (to ensure same selections)
-      const sameAdditions =
-        (!additions && (!p.additions || p.additions.length === 0)) ||
-        (Array.isArray(additions) &&
-          Array.isArray(p.additions) &&
-          additions.length === p.additions.length &&
-          additions.every((a) =>
-            p.additions.map(String).includes(a.toString())
-          ));
-      const sameType = p.selectedType === selectedType;
-      const sameProtein = p.selectedProtein === selectedProtein;
-
-      return sameProduct && sameAdditions && sameType && sameProtein;
+    const index = userCart.products.findIndex((p) => {
+      return (
+        p.productId.toString() === productId &&
+        p.selectedType === selectedType &&
+        p.selectedProtein === selectedProtein &&
+        sameAdditions(p.additions, additions)
+      );
     });
 
-    if (productIndex === -1) {
+    if (index === -1)
       return res.status(404).json({ message: "Product not found in cart" });
-    }
 
-    // remove the matched product
-    userCart.products.splice(productIndex, 1);
+    userCart.products.splice(index, 1);
     await userCart.save();
-
-    // repopulate after save
-    await userCart.populate([
-      { path: "products.productId" },
-      { path: "products.additions" },
-    ]);
+    await userCart.populate("products.productId");
 
     return res.status(200).json({
       message: "Product removed from cart",
@@ -216,10 +176,9 @@ exports.removeFromCart = async (req, res) => {
 
 // ✅ Clear Cart
 exports.clearCart = async (req, res) => {
-  const userId = req.params.userId;
-
   try {
-    const userCart = await cart.findOne({ userId });
+    const userId = req.params.userId;
+    const userCart = await Cart.findOne({ userId });
     if (!userCart) return res.status(404).json({ message: "Cart not found" });
 
     userCart.products = [];
@@ -237,25 +196,20 @@ exports.clearCart = async (req, res) => {
 
 // ✅ Get Cart
 exports.getCart = async (req, res) => {
-  const userId = req.params.userId;
-
   try {
-    const user = await userModel.findById(userId);
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const userCart = await cart
-      .findOne({ userId })
+    const userCart = await Cart.findOne({ userId })
       .populate("products.productId")
-      .populate("products.additions")
       .lean();
 
-    if (!userCart) {
+    if (!userCart)
       return res
         .status(200)
         .json({ message: "Cart is empty", cart: { products: [] } });
-    }
-
-    if (!userCart) return res.status(404).json({ message: "Cart not found" });
 
     return res.status(200).json(userCart);
   } catch (error) {

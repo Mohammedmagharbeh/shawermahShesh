@@ -91,7 +91,7 @@ exports.getAllOrders = async (req, res) => {
 
     const orders = await Order.find(filter)
       .populate("products.productId")
-      .populate("products.additions")
+      // .populate("products.additions")
       .populate("userId", "phone name") // 🟢 جلب الاسم والهاتف مباشرة
       .populate("shippingAddress")
       .lean()
@@ -193,19 +193,18 @@ exports.createOrder = async (req, res) => {
         message: "Invalid shipping address",
       });
 
-    // ✅ Get unique product IDs
+    // ✅ Get product IDs and fetch from DB
     const productIds = products.map((p) =>
       typeof p.productId === "object" ? p.productId._id : p.productId
     );
     const uniqueProductIds = [...new Set(productIds)];
 
-    // ✅ Fetch from DB
     const dbProducts = await productsModel.find({
       _id: { $in: uniqueProductIds },
     });
     const dbProductIds = dbProducts.map((p) => p._id.toString());
 
-    // ✅ Check missing
+    // ✅ Check for missing products
     const missingProducts = uniqueProductIds.filter(
       (pid) => !dbProductIds.includes(pid)
     );
@@ -217,63 +216,63 @@ exports.createOrder = async (req, res) => {
     }
 
     // ✅ Enrich products
-    const enrichedProducts = await Promise.all(
-      products.map(async (p) => {
-        const productId =
-          typeof p.productId === "object" ? p.productId._id : p.productId;
-        const matchedProduct = dbProducts.find(
-          (dp) => dp._id.toString() === productId.toString()
-        );
+    const enrichedProducts = products.map((p) => {
+      const productId =
+        typeof p.productId === "object" ? p.productId._id : p.productId;
+      const matchedProduct = dbProducts.find(
+        (dp) => dp._id.toString() === productId.toString()
+      );
 
-        // ✅ Fetch additions
-        const dbAdditions = await additionsModel.find({
-          _id: { $in: p.additions || [] },
-        });
-        const additions = dbAdditions.map((a) => ({
-          _id: a._id,
-          name: a.name,
-          price: a.price,
-        }));
+      // ✅ Match selected additions against product's own additions
+      const selectedAdditions = (p.additions || [])
+        .map((addId) => {
+          const additionObj = matchedProduct.additions.find(
+            (a) => a._id.toString() === addId._id.toString()
+          );
+          return additionObj
+            ? {
+                _id: additionObj._id,
+                name: additionObj.name,
+                price: additionObj.price,
+              }
+            : null;
+        })
+        .filter(Boolean);
 
-        // ✅ Determine price depending on type/protein
-        let basePrice = matchedProduct.basePrice;
+      // ✅ Determine product price based on type/protein
+      let basePrice = matchedProduct.basePrice;
+      if (matchedProduct.hasTypeChoices || matchedProduct.hasProteinChoices) {
+        const protein = p.selectedProtein || "chicken";
+        const type = p.selectedType || "sandwich";
 
-        if (matchedProduct.hasTypeChoices || matchedProduct.hasProteinChoices) {
-          const protein = p.selectedProtein || "chicken";
-          const type = p.selectedType || "sandwich";
+        const variationPrice =
+          matchedProduct.prices?.[protein]?.[type] ||
+          matchedProduct.prices?.[type] ||
+          matchedProduct.basePrice;
 
-          // Use nested prices if available
-          const variationPrice =
-            matchedProduct.prices?.[protein]?.[type] ||
-            matchedProduct.prices?.[type] ||
-            matchedProduct.basePrice;
+        basePrice = variationPrice;
+      }
 
-          basePrice = variationPrice;
-        }
+      // ✅ Apply discount
+      const discountedPrice =
+        matchedProduct.discount && matchedProduct.discount > 0
+          ? basePrice - (matchedProduct.discount * basePrice) / 100
+          : basePrice;
 
-        // ✅ Apply discount (if any)
-        const discountedPrice =
-          matchedProduct.discount && matchedProduct.discount > 0
-            ? basePrice - (matchedProduct.discount * basePrice) / 100
-            : basePrice;
-
-        // ✅ Final product price (without additions yet)
-        const priceAtPurchase = discountedPrice;
-
-        return {
-          productId,
-          quantity: p.quantity,
-          additions,
-          priceAtPurchase,
-          isSpicy: p.isSpicy || false,
-          notes: p.notes || "",
-          orderType,
-          userDetails,
-          selectedProtein: p.selectedProtein || null,
-          selectedType: p.selectedType || null,
-        };
-      })
-    );
+      // ✅ Return enriched item
+      return {
+        productId,
+        quantity: p.quantity,
+        additions: selectedAdditions,
+        priceAtPurchase: discountedPrice,
+        isSpicy: p.isSpicy || false,
+        notes: p.notes || "",
+        orderType,
+        userDetails,
+        selectedProtein: p.selectedProtein || null,
+        selectedType: p.selectedType || null,
+      };
+    });
 
     // ✅ Calculate total
     const productsTotal = enrichedProducts.reduce((sum, p) => {
@@ -307,7 +306,6 @@ exports.createOrder = async (req, res) => {
     // ✅ Populate for frontend
     const populatedOrder = await newOrder.populate([
       { path: "products.productId" },
-      { path: "products.additions" },
       { path: "userId" },
       { path: "shippingAddress" },
     ]);

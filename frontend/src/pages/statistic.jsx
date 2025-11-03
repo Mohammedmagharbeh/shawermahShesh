@@ -73,8 +73,6 @@ export default function StatisticsPage() {
 
       const revenue = filteredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
 
-      console.log(totalVisitors);
-
       setOrderedUsers(ordered);
       setNotOrderedUsers(notOrdered);
       setTotalRevenue(revenue);

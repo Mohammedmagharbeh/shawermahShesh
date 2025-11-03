@@ -1,8 +1,9 @@
-const { default: cloudinary } = require("../config/cloudinary");
-const { CATEGORIES } = require("../constants");
 const products = require("../models/products");
 
-// for post
+const { CATEGORIES } = require("../constants");
+const { default: cloudinary } = require("../config/cloudinary");
+
+// ✅ POST: Create Product
 exports.postEat = async (req, res) => {
   try {
     const {
@@ -13,12 +14,13 @@ exports.postEat = async (req, res) => {
       category,
       image,
       discount,
-      isSpicy,
-      hasProteinChoices,
-      hasTypeChoices,
+      isSpicy = false,
+      hasProteinChoices = false,
+      hasTypeChoices = false,
+      additions = [],
     } = req.body;
 
-    // Validate required fields
+    // 🔍 Validate required fields
     if (
       !name?.ar ||
       !name?.en ||
@@ -29,44 +31,47 @@ exports.postEat = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Validate category
+    // 🔍 Validate category
     const matchedCategory = CATEGORIES.find((c) => c.en === category);
     if (!matchedCategory) {
       return res.status(400).json({ message: "Invalid category" });
     }
 
-    // Upload image if provided
+    // 📸 Upload image if provided
     let imageUrl = "";
     if (image) {
-      const uploadResponse = await cloudinary.uploader.upload(image);
+      const uploadResponse = await cloudinary.uploader.upload(image, {
+        folder: "products",
+      });
       imageUrl = uploadResponse.secure_url;
     }
 
-    // Create product
-    const createdFood = await products.create({
+    // 🧾 Create product
+    const createdProduct = await products.create({
       name,
       description,
-      basePrice: basePrice || 0,
+      basePrice: Number(basePrice) || 0,
       prices: prices || {},
-      discount: discount || 0,
+      discount: Number(discount) || 0,
       image: imageUrl,
       category: matchedCategory.en,
-      isSpicy: isSpicy || false,
-      hasProteinChoices: !!hasProteinChoices,
-      hasTypeChoices: !!hasTypeChoices,
+      isSpicy,
+      hasProteinChoices,
+      hasTypeChoices,
+      additions, // Expected as array of { addition: ObjectId, price: Number }
     });
 
     res.status(201).json({
-      message: "Product created successfully",
-      data: createdFood,
+      message: "✅ Product created successfully",
+      data: createdProduct,
     });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error in postEat:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// for update
+// ✅ PUT: Update Product
 exports.updatedfood = async (req, res) => {
   try {
     const { id } = req.params;
@@ -81,15 +86,15 @@ exports.updatedfood = async (req, res) => {
       isSpicy,
       hasTypeChoices,
       hasProteinChoices,
+      additions = [],
     } = req.body;
 
-    // Validate required fields
+    // 🔍 Validate required fields
     if (
-      !name.ar ||
-      !name.en ||
-      !description.ar ||
-      !description.en ||
-      !basePrice ||
+      !name?.ar ||
+      !name?.en ||
+      !description?.ar ||
+      !description?.en ||
       !category
     ) {
       return res
@@ -97,31 +102,37 @@ exports.updatedfood = async (req, res) => {
         .json({ message: "All required fields must be provided" });
     }
 
-    // Validate category
+    // 🔍 Validate category
     const matchedCategory = CATEGORIES.find((c) => c.en === category);
     if (!matchedCategory) {
       return res.status(400).json({ message: "Invalid category" });
     }
 
-    let updateResponse = "";
-    if (image)
-      updateResponse = (await cloudinary.uploader.upload(image)).secure_url;
+    // 📸 Only upload new image if it’s different (base64)
+    let imageUrl;
+    if (image && image.startsWith("data:image")) {
+      const uploadResponse = await cloudinary.uploader.upload(image, {
+        folder: "products",
+      });
+      imageUrl = uploadResponse.secure_url;
+    }
 
-    // Prepare updated data
+    // 🧾 Prepare update data
     const updatedData = {
       name,
       description,
-      basePrice,
-      discount: discount ?? 0,
-      image: updateResponse,
-      category: matchedCategory.en, // store only English version
-      isSpicy: isSpicy ?? false,
-      hasProteinChoices,
-      hasTypeChoices,
-      prices,
+      basePrice: Number(basePrice) || 0,
+      discount: Number(discount) || 0,
+      prices: prices || {},
+      category: matchedCategory.en,
+      isSpicy: !!isSpicy,
+      hasProteinChoices: !!hasProteinChoices,
+      hasTypeChoices: !!hasTypeChoices,
+      additions,
     };
 
-    // Update the product
+    if (imageUrl) updatedData.image = imageUrl;
+
     const updatedProduct = await products.findByIdAndUpdate(id, updatedData, {
       new: true,
       runValidators: true,
@@ -131,22 +142,33 @@ exports.updatedfood = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.status(200).json(updatedProduct);
+    res.status(200).json({
+      message: "✅ Product updated successfully",
+      data: updatedProduct,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error in updatedfood:", error);
     res.status(500).json({ message: error.message });
   }
 };
-// for delete
+
+// ✅ DELETE: Remove Product
 exports.deletefood = async (req, res) => {
   try {
-    const id = req.params.id;
-    const deletefofo = await products.findByIdAndDelete({ _id: id });
-    if (!deletefofo) {
+    const { id } = req.params;
+
+    const deletedProduct = await products.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
       return res.status(404).json({ message: "Item not found" });
     }
-    res.status(200).json(deletefofo);
+
+    res.status(200).json({
+      message: "🗑️ Product deleted successfully",
+      data: deletedProduct,
+    });
   } catch (error) {
+    console.error("❌ Error in deletefood:", error);
     res.status(500).json({ message: error.message });
   }
 };

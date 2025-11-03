@@ -6,38 +6,50 @@ const productSchema = new mongoose.Schema({
     ar: { type: String, required: true },
     en: { type: String, required: true },
   },
+
   image: { type: String, default: "" },
+
   category: {
     type: String,
     enum: CATEGORIES.map((c) => c.en),
     required: true,
   },
+
   description: {
     ar: { type: String, required: true },
     en: { type: String, required: true },
   },
+
   isSpicy: { type: Boolean, default: false },
 
-  // 🧾 Base price (for products with no variations)
+  // 🧾 Base price (for products without variations)
   basePrice: { type: Number, required: true, min: 0 },
 
-  // 🍗 Optional price variations
-  hasTypeChoices: { type: Boolean, default: false }, // true if it has sandwich/meal types
-  hasProteinChoices: { type: Boolean, default: false }, // true if it has chicken/meat options
+  // 🍗 Variation flags
+  hasTypeChoices: { type: Boolean, default: false }, // sandwich / meal
+  hasProteinChoices: { type: Boolean, default: false }, // chicken / meat
 
-  // Nested optional price structure
+  // 🧮 Variation prices
   prices: {
     chicken: {
-      sandwich: { type: Number },
-      meal: { type: Number },
+      sandwich: { type: Number, min: 0 },
+      meal: { type: Number, min: 0 },
     },
     meat: {
-      sandwich: { type: Number },
-      meal: { type: Number },
+      sandwich: { type: Number, min: 0 },
+      meal: { type: Number, min: 0 },
     },
   },
 
   discount: { type: Number, default: 0, min: 0, max: 100 },
+
+  // 🧂 Additions specific to this product
+  additions: [
+    {
+      name: { type: String, required: true },
+      price: { type: Number, required: true, min: 0 },
+    },
+  ],
 });
 
 module.exports = mongoose.model("Product", productSchema);
