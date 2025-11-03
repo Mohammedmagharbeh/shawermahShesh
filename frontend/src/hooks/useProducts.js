@@ -58,6 +58,7 @@ export function useProducts(t, selectedCategory) {
     loading,
     error,
     fetchProducts,
+    setProducts,
     addProduct,
     updateProduct,
     deleteProduct,
