@@ -22,6 +22,7 @@ import Products from "./pages/Products";
 import { useUser } from "./contexts/UserContext";
 import AdminSlides from "./pages/AdminSlides";
 import AdminProductPanel from "./pages/MenuManagement/AdminProductPanel";
+import Story from "./pages/story";
 
 function App() {
   const { i18n } = useTranslation();
@@ -48,7 +49,7 @@ function App() {
             {!user && <Route path="/" element={<Home />} />}
             <Route path="/login" element={<Login />} />
             <Route path="/slides" element={<AdminSlides />} />
-
+            <Route path="/story" element={<Story />} />
             <Route
               path="/products"
               element={

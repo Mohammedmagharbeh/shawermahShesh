@@ -328,5 +328,38 @@
   "chicken": "Chicken",
   "sandwich": "Sandwich",
   "choose_protein": "Choose the category",
-  "choose_type": "Choose Type"
+  "choose_type": "Choose Type",
+
+
+
+   "story": {
+    "title": "Our Story",
+    "subtitle": "The Journey of Shawarma Sheesh from Dream to Reality",
+    "sections": [
+      {
+        "title": "The Beginning",
+        "content": "The story of Shawarma Sheesh began on March 29, 2021, during the COVID-19 pandemic Yet, those challenges became our greatest motivation With complete faith in God and a firm belief that dedication brings success, our journey took shape"
+      },
+      {
+        "title": "Clear Vision",
+        "content": "We started with one clear goal: to serve shawarma as it should be - unforgettable in flavor, authentic in identity Thanks to God's blessings and the trust of our guests, Shawarma Sheesh quickly grew into a leading brand"
+      },
+      {
+        "title": "Building & Development",
+        "content": "As demand grew, we built a foundation for sustainable excellence We established the largest call center in southern Jordan, then the central production facility, warehouses, and advanced cold storage systems"
+      },
+      {
+        "title": "Quality & Standards",
+        "content": "On September 25, 2024, Shawarma Sheesh proudly earned international ISO certifications from SGS, after full compliance across all operations"
+      },
+      {
+        "title": "Diversity & Excellence",
+        "content": "Building on our shawarma success, we introduced our Snacks Section Soon after, we launched our Burger Line, which became an instant favorite"
+      },
+      {
+        "title": "Today & Tomorrow",
+        "content": "Today, Shawarma Sheesh is more than a restaurant: it's a story of faith, quality, and evolution We continue to grow and innovate with the signature of Sheesh"
+      }
+    ]
+  }
 }

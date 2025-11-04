@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,15 +32,11 @@ function Header() {
   const { user, logout } = useUser();
   const { t } = useTranslation();
 
-  const handleLinkClick = () => {
-    setIsMenuOpen(false);
-  };
-
+  const handleLinkClick = () => setIsMenuOpen(false);
   const handleLogout = () => {
     logout();
     setIsMenuOpen(false);
   };
-
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   return (
@@ -50,6 +47,7 @@ function Header() {
     >
       <div className="container mx-auto px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-2 xs:py-3 sm:py-4">
         <div className="flex items-center justify-between gap-1 xs:gap-2 sm:gap-4 md:gap-6">
+          {/* Logo */}
           <Link
             to={user ? "/products" : "/"}
             className="flex-shrink-0 group min-w-0"
@@ -69,12 +67,13 @@ function Header() {
             </div>
           </Link>
 
+          {/* Desktop Links */}
           <div className="hidden lg:flex items-center gap-6">
             {!user &&
               PUBLIC_LINKS.map((key) => (
                 <NavLink
                   key={key.label}
-                  to={`/#${key.label}`}
+                  to={key.label === "our_story" ? "/story" : `/#${key.label}`}
                   label={t(key.label)}
                   onClick={handleLinkClick}
                   className="text-sm xl:text-base text-gray-700 hover:text-red-700 font-semibold transition-all duration-300 whitespace-nowrap relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-red-600 after:to-yellow-500 hover:after:w-full after:transition-all after:duration-300"
@@ -82,6 +81,7 @@ function Header() {
               ))}
           </div>
 
+          {/* User Icons */}
           <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-2">
             {user && user.role === "user" && (
               <Link to="/cart">
@@ -191,6 +191,7 @@ function Header() {
           </div>
         </div>
 
+        {/* Mobile Menu */}
         {isMenuOpen && (
           <div
             className={`lg:hidden mt-3 xs:mt-4 pb-3 xs:pb-4 border-t-2 ${
@@ -203,9 +204,7 @@ function Header() {
                   <NavLink
                     className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
                     key={key.label}
-                    to={`/#${
-                      key.label === "home" ? "home" : key.label.split("_")[0]
-                    }`}
+                    to={key.label === "our_story" ? "/story" : `/#${key.label}`}
                     label={t(key.label)}
                     onClick={handleLinkClick}
                   />
@@ -231,6 +230,7 @@ function Header() {
                       </div>
                     </Link>
                   ))}
+
                 {user ? (
                   <Button
                     variant="outline"
