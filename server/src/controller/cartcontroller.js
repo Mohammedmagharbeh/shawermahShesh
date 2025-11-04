@@ -211,6 +211,12 @@ exports.getCart = async (req, res) => {
         .status(200)
         .json({ message: "Cart is empty", cart: { products: [] } });
 
+    const filteredCartProducts = userCart.products.filter(
+      (cartProduct) => cartProduct.productId
+    );
+
+    userCart.products = filteredCartProducts;
+
     return res.status(200).json(userCart);
   } catch (error) {
     console.error("Error in getCart:", error);
