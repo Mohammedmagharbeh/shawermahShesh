@@ -57,8 +57,8 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
               <div className="flex gap-1 flex-wrap items-center">
                 <span className="text-sm text-gray-600">{t("additions")}:</span>
                 {product.additions.map((addition) => (
-                  <Badge key={addition._id} className="p-1">
-                    {addition.name}
+                  <Badge key={addition._id + addition.name} className="p-1">
+                    {addition.name[selectedLanguage]}
                   </Badge>
                 ))}
               </div>

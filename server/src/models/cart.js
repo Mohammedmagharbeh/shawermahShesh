@@ -18,24 +18,15 @@ const cartSchema = new mongoose.Schema(
 
         quantity: { type: Number, default: 1, min: 1 },
 
-        // 🧂 Selected additions for this product (from Product.additions)
-        // additions: [
-        //   {
-        //     name: { type: String, required: true },
-        //     price: { type: Number, required: true, min: 0 },
-        //     quantity: { type: Number, default: 1, min: 1 },
-        //   },
-        // ],
-
         additions: [
-        {
-          name: {
-            ar: { type: String, required: true },
-            en: { type: String, required: true },
+          {
+            name: {
+              ar: { type: String, required: true },
+              en: { type: String, required: true },
+            },
+            price: { type: Number, required: true, min: 0 },
           },
-          price: { type: Number, required: true, min: 0 },
-          _id: false 
-        },],
+        ],
         isSpicy: { type: Boolean, default: false },
         notes: { type: String, default: "" },
 

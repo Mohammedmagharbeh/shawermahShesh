@@ -159,6 +159,11 @@ function Checkout() {
       </div>
     );
 
+  if (!cart.products || cart?.products?.length < 1) {
+    navigate("/products");
+    return;
+  }
+
   return (
     <form
       className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50"
@@ -340,8 +345,9 @@ function Checkout() {
                         <ul className="mt-2 text-sm text-gray-600 list-disc list-inside flex gap-2">
                           {product.additions.map((addition, i) => (
                             <Badge key={i}>
-                              {addition.name || "Addition"} (
-                              {addition.price?.toFixed(2) || "0.00"} JOD)
+                              {addition.name[selectedLanguage] ||
+                                "Deleted Addition"}{" "}
+                              ({addition.price?.toFixed(2) || "0.00"} JOD)
                             </Badge>
                           ))}
                         </ul>
