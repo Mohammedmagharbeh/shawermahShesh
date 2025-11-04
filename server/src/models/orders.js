@@ -13,20 +13,14 @@ const ordersSchema = new mongoose.Schema(
         quantity: { type: Number, required: true, default: 1, min: 1 },
         additions: [
           {
-            addition: {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: "additions",
+            name: {
+              ar: { type: String, trim: true },
+              en: { type: String, trim: true },
             },
-            quantity: { type: Number, default: 1 },
+            price: Number,
           },
         ],
-        additions: [
-          {
-            name: { type: String, required: true },
-            price: { type: Number, required: true, min: 0 },
-            quantity: { type: Number, default: 1, min: 1 },
-          },
-        ],
+
         priceAtPurchase: { type: Number, required: true },
         isSpicy: { type: Boolean, default: false },
         notes: { type: String, default: "" },

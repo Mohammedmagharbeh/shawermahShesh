@@ -1,142 +1,25 @@
 const Order = require("../models/orders");
 const User = require("../models/user");
-const productsModel = require("../models/products");
-const locationsModel = require("../models/locations");
-const additionsModel = require("../models/additions");
-const { default: mongoose } = require("mongoose");
+const Product = require("../models/products");
+const Location = require("../models/locations");
 const counterModel = require("../models/counter");
+const mongoose = require("mongoose");
 
-// get order by id
-exports.getOrderById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (!id) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Order ID is required" });
-    }
+// --------------------- HELPERS --------------------- //
 
-    const order = await Order.findById(id)
-      .populate("products.productId")
-      .populate("products.additions")
-      .populate("userId")
-      .populate("shippingAddress")
-      .lean();
+// Validate ObjectId
+const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
-    if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
-    }
+// Fetch user
+const findUser = async (userId) => User.findById(userId);
 
-    res.status(200).json({ success: true, data: order });
-  } catch (error) {
-    console.error("Error in getOrderById:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
+// Fetch products from DB
+const fetchProductsByIds = async (ids) => Product.find({ _id: { $in: ids } });
 
-// get orders by user id
-// exports.getOrdersByUserId = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
+// Fetch location
+const findLocation = async (locationId) => Location.findById(locationId);
 
-//     if (!userId) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "User ID is required" });
-//     }
-
-//     // ✅ Validate ObjectId
-//     if (!mongoose.Types.ObjectId.isValid(userId)) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Invalid User ID" });
-//     }
-
-//     const foundUser = await User.findById(userId);
-//     if (!foundUser) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "User not found" });
-//     }
-
-//     const userOrders = await Order.find({ userId })
-//       .populate("products.productId")
-//       .populate("products.additions")
-//       .populate("shippingAddress")
-//       .sort({ createdAt: -1 });
-
-//     if (!userOrders.length) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "No orders found for this user" });
-//     }
-
-//     res.status(200).json({ success: true, data: userOrders });
-//   } catch (error) {
-//     console.error("Error in getOrdersByUserId:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// };
-
-// get all orders
-exports.getAllOrders = async (req, res) => {
-  try {
-    const { status } = req.query;
-    let filter = {};
-    if (status) {
-      filter.status = status;
-    }
-
-    const orders = await Order.find(filter)
-      .populate("products.productId")
-      // .populate("products.additions")
-      .populate("userId", "phone name") // 🟢 جلب الاسم والهاتف مباشرة
-      .populate("shippingAddress")
-      .lean()
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({ success: true, count: orders.length, data: orders });
-  } catch (error) {
-    console.error("Error in getAllOrders:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-// get orders by user id
-exports.getOrdersByUserId = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    if (!userId)
-      return res
-        .status(400)
-        .json({ success: false, message: "User ID is required" });
-    if (!mongoose.Types.ObjectId.isValid(userId))
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid User ID" });
-
-    const foundUser = await User.findById(userId);
-    if (!foundUser)
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-
-    const userOrders = await Order.find({ userId })
-      .populate("products.productId")
-      .populate("products.additions")
-      .populate("shippingAddress")
-      .sort({ createdAt: -1 })
-      .lean();
-
-    res.status(200).json({ success: true, data: userOrders });
-  } catch (error) {
-    console.error("Error in getOrdersByUserId:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
+// Generate daily sequence
 async function getNextDailySequence() {
   const todayStr = new Date().toISOString().split("T")[0];
   const counter = await counterModel.findOneAndUpdate(
@@ -147,7 +30,148 @@ async function getNextDailySequence() {
   return counter.sequence;
 }
 
-// create new order
+// Enrich products with price, additions, etc.
+const enrichProducts = (productsInput, dbProducts, orderType, userDetails) => {
+  return productsInput.map((p) => {
+    const productId = p.productId._id || p.productId;
+    const matchedProduct = dbProducts.find(
+      (dp) => dp._id.toString() === productId.toString()
+    );
+
+    const selectedAdditions = (p.additions || [])
+      .map((add) =>
+        matchedProduct.additions.find(
+          (a) => a._id.toString() === add._id.toString()
+        )
+      )
+      .filter(Boolean)
+      .map((a) => ({
+        _id: a._id,
+        name: a.name,
+        price: a.price, // Make sure the price is included
+      }));
+
+    // Base price
+    let basePrice = matchedProduct.basePrice;
+    if (matchedProduct.hasTypeChoices || matchedProduct.hasProteinChoices) {
+      const protein = p.selectedProtein || "chicken";
+      const type = p.selectedType || "sandwich";
+      basePrice = matchedProduct.prices?.[protein]?.[type] || basePrice;
+    }
+
+    const discountedPrice =
+      matchedProduct.discount > 0
+        ? basePrice - (matchedProduct.discount * basePrice) / 100
+        : basePrice;
+
+    return {
+      productId,
+      quantity: p.quantity,
+      additions: selectedAdditions,
+      priceAtPurchase: discountedPrice,
+      isSpicy: p.isSpicy || false,
+      notes: p.notes || "",
+      orderType,
+      userDetails,
+      selectedProtein: p.selectedProtein || null,
+      selectedType: p.selectedType || null,
+    };
+  });
+};
+
+// Calculate total price
+const calculateTotalPrice = (products, deliveryCost = 0) => {
+  return (
+    products.reduce((total, product) => {
+      const additionsTotal = (product.additions || []).reduce(
+        (sum, add) => sum + add.price,
+        0
+      );
+      const productTotal =
+        (product.priceAtPurchase + additionsTotal) * product.quantity;
+      return total + productTotal;
+    }, 0) + deliveryCost
+  );
+};
+
+// --------------------- CONTROLLERS --------------------- //
+
+// GET order by ID
+exports.getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id || !isValidId(id))
+      return res
+        .status(400)
+        .json({ success: false, message: "Valid Order ID is required" });
+
+    const order = await Order.findById(id)
+      .populate("products.productId")
+      .populate("userId")
+      .populate("shippingAddress")
+      .lean();
+
+    if (!order)
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+
+    res.status(200).json({ success: true, data: order });
+  } catch (err) {
+    console.error("getOrderById error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// GET all orders (optional status filter)
+exports.getAllOrders = async (req, res) => {
+  try {
+    const { status } = req.query;
+    const filter = status ? { status } : {};
+
+    const orders = await Order.find(filter)
+      .populate("products.productId")
+      .populate("userId", "phone name")
+      .populate("shippingAddress")
+      .lean()
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, count: orders.length, data: orders });
+  } catch (err) {
+    console.error("getAllOrders error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// GET orders by user ID
+exports.getOrdersByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId || !isValidId(userId))
+      return res
+        .status(400)
+        .json({ success: false, message: "Valid User ID is required" });
+
+    const user = await findUser(userId);
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+
+    const orders = await Order.find({ userId })
+      .populate("products.productId")
+      .populate("shippingAddress")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({ success: true, data: orders });
+  } catch (err) {
+    console.error("getOrdersByUserId error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// CREATE order
 exports.createOrder = async (req, res) => {
   try {
     const {
@@ -163,7 +187,6 @@ exports.createOrder = async (req, res) => {
       userDetails,
     } = req.body;
 
-    // 🛑 Basic validation
     if (
       !userId ||
       !products?.length ||
@@ -172,120 +195,70 @@ exports.createOrder = async (req, res) => {
       !orderType ||
       !userDetails?.name
     ) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required fields",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
     }
 
-    // ✅ Validate user
     const foundUser = await User.findById(userId);
     if (!foundUser)
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
 
-    // ✅ Validate shipping address
-    const location = await locationsModel.findById(shippingAddress);
+    const location = await Location.findById(shippingAddress);
     if (!location)
-      return res.status(400).json({
-        success: false,
-        message: "Invalid shipping address",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid shipping address" });
 
-    // ✅ Get product IDs and fetch from DB
-    const productIds = products.map((p) =>
-      typeof p.productId === "object" ? p.productId._id : p.productId
-    );
-    const uniqueProductIds = [...new Set(productIds)];
+    const productIds = products.map((p) => p.productId);
+    const dbProducts = await Product.find({ _id: { $in: productIds } });
 
-    const dbProducts = await productsModel.find({
-      _id: { $in: uniqueProductIds },
-    });
-    const dbProductIds = dbProducts.map((p) => p._id.toString());
-
-    // ✅ Check for missing products
-    const missingProducts = uniqueProductIds.filter(
-      (pid) => !dbProductIds.includes(pid)
-    );
-    if (missingProducts.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: `Products not found: ${missingProducts.join(", ")}`,
-      });
-    }
-
-    // ✅ Enrich products
+    // Enrich products
     const enrichedProducts = products.map((p) => {
-      const productId =
-        typeof p.productId === "object" ? p.productId._id : p.productId;
       const matchedProduct = dbProducts.find(
-        (dp) => dp._id.toString() === productId.toString()
+        (dp) => dp._id.toString() === p.productId
       );
 
-      // ✅ Match selected additions against product's own additions
-      const selectedAdditions = (p.additions || [])
-        .map((addId) => {
-          const additionObj = matchedProduct.additions.find(
-            (a) => a._id.toString() === addId._id.toString()
-          );
-          return additionObj
-            ? {
-                _id: additionObj._id,
-                name: additionObj.name,
-                price: additionObj.price,
-              }
-            : null;
-        })
-        .filter(Boolean);
-
-      // ✅ Determine product price based on type/protein
       let basePrice = matchedProduct.basePrice;
       if (matchedProduct.hasTypeChoices || matchedProduct.hasProteinChoices) {
         const protein = p.selectedProtein || "chicken";
         const type = p.selectedType || "sandwich";
-
-        const variationPrice =
-          matchedProduct.prices?.[protein]?.[type] ||
-          matchedProduct.prices?.[type] ||
-          matchedProduct.basePrice;
-
-        basePrice = variationPrice;
+        basePrice =
+          matchedProduct.prices?.[protein]?.[type] || matchedProduct.basePrice;
       }
 
-      // ✅ Apply discount
-      const discountedPrice =
-        matchedProduct.discount && matchedProduct.discount > 0
-          ? basePrice - (matchedProduct.discount * basePrice) / 100
-          : basePrice;
+      const discountedPrice = matchedProduct.discount
+        ? basePrice - (basePrice * matchedProduct.discount) / 100
+        : basePrice;
 
-      // ✅ Return enriched item
+      // Use full addition objects from cart
+      const additions = p.additions || [];
+
       return {
-        productId,
+        productId: p.productId,
         quantity: p.quantity,
-        additions: selectedAdditions,
+        additions,
         priceAtPurchase: discountedPrice,
         isSpicy: p.isSpicy || false,
         notes: p.notes || "",
-        orderType,
-        userDetails,
         selectedProtein: p.selectedProtein || null,
         selectedType: p.selectedType || null,
       };
     });
 
-    // ✅ Calculate total
-    const productsTotal = enrichedProducts.reduce((sum, p) => {
-      const additionsSum = p.additions.reduce(
-        (aSum, add) => aSum + add.price,
-        0
-      );
-      return sum + (p.priceAtPurchase + additionsSum) * p.quantity;
-    }, 0);
+    // Calculate total price
+    const totalPrice =
+      enrichedProducts.reduce((sum, p) => {
+        const additionsTotal = (p.additions || []).reduce(
+          (aSum, a) => aSum + a.price,
+          0
+        );
+        return sum + (p.priceAtPurchase + additionsTotal) * p.quantity;
+      }, 0) + location.deliveryCost;
 
-    const totalPrice = productsTotal + location.deliveryCost;
-
-    // ✅ Create order
+    // Create order
     const newOrder = await Order.create({
       userId,
       products: enrichedProducts,
@@ -303,28 +276,26 @@ exports.createOrder = async (req, res) => {
       sequenceNumber: await getNextDailySequence(),
     });
 
-    // ✅ Populate for frontend
     const populatedOrder = await newOrder.populate([
       { path: "products.productId" },
       { path: "userId" },
       { path: "shippingAddress" },
     ]);
 
-    // ✅ Notify admins if using socket.io
+    // Notify admins via socket.io
     const io = req.app.get("io");
     if (io) io.emit("newOrder", populatedOrder);
 
     res.status(201).json({ success: true, data: populatedOrder });
   } catch (error) {
-    console.error("❌ Error in createOrder:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Server error",
-    });
+    console.error("Error in createOrder:", error);
+    res
+      .status(500)
+      .json({ success: false, message: error.message || "Server error" });
   }
 };
 
-// update order
+// UPDATE order
 exports.updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
@@ -337,49 +308,46 @@ exports.updateOrder = async (req, res) => {
       "totalPrice",
     ];
     const updates = {};
-    allowedUpdates.forEach((field) => {
-      if (body[field] !== undefined) updates[field] = body[field];
-    });
 
-    if (Object.keys(updates).length === 0) {
+    allowedUpdates.forEach(
+      (f) => body[f] !== undefined && (updates[f] = body[f])
+    );
+    if (!Object.keys(updates).length)
       return res.status(400).json({ message: "No valid fields to update" });
-    }
 
     const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
       new: true,
     })
       .populate("products.productId")
-      .populate("products.additions")
       .populate("userId")
       .populate("shippingAddress");
 
-    if (!updatedOrder) {
+    if (!updatedOrder)
       return res.status(404).json({ message: "Order not found" });
-    }
 
+    // Send OTP if status confirmed
     if (updates.status === "Confirmed") {
       const { sendOrderConfirm } = require("../utils/otp");
       await sendOrderConfirm(updatedOrder.userId.phone);
     }
 
     res.status(200).json(updatedOrder);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    console.error("updateOrder error:", err);
+    res.status(500).json({ message: err.message });
   }
 };
 
-// delete order
+// DELETE order
 exports.deleteOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedOrder = await Order.findByIdAndDelete(id);
-
-    if (!deletedOrder) {
+    if (!deletedOrder)
       return res.status(404).json({ message: "Order not found" });
-    }
-
     res.status(200).json(deletedOrder);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    console.error("deleteOrder error:", err);
+    res.status(500).json({ message: err.message });
   }
 };

@@ -332,12 +332,22 @@ function Checkout() {
 
                       {/*order details*/}
                       <div className="flex gap-1 mt-1">
-                        {product.isSpicy !== null && (
-                          <Badge>{product.isSpicy ? "حار" : "عادي"}</Badge>
+                        {product.productId.isSpicy && (
+                          <Badge variant="secondary">
+                            {product.isSpicy ? "حار" : "عادي"}
+                          </Badge>
                         )}
 
-                        <Badge>{t(product.selectedType)}</Badge>
-                        <Badge>{t(product.selectedProtein)}</Badge>
+                        {product.productId.hasTypeChoices && (
+                          <Badge variant="secondary">
+                            {t(product.selectedType)}
+                          </Badge>
+                        )}
+                        {product.productId.hasProteinChoices && (
+                          <Badge variant="secondary">
+                            {t(product.selectedProtein)}
+                          </Badge>
+                        )}
                       </div>
 
                       {/* 🧀 عرض الإضافات */}

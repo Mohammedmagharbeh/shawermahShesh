@@ -20,7 +20,9 @@ exports.postEat = async (req, res) => {
       additions = [],
     } = req.body;
 
-    // 🔍 Validate required fields
+    // ================================
+    // ✅ Validate required fields
+    // ================================
     if (
       !name?.ar ||
       !name?.en ||
@@ -31,43 +33,87 @@ exports.postEat = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // 🔍 Validate category
+    // ================================
+    // ✅ Validate category
+    // ================================
     const matchedCategory = CATEGORIES.find((c) => c.en === category);
     if (!matchedCategory) {
       return res.status(400).json({ message: "Invalid category" });
     }
 
-    // 📸 Upload image if provided
-    let imageUrl = "";
-    if (image) {
-      const uploadResponse = await cloudinary.uploader.upload(image, {
-        folder: "products",
-      });
-      imageUrl = uploadResponse.secure_url;
+    // ================================
+    // ✅ Normalize booleans
+    // ================================
+    const spicy = Boolean(isSpicy);
+    const proteinChoices = Boolean(hasProteinChoices);
+    const typeChoices = Boolean(hasTypeChoices);
+
+    // ================================
+    // ✅ Parse prices if string
+    // ================================
+    let parsedPrices = {};
+    try {
+      parsedPrices =
+        typeof prices === "string" ? JSON.parse(prices) : prices || {};
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid prices format" });
     }
 
-    // 🧾 Create product
+    // ================================
+    // ✅ Validate additions array
+    // ================================
+    if (!Array.isArray(additions)) {
+      return res.status(400).json({ message: "Additions must be an array" });
+    }
+
+    for (const add of additions) {
+      if (!add?.name?.ar || !add?.name?.en || add.price == null) {
+        return res.status(400).json({
+          message: "Each addition must have { name: {ar,en}, price }",
+        });
+      }
+    }
+
+    // ================================
+    // ✅ Upload image if base64
+    // ================================
+    let imageUrl = "";
+    if (image) {
+      if (image.startsWith("data:image")) {
+        const uploadResponse = await cloudinary.uploader.upload(image, {
+          folder: "products",
+        });
+        imageUrl = uploadResponse.secure_url;
+      } else {
+        // If it's already a URL, keep it
+        imageUrl = image;
+      }
+    }
+
+    // ================================
+    // ✅ Save product
+    // ================================
     const createdProduct = await products.create({
       name,
       description,
       basePrice: Number(basePrice) || 0,
-      prices: prices || {},
+      prices: parsedPrices,
       discount: Number(discount) || 0,
       image: imageUrl,
       category: matchedCategory.en,
-      isSpicy,
-      hasProteinChoices,
-      hasTypeChoices,
-      additions, // Expected as array of { addition: ObjectId, price: Number }
+      isSpicy: spicy,
+      hasProteinChoices: proteinChoices,
+      hasTypeChoices: typeChoices,
+      additions, // embedded additions
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "✅ Product created successfully",
       data: createdProduct,
     });
   } catch (error) {
     console.error("❌ Error in postEat:", error);
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -89,7 +135,9 @@ exports.updatedfood = async (req, res) => {
       additions = [],
     } = req.body;
 
-    // 🔍 Validate required fields
+    // ================================
+    // ✅ Validate required fields
+    // ================================
     if (
       !name?.ar ||
       !name?.en ||
@@ -102,14 +150,44 @@ exports.updatedfood = async (req, res) => {
         .json({ message: "All required fields must be provided" });
     }
 
-    // 🔍 Validate category
+    // ================================
+    // ✅ Validate category
+    // ================================
     const matchedCategory = CATEGORIES.find((c) => c.en === category);
     if (!matchedCategory) {
       return res.status(400).json({ message: "Invalid category" });
     }
 
-    // 📸 Only upload new image if it’s different (base64)
-    let imageUrl;
+    // ================================
+    // ✅ Parse prices if needed
+    // ================================
+    let parsedPrices = {};
+    try {
+      parsedPrices =
+        typeof prices === "string" ? JSON.parse(prices) : prices || {};
+    } catch {
+      return res.status(400).json({ message: "Invalid prices format" });
+    }
+
+    // ================================
+    // ✅ Validate additions array
+    // ================================
+    if (!Array.isArray(additions)) {
+      return res.status(400).json({ message: "Additions must be an array" });
+    }
+
+    for (const add of additions) {
+      if (!add?.name?.ar || !add?.name?.en || add.price == null) {
+        return res.status(400).json({
+          message: "Each addition must have { name: {ar,en}, price }",
+        });
+      }
+    }
+
+    // ================================
+    // ✅ Upload new image if base64
+    // ================================
+    let imageUrl = undefined;
     if (image && image.startsWith("data:image")) {
       const uploadResponse = await cloudinary.uploader.upload(image, {
         folder: "products",
@@ -117,22 +195,27 @@ exports.updatedfood = async (req, res) => {
       imageUrl = uploadResponse.secure_url;
     }
 
-    // 🧾 Prepare update data
+    // ================================
+    // ✅ Build update object
+    // ================================
     const updatedData = {
       name,
       description,
       basePrice: Number(basePrice) || 0,
       discount: Number(discount) || 0,
-      prices: prices || {},
+      prices: parsedPrices,
       category: matchedCategory.en,
-      isSpicy: !!isSpicy,
-      hasProteinChoices: !!hasProteinChoices,
-      hasTypeChoices: !!hasTypeChoices,
+      isSpicy: Boolean(isSpicy),
+      hasProteinChoices: Boolean(hasProteinChoices),
+      hasTypeChoices: Boolean(hasTypeChoices),
       additions,
     };
 
     if (imageUrl) updatedData.image = imageUrl;
 
+    // ================================
+    // ✅ Update DB
+    // ================================
     const updatedProduct = await products.findByIdAndUpdate(id, updatedData, {
       new: true,
       runValidators: true,
@@ -142,7 +225,7 @@ exports.updatedfood = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "✅ Product updated successfully",
       data: updatedProduct,
     });

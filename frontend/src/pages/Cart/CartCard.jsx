@@ -45,12 +45,18 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
             </h3>
 
             <div className="grid w-full gap-1 text-white">
-              <Badge variant="secondary">
-                {product.isSpicy ? "حار" : "عادي"}
-              </Badge>
+              {product.productId.isSpicy && (
+                <Badge variant="secondary">
+                  {product.isSpicy ? "حار" : "عادي"}
+                </Badge>
+              )}
 
-              <Badge variant="secondary">{t(product.selectedType)}</Badge>
-              <Badge variant="secondary">{t(product.selectedProtein)}</Badge>
+              {product.productId.hasTypeChoices && (
+                <Badge variant="secondary">{t(product.selectedType)}</Badge>
+              )}
+              {product.productId.hasProteinChoices && (
+                <Badge variant="secondary">{t(product.selectedProtein)}</Badge>
+              )}
             </div>
 
             {product.additions && product.additions.length > 0 && (

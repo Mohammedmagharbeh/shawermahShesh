@@ -516,16 +516,16 @@ function AdminDashboard() {
                                   {t("additions")}:
                                   {item.additions.map((addition) => (
                                     <Badge key={addition._id} className="p-1">
-                                      {addition.name}
+                                      {addition.name[selectedLanguage]}
                                     </Badge>
                                   ))}
                                 </div>
                               )}
                               <div className="flex gap-1">
-                                {item.selectedType && (
+                                {item.productId.hasTypeChoices && (
                                   <Badge>{t(item.selectedType)}</Badge>
                                 )}
-                                {item.selectedProtein && (
+                                {item.productId.hasProteinChoices && (
                                   <Badge>{t(item.selectedProtein)}</Badge>
                                 )}
                               </div>

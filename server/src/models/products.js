@@ -16,8 +16,8 @@ const productSchema = new mongoose.Schema({
   },
 
   description: {
-    ar: { type: String, required: true },
-    en: { type: String, required: true },
+    ar: { type: String, required: true, trim: true },
+    en: { type: String, required: true, trim: true },
   },
 
   isSpicy: { type: Boolean, default: false },
@@ -43,23 +43,15 @@ const productSchema = new mongoose.Schema({
 
   discount: { type: Number, default: 0, min: 0, max: 100 },
 
-  // 🧂 Additions specific to this product
-  // additions: [
-  //   {
-  //     name: { type: String, required: true },
-  //     price: { type: Number, required: true, min: 0 },
-  //   },
-  // ],
   additions: [
-  {
-    name: {
-      ar: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
+    {
+      name: {
+        ar: { type: String, required: true, trim: true },
+        en: { type: String, required: true, trim: true },
+      },
+      price: { type: Number, required: true, min: 0 },
     },
-    price: { type: Number, required: true, min: 0 },
-  },
-],
-
+  ],
 });
 
 module.exports = mongoose.model("Product", productSchema);

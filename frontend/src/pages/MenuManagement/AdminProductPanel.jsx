@@ -1,6 +1,5 @@
 import { useState } from "react";
 import ProductManagement from "./ProductManagement";
-// import AdditionsManagement from "./AdditionsManagement";
 import ProductsList from "./ProductsList";
 import Header from "./Header";
 import { INITIAL_FORM_DATA } from "@/constants";
@@ -24,10 +23,7 @@ export default function AdminProductPanel() {
             {...handlers}
           />
 
-          {/* <div className="lg:col-span-2 space-y-4 sm:space-y-6"> */}
-          {/* <AdditionsManagement /> */}
           <ProductsList products={products} {...handlers} />
-          {/* </div> */}
         </div>
       </div>
     </div>

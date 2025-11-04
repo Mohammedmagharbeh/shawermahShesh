@@ -21,8 +21,8 @@ const cartSchema = new mongoose.Schema(
         additions: [
           {
             name: {
-              ar: { type: String, required: true },
-              en: { type: String, required: true },
+              ar: { type: String, required: true, trim: true },
+              en: { type: String, required: true, trim: true },
             },
             price: { type: Number, required: true, min: 0 },
           },
@@ -32,11 +32,13 @@ const cartSchema = new mongoose.Schema(
 
         selectedProtein: {
           type: String,
-          enum: ["chicken", "meat", null],
+          enum: ["chicken", "meat"],
+          defaultV: null,
         },
         selectedType: {
           type: String,
-          enum: ["sandwich", "meal", null],
+          enum: ["sandwich", "meal"],
+          default: null,
         },
       },
     ],
