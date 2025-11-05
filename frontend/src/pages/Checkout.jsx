@@ -460,7 +460,7 @@ function Checkout() {
               </div>
 
               <button
-                className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-red-600 hover:to-red-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
+                className={`w-full bg-gradient-to-r ${loading ? "from-gray-500 to bg-gray-600" : "from-red-500 to-red-600"} text-white py-4 px-8 rounded-xl font-bold text-lg ${loading ? "hover:from-gray-600 hover:to-gray-700" : "hover:from-red-600 hover:to-red-700"} transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl`}
                 type="submit"
                 disabled={loading}
               >
