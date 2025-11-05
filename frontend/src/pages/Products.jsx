@@ -40,13 +40,13 @@ export default function Products() {
     <div className="min-h-screen bg-gray-50 arabic-font" dir="rtl">
       <div className="container mx-auto px-4 py-10">
         <div className="mb-6">
-          <input
+          {/* <input
             type="text"
             placeholder={t("search_your_favorite_dish")}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent bg-white"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          /> */}
         </div>
 
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">

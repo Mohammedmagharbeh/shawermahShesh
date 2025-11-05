@@ -61,9 +61,8 @@ export function ProductDialog({ id, triggerLabel }) {
     setQuantity((prev) => Math.max(1, prev + increment));
   };
 
-  // ✅ Determine the current price dynamically
+  // سعر الوجبة بعد الخصم إذا موجود
   const getCurrentPrice = () => {
-    // if both choices exist
     if (product.hasProteinChoices && product.hasTypeChoices) {
       return (
         product.prices?.[selectedProtein]?.[selectedType] ||
@@ -71,15 +70,12 @@ export function ProductDialog({ id, triggerLabel }) {
         0
       );
     }
-    // if only type choices
     if (product.hasTypeChoices) {
       return product.prices?.[selectedType] || product.basePrice || 0;
     }
-    // if only protein choices
     if (product.hasProteinChoices) {
       return product.prices?.[selectedProtein] || product.basePrice || 0;
     }
-    // otherwise just base price
     return product.basePrice || 0;
   };
 
@@ -89,6 +85,17 @@ export function ProductDialog({ id, triggerLabel }) {
       return price - (price * product.discount) / 100;
     }
     return price;
+  };
+
+  // السعر النهائي شامل الإضافات × الكمية
+  const getTotalPrice = () => {
+    const basePrice = getFinalPrice();
+    const additionsPrice = selectedAdditions.reduce((sum, additionId) => {
+      const addition = product.additions?.find((a) => a._id === additionId);
+      return sum + (addition ? Number(addition.price) : 0);
+    }, 0);
+
+    return (basePrice + additionsPrice) * quantity;
   };
 
   const handleAddToCart = () => {
@@ -104,6 +111,8 @@ export function ProductDialog({ id, triggerLabel }) {
       notes,
       { selectedProtein, selectedType }
     );
+
+    // إعادة تعيين القيم
     setSelectedAdditions([]);
     setSpicy(null);
     setSelectedProtein("chicken");
@@ -276,9 +285,6 @@ export function ProductDialog({ id, triggerLabel }) {
                         }
                       }}
                     />
-                    {/* <Label htmlFor={addition._id} className="text-gray-700">
-                      {addition.name} (JOD {addition.price.toFixed(2)})
-                    </Label> */}
                     <Label htmlFor={addition._id} className="text-gray-700">
                       {addition.name?.[selectedLanguage]} (JOD{" "}
                       {Number(addition.price).toFixed(2)})
@@ -323,8 +329,7 @@ export function ProductDialog({ id, triggerLabel }) {
                     className="flex-1 bg-red-600 text-white h-12 text-lg font-semibold"
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
-                    {t("add_to_cart")} JOD{" "}
-                    {(getFinalPrice() * quantity).toFixed(2)}
+                    {t("add_to_cart")} JOD {getTotalPrice().toFixed(2)}
                   </Button>
                 </div>
               </div>

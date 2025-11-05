@@ -1,6 +1,3 @@
-
-"use client"
-
 import { useState, useEffect } from "react"
 import { Facebook, Instagram } from "lucide-react"
 import { motion } from "framer-motion"
@@ -8,12 +5,34 @@ import { useTranslation } from "react-i18next"
 
 function Story() {
   const { t, i18n } = useTranslation()
-  const [language, setLanguage] = useState("ar")
+  
+  // جلب اللغة المحفوظة أو استخدام اللغة الحالية
+  const [language, setLanguage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selectedLanguage') || i18n.language;
+    }
+    return i18n.language;
+  });
 
-  // تغيير اللغة عند اختيار المستخدم
+  // تغيير اللغة وحفظها
   useEffect(() => {
     i18n.changeLanguage(language)
+    localStorage.setItem('selectedLanguage', language)
   }, [language, i18n])
+
+  // دالة لتغيير اللغة من المفتاح الخارجي
+  const handleLanguageChange = (newLanguage) => {
+    setLanguage(newLanguage);
+  }
+
+  // الاستماع لتغييرات اللغة من المفتاح الخارجي
+  useEffect(() => {
+    // إذا كانت اللغة في i18n تغيرت من مصدر خارجي
+    if (i18n.language !== language) {
+      setLanguage(i18n.language);
+      localStorage.setItem('selectedLanguage', i18n.language);
+    }
+  }, [i18n.language]);
 
   // أيقونة واتساب
   const WhatsAppIcon = ({ className }) => (
@@ -26,8 +45,6 @@ function Story() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* أزرار اللغة */}
-
       {/* العنوان */}
       <div className="bg-gradient-to-b from-[#b80505] to-[#dc0606] text-white py-12 px-6">
         <motion.div
@@ -53,11 +70,10 @@ function Story() {
               viewport={{ once: true, margin: "-100px" }}
               className="group"
             >
-             <div
-  className="bg-white border-l-4 border-[#dc0606] rounded-lg p-8 hover:shadow-lg transition-all duration-300 hover:border-yellow-400"
-  style={{ direction: language === "ar" ? "rtl" : "ltr" }}
->
-
+              <div
+                className="bg-white border-l-4 border-[#dc0606] rounded-lg p-8 hover:shadow-lg transition-all duration-300 hover:border-yellow-400"
+                style={{ direction: language === "ar" ? "rtl" : "ltr" }}
+              >
                 <motion.h2
                   whileHover={{ color: "#dc0606" }}
                   className="text-2xl md:text-3xl font-bold text-[#dc0606] mb-4"
@@ -72,7 +88,7 @@ function Story() {
       </div>
 
       {/* الفوتر */}
-       <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col-reverse md:flex-row items-center justify-between relative text-center md:text-left gap-8">
             {/* شعار Yalla Sheesh */}
@@ -84,35 +100,29 @@ function Story() {
                 loading="lazy"
               />
               {/* مواقع التواصل */}
-                         <div className="flex gap-3 sm:gap-4 mt-4 justify-center md:justify-start w-full flex-wrap">
-                           {/* Facebook */}
-                           <a
-                             href="https://www.facebook.com/sheesh.jo"
-                             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
-                           >
-                             <Facebook className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                           </a>
-             
-                           {/* WhatsApp */}
-                           <a
-                             href="https://api.whatsapp.com/send?phone=96232019099"
-                             target="_blank"
-                             rel="noopener noreferrer"
-                             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
-                           >
-                             <WhatsAppIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                           </a>
-             
-                           {/* Instagram */}
-                           <a
-                             href="https://www.instagram.com/SHAWERMASHEESH/"
-                             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-pink-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
-                           >
-                             <Instagram className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                           </a>
-                         </div>
-                       </div>
-             
+              <div className="flex gap-3 sm:gap-4 mt-4 justify-center md:justify-start w-full flex-wrap">
+                <a
+                  href="https://www.facebook.com/sheesh.jo"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                >
+                  <Facebook className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </a>
+                <a
+                  href="https://api.whatsapp.com/send?phone=96232019099"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                >
+                  <WhatsAppIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                </a>
+                <a
+                  href="https://www.instagram.com/SHAWERMASHEESH/"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-800 hover:bg-pink-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                >
+                  <Instagram className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </a>
+              </div>
+            </div>
 
             <div className="text-center md:absolute md:left-[35%] md:top-[50%]">
               <p className="white text-xs sm:text-sm">
