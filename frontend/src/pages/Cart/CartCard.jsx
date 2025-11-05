@@ -70,7 +70,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
                   >
                     {addition.name[selectedLanguage]}
                     <span className="opacity-70">·</span>
-                    {addition.price.toFixed(2)} JOD
+                    {addition.price?.toFixed(2)} JOD
                   </Badge>
                 ))}
               </div>
@@ -91,11 +91,11 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
           <div className="flex flex-col items-end lg:items-center">
             {product?.productId?.discount > 0 && (
               <span className="text-sm text-gray-400 line-through">
-                {basePrice.toFixed(2)} JOD
+                {basePrice?.toFixed(2)} JOD
               </span>
             )}
             <span className="text-xl font-bold text-red-600">
-              {getProductPrice(product).toFixed(2)} JOD
+              {getProductPrice(product)?.toFixed(2)} JOD
             </span>
           </div>
         </div>
@@ -132,7 +132,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
           </span>
 
           <span className="text-2xl font-extrabold text-red-600">
-            {(calculateSubtotal(product) * product.quantity).toFixed(2)} JOD
+            {(calculateSubtotal(product) * product.quantity)?.toFixed(2)} JOD
           </span>
         </div>
       </div>
