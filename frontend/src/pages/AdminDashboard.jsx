@@ -522,10 +522,10 @@ function AdminDashboard() {
                                 </div>
                               )}
                               <div className="flex gap-1">
-                                {item.productId.hasTypeChoices && (
+                                {item.productId?.hasTypeChoices && (
                                   <Badge>{t(item.selectedType)}</Badge>
                                 )}
-                                {item.productId.hasProteinChoices && (
+                                {item.productId?.hasProteinChoices && (
                                   <Badge>{t(item.selectedProtein)}</Badge>
                                 )}
                               </div>
