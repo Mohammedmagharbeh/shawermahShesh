@@ -92,19 +92,28 @@ export const INITIAL_FORM_DATA = {
 };
 
 export const getProductPrice = (product) => {
-  if (!product.productId.hasProteinChoices && !product.productId.hasTypeChoices)
-    return product.productId.basePrice;
+  if (!product.productId) return 0;
 
-  if (product.productId.hasProteinChoices && product.productId.hasTypeChoices)
-    return product.productId.prices[product.selectedProtein][
-      product.selectedType
-    ];
+  let basePrice = Number(product.productId.basePrice || 0);
 
-  if (product.hasProteinChoices)
-    return product.productId.prices[product.selectedProtein];
+  const pId = product.productId;
 
-  if (product.hasTypeChoices)
-    return product.productId.prices[product.selectedType];
+  if (pId.hasProteinChoices && pId.hasTypeChoices) {
+    basePrice = Number(
+      pId.prices?.[product.selectedProtein]?.[product.selectedType] ?? basePrice
+    );
+  } else if (pId.hasProteinChoices) {
+    basePrice = Number(pId.prices?.[product.selectedProtein] ?? basePrice);
+  } else if (pId.hasTypeChoices) {
+    basePrice = Number(pId.prices?.[product.selectedType] ?? basePrice);
+  }
+
+  // apply discount if any
+  if (pId.discount && pId.discount > 0) {
+    basePrice = basePrice - (basePrice * pId.discount) / 100;
+  }
+
+  return basePrice;
 };
 
 export const getAdditionsPrice = (additions) => {

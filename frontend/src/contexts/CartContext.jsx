@@ -156,6 +156,8 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (
     productId,
     additions,
+    isSpicy,
+    notes,
     selectedProtein,
     selectedType
   ) => {
@@ -168,6 +170,8 @@ export const CartProvider = ({ children }) => {
           userId: user._id,
           productId,
           additions: additions || [],
+          isSpicy,
+          notes,
           selectedProtein: selectedProtein || null,
           selectedType: selectedType || null,
         }),

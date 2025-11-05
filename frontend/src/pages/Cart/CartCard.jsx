@@ -19,6 +19,8 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
               removeFromCart(
                 product.productId._id,
                 product.additions.map((a) => a._id),
+                product.isSpicy,
+                product.notes,
                 product.selectedProtein,
                 product.selectedType
               )

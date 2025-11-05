@@ -155,7 +155,11 @@ exports.removeFromCart = async (req, res) => {
       additions = [],
       selectedProtein,
       selectedType,
+      isSpicy,
+      notes,
     } = req.body;
+
+    console.log(req.body);
 
     if (!userId || !productId)
       return res.status(400).json({ message: "userId & productId required" });
@@ -167,7 +171,9 @@ exports.removeFromCart = async (req, res) => {
       isSameCartItem(item, {
         productId,
         additions,
+        isSpicy,
         selectedProtein,
+        notes,
         selectedType,
       })
     );
