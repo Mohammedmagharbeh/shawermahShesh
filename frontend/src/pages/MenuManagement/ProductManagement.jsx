@@ -62,7 +62,7 @@ function ProductManagement({
         setProducts((prev) => [res.data, ...prev]);
       }
 
-      setFormData(INITIAL_FORM_DATA);
+      setFormData({ ...INITIAL_FORM_DATA, category: formData.category });
       toast.success(editingId ? t("product_updated") : t("product_added"));
     } catch (error) {
       console.error("خطأ في الإرسال:", error.response?.data || error.message);
@@ -205,6 +205,7 @@ function ProductManagement({
                         step="0.01"
                         value={formData.prices.chicken_sandwich}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                     <div>
@@ -216,6 +217,7 @@ function ProductManagement({
                         step="0.01"
                         value={formData.prices.chicken_meal}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                     <div>
@@ -227,6 +229,7 @@ function ProductManagement({
                         step="0.01"
                         value={formData.prices.meat_sandwich}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                     <div>
@@ -238,6 +241,7 @@ function ProductManagement({
                         step="0.01"
                         value={formData.prices.meat_meal}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                   </div>
@@ -257,6 +261,7 @@ function ProductManagement({
                         step="0.01"
                         value={formData.prices.sandwich}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                     <div className="flex-1">
@@ -268,6 +273,7 @@ function ProductManagement({
                         step="0.01"
                         value={formData.prices.meal}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                   </div>
@@ -287,6 +293,7 @@ function ProductManagement({
                         step="0.01"
                         value={formData.prices.chicken}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                     <div className="flex-1">
@@ -298,6 +305,7 @@ function ProductManagement({
                         step="0.01"
                         value={formData.prices.meat}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                   </div>
@@ -405,11 +413,10 @@ function ProductManagement({
                   setFormData({ ...formData, category: selectedCategory?.en });
                 }}
                 className="mt-1.5"
+                required
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue
-                    placeholder={formData.category || t("choose_category")}
-                  />
+                  <SelectValue placeholder={t("choose_category")} />
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.map((cat, index) => (
@@ -501,7 +508,9 @@ function ProductManagement({
                 variant="outline"
                 onClick={() => {
                   setEditingId(null);
-                  setFormData(INITIAL_FORM_DATA);
+                  setFormData({
+                    INITIAL_FORM_DATA,
+                  });
                 }}
                 className="w-full"
               >
