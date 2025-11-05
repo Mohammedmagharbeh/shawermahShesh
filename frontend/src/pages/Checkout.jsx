@@ -466,8 +466,7 @@ function Checkout() {
               >
                 {loading
                   ? "جار انشاء الطلب..."
-                  : `🍽️ ${t("checkout_place_order")} - ${totalWithDelivery.toFixed(2)}`}
-                JOD
+                  : `🍽️ ${t("checkout_place_order")} - ${totalWithDelivery.toFixed(2)} JOD`}
               </button>
             </div>
           </div>
