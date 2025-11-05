@@ -90,3 +90,27 @@ export const INITIAL_FORM_DATA = {
     meat_meal: "",
   },
 };
+
+export const getProductPrice = (product) => {
+  if (!product.productId.hasProteinChoices && !product.productId.hasTypeChoices)
+    return product.productId.basePrice;
+
+  if (product.productId.hasProteinChoices && product.productId.hasTypeChoices)
+    return product.productId.prices[product.selectedProtein][
+      product.selectedType
+    ];
+
+  if (product.hasProteinChoices)
+    return product.productId.prices[product.selectedProtein];
+
+  if (product.hasTypeChoices)
+    return product.productId.prices[product.selectedType];
+};
+
+export const getAdditionsPrice = (additions) => {
+  if (!additions || additions.length === 0) return 0;
+
+  const additionsTotal = additions.reduce((acc, item) => acc + item.price, 0);
+  console.log(additionsTotal);
+  return additionsTotal;
+};

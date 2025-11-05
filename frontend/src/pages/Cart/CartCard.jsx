@@ -2,29 +2,11 @@ import { Badge } from "@/components/ui/badge";
 import productPlaceholderImg from "../../assets/product_placeholder.jpeg";
 import { useTranslation } from "react-i18next";
 import { calculateSubtotal } from "@/lib/utils";
+import { getProductPrice } from "@/constants";
 
 function CartCard({ product, updateQuantity, removeFromCart }) {
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const { t } = useTranslation();
-
-  const getProductPrice = () => {
-    if (
-      !product.productId.hasProteinChoices &&
-      !product.productId.hasTypeChoices
-    )
-      return product.productId.basePrice;
-
-    if (product.productId.hasProteinChoices && product.productId.hasTypeChoices)
-      return product.productId.prices[product.selectedProtein][
-        product.selectedType
-      ];
-
-    if (product.hasProteinChoices)
-      return product.productId.prices[product.selectedProtein];
-
-    if (product.hasTypeChoices)
-      return product.productId.prices[product.selectedType];
-  };
 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
@@ -113,7 +95,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
               </span>
             )}
             <span className="text-xl font-bold text-red-600">
-              {getProductPrice().toFixed(2)} JOD
+              {getProductPrice(product).toFixed(2)} JOD
             </span>
           </div>
         </div>

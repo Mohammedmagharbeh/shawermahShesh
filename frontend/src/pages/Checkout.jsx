@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { calculateSubtotal } from "@/lib/utils";
+import { getAdditionsPrice, getProductPrice } from "@/constants";
 
 function Checkout() {
   const { cart, total, clearCart } = useCart();
@@ -369,9 +370,17 @@ function Checkout() {
                       )}
                     </div>
 
-                    <span className="font-bold text-gray-900">
-                      {calculateSubtotal(product)?.toFixed(2)} JOD
-                    </span>
+                    <div className="flex flex-col gap-1 items-center">
+                      <span className="font-bold text-gray-900">
+                        {getProductPrice(product)?.toFixed(2)} JOD
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {"+"}
+                        {getAdditionsPrice(product.additions).toFixed(
+                          2
+                        )} JOD {t("additions")}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -379,7 +388,11 @@ function Checkout() {
               <div className="space-y-3 pt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">{t("subtotal")}:</span>
-                  <span className="font-semibold">{total.toFixed(2)} JOD</span>
+                  <div>
+                    <span className="font-semibold">
+                      {total.toFixed(2)} JOD
+                    </span>
+                  </div>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">{t("delivery")}:</span>
