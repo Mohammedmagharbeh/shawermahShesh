@@ -182,7 +182,7 @@ function MyOrders() {
                               {t("additions")}:
                               {item.additions.map((addition) => (
                                 <Badge key={addition._id} className="p-1">
-                                  {addition.name}
+                                  {addition.name[selectedLanguage]}
                                 </Badge>
                               ))}
                             </div>
