@@ -43,27 +43,41 @@ export const CartProvider = ({ children }) => {
     fetchCart();
   }, []);
 
-  // Calculate total whenever cart changes
+  // calculate total
   useEffect(() => {
     const newTotal = cart.products?.reduce((acc, item) => {
-      // Determine base price using protein/type selection
-      let basePrice = item.productId?.basePrice || 0;
+      const product = item.productId;
+      if (!product) return acc;
 
-      if (item.selectedProtein && item.selectedType) {
-        basePrice =
-          item.productId?.prices?.[item.selectedProtein]?.[item.selectedType] ||
-          basePrice;
+      let basePrice = product.basePrice || 0;
+      const { selectedProtein, selectedType } = item;
+
+      // ✅ Handle nested prices { chicken: { sandwich, meal } }
+      if (
+        selectedProtein &&
+        selectedType &&
+        product.prices?.[selectedProtein]?.[selectedType] != null
+      ) {
+        basePrice = Number(product.prices[selectedProtein][selectedType]);
+      }
+      // ✅ Handle flat prices { sandwich, meal }
+      else if (selectedType && product.prices?.[selectedType] != null) {
+        basePrice = Number(product.prices[selectedType]);
       }
 
-      // Apply discount if any
-      if (item.productId?.discount) {
-        basePrice = basePrice - (basePrice * item.productId.discount) / 100;
+      // ✅ Apply discount
+      if (product.discount) {
+        basePrice = basePrice - (basePrice * product.discount) / 100;
       }
 
+      // ✅ Add additions prices
       const additionsPrice =
-        item.additions?.reduce((sum, add) => sum + (add.price || 0), 0) || 0;
+        item.additions?.reduce(
+          (sum, add) => sum + (Number(add.price) || 0),
+          0
+        ) || 0;
 
-      return acc + (basePrice + additionsPrice) * (item.quantity || 0);
+      return acc + (basePrice + additionsPrice) * (item.quantity || 1);
     }, 0);
 
     setTotal(newTotal);

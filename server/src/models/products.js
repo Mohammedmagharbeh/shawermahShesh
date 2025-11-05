@@ -29,16 +29,9 @@ const productSchema = new mongoose.Schema({
   hasTypeChoices: { type: Boolean, default: false }, // sandwich / meal
   hasProteinChoices: { type: Boolean, default: false }, // chicken / meat
 
-  // 🧮 Variation prices
   prices: {
-    chicken: {
-      sandwich: { type: Number, min: 0 },
-      meal: { type: Number, min: 0 },
-    },
-    meat: {
-      sandwich: { type: Number, min: 0 },
-      meal: { type: Number, min: 0 },
-    },
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
   },
 
   discount: { type: Number, default: 0, min: 0, max: 100 },

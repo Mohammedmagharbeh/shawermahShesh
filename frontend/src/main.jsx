@@ -8,13 +8,13 @@ import { OrderProvider } from "./contexts/OrderContext";
 import "./i18n";
 
 createRoot(document.getElementById("root")).render(
-  // <StrictMode>
-  <UserProvider>
-    <CartProvider>
-      <OrderProvider>
-        <App />
-      </OrderProvider>
-    </CartProvider>
-  </UserProvider>
-  // </StrictMode>
+  <StrictMode>
+    <UserProvider>
+      <CartProvider>
+        <OrderProvider>
+          <App />
+        </OrderProvider>
+      </CartProvider>
+    </UserProvider>
+  </StrictMode>
 );

@@ -101,6 +101,8 @@ function ProductManagement({
     });
   };
 
+  console.log(formData);
+
   return (
     <div className="lg:col-span-1">
       <Card className="shadow-xl lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto rounded-md">
@@ -190,7 +192,9 @@ function ProductManagement({
             <div className="mt-3">
               {formData.hasTypeChoices && formData.hasProteinChoices && (
                 <div className="space-y-3 border p-3 rounded-md">
-                  <p className="font-semibold text-sm">{t("variation_prices_matrix")}</p>
+                  <p className="font-semibold text-sm">
+                    {t("variation_prices_matrix")}
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label>{t("chicken_sandwich")}</Label>
@@ -315,7 +319,9 @@ function ProductManagement({
               </div>
 
               {formData.additions?.length === 0 && (
-                <p className="text-sm text-muted-foreground">{t("no_additions_yet")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("no_additions_yet")}
+                </p>
               )}
 
               {formData.additions?.map((addition, index) => (
@@ -393,7 +399,9 @@ function ProductManagement({
               </Label>
               <Select
                 onValueChange={(value) => {
-                  const selectedCategory = CATEGORIES.find((cat) => cat.en === value);
+                  const selectedCategory = CATEGORIES.find(
+                    (cat) => cat.en === value
+                  );
                   setFormData({ ...formData, category: selectedCategory?.en });
                 }}
                 className="mt-1.5"

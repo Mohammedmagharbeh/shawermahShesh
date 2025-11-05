@@ -187,9 +187,11 @@ exports.createOrder = async (req, res) => {
       userDetails,
     } = req.body;
 
+    // basic validation
     if (
       !userId ||
-      !products?.length ||
+      !Array.isArray(products) ||
+      products.length === 0 ||
       !shippingAddress ||
       !paymentMethod ||
       !orderType ||
@@ -200,6 +202,7 @@ exports.createOrder = async (req, res) => {
         .json({ success: false, message: "Missing required fields" });
     }
 
+    // validate user & location
     const foundUser = await User.findById(userId);
     if (!foundUser)
       return res
@@ -212,53 +215,170 @@ exports.createOrder = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid shipping address" });
 
-    const productIds = products.map((p) => p.productId);
-    const dbProducts = await Product.find({ _id: { $in: productIds } });
+    // collect product ids and fetch DB products
+    const productIds = products.map((p) =>
+      p.productId && p.productId._id ? p.productId._id : p.productId
+    );
+    const uniqueProductIds = [
+      ...new Set(productIds.map((id) => id.toString())),
+    ];
+    const dbProducts = await Product.find({ _id: { $in: uniqueProductIds } });
 
-    // Enrich products
-    const enrichedProducts = products.map((p) => {
-      const matchedProduct = dbProducts.find(
-        (dp) => dp._id.toString() === p.productId
-      );
+    // check missing products
+    const dbProductIds = dbProducts.map((p) => p._id.toString());
+    const missing = uniqueProductIds.filter((id) => !dbProductIds.includes(id));
+    if (missing.length) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: `Products not found: ${missing.join(", ")}`,
+        });
+    }
 
-      let basePrice = matchedProduct.basePrice;
-      if (matchedProduct.hasTypeChoices || matchedProduct.hasProteinChoices) {
-        const protein = p.selectedProtein || "chicken";
-        const type = p.selectedType || "sandwich";
-        basePrice =
-          matchedProduct.prices?.[protein]?.[type] || matchedProduct.basePrice;
+    // helper: get addition price from product by _id or by name if needed
+    const getAdditionFromProduct = (matchedProduct, addRef) => {
+      if (!matchedProduct || !Array.isArray(matchedProduct.additions))
+        return null;
+
+      // addRef might be {_id: "..."} or { _id: ObjectId } or { name: {en/ar}, price }
+      if (addRef?._id) {
+        const found = matchedProduct.additions.find(
+          (a) => a._id.toString() === addRef._id.toString()
+        );
+        if (found)
+          return {
+            _id: found._id,
+            name: found.name,
+            price: Number(found.price || 0),
+          };
       }
 
-      const discountedPrice = matchedProduct.discount
-        ? basePrice - (basePrice * matchedProduct.discount) / 100
-        : basePrice;
+      // try matching by name (fallback)
+      if (addRef?.name?.en) {
+        const found = matchedProduct.additions.find(
+          (a) => a.name?.en === addRef.name.en
+        );
+        if (found)
+          return {
+            _id: found._id,
+            name: found.name,
+            price: Number(found.price || 0),
+          };
+      }
 
-      // Use full addition objects from cart
-      const additions = p.additions || [];
+      return null;
+    };
+
+    // normalize a single price lookup from product.prices supporting both formats
+    const getVariationPrice = (
+      matchedProduct,
+      selectedProtein,
+      selectedType
+    ) => {
+      if (!matchedProduct) return 0;
+      // if nested (chicken.meal etc)
+      if (
+        selectedProtein &&
+        selectedType &&
+        matchedProduct.prices?.[selectedProtein]?.[selectedType] != null
+      ) {
+        return Number(matchedProduct.prices[selectedProtein][selectedType]);
+      }
+      // if flat (sandwich: x, meal: y)
+      if (selectedType && matchedProduct.prices?.[selectedType] != null) {
+        return Number(matchedProduct.prices[selectedType]);
+      }
+      // fallback to basePrice
+      return Number(matchedProduct.basePrice || 0);
+    };
+
+    // Enrich products (normalize additions and compute priceAtPurchase)
+    const enrichedProducts = products.map((p) => {
+      const productId =
+        p.productId && p.productId._id
+          ? p.productId._id.toString()
+          : p.productId.toString();
+      const matchedProduct = dbProducts.find(
+        (dp) => dp._id.toString() === productId
+      );
+
+      const quantity = Number(p.quantity || 1);
+
+      // determine base price (supports nested or flat prices)
+      const basePriceRaw = getVariationPrice(
+        matchedProduct,
+        p.selectedProtein,
+        p.selectedType
+      );
+
+      // apply discount (only to base product price)
+      const discountPct = Number(matchedProduct.discount || 0);
+      const priceAtPurchase =
+        discountPct > 0
+          ? basePriceRaw - (basePriceRaw * discountPct) / 100
+          : basePriceRaw;
+
+      // normalize additions: each item should be { _id?, name?, price: Number, quantity: Number (optional) }
+      const normalizedAdditions = (p.additions || []).map((add) => {
+        // if frontend already sent full object with price -> use it
+        if (
+          add &&
+          (add.price !== undefined || add.price !== null) &&
+          (add.name || add._id)
+        ) {
+          return {
+            _id: add._id ? add._id : undefined,
+            name: add.name ? add.name : undefined,
+            price: Number(add.price || 0),
+            quantity: Number(add.quantity || 1),
+          };
+        }
+        // else try to resolve from product additions by _id or name
+        const resolved = getAdditionFromProduct(matchedProduct, add);
+        if (resolved) {
+          return {
+            _id: resolved._id,
+            name: resolved.name,
+            price: Number(resolved.price || 0),
+            quantity: 1,
+          };
+        }
+        // fallback: ignore unknown addition (price 0)
+        return {
+          _id: add?._id,
+          name: add?.name,
+          price: 0,
+          quantity: Number(add?.quantity || 1),
+        };
+      });
 
       return {
-        productId: p.productId,
-        quantity: p.quantity,
-        additions,
-        priceAtPurchase: discountedPrice,
-        isSpicy: p.isSpicy || false,
+        productId,
+        quantity,
+        additions: normalizedAdditions,
+        priceAtPurchase: Number(priceAtPurchase || 0),
+        isSpicy: Boolean(p.isSpicy || false),
         notes: p.notes || "",
         selectedProtein: p.selectedProtein || null,
         selectedType: p.selectedType || null,
       };
     });
 
-    // Calculate total price
-    const totalPrice =
-      enrichedProducts.reduce((sum, p) => {
-        const additionsTotal = (p.additions || []).reduce(
-          (aSum, a) => aSum + a.price,
-          0
-        );
-        return sum + (p.priceAtPurchase + additionsTotal) * p.quantity;
-      }, 0) + location.deliveryCost;
+    // Calculate total price (additions accounted per item and multiplied by product quantity)
+    const productsTotal = enrichedProducts.reduce((sum, item) => {
+      const additionsSumPerUnit = (item.additions || []).reduce(
+        (aSum, a) => aSum + Number(a.price || 0) * Number(a.quantity || 1),
+        0
+      );
+      const unitTotal = Number(item.priceAtPurchase || 0) + additionsSumPerUnit;
+      return sum + unitTotal * Number(item.quantity || 1);
+    }, 0);
 
-    // Create order
+    const totalPrice =
+      Number(productsTotal) + Number(location.deliveryCost || 0);
+
+    // create order
     const newOrder = await Order.create({
       userId,
       products: enrichedProducts,
@@ -276,20 +396,21 @@ exports.createOrder = async (req, res) => {
       sequenceNumber: await getNextDailySequence(),
     });
 
+    // populate for response
     const populatedOrder = await newOrder.populate([
       { path: "products.productId" },
       { path: "userId" },
       { path: "shippingAddress" },
     ]);
 
-    // Notify admins via socket.io
+    // socket notify
     const io = req.app.get("io");
     if (io) io.emit("newOrder", populatedOrder);
 
-    res.status(201).json({ success: true, data: populatedOrder });
+    return res.status(201).json({ success: true, data: populatedOrder });
   } catch (error) {
     console.error("Error in createOrder:", error);
-    res
+    return res
       .status(500)
       .json({ success: false, message: error.message || "Server error" });
   }

@@ -2,6 +2,7 @@ const products = require("../models/products");
 
 const { CATEGORIES } = require("../constants");
 const { default: cloudinary } = require("../config/cloudinary");
+const { parse } = require("dotenv");
 
 // ✅ POST: Create Product
 exports.postEat = async (req, res) => {
@@ -161,12 +162,46 @@ exports.updatedfood = async (req, res) => {
     // ================================
     // ✅ Parse prices if needed
     // ================================
-    let parsedPrices = {};
-    try {
-      parsedPrices =
-        typeof prices === "string" ? JSON.parse(prices) : prices || {};
-    } catch {
-      return res.status(400).json({ message: "Invalid prices format" });
+    // ✅ Parse prices (supports A + B)
+    let parsedPrices;
+    if (typeof prices === "string") {
+      try {
+        parsedPrices = JSON.parse(prices);
+      } catch (err) {
+        return res.status(400).json({ message: "Invalid prices JSON" });
+      }
+    } else if (typeof prices === "object" && prices !== null) {
+      parsedPrices = prices;
+    } else {
+      parsedPrices = {};
+    }
+
+    // ✅ Validate flat format: { sandwich, meal }
+    if (
+      parsedPrices.sandwich !== undefined ||
+      parsedPrices.meal !== undefined
+    ) {
+      parsedPrices = {
+        ...(parsedPrices.sandwich !== undefined && {
+          sandwich: Number(parsedPrices.sandwich),
+        }),
+        ...(parsedPrices.meal !== undefined && {
+          meal: Number(parsedPrices.meal),
+        }),
+      };
+    }
+
+    // ✅ Validate nested format: { chicken: {...}, meat: {...} }
+    else {
+      Object.keys(parsedPrices).forEach((type) => {
+        const entry = parsedPrices[type];
+        parsedPrices[type] = {
+          ...(entry.sandwich !== undefined && {
+            sandwich: Number(entry.sandwich),
+          }),
+          ...(entry.meal !== undefined && { meal: Number(entry.meal) }),
+        };
+      });
     }
 
     // ================================
@@ -216,10 +251,18 @@ exports.updatedfood = async (req, res) => {
     // ================================
     // ✅ Update DB
     // ================================
-    const updatedProduct = await products.findByIdAndUpdate(id, updatedData, {
-      new: true,
-      runValidators: true,
-    });
+    console.log("Incoming prices:", parsedPrices);
+    console.log("DB before:", await products.findById(id).lean());
+    const updatedProduct = await products.findByIdAndUpdate(
+      id,
+      { $set: updatedData },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    console.log("DB after:", updatedProduct);
 
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
