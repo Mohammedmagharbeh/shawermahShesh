@@ -13,7 +13,7 @@ import { getAdditionsPrice, getProductPrice } from "@/constants";
 
 function Checkout() {
   const { cart, total, clearCart } = useCart();
-  const { createOrder } = useOrder();
+  const { createOrder, loading } = useOrder();
   const { user } = useUser();
   const [areas, setAreas] = useState([]);
   const [selectedArea, setSelectedArea] = useState({
@@ -462,6 +462,7 @@ function Checkout() {
               <button
                 className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-red-600 hover:to-red-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
                 type="submit"
+                disabled={loading}
               >
                 🍽️ {t("checkout_place_order")} - {totalWithDelivery.toFixed(2)}{" "}
                 JOD
