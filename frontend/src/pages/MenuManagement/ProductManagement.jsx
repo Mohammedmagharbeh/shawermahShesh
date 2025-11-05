@@ -39,68 +39,38 @@ function ProductManagement({
     setFormData
   );
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   try {
-  //     const payload = buildPayload(formData);
-
-  //     if (editingId) {
-  //       const res = await axios.put(
-  //         `${import.meta.env.VITE_BASE_URL}/admin/updatefood/${editingId}`,
-  //         payload
-  //       );
-  //       setProducts((prev) =>
-  //         prev.map((p) => (p._id === editingId ? res.data : p))
-  //       );
-  //       setEditingId(null);
-  //     } else {
-  //       const res = await axios.post(
-  //         `${import.meta.env.VITE_BASE_URL}/admin/postfood`,
-  //         payload
-  //       );
-  //       setProducts((prev) => [res.data, ...prev]);
-  //     }
-
-  //     setFormData(INITIAL_FORM_DATA);
-  //     toast.success(editingId ? t("product_updated") : t("product_added"));
-  //   } catch (error) {
-  //     console.error("خطأ في الإرسال:", error.response?.data || error.message);
-  //     toast.error(t("submit_error"));
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    const payload = buildPayload(formData);
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const payload = buildPayload(formData);
 
-    if (editingId) {
-      const res = await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/admin/updatefood/${editingId}`,
-        payload
-      );
-      toast.success(t("product_updated"));
-    } else {
-      await axios.post(`${import.meta.env.VITE_BASE_URL}/admin/postfood`, payload);
-      toast.success(t("product_added"));
+      if (editingId) {
+        const res = await axios.put(
+          `${import.meta.env.VITE_BASE_URL}/admin/updatefood/${editingId}`,
+          payload
+        );
+        setProducts((prev) =>
+          prev.map((p) => (p._id === editingId ? res.data : p))
+        );
+        setEditingId(null);
+      } else {
+        const res = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/admin/postfood`,
+          payload
+        );
+        setProducts((prev) => [res.data, ...prev]);
+      }
+
+      setFormData(INITIAL_FORM_DATA);
+      toast.success(editingId ? t("product_updated") : t("product_added"));
+    } catch (error) {
+      console.error("خطأ في الإرسال:", error.response?.data || error.message);
+      toast.error(t("submit_error"));
+    } finally {
+      setLoading(false);
     }
-
-    setFormData(INITIAL_FORM_DATA);
-
-    // هنا نعمل ريفريش للصفحة
-    window.location.reload();
-  } catch (error) {
-    console.error("خطأ في الإرسال:", error.response?.data || error.message);
-    toast.error(t("submit_error"));
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleAddAddition = () => {
     setFormData((prev) => ({
@@ -544,4 +514,5 @@ function ProductManagement({
     </div>
   );
 }
+
 export default ProductManagement;
