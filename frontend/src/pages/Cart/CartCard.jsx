@@ -7,6 +7,25 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const { t } = useTranslation();
 
+  const getProductPrice = () => {
+    if (
+      !product.productId.hasProteinChoices &&
+      !product.productId.hasTypeChoices
+    )
+      return product.productId.basePrice;
+
+    if (product.productId.hasProteinChoices && product.productId.hasTypeChoices)
+      return product.productId.prices[product.selectedProtein][
+        product.selectedType
+      ];
+
+    if (product.hasProteinChoices)
+      return product.productId.prices[product.selectedProtein];
+
+    if (product.hasTypeChoices)
+      return product.productId.prices[product.selectedType];
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg border border-red-100 p-6 hover:shadow-xl transition-all duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
@@ -63,8 +82,13 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
               <div className="flex gap-1 flex-wrap items-center">
                 <span className="text-sm text-gray-600">{t("additions")}:</span>
                 {product.additions.map((addition) => (
-                  <Badge key={addition._id + addition.name} className="p-1">
+                  <Badge
+                    key={addition._id}
+                    className="px-2 py-1 flex items-center gap-1"
+                  >
                     {addition.name[selectedLanguage]}
+                    <span className="opacity-70">·</span>
+                    {addition.price.toFixed(2)} JOD
                   </Badge>
                 ))}
               </div>
@@ -89,7 +113,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
               </span>
             )}
             <span className="text-xl font-bold text-red-600">
-              {calculateSubtotal(product).toFixed(2)} JOD
+              {getProductPrice().toFixed(2)} JOD
             </span>
           </div>
         </div>
@@ -120,11 +144,12 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
         </div>
 
         {/* Total */}
-        <div className="flex justify-between lg:justify-center items-center">
+        <div className="flex flex-col lg:justify-center items-center gap-1 bg-gray-50 p-3 rounded-lg shadow-sm w-full max-w-xs">
           <span className="lg:hidden font-medium text-gray-600">
             {t("total")}:
           </span>
-          <span className="text-xl font-bold text-red-700">
+
+          <span className="text-2xl font-extrabold text-red-600">
             {(calculateSubtotal(product) * product.quantity).toFixed(2)} JOD
           </span>
         </div>
