@@ -23,6 +23,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Loading from "@/componenet/common/Loading";
+import { useUser } from "@/contexts/UserContext";
 
 const AdminUsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -35,6 +36,7 @@ const AdminUsersPage = () => {
   const [editRole, setEditRole] = useState("user");
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const { user } = useUser();
 
   // نجيب المستخدمين مرة واحدة عند تحميل الصفحة ليظهر عددهم دائمًا
   useEffect(() => {
@@ -44,7 +46,12 @@ const AdminUsersPage = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users`);
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users`, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user?.token}`,
+        },
+      });
       const data = res.data.sort((a, b) => a.role.localeCompare(b.role));
       setUsers(data);
     } catch (err) {
@@ -64,7 +71,13 @@ const AdminUsersPage = () => {
       setActionLoading(true);
       await axios.post(
         `${import.meta.env.VITE_BASE_URL}/admin/user/add`,
-        newUser
+        newUser,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        }
       );
       setNewUser({ phone: "", role: "user" });
       fetchUsers();
@@ -81,9 +94,18 @@ const AdminUsersPage = () => {
   const handleUpdateRole = async (id) => {
     try {
       setActionLoading(true);
-      await axios.put(`${import.meta.env.VITE_BASE_URL}/admin/user/${id}`, {
-        role: editRole,
-      });
+      await axios.put(
+        `${import.meta.env.VITE_BASE_URL}/admin/user/${id}`,
+        {
+          role: editRole,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
       setEditUserId(null);
       fetchUsers();
       toast.success("تم تحديث الصلاحية بنجاح");

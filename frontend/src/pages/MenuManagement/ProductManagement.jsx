@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import useProductForm from "../../hooks/useProductForm";
 import { Switch } from "@/components/ui/switch";
 import { Plus } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
 
 function ProductManagement({
   setProducts,
@@ -38,6 +39,7 @@ function ProductManagement({
     formData,
     setFormData
   );
+  const { user } = useUser();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,8 +50,15 @@ function ProductManagement({
       if (editingId) {
         const res = await axios.put(
           `${import.meta.env.VITE_BASE_URL}/admin/updatefood/${editingId}`,
-          payload
+          payload, // <-- This is the data sent to the server
+          {
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Bearer ${user.token}`,
+            },
+          }
         );
+
         setProducts((prev) =>
           prev.map((p) => (p._id === editingId ? res.data : p))
         );
@@ -57,8 +66,15 @@ function ProductManagement({
       } else {
         const res = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/admin/postfood`,
-          payload
+          payload, // <-- This is the data sent to the server
+          {
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Bearer ${user.token}`,
+            },
+          }
         );
+
         setProducts((prev) => [res.data, ...prev]);
       }
 

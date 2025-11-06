@@ -6,6 +6,7 @@ import product_placeholder from "../../assets/product_placeholder.jpeg";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useUser } from "@/contexts/UserContext";
 
 export default function ProductCard({
   product,
@@ -15,6 +16,7 @@ export default function ProductCard({
 }) {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const { user } = useUser();
 
   const getDisplayPrice = () => {
     if (product.hasProteinChoices || product.hasTypeChoices)
@@ -79,11 +81,20 @@ export default function ProductCard({
             onClick={async () => {
               try {
                 await axios.delete(
-                  `${import.meta.env.VITE_BASE_URL}/admin/deletefood/${id}`
+                  `${import.meta.env.VITE_BASE_URL}/admin/deletefood/${id}`,
+                  {
+                    headers: {
+                      "Content-Type": "application/json",
+                      authorization: `Bearer ${user.token}`,
+                    },
+                  }
                 );
+
                 setProducts((prev) => prev.filter((p) => p._id !== id));
                 toast.success(t("product_deleted"));
-              } catch {
+              } catch (err) {
+                console.log(err);
+
                 toast.error(t("delete_error"));
               } finally {
                 toast.dismiss(tInstance.id);
