@@ -38,7 +38,10 @@ export const UserProvider = ({ children }) => {
         `${import.meta.env.VITE_BASE_URL}/update-phone`,
         { newPhone }, // this is the body data
         {
-          headers: { Authorization: `Bearer ${user.token}` },
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
         }
       );
 
