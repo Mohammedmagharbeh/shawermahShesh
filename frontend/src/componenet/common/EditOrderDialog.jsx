@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useUser } from "@/contexts/UserContext";
 
 export function EditOrderDialog({ name, order, updateOrders }) {
   const [updatedOrder, setUpdatedOrder] = useState({
@@ -42,6 +43,7 @@ export function EditOrderDialog({ name, order, updateOrders }) {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const [open, setOpen] = useState(false);
+  const { user } = useUser();
 
   useEffect(() => {
     if (!open) return;
@@ -139,7 +141,10 @@ export function EditOrderDialog({ name, order, updateOrders }) {
         `${import.meta.env.VITE_BASE_URL}/order/${order._id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
           body: JSON.stringify(payload),
         }
       );

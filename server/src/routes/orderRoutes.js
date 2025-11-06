@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const validateJWT = require("../middlewares/validateJWT.js");
 
 const {
   createOrder,
@@ -15,11 +16,11 @@ dotenv.config();
 
 const router = express.Router();
 
-router.get("/get", getAllOrders);
-router.get("/user/:userId", getOrdersByUserId); // must come BEFORE /:id
-router.get("/:id", getOrderById);
-router.post("/post", createOrder);
-router.put("/:id", updateOrder);
-router.delete("/:id", deleteOrder);
+router.get("/get", validateJWT, getAllOrders);
+router.get("/user/:userId", validateJWT, getOrdersByUserId); // must come BEFORE /:id
+router.get("/:id", validateJWT, getOrderById);
+router.post("/post", validateJWT, createOrder);
+router.put("/:id", validateJWT, updateOrder);
+router.delete("/:id", validateJWT, deleteOrder);
 
 module.exports = router;

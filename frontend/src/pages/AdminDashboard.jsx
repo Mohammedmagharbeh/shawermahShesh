@@ -26,6 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useUser } from "@/contexts/UserContext";
 
 const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
@@ -52,6 +53,7 @@ function AdminDashboard() {
   const [soundAllowed, setSoundAllowed] = useState(false);
   const [sound, setSound] = useState(null);
   const [incomingOrder, setIncomingOrder] = useState([]);
+  const { user } = useUser();
 
   // الحل: تحديث التاريخ تلقائياً كل دقيقة
   useEffect(() => {
@@ -67,7 +69,13 @@ function AdminDashboard() {
 
   const fetchPendingOrders = async () => {
     const res = await fetch(
-      `${import.meta.env.VITE_BASE_URL}/order/get?status=Processing`
+      `${import.meta.env.VITE_BASE_URL}/order/get?status=Processing`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+      }
     );
     const data = await res.json();
     setIncomingOrder(data.data);

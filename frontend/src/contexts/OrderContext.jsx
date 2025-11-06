@@ -21,10 +21,15 @@ export const OrderProvider = ({ children }) => {
   const getAllOrders = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/get`);
+      const res = await axios.get(`${API_URL}/get`, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+      });
       setOrders(res.data.data);
-      return res.data.data; // return directly without overwriting state
       setError(null);
+      return res.data.data; // return directly without overwriting state
     } catch (err) {
       const msg = err.response?.data?.message || t("failed_fetch_orders");
 
@@ -43,7 +48,12 @@ export const OrderProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/user/${id}`);
+      const res = await axios.get(`${API_URL}/user/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+      });
       setOrders(res.data.data);
       setError(null);
       return res.data.data; // return directly without overwriting state
@@ -60,7 +70,12 @@ export const OrderProvider = ({ children }) => {
   const getOrderById = async (id) => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/${id}`);
+      const res = await axios.get(`${API_URL}/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+      });
       setError(null);
       return res.data.data; // return directly without overwriting state
     } catch (err) {
@@ -76,7 +91,12 @@ export const OrderProvider = ({ children }) => {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_URL}/post`, orderData);
+      const res = await axios.post(`${API_URL}/post`, orderData, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+      });
       setOrders((prev) => [...prev, res.data.data]); // append new order
       setError(null);
       return res.data.data;
@@ -92,7 +112,12 @@ export const OrderProvider = ({ children }) => {
   const updateOrder = async (id, updates) => {
     setLoading(true);
     try {
-      const res = await axios.put(`${API_URL}/${id}`, updates);
+      const res = await axios.put(`${API_URL}/${id}`, updates, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+      });
       setOrders((prev) =>
         prev.map((order) => (order._id === id ? res.data : order))
       );
@@ -113,7 +138,12 @@ export const OrderProvider = ({ children }) => {
   const deleteOrder = async (id) => {
     setLoading(true);
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await axios.delete(`${API_URL}/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+      });
       setOrders((prev) => prev.filter((order) => order._id !== id));
       setError(null);
       toast.success(t("order_deleted_success"));
