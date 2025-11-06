@@ -30,7 +30,7 @@ const ImageCarousel = () => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(false);
   const { t, i18n } = useTranslation();
-  const { isAuthenticated } = useUser();
+  const { isAuthenticated, user } = useUser();
   const selectedLanguage = i18n.language;
   const navigate = useNavigate();
 
@@ -40,7 +40,13 @@ const ImageCarousel = () => {
       setLoading(true);
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section1`
+          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section1`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Bearer ${user.token}`,
+            },
+          }
         );
         const data = await res.json();
         setSlides(data);

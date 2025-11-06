@@ -7,18 +7,26 @@ import home_logo2 from "../../assets/home_logo2.jpeg";
 import { useTranslation } from "react-i18next";
 import Footer from "@/componenet/Footer";
 import ImageCarousel from "./ImageCarousel";
+import { useUser } from "@/contexts/UserContext";
 
 export default function Home() {
   const location = useLocation();
   const [section2, setSection2] = useState();
   const { t, i18n } = useTranslation();
   const selectedLanguage = i18n.language;
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchSection2 = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section2`
+          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section2`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Bearer ${user.token}`,
+            },
+          }
         );
         const data = await res.json();
         setSection2(data[0]);

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useUser } from "@/contexts/UserContext";
+import Loading from "@/componenet/common/Loading";
 
 const SERVER_URL = import.meta.env.VITE_BASE_URL;
 
@@ -22,10 +23,16 @@ export default function AdminSlides() {
     relatedTo: "",
   });
   const [editId, setEditId] = useState(null);
+  const { user } = useUser();
 
   const fetchSlides = async () => {
     try {
-      const { data } = await axios.get(`${SERVER_URL}/slides`);
+      const { data } = await axios.get(`${SERVER_URL}/slides`, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user?.token}`,
+        },
+      });
       setSlides(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching slides:", error);
@@ -41,9 +48,19 @@ export default function AdminSlides() {
     e.preventDefault();
     try {
       if (editId) {
-        await axios.put(`${SERVER_URL}/slides/${editId}`, form);
+        await axios.put(`${SERVER_URL}/slides/${editId}`, form, {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        });
       } else {
-        await axios.post(`${SERVER_URL}/slides`, form);
+        await axios.post(`${SERVER_URL}/slides`, form, {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        });
       }
       setForm({
         title: { ar: "", en: "" },
@@ -60,7 +77,12 @@ export default function AdminSlides() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${SERVER_URL}/slides/${id}`);
+      await axios.delete(`${SERVER_URL}/slides/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+      });
       fetchSlides();
     } catch (error) {
       console.error("Error deleting slide:", error);
@@ -72,6 +94,8 @@ export default function AdminSlides() {
     reader.onload = () => setForm({ ...form, image: reader.result });
     reader.readAsDataURL(e.target.files[0]);
   };
+
+  if (!user) return <Loading />;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
@@ -91,7 +115,6 @@ export default function AdminSlides() {
             {editId ? "تعديل السلايد" : "إضافة سلايد جديد"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-
             {/* Arabic Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -167,7 +190,9 @@ export default function AdminSlides() {
               </label>
               <Select
                 value={form.relatedTo}
-                onValueChange={(value) => setForm({ ...form, relatedTo: value })}
+                onValueChange={(value) =>
+                  setForm({ ...form, relatedTo: value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="اختر القسم" />

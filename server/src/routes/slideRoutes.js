@@ -1,4 +1,5 @@
 const express = require("express");
+const validateJWT = require("../middlewares/validateJWT");
 const {
   getSlides,
   createSlide,
@@ -8,9 +9,9 @@ const {
 
 const router = express.Router();
 
-router.get("/", getSlides);
-router.post("/", createSlide);
-router.put("/:id", updateSlide);
-router.delete("/:id", deleteSlide);
+router.get("/", validateJWT, getSlides);
+router.post("/", validateJWT, createSlide);
+router.put("/:id", validateJWT, updateSlide);
+router.delete("/:id", validateJWT, deleteSlide);
 
 module.exports = router;
