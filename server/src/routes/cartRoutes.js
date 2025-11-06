@@ -10,11 +10,12 @@ const {
   getCart,
   addToCart,
 } = require("../controller/cartcontroller");
+const validateJWT = require("../middlewares/validateJWT");
 
-routes.get("/:userId", getCart);
-routes.post("/add/:userId", addToCart);
-routes.put("/update/:id", updateCart);
-routes.delete("/remove", removeFromCart);
-routes.delete("/clear/:userId", clearCart);
+routes.get("/:userId", validateJWT, getCart);
+routes.post("/add/:userId", validateJWT, addToCart);
+routes.put("/update/:id", validateJWT, updateCart);
+routes.delete("/remove", validateJWT, removeFromCart);
+routes.delete("/clear/:userId", validateJWT, clearCart);
 
 module.exports = routes;

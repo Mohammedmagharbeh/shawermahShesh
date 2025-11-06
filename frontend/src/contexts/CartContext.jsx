@@ -24,7 +24,13 @@ export const CartProvider = ({ children }) => {
       setLoading(true);
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/cart/${user._id}`
+          `${import.meta.env.VITE_BASE_URL}/cart/${user._id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Bearer ${user.token}`,
+            },
+          }
         );
         if (!res.ok) throw new Error("Failed to fetch cart");
         const data = await res.json();
@@ -101,7 +107,10 @@ export const CartProvider = ({ children }) => {
         `${import.meta.env.VITE_BASE_URL}/cart/add/${user._id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
           body: JSON.stringify({
             productId,
             quantity: quantity || 1,
@@ -132,7 +141,10 @@ export const CartProvider = ({ children }) => {
         `${import.meta.env.VITE_BASE_URL}/cart/update/${cart._id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
           body: JSON.stringify({
             productId,
             quantity,
@@ -165,7 +177,10 @@ export const CartProvider = ({ children }) => {
       const user = JSON.parse(sessionStorage.getItem("user"));
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}/cart/remove`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
         body: JSON.stringify({
           userId: user._id,
           productId,

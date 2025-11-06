@@ -73,9 +73,13 @@ routes.post("/verify-otp", async (req, res) => {
     await user.save();
 
     // Issue JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, phone: user.phone },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     return res.status(200).json({
       msg: "Login successful",
