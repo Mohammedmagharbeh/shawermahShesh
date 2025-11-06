@@ -39,7 +39,13 @@ function Checkout() {
     async function fetchAreas() {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/locations/get`
+          `${import.meta.env.VITE_BASE_URL}/locations/get`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Bearer ${user.token}`,
+            },
+          }
         );
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);

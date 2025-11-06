@@ -5,11 +5,12 @@ const {
   addLocation,
 } = require("../controller/locationsController");
 const routes = express.Router();
+const validateJWT = require("../middlewares/validateJWT");
 
-routes.get("/get", getLocations);
+routes.get("/get", validateJWT, getLocations);
 
-routes.get("/:id", getLocationById);
+routes.get("/:id", validateJWT, getLocationById);
 
-routes.post("/", addLocation);
+routes.post("/", validateJWT, addLocation);
 
 module.exports = routes;

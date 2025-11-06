@@ -46,7 +46,15 @@ export function EditOrderDialog({ name, order, updateOrders }) {
   useEffect(() => {
     if (!open) return;
     const fetchAddresses = async () => {
-      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/locations/get`);
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/locations/get`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
       const data = await res.json();
       setAddresses(data.locations || []);
     };

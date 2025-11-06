@@ -207,7 +207,13 @@ export const CartProvider = ({ children }) => {
       const user = JSON.parse(sessionStorage.getItem("user"));
       const res = await fetch(
         `${import.meta.env.VITE_BASE_URL}/cart/clear/${user._id}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        }
       );
       if (!res.ok) throw new Error("Failed to clear cart");
       const data = await res.json();
