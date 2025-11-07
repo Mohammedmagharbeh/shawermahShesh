@@ -251,8 +251,7 @@ exports.updatedfood = async (req, res) => {
     // ================================
     // ✅ Update DB
     // ================================
-    console.log("Incoming prices:", parsedPrices);
-    console.log("DB before:", await products.findById(id).lean());
+
     const updatedProduct = await products.findByIdAndUpdate(
       id,
       { $set: updatedData },
@@ -261,8 +260,6 @@ exports.updatedfood = async (req, res) => {
         runValidators: true,
       }
     );
-
-    console.log("DB after:", updatedProduct);
 
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });

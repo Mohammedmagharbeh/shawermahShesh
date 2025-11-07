@@ -93,8 +93,7 @@ export default function ProductCard({
                 setProducts((prev) => prev.filter((p) => p._id !== id));
                 toast.success(t("product_deleted"));
               } catch (err) {
-                console.log(err);
-
+                console.error(err);
                 toast.error(t("delete_error"));
               } finally {
                 toast.dismiss(tInstance.id);

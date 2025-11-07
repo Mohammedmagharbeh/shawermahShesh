@@ -20,13 +20,7 @@ export default function Home() {
     const fetchSection2 = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section2`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              authorization: `Bearer ${user.token}`,
-            },
-          }
+          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section2`
         );
         const data = await res.json();
         setSection2(data[0]);

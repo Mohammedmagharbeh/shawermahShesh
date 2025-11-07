@@ -70,7 +70,7 @@ function Settings() {
                   <Input
                     id="phone"
                     type="tel"
-                    value={phone}
+                    value={user.phone}
                     onChange={(e) => handlePhoneChange(e.target.value)}
                     maxLength={10}
                     placeholder={t("enter_phone")}
@@ -88,7 +88,7 @@ function Settings() {
                   className="w-full mt-5 bg-red-700 text-white p-2 rounded-md flex items-center justify-center gap-2 hover:bg-red-800 transition-colors"
                   to={`/orders/${user._id}`}
                 >
-                    {t("my past order")}
+                  {t("my past order")}
                 </Link>
               </div>
             </CardContent>

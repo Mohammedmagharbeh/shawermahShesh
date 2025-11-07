@@ -9,7 +9,7 @@ const {
 
 const router = express.Router();
 
-router.get("/", validateJWT, getSlides);
+router.get("/", getSlides);
 router.post("/", validateJWT, createSlide);
 router.put("/:id", validateJWT, updateSlide);
 router.delete("/:id", validateJWT, deleteSlide);

@@ -159,8 +159,6 @@ exports.removeFromCart = async (req, res) => {
       notes,
     } = req.body;
 
-    console.log(req.body);
-
     if (!userId || !productId)
       return res.status(400).json({ message: "userId & productId required" });
 

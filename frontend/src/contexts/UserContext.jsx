@@ -7,26 +7,16 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const { t } = useTranslation();
 
-  // Load user from storage on refresh
-  useEffect(() => {
-    const storedUser = sessionStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
-  }, []);
-
   const login = (userData) => {
-    sessionStorage.setItem("user", JSON.stringify(userData));
+    sessionStorage.setItem("token", userData.token);
     setUser(userData);
   };
 
   const logout = () => {
-    sessionStorage.removeItem("user");
     setUser(null);
   };
 
@@ -52,6 +42,7 @@ export const UserProvider = ({ children }) => {
           state: { phone: user.phone, newPhone, newPhone },
         });
       }
+      setUser({ ...user, phone: newPhone });
     } catch (error) {
       console.error("Failed to update phone number:", error);
       throw error;

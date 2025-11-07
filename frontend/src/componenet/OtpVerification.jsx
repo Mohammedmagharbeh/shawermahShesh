@@ -15,7 +15,7 @@ function OtpVerification() {
   const location = useLocation();
   const phone = location.state?.phone;
   const newPhone = location.state?.newPhone;
-  const { login, user } = useUser();
+  const { login } = useUser();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
@@ -76,13 +76,6 @@ function OtpVerification() {
       toast.error(t("otp_resend_failed"));
     }
   };
-
-  useEffect(() => {
-    if (user) {
-      navigate("/products");
-      return;
-    }
-  }, [user]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#b80505]">

@@ -117,8 +117,6 @@ function ProductManagement({
     });
   };
 
-  console.log(formData);
-
   return (
     <div className="lg:col-span-1">
       <Card className="shadow-xl lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto rounded-md">

@@ -40,13 +40,7 @@ const ImageCarousel = () => {
       setLoading(true);
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section1`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              authorization: `Bearer ${user.token}`,
-            },
-          }
+          `${import.meta.env.VITE_BASE_URL}/slides?relatedTo=home-section1`
         );
         const data = await res.json();
         setSlides(data);

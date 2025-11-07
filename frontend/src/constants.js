@@ -119,6 +119,6 @@ export const getAdditionsPrice = (additions) => {
   if (!additions || additions.length === 0) return 0;
 
   const additionsTotal = additions.reduce((acc, item) => acc + item.price, 0);
-  console.log(additionsTotal);
+
   return additionsTotal;
 };

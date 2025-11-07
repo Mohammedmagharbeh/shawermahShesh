@@ -18,7 +18,6 @@ export const CartProvider = ({ children }) => {
 
   // Fetch cart on mount
   useEffect(() => {
-    const user = JSON.parse(sessionStorage.getItem("user"));
     const fetchCart = async () => {
       if (!user?._id) return;
       setLoading(true);
@@ -174,7 +173,6 @@ export const CartProvider = ({ children }) => {
     selectedType
   ) => {
     try {
-      const user = JSON.parse(sessionStorage.getItem("user"));
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}/cart/remove`, {
         method: "DELETE",
         headers: {
@@ -204,7 +202,6 @@ export const CartProvider = ({ children }) => {
   // Clear cart
   const clearCart = async () => {
     try {
-      const user = JSON.parse(sessionStorage.getItem("user"));
       const res = await fetch(
         `${import.meta.env.VITE_BASE_URL}/cart/clear/${user._id}`,
         {

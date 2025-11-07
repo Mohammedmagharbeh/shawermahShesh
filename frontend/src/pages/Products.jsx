@@ -6,19 +6,27 @@ import { useTranslation } from "react-i18next";
 import { ProductDialog } from "@/componenet/common/ProductDialog";
 import product_placeholder from "../assets/product_placeholder.jpeg";
 import { CATEGORIES } from "@/constants";
+import { useUser } from "@/contexts/UserContext";
+import Loading from "@/componenet/common/Loading";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Burgers");
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const { user } = useUser();
 
   const fetchProducts = () => {
     setIsLoading(true);
     fetch(
-      `${import.meta.env.VITE_BASE_URL}/products?category=${selectedCategory}`
+      `${import.meta.env.VITE_BASE_URL}/products?category=${selectedCategory}`,
+      {
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      }
     )
       .then((res) => res.json())
       .then((data) => {
@@ -27,6 +35,8 @@ export default function Products() {
         setIsLoading(false);
       })
       .catch((err) => {
+        console.error(err);
+
         toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
         setIsLoading(false);
       });
@@ -35,6 +45,8 @@ export default function Products() {
   useMemo(() => {
     fetchProducts();
   }, [selectedCategory]);
+
+  if (isLoading) return <Loading />;
 
   return (
     <div className="min-h-screen bg-gray-50 arabic-font" dir="rtl">
@@ -48,7 +60,6 @@ export default function Products() {
             onChange={(e) => setSearchTerm(e.target.value)}
           /> */}
         </div>
-
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
           {CATEGORIES.map((cat, i) => {
             const isAll = cat === "All";
@@ -71,12 +82,7 @@ export default function Products() {
           })}
         </div>
 
-        {isLoading ? (
-          <div className="text-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin yellow mx-auto mb-4" />
-            <p className="text-gray-600">{t("loading_products")}</p>
-          </div>
-        ) : products.length > 0 ? (
+        {products.length > 0 ? (
           <>
             <div className="space-y-6">
               {products.map((product) => (
