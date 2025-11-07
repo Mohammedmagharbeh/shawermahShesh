@@ -109,7 +109,7 @@ function AdminDashboard() {
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().then((permission) =>
-        toast.error("Notification permission:", permission)
+        console.error(permission)
       );
     }
   }, []);

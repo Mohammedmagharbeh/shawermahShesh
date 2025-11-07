@@ -61,7 +61,7 @@ export default function StatisticsPage() {
       const filteredOrders = applyDateFilter(allOrders, dateFilter);
 
       const orderedUserIds = new Set(
-        filteredOrders.map((o) => o.userId._id || o.userDetails._id)
+        filteredOrders.map((o) => o.userId?._id || o.userDetails?._id)
       );
 
       const totalVisitors = applyDateFilterToUsers(users, dateFilter);
@@ -139,12 +139,12 @@ export default function StatisticsPage() {
   };
 
   const getTotalOrdersByUser = (userId) => {
-    return orders.filter((order) => order.userId._id === userId).length;
+    return orders.filter((order) => order.userId?._id === userId).length;
   };
 
   const getTotalSpentByUser = (userId) => {
     return orders
-      .filter((order) => order.userId._id === userId)
+      .filter((order) => order.userId?._id === userId)
       .reduce((sum, order) => sum + order.totalPrice, 0);
   };
 
