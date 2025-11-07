@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 function Login() {
   const [phone, setphone] = useState("");
   const navigate = useNavigate();
-  const { login, user } = useUser();
+  const { login, isAuthenticated } = useUser();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +60,7 @@ function Login() {
     }
   };
 
-  if (user) {
+  if (isAuthenticated) {
     navigate("/products");
     return null;
   }

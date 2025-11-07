@@ -46,7 +46,7 @@ function App() {
         <Header />
         <main className="pt-14">
           <Routes>
-            {!user && <Route path="/" element={<Home />} />}
+            <Route path="/" index element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/slides" element={<AdminSlides />} />
             <Route path="/story" element={<Story />} />

@@ -14,12 +14,12 @@ export const CartProvider = ({ children }) => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
-  const { user } = useUser();
+  const { user, isAuthenticated } = useUser();
 
   // Fetch cart on mount
   useEffect(() => {
     const fetchCart = async () => {
-      if (!user?._id) return;
+      if (!isAuthenticated) return;
       setLoading(true);
       try {
         const res = await fetch(
@@ -97,7 +97,7 @@ export const CartProvider = ({ children }) => {
     notes,
     { selectedProtein, selectedType } = {} // new selections
   ) => {
-    if (!user._id) {
+    if (!isAuthenticated) {
       toast.error(t("please_login_to_add_items"));
       return;
     }

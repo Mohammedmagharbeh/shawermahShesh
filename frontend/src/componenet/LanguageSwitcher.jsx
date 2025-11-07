@@ -13,8 +13,7 @@ function LanguageSwitcher() {
     if (i18n.language === "ar") {
       document.documentElement.style.fontFamily = "'STC', sans-serif";
     } else {
-      document.documentElement.style.fontFamily =
-        "'Baloo Tammudu 2'";
+      document.documentElement.style.fontFamily = "'Baloo Tammudu 2'";
     }
   }, [i18n.language]);
 

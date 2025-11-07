@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +28,7 @@ import logo from "../assets/Logo Sheesh 2025.png";
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cart } = useCart();
-  const { user, logout } = useUser();
+  const { user, logout, isAuthenticated } = useUser();
   const { t } = useTranslation();
 
   const handleLinkClick = () => setIsMenuOpen(false);
@@ -42,14 +41,14 @@ function Header() {
   return (
     <nav
       className={`fixed top-0 w-full bg-gradient-to-r from-white via-yellow-50/30 to-white backdrop-blur-md border-b-2 ${
-        !user && "border-yellow-300"
+        !isAuthenticated && "border-yellow-300"
       } z-50 shadow-lg shadow-yellow-100/50`}
     >
       <div className="container mx-auto px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-2 xs:py-3 sm:py-4">
         <div className="flex items-center justify-between gap-1 xs:gap-2 sm:gap-4 md:gap-6">
           {/* Logo */}
           <Link
-            to={user ? "/products" : "/"}
+            to={isAuthenticated ? "/products" : "/"}
             className="flex-shrink-0 group min-w-0"
           >
             <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
@@ -66,10 +65,9 @@ function Header() {
               </div>
             </div>
           </Link>
-
           {/* Desktop Links */}
           <div className="hidden lg:flex items-center gap-6">
-            {!user &&
+            {!isAuthenticated &&
               PUBLIC_LINKS.map((key) => (
                 <NavLink
                   key={key.label}
@@ -80,10 +78,9 @@ function Header() {
                 />
               ))}
           </div>
-
           {/* User Icons */}
           <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-2">
-            {user && user.role === "user" && (
+            {isAuthenticated && user.role === "user" && (
               <Link to="/cart">
                 <Button
                   variant="outline"
@@ -100,44 +97,45 @@ function Header() {
               </Link>
             )}
 
-            {user && (user.role === "admin" || user.role === "employee") && (
-              <div className="hidden lg:block">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-white border-red-600 border-2 text-red-900 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
+            {isAuthenticated &&
+              (user.role === "admin" || user.role === "employee") && (
+                <div className="hidden lg:block">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-white border-red-600 border-2 text-red-900 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
+                      >
+                        <MonitorCog className="h-4 w-4" />
+                        <span className="hidden xl:inline">
+                          {t("control_panel")}
+                        </span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-56 bg-white border-2 border-red-200 shadow-xl rounded-lg p-2"
                     >
-                      <MonitorCog className="h-4 w-4" />
-                      <span className="hidden xl:inline">
-                        {t("control_panel")}
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-56 bg-white border-2 border-red-200 shadow-xl rounded-lg p-2"
-                  >
-                    {ADMIN_LINKS.map(
-                      (link) =>
-                        link.roles.includes(user.role) && (
-                          <Link to={link.to} key={link.to}>
-                            <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                              <link.icon className="h-4 w-4 ml-2 text-red-600" />
-                              <span className="font-semibold text-gray-700">
-                                {t(link.label)}
-                              </span>
-                            </DropdownMenuItem>
-                          </Link>
-                        )
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+                      {ADMIN_LINKS.map(
+                        (link) =>
+                          link.roles.includes(user.role) && (
+                            <Link to={link.to} key={link.to}>
+                              <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                                <link.icon className="h-4 w-4 ml-2 text-red-600" />
+                                <span className="font-semibold text-gray-700">
+                                  {t(link.label)}
+                                </span>
+                              </DropdownMenuItem>
+                            </Link>
+                          )
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
 
-            {user && (
+            {isAuthenticated && (
               <Link to="/settings">
                 <Button
                   variant="outline"
@@ -153,7 +151,7 @@ function Header() {
               <LanguageSwitcher />
             </div>
 
-            {user ? (
+            {isAuthenticated ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -195,11 +193,11 @@ function Header() {
         {isMenuOpen && (
           <div
             className={`lg:hidden mt-3 xs:mt-4 pb-3 xs:pb-4 border-t-2 ${
-              !user && "border-yellow-300"
+              !isAuthenticated && "border-yellow-300"
             } animate-in slide-in-from-top-2 duration-300 bg-gradient-to-b from-yellow-50/50 to-transparent rounded-b-lg`}
           >
             <div className="flex flex-col gap-1.5 xs:gap-2 pt-3 xs:pt-4">
-              {!user &&
+              {!isAuthenticated &&
                 PUBLIC_LINKS.map((key) => (
                   <NavLink
                     className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
@@ -216,22 +214,25 @@ function Header() {
 
               <div
                 className={`pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${
-                  !user && "border-yellow-300"
+                  !isAuthenticated && "border-yellow-300"
                 }`}
               >
-                {user &&
-                  ADMIN_LINKS.map((link) => (
-                    <Link to={link.to} key={link.to} onClick={toggleMenu}>
-                      <div className="cursor-pointer flex items-center hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                        <link.icon className="h-4 w-4 ml-2 text-red-600" />
-                        <span className="font-semibold text-gray-700">
-                          {t(link.label)}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
+                {isAuthenticated &&
+                  ADMIN_LINKS.map(
+                    (link) =>
+                      link.roles.includes(user.role) && (
+                        <Link to={link.to} key={link.to} onClick={toggleMenu}>
+                          <div className="cursor-pointer flex items-center hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                            <link.icon className="h-4 w-4 ml-2 text-red-600" />
+                            <span className="font-semibold text-gray-700">
+                              {t(link.label)}
+                            </span>
+                          </div>
+                        </Link>
+                      )
+                  )}
 
-                {user ? (
+                {isAuthenticated ? (
                   <Button
                     variant="outline"
                     size="sm"

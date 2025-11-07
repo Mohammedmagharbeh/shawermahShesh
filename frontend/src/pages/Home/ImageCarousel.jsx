@@ -30,7 +30,7 @@ const ImageCarousel = () => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(false);
   const { t, i18n } = useTranslation();
-  const { isAuthenticated, user } = useUser();
+  const { isAuthenticated } = useUser();
   const selectedLanguage = i18n.language;
   const navigate = useNavigate();
 
@@ -62,10 +62,11 @@ const ImageCarousel = () => {
     return () => clearInterval(interval);
   }, [slides]);
 
-  if (isAuthenticated) {
-    navigate("/products");
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/products");
+    }
+  }, [isAuthenticated, navigate]);
 
   if (loading) return <Loading />;
 
