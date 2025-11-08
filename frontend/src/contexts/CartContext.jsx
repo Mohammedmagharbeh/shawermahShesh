@@ -46,7 +46,7 @@ export const CartProvider = ({ children }) => {
       }
     };
     fetchCart();
-  }, []);
+  }, [user]);
 
   // calculate total
   useEffect(() => {

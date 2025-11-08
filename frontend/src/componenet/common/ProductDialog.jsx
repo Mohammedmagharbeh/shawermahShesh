@@ -61,26 +61,31 @@ export function ProductDialog({ id, triggerLabel }) {
     setQuantity((prev) => Math.max(1, prev + increment));
   };
 
-  // سعر الوجبة بعد الخصم إذا موجود
-  const getCurrentPrice = () => {
+  const getProductPrice = (product) => {
+    if (!product) return 0;
+
+    let basePrice = Number(product?.basePrice || 0);
+
     if (product.hasProteinChoices && product.hasTypeChoices) {
-      return (
-        product.prices?.[selectedProtein]?.[selectedType] ||
-        product.basePrice ||
-        0
+      basePrice = Number(
+        product.prices[selectedProtein][selectedType] ?? basePrice
       );
+    } else if (product.hasProteinChoices) {
+      basePrice = Number(product.prices[selectedProtein] ?? basePrice);
+    } else if (product.hasTypeChoices) {
+      basePrice = Number(product.prices?.[selectedType] ?? basePrice);
     }
-    if (product.hasTypeChoices) {
-      return product.prices?.[selectedType] || product.basePrice || 0;
+
+    // apply discount if any
+    if (product.discount && product.discount > 0) {
+      basePrice = basePrice - (basePrice * product.discount) / 100;
     }
-    if (product.hasProteinChoices) {
-      return product.prices?.[selectedProtein] || product.basePrice || 0;
-    }
-    return product.basePrice || 0;
+
+    return basePrice;
   };
 
   const getFinalPrice = () => {
-    const price = getCurrentPrice();
+    const price = getProductPrice(product);
     if (product.discount && product.discount > 0) {
       return price - (price * product.discount) / 100;
     }
@@ -171,7 +176,7 @@ export function ProductDialog({ id, triggerLabel }) {
                       JOD {getFinalPrice().toFixed(2)}
                     </p>
                     <p className="text-xl text-gray-400 line-through">
-                      JOD {getCurrentPrice().toFixed(2)}
+                      JOD {getProductPrice(product).toFixed(2)}
                     </p>
                     <Badge className="bg-green-500 text-white">
                       {t("discount")} {product.discount}%
@@ -179,7 +184,7 @@ export function ProductDialog({ id, triggerLabel }) {
                   </div>
                 ) : (
                   <p className="text-4xl font-bold text-red-600 mb-4">
-                    JOD {getCurrentPrice().toFixed(2)}
+                    JOD {getProductPrice(product).toFixed(2)}
                   </p>
                 )}
               </div>

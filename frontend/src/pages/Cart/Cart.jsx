@@ -75,7 +75,9 @@ const Cart = () => {
                     (product?.productId?._id ?? "id not found") +
                     product.notes +
                     product.isSpicy +
-                    product.additions.map((a) => a._id).join(",")
+                    product.additions.map((a) => a._id).join(",") +
+                    product.selectedType +
+                    product.selectedProtein
                   }
                 />
               ))}

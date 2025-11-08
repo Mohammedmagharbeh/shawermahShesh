@@ -53,6 +53,10 @@ export default function ProductCard({
           meal: data.prices?.meal?.toString() || "",
           chicken: data.prices?.chicken?.toString() || "",
           meat: data.prices?.meat?.toString() || "",
+          chicken_sandwich: data.prices.chicken.sandwich || "",
+          chicken_meal: data.prices.chicken.meal || "",
+          meat_sandwich: data.prices.meat.sandwich || "",
+          meat_meal: data.prices.meat.meal || "",
         },
       });
       setEditingId(data._id);

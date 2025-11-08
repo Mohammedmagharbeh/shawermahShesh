@@ -177,32 +177,34 @@ exports.updatedfood = async (req, res) => {
     }
 
     // ✅ Validate flat format: { sandwich, meal }
-    if (
-      parsedPrices.sandwich !== undefined ||
-      parsedPrices.meal !== undefined
-    ) {
-      parsedPrices = {
-        ...(parsedPrices.sandwich !== undefined && {
-          sandwich: Number(parsedPrices.sandwich),
-        }),
-        ...(parsedPrices.meal !== undefined && {
-          meal: Number(parsedPrices.meal),
-        }),
-      };
-    }
+    // if (
+    //   parsedPrices.sandwich !== undefined ||
+    //   parsedPrices.meal !== undefined
+    // ) {
+    //   parsedPrices = {
+    //     ...(parsedPrices.sandwich !== undefined && {
+    //       sandwich: Number(parsedPrices.sandwich),
+    //     }),
+    //     ...(parsedPrices.meal !== undefined && {
+    //       meal: Number(parsedPrices.meal),
+    //     }),
+    //   };
+    // }
 
     // ✅ Validate nested format: { chicken: {...}, meat: {...} }
-    else {
-      Object.keys(parsedPrices).forEach((type) => {
-        const entry = parsedPrices[type];
-        parsedPrices[type] = {
-          ...(entry.sandwich !== undefined && {
-            sandwich: Number(entry.sandwich),
-          }),
-          ...(entry.meal !== undefined && { meal: Number(entry.meal) }),
-        };
-      });
-    }
+    // else {
+    //   Object.keys(parsedPrices).forEach((type) => {
+    //     const entry = parsedPrices[type];
+    //     parsedPrices[type] = {
+    //       ...(entry.chicken !== undefined && {
+    //         chicken: Number(entry.chicken),
+    //       }),
+    //       ...(entry?.meat !== undefined && { meat: Number(entry.meat) }),
+    //     };
+    //   });
+    // }
+    // console.log(Object.keys(parsedPrices));
+    // console.log(parsedPrices["chicken"]);
 
     // ================================
     // ✅ Validate additions array
@@ -233,6 +235,8 @@ exports.updatedfood = async (req, res) => {
     // ================================
     // ✅ Build update object
     // ================================
+    console.log(parsedPrices);
+
     const updatedData = {
       name,
       description,
