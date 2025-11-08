@@ -80,8 +80,8 @@ routes.post("/verify-otp", async (req, res) => {
 });
 
 routes.get("/home", verify, home);
-routes.get("/products", getAllProducts);
-routes.get("/products/:id", getSingleProduct);
+routes.get("/products", validateJWT, getAllProducts);
+routes.get("/products/:id", validateJWT, getSingleProduct);
 routes.put("/update-phone", validateJWT, async (req, res) => {
   try {
     const { newPhone } = req.body;

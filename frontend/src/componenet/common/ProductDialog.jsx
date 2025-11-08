@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
+import { useUser } from "@/contexts/UserContext";
 
 export function ProductDialog({ id, triggerLabel }) {
   const [quantity, setQuantity] = useState(1);
@@ -35,6 +36,7 @@ export function ProductDialog({ id, triggerLabel }) {
   const [open, setOpen] = useState(false);
   const [selectedType, setSelectedType] = useState("sandwich");
   const [selectedProtein, setSelectedProtein] = useState("chicken");
+  const { user } = useUser();
 
   useEffect(() => {
     if (!open) return;
@@ -42,7 +44,13 @@ export function ProductDialog({ id, triggerLabel }) {
       try {
         setLoading(true);
         const response = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/products/${id}`
+          `${import.meta.env.VITE_BASE_URL}/products/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Bearer ${user.token}`,
+            },
+          }
         );
         if (!response.ok) throw new Error(t("fetch_product_failed"));
         const data = await response.json();
