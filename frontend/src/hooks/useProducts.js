@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useUser } from "@/contexts/UserContext";
 
 export function useProducts(t, selectedCategory) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { user } = useUser();
 
   useEffect(() => {
     fetchProducts();
@@ -16,7 +18,12 @@ export function useProducts(t, selectedCategory) {
     setError("");
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/products?category=${selectedCategory}`
+        `${import.meta.env.VITE_BASE_URL}/products?category=${selectedCategory}`,
+        {
+          headers: {
+            authorization: `Bearer ${user.token}`,
+          },
+        }
       );
       setProducts(res.data.data || []);
     } catch (err) {

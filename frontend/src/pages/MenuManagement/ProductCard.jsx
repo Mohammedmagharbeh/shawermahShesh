@@ -27,7 +27,12 @@ export default function ProductCard({
   const handleEdit = async () => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/products/${product._id}`
+        `${import.meta.env.VITE_BASE_URL}/products/${product._id}`,
+        {
+          headers: {
+            authorization: `Bearer ${user.token}`,
+          },
+        }
       );
       let data = await res.json();
       if (!res.ok) {
