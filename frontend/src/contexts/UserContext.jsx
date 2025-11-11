@@ -7,16 +7,14 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // start as loading
+  const [loading, setLoading] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
   const { t } = useTranslation();
 
   // ✅ Load user from sessionStorage on mount
   useEffect(() => {
     const savedUser = JSON.parse(sessionStorage.getItem("user"));
-    if (savedUser) {
-      setUser(savedUser);
-    }
+    if (savedUser) setUser(savedUser);
     setLoading(false);
   }, []);
 
@@ -28,7 +26,26 @@ export const UserProvider = ({ children }) => {
   const logout = () => {
     sessionStorage.removeItem("user");
     setUser(null);
+    toast.error(t("session_expired") || "Session expired, please log in again");
   };
+
+  // ✅ Axios interceptor for expired tokens
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (err.message.includes("Invalid token")) {
+          logout(); // log the user out
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Clean up interceptor when component unmounts
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, []);
 
   const updatePhone = async (newPhone, navigate) => {
     if (!user) throw new Error("No user logged in");
@@ -52,7 +69,6 @@ export const UserProvider = ({ children }) => {
         });
       }
 
-      // Optional: only set new phone after verification success
       setUser({ ...user, phone: newPhone });
     } catch (error) {
       console.error("Failed to update phone number:", error);
@@ -63,9 +79,7 @@ export const UserProvider = ({ children }) => {
   const getAllUsers = async () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users`);
-      if (res.status !== 200) {
-        throw new Error("Failed to fetch users");
-      }
+      if (res.status !== 200) throw new Error("Failed to fetch users");
       setAllUsers(res.data);
       return res.data;
     } catch (error) {
@@ -87,7 +101,7 @@ export const UserProvider = ({ children }) => {
         logout,
         updatePhone,
         getAllUsers,
-        loading, // <- expose loading to consumers
+        loading,
       }}
     >
       {children}

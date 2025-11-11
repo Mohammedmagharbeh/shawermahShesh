@@ -5,8 +5,6 @@ import Loading from "@/componenet/common/Loading";
 import CartCard from "./CartCard";
 import { useTranslation } from "react-i18next";
 
-// Mock hooks - replace with actual imports
-
 const Cart = () => {
   const { cart, total, loading, updateQuantity, removeFromCart } = useCart();
   const { user } = useUser();

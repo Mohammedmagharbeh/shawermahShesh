@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUser } from "@/contexts/UserContext";
+import { getProductPrice } from "@/constants";
 
 const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
@@ -37,8 +38,6 @@ const statusColors = {
 };
 
 const socket = io(import.meta.env.VITE_SOCKET_URL);
-
-// To-Do: Fetch pending orders on component mount and play sound for each pending order and show them on the dialog.
 
 function AdminDashboard() {
   const { t } = useTranslation();
@@ -546,7 +545,7 @@ function AdminDashboard() {
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-bold text-primary">
-                              {item.priceAtPurchase || 0} {t("price_jod")}
+                              {item.priceAtPurchase} {t("price_jod")}
                             </p>
                             {item.quantity > 1 && (
                               <p className="text-xs text-muted-foreground">

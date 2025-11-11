@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { calculateSubtotal } from "@/lib/utils";
 import { getAdditionsPrice, getProductPrice } from "@/constants";
 
 function Checkout() {
@@ -358,7 +357,7 @@ function Checkout() {
                       </div>
 
                       {/* 🧀 عرض الإضافات */}
-                      {product.additions?.length > 0 && (
+                      {product.additions.length > 0 && (
                         <ul className="mt-2 text-sm text-gray-600 list-disc list-inside flex gap-2">
                           {product.additions.map((addition, i) => (
                             <Badge key={i}>

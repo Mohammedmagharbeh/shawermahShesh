@@ -16,7 +16,7 @@ export default function Products() {
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
-  const { user } = useUser();
+  const { user, logout } = useUser();
 
   const fetchProducts = () => {
     setIsLoading(true);

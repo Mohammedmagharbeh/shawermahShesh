@@ -15,7 +15,7 @@ import product_placeholder from "../assets/product_placeholder.jpeg";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useTranslation } from "react-i18next";
-import { calculateSubtotal } from "@/lib/utils";
+import { getProductPrice } from "@/constants";
 
 const statusColors = {
   processing: "bg-secondary text-secondary-foreground",
@@ -302,7 +302,8 @@ function Orders() {
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold text-primary">
-                            {t("price_jod")}:{calculateSubtotal(item) ?? 0}
+                            {t("price_jod")}:
+                            {item.priceAtPurchase.toFixed(2) ?? 0}
                           </p>
                         </div>
                       </div>

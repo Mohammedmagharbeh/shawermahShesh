@@ -84,11 +84,6 @@ export function ProductDialog({ id, triggerLabel }) {
       basePrice = Number(product.prices?.[selectedType] ?? basePrice);
     }
 
-    // apply discount if any
-    if (product.discount && product.discount > 0) {
-      basePrice = basePrice - (basePrice * product.discount) / 100;
-    }
-
     return basePrice;
   };
 
@@ -180,8 +175,9 @@ export function ProductDialog({ id, triggerLabel }) {
 
                 {product.discount > 0 ? (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <p className="text-4xl font-bold">
-                      JOD {getFinalPrice().toFixed(2)}
+                    <p className="text-4xl font-bold text-red-600">
+                      JOD
+                      {getFinalPrice(product).toFixed(2)}
                     </p>
                     <p className="text-xl text-gray-400 line-through">
                       JOD {getProductPrice(product).toFixed(2)}

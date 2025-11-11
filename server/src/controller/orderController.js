@@ -53,10 +53,19 @@ const enrichProducts = (productsInput, dbProducts, orderType, userDetails) => {
 
     // Base price
     let basePrice = matchedProduct.basePrice;
-    if (matchedProduct.hasTypeChoices || matchedProduct.hasProteinChoices) {
-      const protein = p.selectedProtein || "chicken";
-      const type = p.selectedType || "sandwich";
-      basePrice = matchedProduct.prices?.[protein]?.[type] || basePrice;
+    if (matchedProduct.hasProteinChoices && matchedProduct.hasTypeChoices) {
+      basePrice = Number(
+        matchedProduct.prices?.[selectedProtein]?.[selectedType] ?? basePrice
+      );
+    } else if (matchedProduct.hasProteinChoices) {
+      basePrice = Number(matchedProduct.prices?.[selectedProtein] ?? basePrice);
+    } else if (matchedProduct.hasTypeChoices) {
+      basePrice = Number(matchedProduct.prices?.[selectedType] ?? basePrice);
+    }
+
+    // apply discount if any
+    if (matchedProduct.discount && matchedProduct.discount > 0) {
+      basePrice = basePrice - (basePrice * matchedProduct.discount) / 100;
     }
 
     const discountedPrice =
@@ -228,12 +237,10 @@ exports.createOrder = async (req, res) => {
     const dbProductIds = dbProducts.map((p) => p._id.toString());
     const missing = uniqueProductIds.filter((id) => !dbProductIds.includes(id));
     if (missing.length) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `Products not found: ${missing.join(", ")}`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `Products not found: ${missing.join(", ")}`,
+      });
     }
 
     // helper: get addition price from product by _id or by name if needed
@@ -288,6 +295,8 @@ exports.createOrder = async (req, res) => {
       // if flat (sandwich: x, meal: y)
       if (selectedType && matchedProduct.prices?.[selectedType] != null) {
         return Number(matchedProduct.prices[selectedType]);
+      } else if (selectedProtein) {
+        return Number(matchedProduct.prices[selectedProtein]);
       }
       // fallback to basePrice
       return Number(matchedProduct.basePrice || 0);

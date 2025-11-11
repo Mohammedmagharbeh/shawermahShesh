@@ -15,8 +15,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
-//To-Do: need Fix
-
 function MyOrders() {
   const { getOrdersByUserId } = useOrder();
   const { user } = useUser();

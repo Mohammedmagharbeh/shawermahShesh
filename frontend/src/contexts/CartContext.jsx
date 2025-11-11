@@ -68,6 +68,8 @@ export const CartProvider = ({ children }) => {
       // ✅ Handle flat prices { sandwich, meal }
       else if (selectedType && product.prices?.[selectedType] != null) {
         basePrice = Number(product.prices[selectedType]);
+      } else if (selectedProtein) {
+        basePrice = product.prices[selectedProtein];
       }
 
       // ✅ Apply discount

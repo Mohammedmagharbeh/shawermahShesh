@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import productPlaceholderImg from "../../assets/product_placeholder.jpeg";
 import { useTranslation } from "react-i18next";
-import { calculateSubtotal } from "@/lib/utils";
 import { getProductPrice } from "@/constants";
 
 function CartCard({ product, updateQuantity, removeFromCart }) {
@@ -91,11 +90,11 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
             {t("price")}:
           </span>
           <div className="flex flex-col items-end lg:items-center">
-            {product?.productId?.discount > 0 && (
+            {/* {product?.productId?.discount > 0 && (
               <span className="text-sm text-gray-400 line-through">
                 {basePrice?.toFixed(2)} JOD
               </span>
-            )}
+            )} */}
             <span className="text-xl font-bold text-red-600">
               {getProductPrice(product)?.toFixed(2)} JOD
             </span>
@@ -134,7 +133,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
           </span>
 
           <span className="text-2xl font-extrabold text-red-600">
-            {(calculateSubtotal(product) * product.quantity)?.toFixed(2)} JOD
+            {(getProductPrice(product) * product.quantity)?.toFixed(2)} JOD
           </span>
         </div>
       </div>
