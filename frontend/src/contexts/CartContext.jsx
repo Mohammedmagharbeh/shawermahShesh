@@ -54,7 +54,7 @@ export const CartProvider = ({ children }) => {
       const product = item.productId;
       if (!product) return acc;
 
-      let basePrice = product.basePrice || 0;
+      let basePrice;
       const { selectedProtein, selectedType } = item;
 
       // ✅ Handle nested prices { chicken: { sandwich, meal } }
@@ -63,14 +63,25 @@ export const CartProvider = ({ children }) => {
         selectedType &&
         product.prices?.[selectedProtein]?.[selectedType] != null
       ) {
+        console.log("1");
+
         basePrice = Number(product.prices[selectedProtein][selectedType]);
       }
       // ✅ Handle flat prices { sandwich, meal }
-      else if (selectedType && product.prices?.[selectedType] != null) {
+      else if (selectedType && product.prices[selectedType] !== null) {
+        console.log("2");
+
         basePrice = Number(product.prices[selectedType]);
       } else if (selectedProtein) {
-        basePrice = product.prices[selectedProtein];
+        console.log("3");
+
+        basePrice = Number(product.prices[selectedProtein]);
+      } else {
+        console.log("4");
+
+        basePrice = product.basePrice;
       }
+      console.log(item, selectedProtein);
 
       // ✅ Apply discount
       if (product.discount) {

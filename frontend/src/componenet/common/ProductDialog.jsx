@@ -34,8 +34,8 @@ export function ProductDialog({ id, triggerLabel }) {
   const { addToCart } = useCart();
   const selectedLanguage = localStorage.getItem("i18nextLng");
   const [open, setOpen] = useState(false);
-  const [selectedType, setSelectedType] = useState("sandwich");
-  const [selectedProtein, setSelectedProtein] = useState("chicken");
+  const [selectedType, setSelectedType] = useState(null);
+  const [selectedProtein, setSelectedProtein] = useState(null);
   const { user } = useUser();
 
   useEffect(() => {
@@ -106,7 +106,8 @@ export function ProductDialog({ id, triggerLabel }) {
     return (basePrice + additionsPrice) * quantity;
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e) => {
+    e.preventDefault();
     const selectedFullAdditions = product.additions?.filter((a) =>
       selectedAdditions.includes(a._id)
     );
@@ -120,11 +121,10 @@ export function ProductDialog({ id, triggerLabel }) {
       { selectedProtein, selectedType }
     );
 
-    // إعادة تعيين القيم
     setSelectedAdditions([]);
     setSpicy(null);
-    setSelectedProtein("chicken");
-    setSelectedType("sandwich");
+    setSelectedProtein(null);
+    setSelectedType(null);
     setNotes("");
     toast.success(
       `${t("added_successfully")} ${quantity} ${t("of")} ${product.name[selectedLanguage]}`
@@ -197,7 +197,10 @@ export function ProductDialog({ id, triggerLabel }) {
                 {product.description?.[selectedLanguage]}
               </p>
 
-              <div className="space-y-4 mt-6">
+              <form
+                className="space-y-4 mt-6"
+                onSubmit={(e) => handleAddToCart(e)}
+              >
                 {/* Protein choice */}
                 {product.hasProteinChoices && (
                   <div>
@@ -215,6 +218,7 @@ export function ProductDialog({ id, triggerLabel }) {
                           value={option}
                           checked={selectedProtein === option}
                           onChange={() => setSelectedProtein(option)}
+                          required
                         />
                         <span>{t(option)}</span>
                       </Label>
@@ -334,14 +338,15 @@ export function ProductDialog({ id, triggerLabel }) {
                   </div>
 
                   <Button
-                    onClick={handleAddToCart}
+                    // onClick={handleAddToCart}
                     className="flex-1 bg-red-600 text-white h-12 text-lg font-semibold"
+                    type="submit"
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
                     {t("add_to_cart")} JOD {getTotalPrice().toFixed(2)}
                   </Button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         )}

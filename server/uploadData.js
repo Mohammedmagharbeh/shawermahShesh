@@ -75,29 +75,29 @@ data = data
       hasTypeChoices: item.hasTypeChoices || false,
       hasProteinChoices: item.hasProteinChoices || false,
       prices: {
-        sandwich: item.sandwichPrice || base,
-        meal: item.mealPrice || base,
-        chicken: item.chickenPrice || base,
-        meat: item.meatPrice || base,
-        chicken_sandwich: item.chickenSandwichPrice || base,
-        chicken_meal: item.chickenMealPrice || base,
-        meat_sandwich: item.meatSandwichPrice || base,
-        meat_meal: item.meatMealPrice || base,
+        sandwich: item.sandwichPrice,
+        meal: item.mealPrice,
+        chicken: item.chickenPrice,
+        meat: item.meatPrice,
+        chicken_sandwich: item.chickenSandwichPrice,
+        chicken_meal: item.chickenMealPrice,
+        meat_sandwich: item.meatSandwichPrice,
+        meat_meal: item.meatMealPrice,
       },
     };
   });
 
 console.log(`✅ Prepared ${data.length} valid products for insertion.`);
 
-console.log("data:", data);
+// console.log("data:", data);
 
 // ----------------------
 // 4️⃣ Upload to MongoDB
 // ----------------------
 (async () => {
   try {
-    // await Product.deleteMany({}); // optional — clears existing data first
-    // console.log("🗑️ Old products cleared.");
+    await Product.deleteMany({}); // optional — clears existing data first
+    console.log("🗑️ Old products cleared.");
 
     const inserted = await Product.insertMany(data);
     console.log(`🎉 Successfully inserted ${inserted.length} products!`);
