@@ -24,7 +24,7 @@ const filePath = path.join(
   "Users",
   "Ahmad Jamil",
   "Desktop",
-  "Menu_full.xls" // ensure correct extension
+  "Menu.xlsx" // ensure correct extension
 );
 
 const workbook = XLSX.readFile(filePath);
@@ -32,7 +32,6 @@ console.log("📄 Sheets found:", workbook.SheetNames);
 
 const sheetName = workbook.SheetNames[0];
 const worksheet = workbook.Sheets[sheetName];
-
 // Convert sheet to JSON
 let data = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
@@ -47,51 +46,58 @@ if (data.length === 0) {
   process.exit(1);
 }
 
-console.log(`📊 Loaded ${data.length} rows from Excel.`);
-console.log("🔍 Preview first 3 rows:", data.slice(0, 3));
+// console.log(`📊 Loaded ${data.length} rows from Excel.`);
+// console.log("🔍 Preview first 3 rows:", data.slice(0, 3));
 
 data = data
-  .filter((item) => item.enName && item.price)
+  .filter((item) => item.enName)
   .map((item) => {
-    const numericPrice = parseFloat(
-      item.price.toString().replace(/[^\d.]/g, "")
-    );
+    const base =
+      parseFloat(item.basePrice) ||
+      parseFloat(item.chickenPrice) ||
+      parseFloat(item.meatPrice) ||
+      0;
 
     return {
-      category: item.category || "",
       name: {
         en: item.enName || "",
         ar: item.arName || "",
       },
       description: {
         en: item.enDescription || "",
-        ar: item.arDdescription || item.arDescription || "",
+        ar: item.arDescription || "",
       },
-      type: item.type || "",
-      price: isNaN(numericPrice) ? 0 : numericPrice,
-      image: "", // 👈 Add a default value or generate one if needed
-    };
-
-    return {
+      basePrice: base,
+      discount: item.discount || 0,
+      image: "",
       category: item.category || "",
-      name_en: item.enName || "", // match Excel field
-      name_ar: item.arName || "",
-      type: item.type || "",
-      description_en: item.enDescription || "",
-      description_ar: item.arDdescription || "",
-      price: isNaN(numericPrice) ? 0 : numericPrice,
+      isSpicy: item.isSpicy || false,
+      hasTypeChoices: item.hasTypeChoices || false,
+      hasProteinChoices: item.hasProteinChoices || false,
+      prices: {
+        sandwich: item.sandwichPrice || base,
+        meal: item.mealPrice || base,
+        chicken: item.chickenPrice || base,
+        meat: item.meatPrice || base,
+        chicken_sandwich: item.chickenSandwichPrice || base,
+        chicken_meal: item.chickenMealPrice || base,
+        meat_sandwich: item.meatSandwichPrice || base,
+        meat_meal: item.meatMealPrice || base,
+      },
     };
   });
 
 console.log(`✅ Prepared ${data.length} valid products for insertion.`);
+
+console.log("data:", data);
 
 // ----------------------
 // 4️⃣ Upload to MongoDB
 // ----------------------
 (async () => {
   try {
-    await Product.deleteMany({}); // optional — clears existing data first
-    console.log("🗑️ Old products cleared.");
+    // await Product.deleteMany({}); // optional — clears existing data first
+    // console.log("🗑️ Old products cleared.");
 
     const inserted = await Product.insertMany(data);
     console.log(`🎉 Successfully inserted ${inserted.length} products!`);

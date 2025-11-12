@@ -36,6 +36,9 @@ export default function Products() {
       })
       .catch((err) => {
         console.error(err);
+        if (err.message.includes("Invalid token")) {
+          logout();
+        }
 
         toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
         setIsLoading(false);

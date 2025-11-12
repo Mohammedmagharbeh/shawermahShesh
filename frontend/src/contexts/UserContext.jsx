@@ -29,24 +29,6 @@ export const UserProvider = ({ children }) => {
     toast.error(t("session_expired") || "Session expired, please log in again");
   };
 
-  // ✅ Axios interceptor for expired tokens
-  useEffect(() => {
-    const interceptor = axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (err.message.includes("Invalid token")) {
-          logout(); // log the user out
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    // Clean up interceptor when component unmounts
-    return () => {
-      axios.interceptors.response.eject(interceptor);
-    };
-  }, []);
-
   const updatePhone = async (newPhone, navigate) => {
     if (!user) throw new Error("No user logged in");
 
