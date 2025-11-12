@@ -8,10 +8,11 @@ import {
 } from "lucide-react";
 
 export const CATEGORIES = [
+  { en: "Shawarma", ar: "شاورما" },
+  { en: "Group meals", ar: "وجبات جماعية" },
   { en: "Burgers", ar: "برجر" },
   { en: "Snacks", ar: "وجبات خفيفة" },
   { en: "Drinks", ar: "مشروبات" },
-  { en: "Shawarma", ar: "شاورما" },
   { en: "Box", ar: "بوكس" },
   { en: "Dishes", ar: "أطباق" },
   { en: "Appetizers", ar: "مقبلات" },
