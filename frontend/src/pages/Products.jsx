@@ -11,7 +11,7 @@ import Loading from "@/componenet/common/Loading";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("Burgers");
+  const [selectedCategory, setSelectedCategory] = useState("Shawarma");
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
