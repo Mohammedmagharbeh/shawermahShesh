@@ -19,6 +19,7 @@ exports.postEat = async (req, res) => {
       hasProteinChoices = false,
       hasTypeChoices = false,
       additions = [],
+      inStock = true,
     } = req.body;
 
     // ================================
@@ -106,6 +107,7 @@ exports.postEat = async (req, res) => {
       hasProteinChoices: proteinChoices,
       hasTypeChoices: typeChoices,
       additions, // embedded additions
+      inStock: Boolean(inStock),
     });
 
     return res.status(201).json({
@@ -134,6 +136,7 @@ exports.updatedfood = async (req, res) => {
       hasTypeChoices,
       hasProteinChoices,
       additions = [],
+      inStock = true,
     } = req.body;
 
     // ================================
@@ -248,6 +251,7 @@ exports.updatedfood = async (req, res) => {
       hasProteinChoices: Boolean(hasProteinChoices),
       hasTypeChoices: Boolean(hasTypeChoices),
       additions,
+      inStock: Boolean(inStock),
     };
 
     if (imageUrl) updatedData.image = imageUrl;

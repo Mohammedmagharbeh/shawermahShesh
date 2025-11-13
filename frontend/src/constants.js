@@ -76,6 +76,7 @@ export const INITIAL_FORM_DATA = {
   enDescription: "",
   image: "",
   isSpicy: false,
+  inStock: false,
   hasTypeChoices: false,
   hasProteinChoices: false,
   additions: [],

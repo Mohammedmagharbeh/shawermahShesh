@@ -438,13 +438,26 @@ function ProductManagement({
             {/* Spicy */}
             <div className="flex flex-col">
               <Label htmlFor="isSpicy" className="text-sm">
-                Has Spicy
+                {t("has_spicy")}
               </Label>
               <Switch
                 id="isSpicy"
                 checked={Boolean(formData.isSpicy)}
                 onCheckedChange={(v) =>
                   setFormData((prev) => ({ ...prev, isSpicy: Boolean(v) }))
+                }
+                className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
+              />
+            </div>
+            <div className="flex flex-col">
+              <Label htmlFor="inStock" className="text-sm">
+                {t("is_in_stock")}
+              </Label>
+              <Switch
+                id="inStock"
+                checked={Boolean(formData.inStock)}
+                onCheckedChange={(v) =>
+                  setFormData((prev) => ({ ...prev, inStock: Boolean(v) }))
                 }
                 className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
               />

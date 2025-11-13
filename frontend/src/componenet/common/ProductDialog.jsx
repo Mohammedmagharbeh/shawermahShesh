@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/contexts/UserContext";
 
-export function ProductDialog({ id, triggerLabel }) {
+export function ProductDialog({ id, triggerLabel, disabled = false }) {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
@@ -135,7 +135,9 @@ export function ProductDialog({ id, triggerLabel }) {
   return (
     <DialogUi open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">{buttonLabel}</Button>
+        <Button variant="outline" disabled={disabled}>
+          {buttonLabel}
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -88,70 +89,114 @@ export default function Products() {
         {products.length > 0 ? (
           <>
             <div className="space-y-6">
-              {products.map((product) => (
-                <Card
-                  key={product._id}
-                  className="overflow-hidden border-0 shadow-sm hover:shadow-md transition bg-white"
-                >
-                  <CardContent className="p-0">
-                    <div className="flex flex-row-reverse items-center gap-4 p-4">
-                      {/* الصورة على اليسار */}
-                      <div className="flex-shrink-0 w-32 h-32">
-                        <img
-                          src={product.image || product_placeholder}
-                          alt={product.name[selectedLanguage]}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                      </div>
+              {products.map((product) => {
+                const isOutOfStock = product.inStock === false;
 
-                      {/* المحتوى على اليمين */}
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div>
-                          <h3 className="text-lg font-bold mb-1 text-gray-900">
-                            {product.name[selectedLanguage]}
-                          </h3>
-                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                            {product.description[selectedLanguage]}
-                          </p>
+                return (
+                  <Card
+                    key={product._id}
+                    className={`overflow-hidden border-0 shadow-sm transition bg-white ${
+                      isOutOfStock
+                        ? "opacity-60 grayscale hover:shadow-sm"
+                        : "hover:shadow-md"
+                    }`}
+                  >
+                    <CardContent className="p-0">
+                      <div className="flex flex-row-reverse items-center gap-4 p-4 relative">
+                        {/* Out of Stock Badge */}
+                        {isOutOfStock && (
+                          <Badge
+                            variant="destructive"
+                            className="absolute top-2 left-2 z-10"
+                          >
+                            {t("out_of_stock") || "Out of Stock"}
+                          </Badge>
+                        )}
+
+                        {/* الصورة على اليسار */}
+                        <div className="flex-shrink-0 w-32 h-32 relative">
+                          <img
+                            src={product.image || product_placeholder}
+                            alt={product.name[selectedLanguage]}
+                            className={`w-full h-full object-cover rounded-lg ${
+                              isOutOfStock ? "grayscale opacity-70" : ""
+                            }`}
+                          />
                         </div>
 
-                        <div className="flex items-center justify-between mt-2">
+                        {/* المحتوى على اليمين */}
+                        <div className="flex-1 flex flex-col justify-between">
                           <div>
-                            {product.discount > 0 &&
-                            !product.hasProteinChoices &&
-                            !product.hasTypeChoices ? (
-                              <div className="flex items-center gap-2">
-                                <p className="text-xl font-bold text-orange-500">
-                                  JOD
-                                  {product.discountedPrice
-                                    ? product.discountedPrice.toFixed(2)
-                                    : (
-                                        product.basePrice -
-                                        (product.basePrice * product.discount) /
-                                          100
-                                      ).toFixed(2)}
-                                </p>
-                                <p className="text-gray-400 line-through text-sm">
-                                  {product.basePrice}
-                                </p>
-                              </div>
-                            ) : (
-                              <p className="text-xl font-bold text-red-600">
-                                {product.hasProteinChoices ||
-                                product.hasTypeChoices
-                                  ? "According To Your Choices"
-                                  : `${product.basePrice} ${t("jod")}`}
-                              </p>
-                            )}
+                            <h3
+                              className={`text-lg font-bold mb-1 ${
+                                isOutOfStock ? "text-gray-500" : "text-gray-900"
+                              }`}
+                            >
+                              {product.name[selectedLanguage]}
+                            </h3>
+                            <p
+                              className={`text-sm mb-2 line-clamp-2 ${
+                                isOutOfStock ? "text-gray-400" : "text-gray-600"
+                              }`}
+                            >
+                              {product.description[selectedLanguage]}
+                            </p>
                           </div>
 
-                          <ProductDialog id={product._id} />
+                          <div className="flex items-center justify-between mt-2">
+                            <div>
+                              {product.discount > 0 &&
+                              !product.hasProteinChoices &&
+                              !product.hasTypeChoices ? (
+                                <div className="flex items-center gap-2">
+                                  <p
+                                    className={`text-xl font-bold ${
+                                      isOutOfStock
+                                        ? "text-gray-400"
+                                        : "text-orange-500"
+                                    }`}
+                                  >
+                                    JOD
+                                    {product.discountedPrice
+                                      ? product.discountedPrice.toFixed(2)
+                                      : (
+                                          product.basePrice -
+                                          (product.basePrice *
+                                            product.discount) /
+                                            100
+                                        ).toFixed(2)}
+                                  </p>
+                                  <p className="text-gray-400 line-through text-sm">
+                                    {product.basePrice}
+                                  </p>
+                                </div>
+                              ) : (
+                                <p
+                                  className={`text-xl font-bold ${
+                                    isOutOfStock
+                                      ? "text-gray-400"
+                                      : "text-red-600"
+                                  }`}
+                                >
+                                  {product.hasProteinChoices ||
+                                  product.hasTypeChoices
+                                    ? "According To Your Choices"
+                                    : `${product.basePrice} ${t("jod")}`}
+                                </p>
+                              )}
+                            </div>
+
+                            <ProductDialog
+                              id={product._id}
+                              disabled={isOutOfStock}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </>
         ) : (

@@ -54,6 +54,7 @@ export default function useProductForm(formData, setFormData) {
       discount: formData.discount ? Number(formData.discount) : 0,
       basePrice: Number(formData.basePrice || formData.price || 0),
       prices: {},
+      inStock: Boolean(formData.inStock),
     };
 
     // Both type & protein

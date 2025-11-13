@@ -40,6 +40,24 @@ export default function ProductCard({
         return;
       }
       data = data.data;
+      if (data.hasTypeChoices && data.hasProteinChoices) {
+        data.prices = {
+          chicken: {
+            sandwich: data.prices.chicken?.sandwich || "",
+            meal: data.prices.chicken?.meal || "",
+          },
+        };
+      } else if (data.hasTypeChoices) {
+        data.prices = {
+          sandwich: data.prices?.sandwich?.toString() || "",
+          meal: data.prices?.meal?.toString() || "",
+        };
+      } else if (data.hasProteinChoices) {
+        data.prices = {
+          chicken: data.prices?.chicken?.toString() || "",
+          meat: data.prices?.meat?.toString() || "",
+        };
+      }
       setFormData({
         arName: data.name?.ar || "",
         enName: data.name?.en || "",
@@ -53,16 +71,8 @@ export default function ProductCard({
         hasTypeChoices: !!data.hasTypeChoices,
         hasProteinChoices: !!data.hasProteinChoices,
         additions: data.additions || [],
-        prices: {
-          sandwich: data.prices?.sandwich?.toString() || "",
-          meal: data.prices?.meal?.toString() || "",
-          chicken: data.prices?.chicken?.toString() || "",
-          meat: data.prices?.meat?.toString() || "",
-          chicken_sandwich: data.prices.chicken?.sandwich || "",
-          chicken_meal: data.prices.chicken?.meal || "",
-          meat_sandwich: data.prices.meat?.sandwich || "",
-          meat_meal: data.prices.meat?.meal || "",
-        },
+        prices: data.prices || {},
+        inStock: Boolean(data.inStock),
       });
       setEditingId(data._id);
     } catch (error) {

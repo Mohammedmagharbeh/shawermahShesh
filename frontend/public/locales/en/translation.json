@@ -330,9 +330,7 @@
   "choose_protein": "Choose the category",
   "choose_type": "Choose Type",
 
-
-
-   "story": {
+  "story": {
     "title": "Our Story",
     "subtitle": "The Journey of Shawarma Sheesh from Dream to Reality",
     "sections": [
@@ -361,5 +359,9 @@
         "content": "Today, Shawarma Sheesh is more than a restaurant: it's a story of faith, quality, and evolution We continue to grow and innovate with the signature of Sheesh"
       }
     ]
-  }
+  },
+  "in_stock": "In Stock",
+  "out_of_stock": "Out of Stock",
+  "is_in_stock": "Product is in Stock",
+  "has_spicy": "Has Spicy"
 }
