@@ -11,7 +11,7 @@ import { CATEGORIES } from "@/constants";
 
 export default function ProductsList({ setFormData, setEditingId }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Burgers");
+  const [selectedCategory, setSelectedCategory] = useState("Shawarma");
   const { t } = useTranslation();
   const { products, setProducts, loading, error } = useProducts(
     t,
