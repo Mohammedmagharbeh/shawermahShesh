@@ -2,15 +2,12 @@
 export const CATEGORIES = [
   { en: "Burgers", ar: "برجر" },
   { en: "Group meals", ar: "وجبات جماعية" },
-  { en: "Snacks", ar: "وجبات خفيفة" },
+  { en: "Snacks", ar: " سناكات" },
   { en: "Drinks", ar: "مشروبات" },
   { en: "Shawarma", ar: "شاورما" },
   { en: "Box", ar: "بوكس" },
-  { en: "Dishes", ar: "أطباق" },
-  { en: "Appetizers", ar: "مقبلات" },
-  { en: "Salads", ar: "سلطات" },
+  { en: " Sheesh Dishes", ar: " أطباق شيش" },
   { en: "Kids", ar: "أطفال" },
-  { en: "Sauces", ar: "صلصات" },
   { en: "Sides", ar: "جانبية" },
 ];
 
