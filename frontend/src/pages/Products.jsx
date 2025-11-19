@@ -114,7 +114,9 @@ export default function Products() {
                         )}
 
                         {/* الصورة على اليسار */}
-                        <div className="flex-shrink-0 w-32 h-32 relative">
+                        {/* <div className="flex-shrink-0 w-32 h-32 relative"> */}
+                        <div className="flex-shrink-0 w-24 h-24 relative">
+
                           <img
                             src={product.image || product_placeholder}
                             alt={product.name[selectedLanguage]}

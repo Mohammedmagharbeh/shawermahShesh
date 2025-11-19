@@ -1,7 +1,6 @@
 // product Constants
 export const CATEGORIES = [
   { en: "Burgers", ar: "برجر" },
-  // { en: "Group meals", ar: "وجبات جماعية" },
   { en: "Snacks", ar: " سناكات" },
   { en: "Drinks", ar: "مشروبات" },
   { en: "Shawarma", ar: "شاورما" },

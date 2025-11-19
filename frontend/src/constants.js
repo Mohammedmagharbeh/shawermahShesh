@@ -9,7 +9,6 @@ import {
 
 export const CATEGORIES = [
   { en: "Shawarma", ar: "شاورما" },
-  // { en: "Group meals", ar: "وجبات جماعية" },
   { en: "Burgers", ar: "برجر" },
   { en: "Snacks", ar: "سناكات " },
   { en: "Drinks", ar: "مشروبات" },
