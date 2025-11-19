@@ -65,17 +65,12 @@ function Header() {
                 <h1 className="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-700 via-red-600 to-red-700 bg-clip-text text-transparent drop-shadow-sm truncate">
                   {t("resturant_name")}
                 </h1>
-                {/* <h2 className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic truncate">
+                <h2 className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic truncate">
                   {t("resturant_tagline")}
-                </h2> */}
+                </h2>
                 {/* <h2 className="ml-4 text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic truncate">
   {t("resturant_tagline")}
 </h2> */}
-<h2 className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic truncate 
-  rtl:ml-4 ltr:mr-4">
-  {t("resturant_tagline")}
-</h2>
-
 
               </div>
             </div>
