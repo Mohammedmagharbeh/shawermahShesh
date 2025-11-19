@@ -212,6 +212,7 @@
 //     </div>
 //   );
 // }
+
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -327,13 +328,12 @@ export default function Products() {
                           >
                             {product.name[selectedLanguage]}
                           </h3>
-                          <p
-                            className={`text-xs xs:text-sm line-clamp-2 ${
-                              isOutOfStock ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {product.description[selectedLanguage]}
-                          </p>
+                         <p
+  className={`text-xs xs:text-sm line-clamp-2 leading-6 ${isOutOfStock ? "text-gray-400" : "text-gray-600"}`}
+>
+  {product.description[selectedLanguage]}
+</p>
+
                         </div>
 
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-1 xs:mt-2 gap-2">
