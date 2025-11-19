@@ -201,9 +201,9 @@ exports.createOrder = async (req, res) => {
       !userId ||
       !Array.isArray(products) ||
       products.length === 0 ||
-      !shippingAddress ||
-      !paymentMethod ||
       !orderType ||
+      (orderType === "delivery" && !shippingAddress) ||
+      !paymentMethod ||
       !userDetails?.name
     ) {
       return res
@@ -218,11 +218,14 @@ exports.createOrder = async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found" });
 
-    const location = await Location.findById(shippingAddress);
-    if (!location)
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid shipping address" });
+    let location = null;
+    if (orderType === "delivery") {
+      location = await Location.findById(shippingAddress);
+      if (!location)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid shipping address" });
+    }
 
     // collect product ids and fetch DB products
     const productIds = products.map((p) =>
@@ -385,7 +388,7 @@ exports.createOrder = async (req, res) => {
     }, 0);
 
     const totalPrice =
-      Number(productsTotal) + Number(location.deliveryCost || 0);
+      Number(productsTotal) + Number(location?.deliveryCost || 0);
 
     // create order
     const newOrder = await Order.create({
@@ -393,7 +396,7 @@ exports.createOrder = async (req, res) => {
       products: enrichedProducts,
       totalPrice,
       status: status || "Processing",
-      shippingAddress,
+      shippingAddress: orderType === "delivery" ? shippingAddress : null,
       payment: {
         method: paymentMethod,
         status: paymentStatus || "unpaid",

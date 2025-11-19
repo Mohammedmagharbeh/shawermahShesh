@@ -43,8 +43,9 @@ const ordersSchema = new mongoose.Schema(
     },
     shippingAddress: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: "locations",
+      default: null,
+      required: false,
     },
     payment: {
       status: { type: String, enum: PAYMENT_STATUSES, default: "unpaid" },
