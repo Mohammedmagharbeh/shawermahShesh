@@ -318,18 +318,46 @@ function ProductManagement({
                 </div>
               )}
             </div>
-
+            <hr />
             {/* Additions */}
             <div className="space-y-2">
-              <div className="flex gap-2 items-center mb-2">
-                <Label className="text-sm font-semibold">Additions</Label>
-                <button
-                  type="button"
-                  onClick={handleAddAddition}
-                  className="p-1 rounded bg-primary text-white hover:bg-primary/90"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex gap-2">
+                  <Label className="text-sm font-semibold">Additions</Label>
+                  <button
+                    type="button"
+                    onClick={handleAddAddition}
+                    className="p-1 rounded bg-primary text-white hover:bg-primary/90"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label className="inline-flex gap-2 items-center">
+                    <Input
+                      type="radio"
+                      id="additionsSelectionType"
+                      name="additonSelectType"
+                      value="radio"
+                      required={formData.additions.length > 0}
+                      checked={formData.additionsSelectionType === "radio"}
+                      onChange={handleInputChange}
+                    />
+                    One Choice
+                  </Label>
+                  <Label className="inline-flex gap-2 items-center">
+                    <Input
+                      type="radio"
+                      id="additionsSelectionType"
+                      name="additonSelectType"
+                      value="checkbox"
+                      required={formData.additions.length > 0}
+                      checked={formData.additionsSelectionType === "checkbox"}
+                      onChange={handleInputChange}
+                    />
+                    Multiple Choices
+                  </Label>
+                </div>
               </div>
 
               {formData.additions?.length === 0 && (
@@ -354,6 +382,7 @@ function ProductManagement({
                     }
                     className="w-full"
                     dir="rtl"
+                    required
                   />
                   <Input
                     placeholder="Addition Name"
@@ -366,6 +395,7 @@ function ProductManagement({
                     }
                     className="w-full"
                     dir="ltr"
+                    required
                   />
                   <Input
                     type="number"
@@ -375,6 +405,7 @@ function ProductManagement({
                       handleAdditionChange(index, "price", e.target.value)
                     }
                     className="w-full"
+                    required
                   />
                   <Button
                     type="button"
@@ -388,7 +419,7 @@ function ProductManagement({
                 </div>
               ))}
             </div>
-
+            <hr />
             {/* Discount */}
             <div className="flex flex-col">
               <Label htmlFor="discount" className="text-sm">
@@ -412,6 +443,7 @@ function ProductManagement({
                 {t("category")}
               </Label>
               <Select
+                defaultValue={formData.category}
                 onValueChange={(value) => {
                   const selectedCategory = CATEGORIES.find(
                     (cat) => cat.en === value
@@ -419,6 +451,7 @@ function ProductManagement({
                   setFormData({ ...formData, category: selectedCategory?.en });
                 }}
                 className="mt-1.5"
+                required
               >
                 <SelectTrigger className="w-full">
                   <SelectValue

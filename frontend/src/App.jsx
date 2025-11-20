@@ -19,7 +19,6 @@ import { useEffect } from "react";
 import StatisticsPage from "./pages/statistic";
 import AdminUsersPage from "./pages/adminusers";
 import Products from "./pages/Products";
-import { useUser } from "./contexts/UserContext";
 import AdminSlides from "./pages/AdminSlides";
 import AdminProductPanel from "./pages/MenuManagement/AdminProductPanel";
 import Story from "./pages/story";
@@ -27,7 +26,6 @@ import NotFound from "./componenet/NotFound";
 
 function App() {
   const { i18n } = useTranslation();
-  const { user } = useUser();
 
   useEffect(() => {
     const currentLang = localStorage.getItem("i18nextLng") || "ar";

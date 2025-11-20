@@ -45,6 +45,11 @@ const productSchema = new mongoose.Schema({
       price: { type: Number, required: true, min: 0 },
     },
   ],
+  additionsSelectionType: {
+    type: String,
+    required: true,
+    enum: ["radio", "checkbox"],
+  },
   inStock: { type: Boolean, default: true },
 });
 
