@@ -357,17 +357,19 @@ function Checkout() {
                       </div>
 
                       {/* 🧀 عرض الإضافات */}
-                      {product.additions.length > 0 && (
-                        <ul className="mt-2 text-sm text-gray-600 list-disc list-inside flex gap-2">
-                          {product.additions.map((addition, i) => (
-                            <Badge key={i}>
-                              {addition.name[selectedLanguage] ||
-                                "Deleted Addition"}{" "}
-                              ({addition.price?.toFixed(2) || "0.00"} JOD)
-                            </Badge>
-                          ))}
-                        </ul>
-                      )}
+                     {product.additions.length > 0 && (
+  <ul className="mt-2 text-sm text-gray-600 list-disc list-inside flex gap-2">
+    {product.additions.map((addition, i) => (
+      <Badge key={i}>
+        {addition.name[selectedLanguage] || "Deleted Addition"}
+        {Number(addition.price) > 0 && (
+          <> ({addition.price.toFixed(2)} JOD)</>
+        )}
+      </Badge>
+    ))}
+  </ul>
+)}
+
                       {product.notes && (
                         <p className="text-sm text-gray-500 italic mt-1">
                           {t("notes")}: {product.notes}
