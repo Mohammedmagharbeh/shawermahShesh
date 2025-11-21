@@ -281,9 +281,15 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
                     }}
                   />
                   <Label htmlFor={addition._id} className="text-gray-700">
-                    {addition.name?.[selectedLanguage]} (JOD {Number(addition.price).toFixed(2)})
-                  </Label>
+  {addition.name?.[selectedLanguage]}
+  {Number(addition.price) > 0 && (
+    <> (JOD {Number(addition.price).toFixed(2)})</>
+  )}
+</Label>
+
                 </div>
+
+                
               ))}
 
               {/* Notes */}
