@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Dialog as DialogUi,
@@ -75,7 +74,9 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
     let basePrice = Number(product?.basePrice || 0);
 
     if (product.hasProteinChoices && product.hasTypeChoices) {
-      basePrice = Number(product.prices[selectedProtein]?.[selectedType] ?? basePrice);
+      basePrice = Number(
+        product.prices[selectedProtein]?.[selectedType] ?? basePrice
+      );
     } else if (product.hasProteinChoices) {
       basePrice = Number(product.prices[selectedProtein] ?? basePrice);
     } else if (product.hasTypeChoices) {
@@ -152,7 +153,10 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
         {loading ? (
           <Loading />
         ) : (
-          <form onSubmit={handleAddToCart} className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 py-4">
+          <form
+            onSubmit={handleAddToCart}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 py-4"
+          >
             {/* Image */}
             <div className="relative">
               <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
@@ -184,7 +188,9 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
                     <p className="text-lg sm:text-xl text-gray-400 line-through">
                       JOD {getProductPrice(product).toFixed(2)}
                     </p>
-                    <Badge className="bg-green-500 text-white">{t("discount")} {product.discount}%</Badge>
+                    <Badge className="bg-green-500 text-white">
+                      {t("discount")} {product.discount}%
+                    </Badge>
                   </div>
                 ) : (
                   <p className="text-3xl sm:text-4xl font-bold text-red-600 mb-4">
@@ -200,9 +206,14 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
               {/* Protein choice */}
               {product.hasProteinChoices && (
                 <div className="mt-4">
-                  <span className="text-lg font-medium text-gray-900 mb-2 block">{t("choose_protein")}</span>
+                  <span className="text-lg font-medium text-gray-900 mb-2 block">
+                    {t("choose_protein")}
+                  </span>
                   {["chicken", "meat"].map((option) => (
-                    <Label key={option} className="inline-flex gap-2 items-center mr-6">
+                    <Label
+                      key={option}
+                      className="inline-flex gap-2 items-center mr-6"
+                    >
                       <Input
                         type="radio"
                         name="protein"
@@ -220,9 +231,14 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
               {/* Type choice */}
               {product.hasTypeChoices && (
                 <div className="mt-4">
-                  <span className="text-lg font-medium text-gray-900 mb-2 block">{t("choose_type")}</span>
+                  <span className="text-lg font-medium text-gray-900 mb-2 block">
+                    {t("choose_type")}
+                  </span>
                   {["sandwich", "meal"].map((option) => (
-                    <Label key={option} className="inline-flex gap-2 items-center mr-6">
+                    <Label
+                      key={option}
+                      className="inline-flex gap-2 items-center mr-6"
+                    >
                       <Input
                         type="radio"
                         name="type"
@@ -240,7 +256,9 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
               {/* Spicy level */}
               {product.isSpicy && (
                 <div className="mt-4 flex flex-col sm:flex-row items-center gap-4">
-                  <span className="text-lg font-medium text-gray-900 mb-2">{t("choose_spicy_level")}</span>
+                  <span className="text-lg font-medium text-gray-900 mb-2">
+                    {t("choose_spicy_level")}
+                  </span>
                   <Label className="inline-flex gap-2 items-center">
                     <Input
                       type="radio"
@@ -265,35 +283,50 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
 
               {/* Additions */}
               {product.additions?.map((addition) => (
-                <div key={addition._id} className="flex items-center gap-2 mt-2">
-                  <Input
-                    type="checkbox"
-                    id={addition._id}
-                    value={addition._id}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedAdditions((prev) => [...prev, addition._id]);
-                      } else {
-                        setSelectedAdditions((prev) =>
-                          prev.filter((id) => id !== addition._id)
-                        );
-                      }
-                    }}
-                  />
+                <div
+                  key={addition._id}
+                  className="flex items-center gap-2 mt-2"
+                >
+                  {product.additionsSelectionType === "checkbox" ? (
+                    <Input
+                      type="checkbox"
+                      id={addition._id}
+                      value={addition._id}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedAdditions((prev) => [
+                            ...prev,
+                            addition._id,
+                          ]);
+                        } else {
+                          setSelectedAdditions((prev) =>
+                            prev.filter((id) => id !== addition._id)
+                          );
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Input
+                      type="radio"
+                      id={addition._id}
+                      value={addition._id}
+                      onChange={(e) => {
+                        setSelectedAdditions([addition._id]);
+                      }}
+                      checked={selectedAdditions.includes(addition._id)}
+                    />
+                  )}
                   <Label htmlFor={addition._id} className="text-gray-700">
-  {addition.name?.[selectedLanguage]}
-  {Number(addition.price) > 0 && (
-    <> (JOD {Number(addition.price).toFixed(2)})</>
-  )}
-</Label>
-
+                    {addition.name?.[selectedLanguage]} (JOD{" "}
+                    {Number(addition.price).toFixed(2)})
+                  </Label>
                 </div>
-
-                
               ))}
 
               {/* Notes */}
-              <Label htmlFor="notes" className="mt-2">{t("notes")}</Label>
+              <Label htmlFor="notes" className="mt-2">
+                {t("notes")}
+              </Label>
               <Textarea
                 id="notes"
                 name="notes"
@@ -313,7 +346,9 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
                   >
                     <Minus className="w-4 h-4" />
                   </Button>
-                  <span className="w-16 text-center font-semibold text-lg">{quantity}</span>
+                  <span className="w-16 text-center font-semibold text-lg">
+                    {quantity}
+                  </span>
                   <Button
                     type="button"
                     variant="ghost"

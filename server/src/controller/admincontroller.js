@@ -19,6 +19,7 @@ exports.postEat = async (req, res) => {
       hasProteinChoices = false,
       hasTypeChoices = false,
       additions = [],
+      additionsSelectionType,
       inStock = true,
     } = req.body;
 
@@ -92,6 +93,8 @@ exports.postEat = async (req, res) => {
       }
     }
 
+    console.log("additionsSelectionType", additionsSelectionType);
+
     // ================================
     // ✅ Save product
     // ================================
@@ -107,6 +110,7 @@ exports.postEat = async (req, res) => {
       hasProteinChoices: proteinChoices,
       hasTypeChoices: typeChoices,
       additions, // embedded additions
+      additionsSelectionType,
       inStock: Boolean(inStock),
     });
 
@@ -136,6 +140,7 @@ exports.updatedfood = async (req, res) => {
       hasTypeChoices,
       hasProteinChoices,
       additions = [],
+      additionsSelectionType,
       inStock = true,
     } = req.body;
 
@@ -238,7 +243,7 @@ exports.updatedfood = async (req, res) => {
     // ================================
     // ✅ Build update object
     // ================================
-    console.log(parsedPrices);
+    console.log(additionsSelectionType);
 
     const updatedData = {
       name,
@@ -251,6 +256,7 @@ exports.updatedfood = async (req, res) => {
       hasProteinChoices: Boolean(hasProteinChoices),
       hasTypeChoices: Boolean(hasTypeChoices),
       additions,
+      additionsSelectionType,
       inStock: Boolean(inStock),
     };
 

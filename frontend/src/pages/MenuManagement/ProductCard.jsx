@@ -71,6 +71,7 @@ export default function ProductCard({
         hasTypeChoices: !!data.hasTypeChoices,
         hasProteinChoices: !!data.hasProteinChoices,
         additions: data.additions || [],
+        additionsSelectionType: data.additionsSelectionType,
         prices: data.prices || {},
         inStock: Boolean(data.inStock),
       });

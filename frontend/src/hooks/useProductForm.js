@@ -46,6 +46,7 @@ export default function useProductForm(formData, setFormData) {
         en: formData.enDescription,
       },
       additions: formData.additions,
+      additionsSelectionType: formData.additionsSelectionType,
       image: formData.image,
       category: formData.category,
       isSpicy: Boolean(formData.isSpicy),
