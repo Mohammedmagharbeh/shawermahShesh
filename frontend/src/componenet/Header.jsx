@@ -53,7 +53,7 @@
 //           >
 //             <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
 //               <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full  ">
-             
+
 //               {/* <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full  bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center flex-shrink-0 ring-2 ring-yellow-400 ring-offset-2 transition-transform group-hover:scale-105 duration-300"> */}
 //   <img
 //     src={logo}
@@ -274,36 +274,48 @@
 // }
 
 // export default Header;
-"use client"
+"use client";
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useCart } from "@/contexts/CartContext"
-import { useUser } from "@/contexts/UserContext"
-import { LogIn, LogOut, Menu, ShoppingCart, X, Settings, MonitorIcon as MonitorCog } from "lucide-react"
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { useTranslation } from "react-i18next"
-import LanguageSwitcher from "@/componenet/LanguageSwitcher"
-import NavLink from "./common/NavLink"
-import { ADMIN_LINKS, PUBLIC_LINKS } from "@/constants"
-import logo from "../assets/Logo Sheesh 2025.png"
-import  shosho  from '../assets/shosho.png';
-
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useCart } from "@/contexts/CartContext";
+import { useUser } from "@/contexts/UserContext";
+import {
+  LogIn,
+  LogOut,
+  Menu,
+  ShoppingCart,
+  X,
+  Settings,
+  MonitorIcon as MonitorCog,
+} from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/componenet/LanguageSwitcher";
+import NavLink from "./common/NavLink";
+import { ADMIN_LINKS, PUBLIC_LINKS } from "@/constants";
+import logo from "../assets/Logo Sheesh 2025.png";
+import shosho from "../assets/shosho.png";
 
 function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { cart } = useCart()
-  const { user, logout, isAuthenticated } = useUser()
-  const { t } = useTranslation()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { cart } = useCart();
+  const { user, logout, isAuthenticated } = useUser();
+  const { t } = useTranslation();
 
-  const handleLinkClick = () => setIsMenuOpen(false)
+  const handleLinkClick = () => setIsMenuOpen(false);
   const handleLogout = () => {
-    logout()
-    setIsMenuOpen(false)
-  }
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev)
+    logout();
+    setIsMenuOpen(false);
+  };
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   return (
     <nav
@@ -314,26 +326,28 @@ function Header() {
       <div className="container mx-auto px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-2 xs:py-3 sm:py-4">
         <div className="flex items-center justify-between gap-1 xs:gap-2 sm:gap-4 md:gap-6">
           {/* Logo */}
-          <Link to={isAuthenticated ? "/products" : "/"} className="flex-shrink-0 group min-w-0">
+          <Link
+            to={isAuthenticated ? "/products" : "/"}
+            className="flex-shrink-0 group min-w-0"
+          >
             <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
               {/* الشعار الأول (أكبر بشكل ملحوظ + Responsive ممتاز) */}
-<div className="w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 md:w-28 md:h-20 rounded-full">
-  <img
-    src={logo || "/placeholder.svg"}
-    alt="شاورما شيش"
-    className="w-full h-full object-contain"
-  />
-</div>
+              <div className="w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 md:w-28 md:h-20 rounded-full">
+                <img
+                  src={logo || "/placeholder.svg"}
+                  alt="شاورما شيش"
+                  className="w-full h-full object-contain"
+                />
+              </div>
 
-{/* الشعار الثاني */}
-<div className="flex-shrink-0 min-w-0">
-  <img
-    src={shosho}
-    alt="YALLA SHEESH Logo"
-    className="h-10 xs:h-12 sm:h-14 md:h-16 lg:h-20 w-auto object-contain"
-  />
-</div>
-
+              {/* الشعار الثاني */}
+              <div className="flex-shrink-0 min-w-0">
+                <img
+                  src={shosho}
+                  alt="YALLA SHEESH Logo"
+                  className="h-10 xs2:w-40 xs:h-12 xs:w-40 sm:h-14 sm:w-44 md:h-16 md:w-50 lg:h-20 lg:w-70 w-auto object-contain"
+                />
+              </div>
             </div>
           </Link>
           {/* Desktop Links */}
@@ -368,38 +382,43 @@ function Header() {
               </Link>
             )}
 
-            {isAuthenticated && (user.role === "admin" || user.role === "employee") && (
-              <div className="hidden lg:block">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-white border-red-600 border-2 text-red-900 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
+            {isAuthenticated &&
+              (user.role === "admin" || user.role === "employee") && (
+                <div className="hidden lg:block">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-white border-red-600 border-2 text-red-900 hover:bg-gradient-to-r hover:from-red-700 hover:to-red-800 hover:text-white h-10 md:h-11 text-sm font-bold gap-2 px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0"
+                      >
+                        <MonitorCog className="h-4 w-4" />
+                        <span className="hidden xl:inline">
+                          {t("control_panel")}
+                        </span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-56 bg-white border-2 border-red-200 shadow-xl rounded-lg p-2"
                     >
-                      <MonitorCog className="h-4 w-4" />
-                      <span className="hidden xl:inline">{t("control_panel")}</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-56 bg-white border-2 border-red-200 shadow-xl rounded-lg p-2"
-                  >
-                    {ADMIN_LINKS.map(
-                      (link) =>
-                        link.roles.includes(user.role) && (
-                          <Link to={link.to} key={link.to}>
-                            <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                              <link.icon className="h-4 w-4 ml-2 text-red-600" />
-                              <span className="font-semibold text-gray-700">{t(link.label)}</span>
-                            </DropdownMenuItem>
-                          </Link>
-                        ),
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+                      {ADMIN_LINKS.map(
+                        (link) =>
+                          link.roles.includes(user.role) && (
+                            <Link to={link.to} key={link.to}>
+                              <DropdownMenuItem className="cursor-pointer hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
+                                <link.icon className="h-4 w-4 ml-2 text-red-600" />
+                                <span className="font-semibold text-gray-700">
+                                  {t(link.label)}
+                                </span>
+                              </DropdownMenuItem>
+                            </Link>
+                          )
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
 
             {isAuthenticated && (
               <Link to="/settings">
@@ -446,7 +465,11 @@ function Header() {
               className="lg:hidden h-9 w-9 xs:h-10 xs:w-10 p-0 hover:bg-red-100 text-red-700 transition-all duration-300 flex-shrink-0"
               onClick={toggleMenu}
             >
-              {isMenuOpen ? <X className="h-5 w-5 xs:h-6 xs:w-6" /> : <Menu className="h-5 w-5 xs:h-6 xs:w-6" />}
+              {isMenuOpen ? (
+                <X className="h-5 w-5 xs:h-6 xs:w-6" />
+              ) : (
+                <Menu className="h-5 w-5 xs:h-6 xs:w-6" />
+              )}
             </Button>
           </div>
         </div>
@@ -474,7 +497,9 @@ function Header() {
                 <LanguageSwitcher />
               </div>
 
-              <div className={`pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!isAuthenticated && "border-yellow-300"}`}>
+              <div
+                className={`pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!isAuthenticated && "border-yellow-300"}`}
+              >
                 {isAuthenticated &&
                   ADMIN_LINKS.map(
                     (link) =>
@@ -482,10 +507,12 @@ function Header() {
                         <Link to={link.to} key={link.to} onClick={toggleMenu}>
                           <div className="cursor-pointer flex items-center hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
                             <link.icon className="h-4 w-4 ml-2 text-red-600" />
-                            <span className="font-semibold text-gray-700">{t(link.label)}</span>
+                            <span className="font-semibold text-gray-700">
+                              {t(link.label)}
+                            </span>
                           </div>
                         </Link>
-                      ),
+                      )
                   )}
 
                 {isAuthenticated ? (
@@ -515,7 +542,7 @@ function Header() {
         )}
       </div>
     </nav>
-  )
+  );
 }
 
-export default Header
+export default Header;
