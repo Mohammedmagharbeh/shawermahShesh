@@ -63,13 +63,14 @@ function Story() {
         <div className="space-y-8">
           {content.sections.map((section, index) => (
             <motion.div
-              key={index}
-              initial={{ opacity: 0, x: language === "ar" ? -50 : 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="group"
-            >
+  key={index}
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, delay: index * 0.1 }}
+  viewport={{ once: true, margin: "-100px" }}
+  className="group"
+>
+
               <div
                 className="bg-white border-l-4 border-[#dc0606] rounded-lg p-8 hover:shadow-lg transition-all duration-300 hover:border-yellow-400"
                 style={{ direction: language === "ar" ? "rtl" : "ltr" }}
