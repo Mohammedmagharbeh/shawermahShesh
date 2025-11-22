@@ -27,8 +27,8 @@ exports.userLogin = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Wrong information" });
     }
-    const token = jwt.sign({ userId: userLog._id }, "goback", {
-      expiresIn: "1h",
+    const token = jwt.sign({ userId: userLog._id }, process.env.JWT_SECRET, {
+      expiresIn: "24h",
     });
     res.status(200).json({ message: "token found", token });
   } catch (error) {
