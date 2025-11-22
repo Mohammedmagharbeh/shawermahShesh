@@ -45,7 +45,10 @@ export default function Home() {
   }, [location.hash]);
 
   return (
-    <div className="min-h-screen bg-background arabic-font" dir="rtl">
+    <div
+      className="min-h-screen bg-background arabic-font pt-14 xs2:pt-4"
+      dir="rtl"
+    >
       <ImageCarousel />
 
       <section id="our_story" className="py-12 sm:py-16 md:py-20 bg-white">

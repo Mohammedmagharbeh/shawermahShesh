@@ -71,7 +71,7 @@ const ImageCarousel = () => {
   if (loading) return <Loading />;
 
   return (
-    <section id="home" className="pt-0">
+    <section id="home" className="xs:pt-0 xs2:pt-0 md:pt-7 lg:pt-10">
       <FloatingCertificates />
       <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[70vh] overflow-hidden">
         {slides?.map((slide, index) => (
