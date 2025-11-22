@@ -61,22 +61,24 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
               )}
             </div>
 
-           {product.additions && product.additions.length > 0 && (
-  <div className="flex gap-1 flex-wrap items-center">
-    <span className="text-sm text-gray-600">{t("additions")}:</span>
-    {product.additions.map((addition) => (
-      <Badge
-        key={addition._id}
-        className="px-2 py-1 flex items-center gap-1"
-      >
-        {addition.name[selectedLanguage]}
-        {Number(addition.price) > 0 && (
-          <span className="">· {addition.price.toFixed(2)} JOD</span>
-        )}
-      </Badge>
-    ))}
-  </div>
-)}
+            {product.additions && product.additions.length > 0 && (
+              <div className="flex gap-1 flex-wrap items-center">
+                <span className="text-sm text-gray-600">{t("additions")}:</span>
+                {product.additions.map((addition) => (
+                  <Badge
+                    key={addition._id}
+                    className="px-2 py-1 flex items-center gap-1"
+                  >
+                    {addition.name[selectedLanguage]}
+                    {Number(addition.price) > 0 && (
+                      <span className="">
+                        · {addition.price.toFixed(2)} JOD
+                      </span>
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            )}
 
             {product.notes && (
               <p className="text-sm text-gray-600 italic">
