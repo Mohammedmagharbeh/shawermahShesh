@@ -44,7 +44,7 @@ function Story() {
   const content = t("story", { returnObjects: true });
 
   return (
-    <div className="min-h-screen bg-white pt-14">
+    <div className="min-h-screen bg-white pt-14 xs2:pt-6 xs:pt-6">
       {/* العنوان */}
       <div className="bg-gradient-to-b from-[#b80505] to-[#dc0606] text-white py-12 px-6">
         <motion.div

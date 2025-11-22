@@ -223,6 +223,9 @@ import product_placeholder from "../assets/product_placeholder.jpeg";
 import { CATEGORIES } from "@/constants";
 import { useUser } from "@/contexts/UserContext";
 import Loading from "@/componenet/common/Loading";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import i18n from "@/i18n";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -257,8 +260,30 @@ export default function Products() {
 
   if (isLoading) return <Loading />;
 
+  const handleInStock = async (v, product) => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/admin/updatefood/${product._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({ ...product, inStock: Boolean(v) }),
+        }
+      );
+
+      const data = await res.json();
+      toast.success(data.message);
+      fetchProducts();
+    } catch (err) {
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 arabic-font" dir="rtl">
+    <div className="min-h-screen bg-gray-50 arabic-font pt-12" dir="rtl">
       <div className="container mx-auto px-2 xs:px-3 sm:px-4 py-6 sm:py-8 lg:py-10">
         {/* Categories */}
         <div className="flex gap-1 xs:gap-1.5 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 scrollbar-hide">
@@ -328,12 +353,11 @@ export default function Products() {
                           >
                             {product.name[selectedLanguage]}
                           </h3>
-                         <p
-  className={`text-xs xs:text-sm line-clamp-2 leading-6 ${isOutOfStock ? "text-gray-400" : "text-gray-600"}`}
->
-  {product.description[selectedLanguage]}
-</p>
-
+                          <p
+                            className={`text-xs xs:text-sm line-clamp-2 leading-6 ${isOutOfStock ? "text-gray-400" : "text-gray-600"}`}
+                          >
+                            {product.description[selectedLanguage]}
+                          </p>
                         </div>
 
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-1 xs:mt-2 gap-2">
@@ -355,8 +379,7 @@ export default function Products() {
                                     ? product.discountedPrice.toFixed(2)
                                     : (
                                         product.basePrice -
-                                        (product.basePrice *
-                                          product.discount) /
+                                        (product.basePrice * product.discount) /
                                           100
                                       ).toFixed(2)}
                                 </p>
@@ -367,10 +390,13 @@ export default function Products() {
                             ) : (
                               <p
                                 className={`text-base xs:text-lg sm:text-xl font-bold line-clamp-1 ${
-                                  isOutOfStock ? "text-gray-400" : "text-red-600"
+                                  isOutOfStock
+                                    ? "text-gray-400"
+                                    : "text-red-600"
                                 }`}
                               >
-                                {product.hasProteinChoices || product.hasTypeChoices
+                                {product.hasProteinChoices ||
+                                product.hasTypeChoices
                                   ? "According To Your Choices"
                                   : `${product.basePrice} ${t("jod")}`}
                               </p>
@@ -378,11 +404,27 @@ export default function Products() {
                           </div>
 
                           {/* Product Dialog Button */}
-                          <div className="flex-shrink-0">
+                          <div className="flex gap-5 flex-shrink-0">
                             <ProductDialog
                               id={product._id}
                               disabled={isOutOfStock}
                             />
+                            {(user.role === "admin" ||
+                              user.role === "employee") && (
+                              <div className="flex flex-col">
+                                <Label htmlFor="inStock" className="text-sm">
+                                  {t("is_in_stock")}
+                                </Label>
+                                <Switch
+                                  id="inStock"
+                                  className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
+                                  checked={product.inStock}
+                                  onCheckedChange={(v) =>
+                                    handleInStock(v, product)
+                                  }
+                                />
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

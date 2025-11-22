@@ -18,7 +18,6 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { toast } from "react-hot-toast";
 import product_placeholder from "../assets/product_placeholder.jpeg";
-import { EditOrderDialog } from "@/componenet/common/EditOrderDialog";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +26,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUser } from "@/contexts/UserContext";
-import { getProductPrice } from "@/constants";
 
 const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
@@ -223,7 +221,7 @@ function AdminDashboard() {
   if (loading) return <Loading />;
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-8">
+    <div className="min-h-screen bg-background p-6 md:p-8 pt-20!">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-2">
@@ -590,18 +588,20 @@ function AdminDashboard() {
                 </div>
 
                 <div className="mt-6 flex flex-col gap-3 border-t pt-4 md:flex-row md:items-center md:justify-end">
-                  <EditOrderDialog
+                  {/* <EditOrderDialog
                     name={t("edit_order")}
                     order={order}
                     updateOrders={getAllOrders}
-                  />
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleDeleteOrder(order._id)}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {t("delete_order")}
-                  </Button>
+                  /> */}
+                  {user.role === "admin" && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDeleteOrder(order._id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {t("delete_order")}
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     className="border-primary text-primary hover:bg-primary/10 bg-transparent"

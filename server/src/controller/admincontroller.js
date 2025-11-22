@@ -145,26 +145,13 @@ exports.updatedfood = async (req, res) => {
     } = req.body;
 
     // ================================
-    // ✅ Validate required fields
-    // ================================
-    if (
-      !name?.ar ||
-      !name?.en ||
-      !description?.ar ||
-      !description?.en ||
-      !category
-    ) {
-      return res
-        .status(400)
-        .json({ message: "All required fields must be provided" });
-    }
-
-    // ================================
     // ✅ Validate category
     // ================================
-    const matchedCategory = CATEGORIES.find((c) => c.en === category);
-    if (!matchedCategory) {
-      return res.status(400).json({ message: "Invalid category" });
+    if (category) {
+      const matchedCategory = CATEGORIES.find((c) => c.en === category);
+      if (!matchedCategory) {
+        return res.status(400).json({ message: "Invalid category" });
+      }
     }
 
     // ================================
@@ -251,7 +238,7 @@ exports.updatedfood = async (req, res) => {
       basePrice: Number(basePrice) || 0,
       discount: Number(discount) || 0,
       prices: parsedPrices,
-      category: matchedCategory.en,
+      category: category,
       isSpicy: Boolean(isSpicy),
       hasProteinChoices: Boolean(hasProteinChoices),
       hasTypeChoices: Boolean(hasTypeChoices),
