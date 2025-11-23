@@ -76,7 +76,10 @@ exports.getAllProducts = async (req, res) => {
     if (hasProteinChoices !== undefined)
       query.hasProteinChoices = hasProteinChoices === "true";
 
-    const productsList = await products.find(query).lean();
+    const productsList = await products
+      .find(query)
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.status(200).json({
       message: "Products fetched successfully",
