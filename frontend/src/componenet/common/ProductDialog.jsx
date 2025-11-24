@@ -325,27 +325,30 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
                       />
                     )}
 
-  {/* صورة مختلفة حسب الإضافة */}
-  {["شيشو ولد", "Sheeshoo Boy"].includes(addition.name?.[selectedLanguage]?.trim()) && (
-    <img
-      src="/images/boy.png" // ضع هنا مسار صورة الولد
-      alt="Sheeshoo Boy"
-      className="w-5 h-5 object-contain"
-    />
-  )}
-  {["شيشي بنت","Sheeshi Girl"].includes(addition.name?.[selectedLanguage]?.trim()) && (
-    <img
-      src="/images/girl.png" // ضع هنا مسار صورة البنت
-      alt="Sheeshi Girl"
-      className="w-5 h-5 object-contain"
-    />
-  )}
+                    {/* صورة مختلفة حسب الإضافة */}
+                    {["شيشو ولد", "Sheeshoo Boy"].includes(
+                      addition.name?.[selectedLanguage]?.trim()
+                    ) && (
+                      <img
+                        src="/images/boy.png" // ضع هنا مسار صورة الولد
+                        alt="Sheeshoo Boy"
+                        className="w-5 h-5 object-contain"
+                      />
+                    )}
+                    {["شيشي بنت", "Sheeshi Girl"].includes(
+                      addition.name?.[selectedLanguage]?.trim()
+                    ) && (
+                      <img
+                        src="/images/girl.png" // ضع هنا مسار صورة البنت
+                        alt="Sheeshi Girl"
+                        className="w-5 h-5 object-contain"
+                      />
+                    )}
                     <Label
                       htmlFor={addition._id}
                       className="flex items-center gap-2 text-gray-700"
                     >
                       {additionName}
-
                       {additionPrice > 0 && (
                         <span>(JOD {additionPrice.toFixed(2)})</span>
                       )}
