@@ -336,7 +336,7 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
       className="w-5 h-5 object-contain"
     />
   )}
-  {["شيشي بنت", "Sheeshi Girl"].includes(addition.name?.[selectedLanguage]?.trim()) && (
+  {["شيشي بنت","Sheeshi Girl"].includes(addition.name?.[selectedLanguage]?.trim()) && (
     <img
       src="/images/girl.png" // ضع هنا مسار صورة البنت
       alt="Sheeshi Girl"
