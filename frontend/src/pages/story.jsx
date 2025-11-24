@@ -9,7 +9,7 @@ function Story() {
   // جلب اللغة المحفوظة أو استخدام اللغة الحالية
   const [language, setLanguage] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("selectedLanguage") || i18n.language;
+      return localStorage.getItem("i18nextLng") || i18n.language;
     }
     return i18n.language;
   });
@@ -17,7 +17,7 @@ function Story() {
   // تغيير اللغة وحفظها
   useEffect(() => {
     i18n.changeLanguage(language);
-    localStorage.setItem("selectedLanguage", language);
+    localStorage.setItem("i18nextLng", language);
   }, [language, i18n]);
 
   // دالة لتغيير اللغة من المفتاح الخارجي
@@ -30,7 +30,7 @@ function Story() {
     // إذا كانت اللغة في i18n تغيرت من مصدر خارجي
     if (i18n.language !== language) {
       setLanguage(i18n.language);
-      localStorage.setItem("selectedLanguage", i18n.language);
+      localStorage.setItem("i18nextLng", i18n.language);
     }
   }, [i18n.language]);
 
