@@ -19,9 +19,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/contexts/UserContext";
-
-import pizzaImg from "@/assets/pizza.jpg";
-
+import shesho from "@/assets/shesho.jpg";
+import shishi from "@/assets/shishi.jpg";
 
 export function ProductDialog({ id, triggerLabel, disabled = false }) {
   const [quantity, setQuantity] = useState(1);
@@ -285,73 +284,79 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
               )}
 
               {/* Additions */}
-              {product.additions?.map((addition) => (
-                <div
-                  key={addition._id}
-                  className="flex items-center gap-2 mt-2"
-                >
-                  {product.additionsSelectionType === "checkbox" ? (
-                    <Input
-                      type="checkbox"
-                      id={addition._id}
-                      value={addition._id}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedAdditions((prev) => [
-                            ...prev,
-                            addition._id,
-                          ]);
-                        } else {
-                          setSelectedAdditions((prev) =>
-                            prev.filter((id) => id !== addition._id)
-                          );
-                        }
-                      }}
-                    />
-                  ) : (
-                    <Input
-                      type="radio"
-                      id={addition._id}
-                      value={addition._id}
-                      onChange={(e) => {
-                        setSelectedAdditions([addition._id]);
-                      }}
-                      checked={selectedAdditions.includes(addition._id)}
-                    />
-                  )}
-                  {/* <Label htmlFor={addition._id} className="text-gray-700">
-                    {addition.name?.[selectedLanguage]}
-                    {Number(addition.price) > 0 && (
-                      <> (JOD {Number(addition.price).toFixed(2)})</>
+              {product.additions?.map((addition) => {
+                const isChecked = selectedAdditions.includes(addition._id);
+                const isCheckbox =
+                  product.additionsSelectionType === "checkbox";
+                const additionName = addition.name?.[selectedLanguage] || "";
+                const additionPrice = Number(addition.price);
+
+                return (
+                  <div
+                    key={addition._id}
+                    className="flex items-center gap-2 mt-2"
+                  >
+                    {isCheckbox ? (
+                      <Input
+                        type="checkbox"
+                        id={addition._id}
+                        value={addition._id}
+                        checked={isChecked}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedAdditions((prev) => [
+                              ...prev,
+                              addition._id,
+                            ]);
+                          } else {
+                            setSelectedAdditions((prev) =>
+                              prev.filter((id) => id !== addition._id)
+                            );
+                          }
+                        }}
+                      />
+                    ) : (
+                      <Input
+                        type="radio"
+                        id={addition._id}
+                        value={addition._id}
+                        checked={isChecked}
+                        onChange={() => setSelectedAdditions([addition._id])}
+                      />
                     )}
-                  </Label> */}
-                  <Label htmlFor={addition._id} className="flex items-center gap-2 text-gray-700">
-  {addition.name?.[selectedLanguage]}
 
-  {/* صورة مختلفة حسب الإضافة */}
-  {["شيشو ولد", "Sheeshoo Boy"].includes(addition.name?.[selectedLanguage]?.trim()) && (
-    <img
-      src="/images/boy.png" // ضع هنا مسار صورة الولد
-      alt="Sheeshoo Boy"
-      className="w-5 h-5 object-contain"
-    />
-  )}
-  {["شيشي بنت", "Sheeshi Girl"].includes(addition.name?.[selectedLanguage]?.trim()) && (
-    <img
-      src="/images/girl.png" // ضع هنا مسار صورة البنت
-      alt="Sheeshi Girl"
-      className="w-5 h-5 object-contain"
-    />
-  )}
+                    <Label
+                      htmlFor={addition._id}
+                      className="flex items-center gap-2 text-gray-700"
+                    >
+                      {additionName}
 
-  {Number(addition.price) > 0 && (
-    <> (JOD {Number(addition.price).toFixed(2)})</>
-  )}
-</Label>
+                      {additionPrice > 0 && (
+                        <span>(JOD {additionPrice.toFixed(2)})</span>
+                      )}
 
-
-                </div>
-              ))}
+                      {(product.category === "Kids" &&
+                        additionName.toLowerCase().includes("boy")) ||
+                      additionName.includes("ولد") ? (
+                        <img
+                          src={shesho}
+                          width={100}
+                          height={50}
+                          className="rounded-xl max-h-16 object-contain"
+                          alt="Kids addition"
+                        />
+                      ) : (
+                        <img
+                          src={shishi}
+                          width={100}
+                          className="rounded-xl max-h-16 object-contain"
+                          alt="Kids addition"
+                        />
+                      )}
+                    </Label>
+                  </div>
+                );
+              })}
 
               {/* Notes */}
               <Label htmlFor="notes" className="mt-2">
