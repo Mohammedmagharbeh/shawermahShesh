@@ -43,6 +43,9 @@ function Story() {
 
   const content = t("story", { returnObjects: true });
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
   return (
     <div className="min-h-screen bg-white pt-14 xs2:pt-6 xs:pt-6">
       {/* العنوان */}
