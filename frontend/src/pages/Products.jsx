@@ -231,7 +231,7 @@ import { useCategoryContext } from "@/contexts/CategoryContext";
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(
-    "692564033f44bbfbbd507657"
+    "6925a83f23f3a8dcdb91b714"
   );
   const [isLoading, setIsLoading] = useState(false);
   const { categories, fetchCategories } = useCategoryContext();

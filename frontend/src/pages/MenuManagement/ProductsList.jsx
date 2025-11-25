@@ -12,7 +12,7 @@ import { useCategoryContext } from "@/contexts/CategoryContext";
 export default function ProductsList({ setFormData, setEditingId }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(
-    "692564033f44bbfbbd507657"
+    "6925a83f23f3a8dcdb91b714"
   );
   const { t } = useTranslation();
   const { products, setProducts, loading, error } = useProducts(
