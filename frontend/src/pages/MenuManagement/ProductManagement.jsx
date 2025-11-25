@@ -442,7 +442,7 @@ function ProductManagement({
                 className="mt-1.5"
               />
             </div>
-
+            
             {/* Category */}
             <div className="flex flex-col">
               <Label htmlFor="category" className="text-sm">
