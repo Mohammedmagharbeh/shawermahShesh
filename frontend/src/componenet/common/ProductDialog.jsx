@@ -149,7 +149,9 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
           <DialogTitle>
             {product.name?.[selectedLanguage] || t("product_details")}
           </DialogTitle>
-          <DialogDescription>{product.category}</DialogDescription>
+          <DialogDescription>
+            {product.category?.name?.[selectedLanguage] || "category"}
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (
@@ -168,9 +170,9 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              {product.category && (
+              {product.category.name && (
                 <Badge className="absolute top-4 left-4 bg-orange-500 hover:bg-orange-600 text-white">
-                  {product.category}
+                  {product.category.name?.[selectedLanguage]}
                 </Badge>
               )}
             </div>
@@ -335,7 +337,7 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
                         <span>(JOD {additionPrice.toFixed(2)})</span>
                       )}
 
-                      {product.category === "Kids" && (
+                      {product.category.name.en === "Kids" && (
                         <>
                           {(additionName?.toLowerCase().includes("boy") ||
                             additionName?.includes("ولادي")) && (

@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { CATEGORIES } = require("../constants");
 const products = require("../models/products");
 const dotenv = require("dotenv");
+const Category = require("../models/Category");
 dotenv.config();
 
 // get endpoint
@@ -67,9 +68,19 @@ exports.getAllProducts = async (req, res) => {
   try {
     const { category, isSpicy, hasTypeChoices, hasProteinChoices } = req.query;
 
-    // Build query dynamically
     const query = {};
-    if (category) query.category = category;
+
+    if (category) {
+      // Find category ID by name
+      const categoryDoc = await Category.findById(category).lean();
+
+      if (categoryDoc) {
+        query.category = categoryDoc._id;
+      } else {
+        return res.status(404).json({ message: "Category not found" });
+      }
+    }
+
     if (isSpicy !== undefined) query.isSpicy = isSpicy === "true";
     if (hasTypeChoices !== undefined)
       query.hasTypeChoices = hasTypeChoices === "true";
@@ -78,8 +89,8 @@ exports.getAllProducts = async (req, res) => {
 
     const productsList = await products
       .find(query)
-      .sort({ createdAt: -1 })
-      .lean();
+      .populate("category")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       message: "Products fetched successfully",
@@ -95,7 +106,7 @@ exports.getSingleProduct = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const product = await products.findById(id).lean();
+    const product = await products.findById(id).populate("category").lean();
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });

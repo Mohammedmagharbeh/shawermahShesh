@@ -137,7 +137,8 @@ export default function ProductCard({
         />
         <div className="absolute top-3 left-3">
           <Badge>
-            {product.category?.[selectedLanguage] || product.category}
+            {product.category?.name?.[selectedLanguage] ||
+              product.category?.name?.ar}
           </Badge>
         </div>
       </div>

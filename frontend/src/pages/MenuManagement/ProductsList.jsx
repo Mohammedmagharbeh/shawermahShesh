@@ -3,29 +3,36 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Package, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Loading from "@/componenet/common/Loading";
 import ProductCard from "./ProductCard";
 import { useProducts } from "@/hooks/useProducts";
-import { CATEGORIES } from "@/constants";
+import { useCategoryContext } from "@/contexts/CategoryContext";
 
 export default function ProductsList({ setFormData, setEditingId }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Shawarma");
+  const [selectedCategory, setSelectedCategory] = useState(
+    "692564033f44bbfbbd507657"
+  );
   const { t } = useTranslation();
   const { products, setProducts, loading, error } = useProducts(
     t,
     selectedCategory
   );
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const { categories, fetchCategories } = useCategoryContext();
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const term = searchTerm.toLowerCase();
   const filteredProducts = products.filter((p) => {
     const name = p.name?.[selectedLanguage]?.toLowerCase() || "";
     const category =
       typeof p.category === "string"
-        ? p.category.toLowerCase()
-        : p.category?.[selectedLanguage]?.toLowerCase() || "";
+        ? p.category?.toLowerCase()
+        : p.category?.name?.[selectedLanguage]?.toLowerCase() || "";
 
     const matchesSearch = name.includes(term) || category.includes(term);
     return matchesSearch;
@@ -56,15 +63,15 @@ export default function ProductsList({ setFormData, setEditingId }) {
 
           {/* 🏷 Category Buttons */}
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-            {CATEGORIES.map((cat, i) => (
+            {categories.map((cat, i) => (
               <Button
                 key={i}
-                variant={selectedCategory === cat.en ? "default" : "outline"}
-                onClick={() => setSelectedCategory(cat.en)}
+                variant={selectedCategory === cat._id ? "default" : "outline"}
+                onClick={() => setSelectedCategory(cat._id)}
                 size="sm"
                 className="whitespace-nowrap flex-shrink-0"
               >
-                {cat[selectedLanguage] || cat.en}
+                {cat.name?.[selectedLanguage] || cat.name.ar}
               </Button>
             ))}
           </div>
@@ -95,10 +102,6 @@ export default function ProductsList({ setFormData, setEditingId }) {
     </div>
   );
 }
-
-
-
-
 
 // import { Button } from "@/components/ui/button";
 // import { Card, CardContent } from "@/components/ui/card";

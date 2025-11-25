@@ -213,7 +213,7 @@
 //   );
 // }
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import toast from "react-hot-toast";
@@ -226,11 +226,15 @@ import Loading from "@/componenet/common/Loading";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import i18n from "@/i18n";
+import { useCategoryContext } from "@/contexts/CategoryContext";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("Shawarma");
+  const [selectedCategory, setSelectedCategory] = useState(
+    "692564033f44bbfbbd507657"
+  );
   const [isLoading, setIsLoading] = useState(false);
+  const { categories, fetchCategories } = useCategoryContext();
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const { user, logout } = useUser();
@@ -253,6 +257,10 @@ export default function Products() {
         setIsLoading(false);
       });
   };
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   useMemo(() => {
     fetchProducts();
@@ -287,16 +295,16 @@ export default function Products() {
       <div className="container mx-auto px-2 xs:px-3 sm:px-4 py-6 sm:py-8 lg:py-10">
         {/* Categories */}
         <div className="flex gap-1 xs:gap-1.5 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 scrollbar-hide">
-          {CATEGORIES.map((cat, i) => {
+          {categories.map((cat, i) => {
             const isAll = cat === "All";
-            const catValue = isAll ? "all" : cat.en;
-            const catLabel = isAll ? t("all") : cat[selectedLanguage];
+            const catValue = isAll ? "all" : cat;
+            const catLabel = isAll ? t("all") : cat.name?.[selectedLanguage];
             return (
               <button
                 key={i}
-                onClick={() => setSelectedCategory(catValue)}
+                onClick={() => setSelectedCategory(catValue._id)}
                 className={`whitespace-nowrap px-3 xs:px-4 sm:px-6 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm sm:text-base rounded-lg transition flex-shrink-0 ${
-                  selectedCategory === catValue
+                  selectedCategory === catValue._id
                     ? "bg-yellow-500 text-white shadow-md"
                     : "bg-white text-gray-700 border border-gray-300 hover:border-gray-400"
                 }`}

@@ -1,8 +1,8 @@
 const products = require("../models/products");
 
 const { CATEGORIES } = require("../constants");
+const categoryModel = require("../models/Category");
 const { default: cloudinary } = require("../config/cloudinary");
-const { parse } = require("dotenv");
 
 // ✅ POST: Create Product
 exports.postEat = async (req, res) => {
@@ -39,9 +39,9 @@ exports.postEat = async (req, res) => {
     // ================================
     // ✅ Validate category
     // ================================
-    const matchedCategory = CATEGORIES.find((c) => c.en === category);
-    if (!matchedCategory) {
-      return res.status(400).json({ message: "Invalid category" });
+    const categoryInDB = categoryModel.findById(category);
+    if (!categoryInDB) {
+      return res.status(400).json({ message: "Invalid Category" });
     }
 
     // ================================
@@ -93,8 +93,6 @@ exports.postEat = async (req, res) => {
       }
     }
 
-    console.log("additionsSelectionType", additionsSelectionType);
-
     // ================================
     // ✅ Save product
     // ================================
@@ -105,7 +103,7 @@ exports.postEat = async (req, res) => {
       prices: parsedPrices,
       discount: Number(discount) || 0,
       image: imageUrl,
-      category: matchedCategory.en,
+      category,
       isSpicy: spicy,
       hasProteinChoices: proteinChoices,
       hasTypeChoices: typeChoices,
@@ -148,8 +146,8 @@ exports.updatedfood = async (req, res) => {
     // ✅ Validate category
     // ================================
     if (category) {
-      const matchedCategory = CATEGORIES.find((c) => c.en === category);
-      if (!matchedCategory) {
+      const categoryInDB = categoryModel.findById(category);
+      if (!categoryInDB) {
         return res.status(400).json({ message: "Invalid category" });
       }
     }
@@ -170,36 +168,6 @@ exports.updatedfood = async (req, res) => {
     } else {
       parsedPrices = {};
     }
-
-    // ✅ Validate flat format: { sandwich, meal }
-    // if (
-    //   parsedPrices.sandwich !== undefined ||
-    //   parsedPrices.meal !== undefined
-    // ) {
-    //   parsedPrices = {
-    //     ...(parsedPrices.sandwich !== undefined && {
-    //       sandwich: Number(parsedPrices.sandwich),
-    //     }),
-    //     ...(parsedPrices.meal !== undefined && {
-    //       meal: Number(parsedPrices.meal),
-    //     }),
-    //   };
-    // }
-
-    // ✅ Validate nested format: { chicken: {...}, meat: {...} }
-    // else {
-    //   Object.keys(parsedPrices).forEach((type) => {
-    //     const entry = parsedPrices[type];
-    //     parsedPrices[type] = {
-    //       ...(entry.chicken !== undefined && {
-    //         chicken: Number(entry.chicken),
-    //       }),
-    //       ...(entry?.meat !== undefined && { meat: Number(entry.meat) }),
-    //     };
-    //   });
-    // }
-    // console.log(Object.keys(parsedPrices));
-    // console.log(parsedPrices["chicken"]);
 
     // ================================
     // ✅ Validate additions array
@@ -230,7 +198,6 @@ exports.updatedfood = async (req, res) => {
     // ================================
     // ✅ Build update object
     // ================================
-    console.log(additionsSelectionType);
 
     const updatedData = {
       name,
@@ -238,7 +205,7 @@ exports.updatedfood = async (req, res) => {
       basePrice: Number(basePrice) || 0,
       discount: Number(discount) || 0,
       prices: parsedPrices,
-      category: category,
+      category,
       isSpicy: Boolean(isSpicy),
       hasProteinChoices: Boolean(hasProteinChoices),
       hasTypeChoices: Boolean(hasTypeChoices),

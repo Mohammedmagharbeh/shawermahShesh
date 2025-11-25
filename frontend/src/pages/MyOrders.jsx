@@ -162,7 +162,9 @@ function MyOrders() {
                             <span>Quantity: {item.quantity}</span>
                             <span>•</span>
                             <span className="capitalize">
-                              {item.productId?.category ?? "Unknown Category"}
+                              {item.productId?.category.name?.[
+                                selectedLanguage
+                              ] ?? "Unknown Category"}
                             </span>
                           </div>
                           {item.productId?.discount > 0 ||
