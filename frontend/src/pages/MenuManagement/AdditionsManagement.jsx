@@ -19,11 +19,9 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function AdditionsManagement() {
-  const { i18n } = useTranslation();
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
-  const { categories, fetchCategories, getCategory, updateCategory } =
-    useCategoryContext();
+  const { categories, getCategory, updateCategory } = useCategoryContext();
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ name: { ar: "", en: "" } });
 
