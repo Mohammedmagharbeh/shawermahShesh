@@ -130,7 +130,7 @@ function MyOrders() {
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Delivery:</span>
                     <span className="font-medium text-foreground">
-                      {order.shippingAddress.name}
+                      {order.shippingAddress?.name}
                     </span>
                   </div>
                 </div>
@@ -145,7 +145,7 @@ function MyOrders() {
                       <div className="flex items-center gap-4">
                         <div className="relative h-16 w-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                           <img
-                            src={burger}
+                            src={item.productId?.image || burger}
                             alt={
                               item.productId?.name[selectedLanguage] ??
                               "Deleted Product Image"
@@ -214,7 +214,7 @@ function MyOrders() {
               </div>
 
               <div className="mt-6 pt-4 border-t border-border space-y-2">
-                {order.shippingAddress.deliveryCost > 0 && (
+                {order.shippingAddress?.deliveryCost > 0 && (
                   <div className="flex justify-between items-center text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Truck className="h-4 w-4" />
