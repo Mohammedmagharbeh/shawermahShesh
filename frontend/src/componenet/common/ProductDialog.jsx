@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/contexts/UserContext";
 import shesho from "@/assets/shesho.png";
-import shishi from "@/assets/shishsi.png"; 
+import shishi from "@/assets/shishsi.png";
 
 export function ProductDialog({ id, triggerLabel, disabled = false }) {
   const [quantity, setQuantity] = useState(1);
@@ -335,23 +335,27 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
                         <span>(JOD {additionPrice.toFixed(2)})</span>
                       )}
 
-                      {(product.category === "Kids" &&
-                        additionName.toLowerCase().includes("boy")) ||
-                      additionName.includes("ولادي") ? (
-                        <img
-                          src={shesho}
-                          width={100}
-                          height={50}
-                          className="rounded-xl max-h-16 object-contain"
-                          alt="Kids addition"
-                        />
-                      ) : (
-                        <img
-                          src={shishi}
-                          width={100}
-                          className="rounded-xl max-h-16 object-contain"
-                          alt="Kids addition"
-                        />
+                      {product.category === "Kids" && (
+                        <>
+                          {(additionName?.toLowerCase().includes("boy") ||
+                            additionName?.includes("ولادي")) && (
+                            <img
+                              src={shesho}
+                              width={100}
+                              height={50}
+                              className="rounded-xl max-h-16 object-contain"
+                            />
+                          )}
+
+                          {(additionName?.toLowerCase().includes("girl") ||
+                            additionName?.includes("بناتي")) && (
+                            <img
+                              src={shishi}
+                              width={100}
+                              className="rounded-xl max-h-16 object-contain"
+                            />
+                          )}
+                        </>
                       )}
                     </Label>
                   </div>
