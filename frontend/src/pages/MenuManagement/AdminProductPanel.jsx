@@ -3,7 +3,7 @@ import ProductManagement from "./ProductManagement";
 import ProductsList from "./ProductsList";
 import Header from "./Header";
 import { INITIAL_FORM_DATA } from "@/constants";
-import AdditionsManagement from "./AdditionsManagement";
+import CategoryManagement from "./CategoryManagement";
 
 export default function AdminProductPanel() {
   const [products, setProducts] = useState([]);
@@ -24,7 +24,7 @@ export default function AdminProductPanel() {
             {...handlers}
           />
           <div className="grid col-span-2 gap-4">
-            <AdditionsManagement />
+            <CategoryManagement />
             <ProductsList products={products} {...handlers} />
           </div>
         </div>

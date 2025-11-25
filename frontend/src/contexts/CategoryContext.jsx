@@ -8,6 +8,7 @@ import {
 } from "react";
 import toast from "react-hot-toast";
 import { useUser } from "./UserContext";
+import { useTranslation } from "react-i18next";
 
 const CategoryContext = createContext(undefined);
 
@@ -15,6 +16,7 @@ export const CategoryProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
+  const { t } = useTranslation();
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -41,7 +43,6 @@ export const CategoryProvider = ({ children }) => {
           headers: { authorization: `Bearer ${user.token}` },
         }
       );
-      // console.log(res.data.data);
 
       return res.data.data;
     } catch (error) {
@@ -90,11 +91,7 @@ export const CategoryProvider = ({ children }) => {
         }
       );
       setCategories((prev) => prev.filter((c) => c._id !== categoryId));
-      if (
-        formData.category ===
-        categories.find((c) => c._id === categoryId)?.name.en
-      ) {
-        setFormData({ ...formData, category: "" });
+      if (categoryId === categories.find((c) => c._id === categoryId)) {
       }
       toast.success(t("category_deleted"));
     } catch (error) {
@@ -124,10 +121,7 @@ export const CategoryProvider = ({ children }) => {
         }
       );
       setCategories((prev) => prev.map((c) => (c._id === id ? res.data : c)));
-      if (formData.category === editingCategory.oldNameEn) {
-        setFormData({ ...formData, category: res.data.name.en });
-      }
-      setEditingCategory(null);
+
       toast.success(t("category_updated_success"));
     } catch (error) {
       console.error(
