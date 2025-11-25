@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   createContext,
   useCallback,
@@ -6,12 +7,14 @@ import {
   useState,
 } from "react";
 import toast from "react-hot-toast";
+import { useUser } from "./UserContext";
 
 const CategoryContext = createContext(undefined);
 
 export const CategoryProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { user } = useUser();
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -30,13 +33,128 @@ export const CategoryProvider = ({ children }) => {
     }
   }, []);
 
+  const getCategory = async (id) => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/admin/categories/${id}`,
+        {
+          headers: { authorization: `Bearer ${user.token}` },
+        }
+      );
+      // console.log(res.data.data);
+
+      return res.data.data;
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "something went wrong");
+    }
+  };
+
+  // --- Add Category ---
+  const addCategory = async (name) => {
+    try {
+      setLoading(true);
+      const payload = { name };
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/admin/categories`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      setCategories((prev) => [...prev, res.data]);
+
+      toast.success(t("category_added"));
+    } catch (error) {
+      console.error(
+        "Error adding category:",
+        error.response?.data || error.message
+      );
+      toast.error(t("error_adding_category"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- Delete Category ---
+  const deleteCategory = async (categoryId) => {
+    if (!window.confirm(t("confirm_delete_category"))) return;
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BASE_URL}/admin/categories/${categoryId}`,
+        {
+          headers: { authorization: `Bearer ${user.token}` },
+        }
+      );
+      setCategories((prev) => prev.filter((c) => c._id !== categoryId));
+      if (
+        formData.category ===
+        categories.find((c) => c._id === categoryId)?.name.en
+      ) {
+        setFormData({ ...formData, category: "" });
+      }
+      toast.success(t("category_deleted"));
+    } catch (error) {
+      console.error(
+        "Error deleting category:",
+        error.response?.data || error.message
+      );
+      toast.error(t("error_deleting_category"));
+    }
+  };
+
+  // --- Update Category ---
+  const updateCategory = async (name, id) => {
+    try {
+      setLoading(true);
+      const payload = {
+        name,
+      };
+      const res = await axios.put(
+        `${import.meta.env.VITE_BASE_URL}/admin/categories/${id}`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      setCategories((prev) => prev.map((c) => (c._id === id ? res.data : c)));
+      if (formData.category === editingCategory.oldNameEn) {
+        setFormData({ ...formData, category: res.data.name.en });
+      }
+      setEditingCategory(null);
+      toast.success(t("category_updated_success"));
+    } catch (error) {
+      console.error(
+        "Error updating category:",
+        error.response?.data || error.message
+      );
+      toast.error(t("error_updating_category"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
   return (
     <CategoryContext.Provider
-      value={{ categories, fetchCategories, categoriesLoading: loading }}
+      value={{
+        categories,
+        fetchCategories,
+        getCategory,
+        addCategory,
+        deleteCategory,
+        updateCategory,
+        categoriesLoading: loading,
+      }}
     >
       {children}
     </CategoryContext.Provider>
