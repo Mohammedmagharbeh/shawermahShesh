@@ -11,6 +11,23 @@ const getCategories = async (req, res) => {
   }
 };
 
+const getCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const category = await Category.findById(id);
+    if (!category) return res.status(400).json({ message: "Invalid Category" });
+
+    return res
+      .status(200)
+      .json({ data: category, message: "category Fetched Successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: error.message || "Something went wrong" });
+  }
+};
+
 // إضافة category جديدة
 const addCategory = async (req, res) => {
   try {
@@ -48,6 +65,7 @@ const deleteCategory = async (req, res) => {
 };
 
 module.exports = {
+  getCategory,
   getCategories,
   addCategory,
   updateCategory,

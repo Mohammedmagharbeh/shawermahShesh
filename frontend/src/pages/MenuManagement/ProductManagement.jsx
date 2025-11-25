@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,17 +16,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { CATEGORIES, INITIAL_FORM_DATA } from "@/constants";
+
+import { Switch } from "@/components/ui/switch";
+import { Plus } from "lucide-react";
+
 import axios from "axios";
-import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import useProductForm from "../../hooks/useProductForm";
-import { Switch } from "@/components/ui/switch";
-import { Plus } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
+import { INITIAL_FORM_DATA } from "@/constants";
 import { useCategoryContext } from "@/contexts/CategoryContext";
+import { Textarea } from "@/components/ui/textarea";
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 function ProductManagement({
   setProducts,
@@ -35,14 +39,20 @@ function ProductManagement({
   setEditingId,
 }) {
   const { t, i18n } = useTranslation();
+  const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const { categories, fetchCategories } = useCategoryContext();
+
   const { buildPayload, handleInputChange, handleImageChange } = useProductForm(
     formData,
     setFormData
   );
-  const { user } = useUser();
 
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  // --- Submit Product ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -51,8 +61,8 @@ function ProductManagement({
 
       if (editingId) {
         const res = await axios.put(
-          `${import.meta.env.VITE_BASE_URL}/admin/updatefood/${editingId}`,
-          payload, // <-- This is the data sent to the server
+          `${BASE_URL}/admin/updatefood/${editingId}`,
+          payload,
           {
             headers: {
               "Content-Type": "application/json",
@@ -60,23 +70,17 @@ function ProductManagement({
             },
           }
         );
-
         setProducts((prev) =>
           prev.map((p) => (p._id === editingId ? res.data : p))
         );
         setEditingId(null);
       } else {
-        const res = await axios.post(
-          `${import.meta.env.VITE_BASE_URL}/admin/postfood`,
-          payload, // <-- This is the data sent to the server
-          {
-            headers: {
-              "Content-Type": "application/json",
-              authorization: `Bearer ${user.token}`,
-            },
-          }
-        );
-
+        const res = await axios.post(`${BASE_URL}/admin/postfood`, payload, {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        });
         setProducts((prev) => [res.data, ...prev]);
       }
 
@@ -90,6 +94,7 @@ function ProductManagement({
     }
   };
 
+  // --- Additions ---
   const handleAddAddition = () => {
     setFormData((prev) => ({
       ...prev,
@@ -110,19 +115,13 @@ function ProductManagement({
   const handleAdditionChange = (index, field, value) => {
     setFormData((prev) => {
       const updated = [...prev.additions];
-      if (field === "name") {
-        updated[index].name = value;
-      } else {
-        updated[index][field] = value;
-      }
+      if (field === "name") updated[index].name = value;
+      else updated[index][field] = value;
       return { ...prev, additions: updated };
     });
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
-
+  // --- Render JSX ---
   return (
     <div className="lg:col-span-1">
       <Card className="shadow-xl lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto rounded-md">
@@ -136,7 +135,7 @@ function ProductManagement({
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-            {/* Name fields */}
+            {/* Name Fields */}
             <div className="flex flex-col">
               <Label htmlFor="arName" className="text-sm">
                 {t("arabic_name")}
@@ -181,7 +180,7 @@ function ProductManagement({
               />
             </div>
 
-            {/* Toggles */}
+            {/* Switches */}
             <div className="flex gap-4 items-center mt-2">
               <div className="flex items-center gap-2">
                 <Switch
@@ -194,7 +193,6 @@ function ProductManagement({
                 />
                 <Label className="text-sm">{t("has_type_choices")}</Label>
               </div>
-
               <div className="flex items-center gap-2">
                 <Switch
                   id="hasProteinChoices"
@@ -263,7 +261,6 @@ function ProductManagement({
                   </div>
                 </div>
               )}
-
               {formData.hasTypeChoices && !formData.hasProteinChoices && (
                 <div className="space-y-2 border p-3 rounded-md">
                   <p className="font-semibold text-sm">{t("type_prices")}</p>
@@ -293,7 +290,6 @@ function ProductManagement({
                   </div>
                 </div>
               )}
-
               {!formData.hasTypeChoices && formData.hasProteinChoices && (
                 <div className="space-y-2 border p-3 rounded-md">
                   <p className="font-semibold text-sm">{t("protein_prices")}</p>
@@ -324,7 +320,9 @@ function ProductManagement({
                 </div>
               )}
             </div>
+
             <hr />
+
             {/* Additions */}
             <div className="space-y-2">
               <div className="flex justify-between items-center mb-2">
@@ -342,7 +340,6 @@ function ProductManagement({
                   <Label className="inline-flex gap-2 items-center">
                     <Input
                       type="radio"
-                      id="additionsSelectionType"
                       name="additonSelectType"
                       value="radio"
                       required={formData.additions.length > 0}
@@ -354,7 +351,6 @@ function ProductManagement({
                   <Label className="inline-flex gap-2 items-center">
                     <Input
                       type="radio"
-                      id="additionsSelectionType"
                       name="additonSelectType"
                       value="checkbox"
                       required={formData.additions.length > 0}
@@ -425,7 +421,9 @@ function ProductManagement({
                 </div>
               ))}
             </div>
+
             <hr />
+
             {/* Discount */}
             <div className="flex flex-col">
               <Label htmlFor="discount" className="text-sm">
@@ -443,86 +441,108 @@ function ProductManagement({
               />
             </div>
 
-            {/* Category */}
+            {/* Category Selection */}
             <div className="flex flex-col">
               <Label htmlFor="category" className="text-sm">
                 {t("category")}
               </Label>
               <Select
-                defaultValue={formData.category}
-                onValueChange={(value) => {
-                  setFormData({ ...formData, category: value });
-                }}
+                value={formData.category}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, category: value })
+                }
                 className="mt-1.5"
                 required
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue
-                    placeholder={
-                      formData.category.name?.ar || t("choose_category")
-                    }
-                  />
+                  <SelectValue placeholder={t("choose_category")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat._id} value={cat._id}>
-                      {i18n.language === "ar" ? cat.name.ar : cat.name.en}
-                    </SelectItem>
-                  ))}
+                  {categories.length > 0 &&
+                    categories?.map((cat) => (
+                      <SelectItem key={cat._id} value={cat._id}>
+                        {cat.name.en} ({cat.name.ar})
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Spicy */}
-            <div className="flex flex-col">
-              <Label htmlFor="isSpicy" className="text-sm">
-                {t("has_spicy")}
-              </Label>
-              <Switch
-                id="isSpicy"
-                checked={Boolean(formData.isSpicy)}
-                onCheckedChange={(v) =>
-                  setFormData((prev) => ({ ...prev, isSpicy: Boolean(v) }))
-                }
-                className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
-              />
-            </div>
-            <div className="flex flex-col">
-              <Label htmlFor="inStock" className="text-sm">
-                {t("is_in_stock")}
-              </Label>
-              <Switch
-                id="inStock"
-                checked={Boolean(formData.inStock)}
-                onCheckedChange={(v) =>
-                  setFormData((prev) => ({ ...prev, inStock: Boolean(v) }))
-                }
-                className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
-              />
-            </div>
-
-            {/* Image */}
-            <div className="flex flex-col">
-              <Label htmlFor="image" className="text-sm">
-                {t("product_image")}
-              </Label>
-              <Input
-                id="image"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="mt-1.5"
-              />
-              {formData.image && (
-                <img
-                  src={formData.image}
-                  alt="preview"
-                  className="mt-2 rounded w-32"
-                />
+            {/* Add / Edit Category */}
+            {/* <div className="border p-3 rounded-md space-y-3">
+              <p className="font-semibold text-sm">
+                {editingCategory
+                  ? t("edit_category")
+                  : t("add_new_category_title")}
+              </p>
+              {editingCategory ? (
+                <div className="space-y-2">
+                  <Input
+                    placeholder={t("arabic_name")}
+                    value={editingCategory.name.ar}
+                    onChange={(e) =>
+                      setEditingCategory({
+                        ...editingCategory,
+                        name: { ...editingCategory.name, ar: e.target.value },
+                      })
+                    }
+                    dir="rtl"
+                    required
+                  />
+                  <Input
+                    placeholder={t("english_name")}
+                    value={editingCategory.name.en}
+                    onChange={(e) =>
+                      setEditingCategory({
+                        ...editingCategory,
+                        name: { ...editingCategory.name, en: e.target.value },
+                      })
+                    }
+                    dir="ltr"
+                    required
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={handleUpdateCategory}
+                      disabled={loading}
+                    >
+                      {t("update")}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => setEditingCategory(null)}
+                    >
+                      {t("cancel")}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={t("arabic_name")}
+                    value={newCategoryAr}
+                    onChange={(e) => setNewCategoryAr(e.target.value)}
+                    dir="rtl"
+                  />
+                  <Input
+                    placeholder={t("english_name")}
+                    value={newCategoryEn}
+                    onChange={(e) => setNewCategoryEn(e.target.value)}
+                    dir="ltr"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleAddCategory}
+                    disabled={loading}
+                  >
+                    {t("add")}
+                  </Button>
+                </div>
               )}
-            </div>
+            </div> */}
 
-            {/* Description */}
             <div className="flex flex-col">
               <Label htmlFor="arDescription" className="text-sm">
                 {t("arabic_description")}
@@ -552,27 +572,9 @@ function ProductManagement({
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading
-                ? t("saving")
-                : editingId
-                  ? t("save_changes")
-                  : t("add_product")}
+            <Button type="submit" disabled={loading} className="w-full mt-3">
+              {editingId ? t("update_product") : t("add_product")}
             </Button>
-
-            {editingId && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setEditingId(null);
-                  setFormData(INITIAL_FORM_DATA);
-                }}
-                className="w-full"
-              >
-                {t("cancel_edit")}
-              </Button>
-            )}
           </form>
         </CardContent>
       </Card>
