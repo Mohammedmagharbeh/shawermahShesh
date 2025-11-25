@@ -47,4 +47,5 @@ app.use("/api/myfatoorah", myfatoorah);
 app.use("/api/additions", additions);
 app.use("/api/slides", slideRoutes);
 app.use("/api/admin/categories", categoryRoutes);
+
 module.exports = server;
