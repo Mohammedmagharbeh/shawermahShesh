@@ -515,7 +515,7 @@ function AdminDashboard() {
                                   {item.quantity || 0}
                                 </span>
                               </p>
-                              <Badge>{item.isSpicy ? "حار" : "عادي"}</Badge>
+{item.isSpicy && <Badge>حار</Badge>}
                               {item.additions && item.additions.length > 0 && (
                                 <div className="flex gap-1">
                                   {t("additions")}:

@@ -15,6 +15,7 @@ const locationsRoute = require("./routes/locationsRoute");
 const myfatoorah = require("./routes/myfatoorah");
 const additions = require("./routes/additions");
 const slideRoutes = require("./routes/slideRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
 
 dotenv.config();
 const app = express();
@@ -45,5 +46,5 @@ app.use("/api/locations", locationsRoute);
 app.use("/api/myfatoorah", myfatoorah);
 app.use("/api/additions", additions);
 app.use("/api/slides", slideRoutes);
-
+app.use("/api/admin/categories", categoryRoutes);
 module.exports = server;
