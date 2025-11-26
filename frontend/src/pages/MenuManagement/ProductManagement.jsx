@@ -442,8 +442,6 @@ function ProductManagement({
             </div>
 
             {/* Category */}
-
-            {/* Category Selection */}
             <div className="flex flex-col">
               <Label htmlFor="category" className="text-sm">
                 {t("category")}
@@ -468,6 +466,55 @@ function ProductManagement({
                     ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Spicy */}
+            <div className="flex flex-col">
+              <Label htmlFor="isSpicy" className="text-sm">
+                {t("has_spicy")}
+              </Label>
+              <Switch
+                id="isSpicy"
+                checked={Boolean(formData.isSpicy)}
+                onCheckedChange={(v) =>
+                  setFormData((prev) => ({ ...prev, isSpicy: Boolean(v) }))
+                }
+                className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
+              />
+            </div>
+            <div className="flex flex-col">
+              <Label htmlFor="inStock" className="text-sm">
+                {t("is_in_stock")}
+              </Label>
+              <Switch
+                id="inStock"
+                checked={Boolean(formData.inStock)}
+                onCheckedChange={(v) =>
+                  setFormData((prev) => ({ ...prev, inStock: Boolean(v) }))
+                }
+                className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
+              />
+            </div>
+
+            {/* Image */}
+            <div className="flex flex-col">
+              <Label htmlFor="image" className="text-sm">
+                {t("product_image")}
+              </Label>
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="mt-1.5"
+              />
+              {formData.image && (
+                <img
+                  src={formData.image}
+                  alt="preview"
+                  className="mt-2 rounded w-32"
+                />
+              )}
             </div>
 
             <div className="flex flex-col">
@@ -500,8 +547,25 @@ function ProductManagement({
             </div>
 
             <Button type="submit" disabled={loading} className="w-full mt-3">
-              {editingId ? t("update_product") : t("add_product")}
+              {loading
+                ? t("saving")
+                : editingId
+                  ? t("save_changes")
+                  : t("add_product")}
             </Button>
+            {editingId && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setEditingId(null);
+                  setFormData(INITIAL_FORM_DATA);
+                }}
+                className="w-full"
+              >
+                {t("cancel_edit")}
+              </Button>
+            )}
           </form>
         </CardContent>
       </Card>
