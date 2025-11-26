@@ -1,6 +1,4 @@
-const products = require("../models/products");
-
-const { CATEGORIES } = require("../constants");
+const productsModel = require("../models/products");
 const categoryModel = require("../models/Category");
 const { default: cloudinary } = require("../config/cloudinary");
 
@@ -96,7 +94,7 @@ exports.postEat = async (req, res) => {
     // ================================
     // ✅ Save product
     // ================================
-    const createdProduct = await products.create({
+    const createdProduct = await productsModel.create({
       name,
       description,
       basePrice: Number(basePrice) || 0,
@@ -220,7 +218,7 @@ exports.updatedfood = async (req, res) => {
     // ✅ Update DB
     // ================================
 
-    const updatedProduct = await products.findByIdAndUpdate(
+    const updatedProduct = await productsModel.findByIdAndUpdate(
       id,
       { $set: updatedData },
       {
@@ -248,7 +246,7 @@ exports.deletefood = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deletedProduct = await products.findByIdAndDelete(id);
+    const deletedProduct = await productsModel.findByIdAndDelete(id);
 
     if (!deletedProduct) {
       return res.status(404).json({ message: "Item not found" });
@@ -261,5 +259,29 @@ exports.deletefood = async (req, res) => {
   } catch (error) {
     console.error("❌ Error in deletefood:", error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+exports.reorderProducts = async (req, res) => {
+  try {
+    const { orderedIds, categoryId } = req.body;
+
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid orderedIds" });
+    }
+
+    // Update position for each product
+    const updates = orderedIds.map((id, index) =>
+      productsModel.findByIdAndUpdate(id, { position: index }, { new: true })
+    );
+
+    await Promise.all(updates);
+
+    res.json({ success: true, message: "Products reordered successfully" });
+  } catch (err) {
+    console.error("Reorder error:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };

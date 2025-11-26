@@ -40,6 +40,7 @@ const productSchema = new mongoose.Schema(
     ],
     additionsSelectionType: { type: String, enum: ["radio", "checkbox"] },
     inStock: { type: Boolean, default: true },
+    position: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

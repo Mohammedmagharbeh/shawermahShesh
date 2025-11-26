@@ -90,7 +90,8 @@ exports.getAllProducts = async (req, res) => {
     const productsList = await products
       .find(query)
       .populate("category")
-      .sort({ createdAt: -1 });
+      .sort({ position: 1 })
+      .lean();
 
     res.status(200).json({
       message: "Products fetched successfully",

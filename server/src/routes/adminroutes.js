@@ -8,6 +8,7 @@ const {
   postEat,
   updatedfood,
   deletefood,
+  reorderProducts,
 } = require("../controller/admincontroller");
 const { USER_ROLES } = require("../constants");
 const validateJWT = require("../middlewares/validateJWT");
@@ -15,6 +16,7 @@ const validateJWT = require("../middlewares/validateJWT");
 routes.post("/postfood", validateJWT, postEat);
 routes.put("/updatefood/:id", validateJWT, updatedfood);
 routes.delete("/deletefood/:id", validateJWT, deletefood);
+routes.put("/reorder", validateJWT, reorderProducts);
 
 // user management
 routes.put("/user/:id", validateJWT, async (req, res) => {
