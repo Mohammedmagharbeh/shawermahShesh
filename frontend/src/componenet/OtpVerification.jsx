@@ -145,7 +145,7 @@ function OtpVerification() {
             : "bg-yellow-400 text-black shadow-lg shadow-yellow-500/30 hover:bg-yellow-500 hover:shadow-xl hover:shadow-yellow-600/50 active:bg-yellow-600"
         }
     `}
-            disabled={loading || otp.length < 6}
+            disabled={loading || otp.length < 4}
           >
             {loading ? t("verifying") + "..." : t("verify_otp")}
           </motion.button>

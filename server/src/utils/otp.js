@@ -3,7 +3,7 @@
 require("dotenv").config();
 
 function generateOTP() {
-  const random = Math.floor(100000 + Math.random() * 900000);
+  const random = Math.floor(1000 + Math.random() * 9000);
 
   return random; // 6-digit
 }
