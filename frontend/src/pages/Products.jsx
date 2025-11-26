@@ -33,7 +33,7 @@ export default function Products() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const { categories, fetchCategories } = useCategoryContext();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const { user, logout } = useUser();
   const [enableDND, setEnableDND] = useState(false);
@@ -147,6 +147,19 @@ export default function Products() {
             );
           })}
         </div>
+
+        {user.role === "admin" && (
+          <div className="flex items-center w-fit mx-auto px-10 gap-2 py-5 my-5 font-semibold border-2 rounded-md ">
+            <Switch
+              id="hasTypeChoices"
+              checked={enableDND}
+              onCheckedChange={(v) => setEnableDND(v)}
+              className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
+              dir={i18n.language === "ar" ? "rtl" : "ltr"}
+            />
+            <Label className="text-sm">{t("enable_reorder")}</Label>
+          </div>
+        )}
 
         {products.length > 0 ? (
           <DndContext
