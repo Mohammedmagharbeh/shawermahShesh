@@ -151,7 +151,7 @@ export default function Products() {
         {user.role === "admin" && (
           <div className="flex items-center w-fit mx-auto px-10 gap-2 py-5 my-5 font-semibold border-2 rounded-md ">
             <Switch
-              id="hasTypeChoices"
+              id="dndconroller"
               checked={enableDND}
               onCheckedChange={(v) => setEnableDND(v)}
               className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
