@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-export function SortableItem({ id, children }) {
+export function SortableItem({ id, children, disabled }) {
   const {
     attributes,
     listeners,
@@ -9,13 +9,12 @@ export function SortableItem({ id, children }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id, disabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.3 : 1,
-    cursor: "grab",
+    touchAction: "none", // ✔ Correct place
   };
 
   return (
