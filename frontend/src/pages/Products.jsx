@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import toast from "react-hot-toast";
@@ -9,7 +9,6 @@ import { useUser } from "@/contexts/UserContext";
 import Loading from "@/componenet/common/Loading";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import i18n from "@/i18n";
 import { useCategoryContext } from "@/contexts/CategoryContext";
 import {
   DndContext,
@@ -20,69 +19,83 @@ import {
 } from "@dnd-kit/core";
 import {
   arrayMove,
+  horizontalListSortingStrategy,
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableItem } from "@/components/SortableItem";
-import { Button } from "@/components/ui/button";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(
-    "6925a83f23f3a8dcdb91b714"
-  );
   const [isLoading, setIsLoading] = useState(false);
-  const { categories, fetchCategories } = useCategoryContext();
+  const { categories, fetchCategories, setCategories } = useCategoryContext();
   const { t, i18n } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const { user, logout } = useUser();
   const [enableDND, setEnableDND] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
-  const fetchProducts = () => {
+  const fetchProducts = useCallback(() => {
+    if (!selectedCategory) return;
+
     setIsLoading(true);
     fetch(
       `${import.meta.env.VITE_BASE_URL}/products?category=${selectedCategory}`,
       { headers: { authorization: `Bearer ${user.token}` } }
     )
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch products");
+        return res.json();
+      })
       .then((data) => {
         setProducts(data.data || []);
-        setIsLoading(false);
       })
       .catch((err) => {
         console.error(err);
-        if (err.message.includes("Invalid token")) logout();
-        toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
+        if (err.message.includes("Invalid token")) {
+          logout();
+        } else {
+          toast.error("خطأ في جلب المنتجات. حاول مرة أخرى لاحقاً.");
+        }
+      })
+      .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, [selectedCategory, user.token, logout]);
+
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0]._id);
+    }
+  }, [categories, selectedCategory]);
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+  }, []);
 
-  useMemo(() => {
+  useEffect(() => {
     fetchProducts();
-  }, [selectedCategory]);
+  }, [fetchProducts]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
+      activationConstraint: { distance: 8 },
     })
   );
 
-  const handleDragEnd = async (event) => {
+  const handleDragEnd = async (event, elements, collection) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = products.findIndex((p) => p._id === active.id);
-    const newIndex = products.findIndex((p) => p._id === over.id);
+    const oldIndex = elements.findIndex((p) => p._id === active.id);
+    const newIndex = elements.findIndex((p) => p._id === over.id);
 
-    const newOrder = arrayMove(products, oldIndex, newIndex);
-    setProducts(newOrder);
+    const newOrder = arrayMove(elements, oldIndex, newIndex);
 
+    if (collection === "admin") setProducts(newOrder);
+    else setCategories(newOrder);
     try {
-      await fetch(`${import.meta.env.VITE_BASE_URL}/admin/reorder`, {
+      await fetch(`${import.meta.env.VITE_BASE_URL}/${collection}/reorder`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -93,9 +106,15 @@ export default function Products() {
           orderedIds: newOrder.map((p) => p._id),
         }),
       });
+      toast.success("تمت اعادة الترتيب بنجاح");
     } catch (err) {
       console.error(err);
       toast.error("خطأ: لم يتم حفظ ترتيب المنتجات");
+      if (collection === "admin") {
+        setProducts(elements);
+      } else {
+        setCategories(elements);
+      }
     }
   };
 
@@ -117,7 +136,11 @@ export default function Products() {
 
       const data = await res.json();
       toast.success(data.message);
-      fetchProducts();
+      setProducts((prev) =>
+        prev.map((p) =>
+          p._id === product._id ? { ...p, inStock: Boolean(v) } : p
+        )
+      );
     } catch (err) {
       toast.error("Something went wrong");
     }
@@ -128,24 +151,40 @@ export default function Products() {
       <div className="container mx-auto px-2 xs:px-3 sm:px-4 py-6 sm:py-8 lg:py-10">
         {/* Categories */}
         <div className="flex gap-1 xs:gap-1.5 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 scrollbar-hide">
-          {categories.map((cat, i) => {
-            const isAll = cat === "All";
-            const catValue = isAll ? "all" : cat;
-            const catLabel = isAll ? t("all") : cat.name?.[selectedLanguage];
-            return (
-              <button
-                key={i}
-                onClick={() => setSelectedCategory(catValue._id)}
-                className={`whitespace-nowrap px-3 xs:px-4 sm:px-6 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm sm:text-base rounded-lg transition flex-shrink-0 ${
-                  selectedCategory === catValue._id
-                    ? "bg-yellow-500 text-white shadow-md"
-                    : "bg-white text-gray-700 border border-gray-300 hover:border-gray-400"
-                }`}
-              >
-                {catLabel}
-              </button>
-            );
-          })}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(e) => handleDragEnd(e, categories, "categories")}
+          >
+            <SortableContext
+              items={categories.map((c) => c._id)} // ✅ Use categories, not products
+              strategy={horizontalListSortingStrategy}
+              disabled={!enableDND}
+            >
+              {categories.map((cat) => {
+                const catLabel = cat.name?.[selectedLanguage];
+                return (
+                  <SortableItem
+                    key={cat._id}
+                    id={cat._id}
+                    disabled={!enableDND}
+                  >
+                    <button
+                      onClick={() => setSelectedCategory(cat._id)}
+                      disabled={enableDND}
+                      className={`whitespace-nowrap px-3 xs:px-4 sm:px-6 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm sm:text-base rounded-lg transition flex-shrink-0 ${
+                        selectedCategory === cat._id
+                          ? "bg-yellow-500 text-white shadow-md"
+                          : "bg-white text-gray-700 border border-gray-300 hover:border-gray-400"
+                      }`}
+                    >
+                      {catLabel}
+                    </button>
+                  </SortableItem>
+                );
+              })}
+            </SortableContext>
+          </DndContext>
         </div>
 
         {user.role === "admin" && (
@@ -165,7 +204,7 @@ export default function Products() {
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+            onDragEnd={(e) => handleDragEnd(e, products, "admin")}
           >
             <SortableContext
               items={products.map((p) => p._id)}
@@ -222,7 +261,7 @@ export default function Products() {
                                 <p
                                   className={`text-xs xs:text-sm line-clamp-2 leading-6 ${isOutOfStock ? "text-gray-400" : "text-gray-600"}`}
                                 >
-                                  {product.description[selectedLanguage]}
+                                  {product?.description?.[selectedLanguage]}
                                 </p>
                               </div>
 
@@ -280,13 +319,13 @@ export default function Products() {
                                     user.role === "employee") && (
                                     <div className="flex flex-col">
                                       <Label
-                                        htmlFor="inStock"
+                                        htmlFor={`inStock-${product._id}`}
                                         className="text-sm"
                                       >
                                         {t("is_in_stock")}
                                       </Label>
                                       <Switch
-                                        id="inStock"
+                                        id={`inStock-${product._id}`}
                                         className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
                                         checked={product.inStock}
                                         onCheckedChange={(v) =>
@@ -308,7 +347,9 @@ export default function Products() {
             </SortableContext>
           </DndContext>
         ) : (
-          <p className="text-center text-gray-500">{t("no_products")}</p>
+          !isLoading && ( // ✅ Only show when not loading
+            <p className="text-center text-gray-500">{t("no_products")}</p>
+          )
         )}
       </div>
     </div>
