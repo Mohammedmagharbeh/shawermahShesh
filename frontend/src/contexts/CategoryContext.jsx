@@ -21,9 +21,7 @@ export const CategoryProvider = ({ children }) => {
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/admin/categories`
-      );
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/categories`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Something went wrong");
       setCategories(data.data || []);
@@ -38,7 +36,7 @@ export const CategoryProvider = ({ children }) => {
   const getCategory = async (id) => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/admin/categories/${id}`,
+        `${import.meta.env.VITE_BASE_URL}/categories/${id}`,
         {
           headers: { authorization: `Bearer ${user.token}` },
         }
@@ -57,7 +55,7 @@ export const CategoryProvider = ({ children }) => {
       setLoading(true);
       const payload = { name };
       const res = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/admin/categories`,
+        `${import.meta.env.VITE_BASE_URL}/categories`,
         payload,
         {
           headers: {
@@ -85,7 +83,7 @@ export const CategoryProvider = ({ children }) => {
     if (!window.confirm(t("confirm_delete_category"))) return;
     try {
       await axios.delete(
-        `${import.meta.env.VITE_BASE_URL}/admin/categories/${categoryId}`,
+        `${import.meta.env.VITE_BASE_URL}/categories/${categoryId}`,
         {
           headers: { authorization: `Bearer ${user.token}` },
         }
@@ -111,7 +109,7 @@ export const CategoryProvider = ({ children }) => {
         name,
       };
       const res = await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/admin/categories/${id}`,
+        `${import.meta.env.VITE_BASE_URL}/categories/${id}`,
         payload,
         {
           headers: {
@@ -142,6 +140,7 @@ export const CategoryProvider = ({ children }) => {
     <CategoryContext.Provider
       value={{
         categories,
+        setCategories,
         fetchCategories,
         getCategory,
         addCategory,
