@@ -14,7 +14,7 @@ export function SortableItem({ id, children, disabled }) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    touchAction: "none", // ✔ Correct place
+    // touchAction: "none", // ✔ Correct place
   };
 
   return (
