@@ -4,8 +4,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const {
   getuser,
-  verify,
-  home,
+
   getAllProducts,
   getSingleProduct,
 } = require("../controller/usercontroller");
@@ -79,7 +78,6 @@ routes.post("/verify-otp", async (req, res) => {
   }
 });
 
-routes.get("/home", verify, home);
 routes.get("/products", validateJWT, getAllProducts);
 routes.get("/products/:id", validateJWT, getSingleProduct);
 routes.put("/update-phone", validateJWT, async (req, res) => {

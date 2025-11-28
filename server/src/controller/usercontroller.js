@@ -7,7 +7,6 @@ const dotenv = require("dotenv");
 const Category = require("../models/Category");
 dotenv.config();
 
-// get endpoint
 exports.getuser = async (req, res) => {
   try {
     const users = await user.find();
@@ -37,32 +36,7 @@ exports.userLogin = async (req, res) => {
   }
 };
 
-exports.verify = (req, res, next) => {
-  try {
-    const authHeader = req.header("Authorization");
-    if (!authHeader) {
-      return res.status(401).json({ msg: "No token, authorization denied" });
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.user = decoded.id;
-    next();
-  } catch (error) {
-    res.status(401).json({ msg: "Token is not valid" });
-  }
-};
-
-exports.home = async (req, res) => {
-  const getuser = req.user;
-  try {
-    const checkuser = await user.findById(getuser);
-    res.status(200).json({ user: checkuser, role: checkuser.role }); // إضافة role في الاستجابة
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+const productsCache = new NodeCache({ stdTTL: 60 });
 
 exports.getAllProducts = async (req, res) => {
   try {
