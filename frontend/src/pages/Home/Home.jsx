@@ -13,7 +13,7 @@ import { useUser } from "@/contexts/UserContext";
 import emailjs from "emailjs-com";
 
 import toast from "react-hot-toast";
-
+import axios from "axios";
 export default function Home() {
   const location = useLocation();
   const [section2, setSection2] = useState();
@@ -34,31 +34,21 @@ const sendEmail = async () => {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/email/send-email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-  from_email: email,
-  subject: `رسالة جديدة من ${name}`,
-  message: `
-📩 رسالة جديدة من الموقع
-
-👤 الاسم:
-${name}
-
-📧 الإيميل:
-${email}
-
-📱 رقم الهاتف:
-${phone}
-
-📝 محتوى الرسالة:
-${message}
+const res = await fetch(`${import.meta.env.VITE_BASE_URL}/email/send-email`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    from_email: email,
+    subject: `رسالة جديدة من ${name}`,
+    message: `
+👤 الاسم: ${name}
+📧 الإيميل: ${email}
+📱 الهاتف: ${phone}
+📝 الرسالة: ${message}
 `
-}),
-    });
+  }),
+});
+
 
     if (!res.ok) throw new Error("فشل الإرسال");
 
