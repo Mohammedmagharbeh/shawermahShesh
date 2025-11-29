@@ -17,7 +17,8 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
   const COOKIE_KEY = "user";
-  const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+  const isHttps =
+    typeof window !== "undefined" && window.location.protocol === "https:";
 
   const persistUser = useCallback(
     (value) => {
@@ -27,7 +28,7 @@ export const UserProvider = ({ children }) => {
       }
 
       Cookies.set(COOKIE_KEY, JSON.stringify(value), {
-        expires: 7,
+        expires: 1,
         sameSite: "Strict",
         secure: isHttps,
       });

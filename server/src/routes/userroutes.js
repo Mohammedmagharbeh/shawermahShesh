@@ -62,7 +62,7 @@ routes.post("/verify-otp", async (req, res) => {
       { id: user._id, phone: user.phone, role: user.role },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "24h",
       }
     );
 
