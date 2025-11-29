@@ -14,15 +14,27 @@ router.post("/send-email", async (req, res) => {
 
   try {
     // إعداد SMTP
-    let transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT),
-      secure: true, // true للبورت 465
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // let transporter = nodemailer.createTransport({
+    //   host: process.env.EMAIL_HOST,
+    //   port: Number(process.env.EMAIL_PORT),
+    //   secure: true, // true للبورت 465
+    //   auth: {
+    //     user: process.env.EMAIL_USER,
+    //     pass: process.env.EMAIL_PASS,
+    //   },
+    // });
+let transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: 587,           // بدل 465
+  secure: false,       // false مع STARTTLS
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false // يسمح بالاتصال حتى لو الشهادة غير موثوقة
+  }
+});
 
     // إرسال الإيميل
     await transporter.sendMail({
