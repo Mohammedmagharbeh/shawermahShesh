@@ -4,8 +4,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const {
   getuser,
-  verify,
-  home,
+
   getAllProducts,
   getSingleProduct,
 } = require("../controller/usercontroller");
@@ -14,6 +13,11 @@ const userModel = require("../models/user");
 const validateJWT = require("../middlewares/validateJWT");
 
 routes.get("/users", getuser);
+
+routes.get("/me", validateJWT, (req, res) => {
+  const { _id, phone, role } = req.user;
+  res.json({ _id, phone, role });
+});
 
 routes.post("/login", async (req, res) => {
   const { phone } = req.body; // ✅ client should send token if they have one
@@ -63,7 +67,7 @@ routes.post("/verify-otp", async (req, res) => {
       { id: user._id, phone: user.phone, role: user.role },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "24h",
       }
     );
 
@@ -79,7 +83,6 @@ routes.post("/verify-otp", async (req, res) => {
   }
 });
 
-routes.get("/home", verify, home);
 routes.get("/products", validateJWT, getAllProducts);
 routes.get("/products/:id", validateJWT, getSingleProduct);
 routes.put("/update-phone", validateJWT, async (req, res) => {

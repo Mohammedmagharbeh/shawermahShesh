@@ -12,14 +12,15 @@ const {
 } = require("../controller/admincontroller");
 const { USER_ROLES } = require("../constants");
 const validateJWT = require("../middlewares/validateJWT");
+const requireRole = require("../middlewares/requireRole");
 
-routes.post("/postfood", validateJWT, postEat);
-routes.put("/updatefood/:id", validateJWT, updatedfood);
-routes.delete("/deletefood/:id", validateJWT, deletefood);
-routes.put("/reorder", validateJWT, reorderProducts);
+routes.post("/postfood", validateJWT, requireRole("admin"), postEat);
+routes.put("/updatefood/:id", validateJWT, requireRole("admin"), updatedfood);
+routes.delete("/deletefood/:id", validateJWT, requireRole("admin"), deletefood);
+routes.put("/reorder", validateJWT, requireRole("admin"), reorderProducts);
 
 // user management
-routes.put("/user/:id", validateJWT, async (req, res) => {
+routes.put("/user/:id", validateJWT, requireRole("admin"), async (req, res) => {
   try {
     const { id } = req.params;
     const { role } = req.body;
@@ -41,7 +42,7 @@ routes.put("/user/:id", validateJWT, async (req, res) => {
 });
 module.exports = routes;
 
-routes.post("/user/add", validateJWT, async (req, res) => {
+routes.post("/user/add", validateJWT, requireRole("admin"), async (req, res) => {
   try {
     const { phone, role } = req.body;
     if (!phone) {

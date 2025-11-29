@@ -1,13 +1,12 @@
 const user = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { CATEGORIES } = require("../constants");
 const products = require("../models/products");
 const dotenv = require("dotenv");
 const Category = require("../models/Category");
+const NodeCache = require("node-cache");
 dotenv.config();
 
-// get endpoint
 exports.getuser = async (req, res) => {
   try {
     const users = await user.find();
@@ -37,43 +36,34 @@ exports.userLogin = async (req, res) => {
   }
 };
 
-exports.verify = (req, res, next) => {
-  try {
-    const authHeader = req.header("Authorization");
-    if (!authHeader) {
-      return res.status(401).json({ msg: "No token, authorization denied" });
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.user = decoded.id;
-    next();
-  } catch (error) {
-    res.status(401).json({ msg: "Token is not valid" });
-  }
-};
-
-exports.home = async (req, res) => {
-  const getuser = req.user;
-  try {
-    const checkuser = await user.findById(getuser);
-    res.status(200).json({ user: checkuser, role: checkuser.role }); // إضافة role في الاستجابة
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+const productsCache = new NodeCache({ stdTTL: 60 });
 
 exports.getAllProducts = async (req, res) => {
   try {
     const { category, isSpicy, hasTypeChoices, hasProteinChoices } = req.query;
 
+    // Build a unique key based on the query parameters
+    const cacheKey = JSON.stringify({
+      category,
+      isSpicy,
+      hasTypeChoices,
+      hasProteinChoices,
+    });
+
+    // Check if cached response exists
+    const cachedData = productsCache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({
+        message: "Products fetched successfully (from cache)",
+        data: cachedData,
+      });
+    }
+
     const query = {};
 
+    // Handle category
     if (category) {
-      // Find category ID by name
       const categoryDoc = await Category.findById(category).lean();
-
       if (categoryDoc) {
         query.category = categoryDoc._id;
       } else {
@@ -81,17 +71,22 @@ exports.getAllProducts = async (req, res) => {
       }
     }
 
+    // Boolean filters
     if (isSpicy !== undefined) query.isSpicy = isSpicy === "true";
     if (hasTypeChoices !== undefined)
       query.hasTypeChoices = hasTypeChoices === "true";
     if (hasProteinChoices !== undefined)
       query.hasProteinChoices = hasProteinChoices === "true";
 
+    // Query DB
     const productsList = await products
       .find(query)
       .populate("category")
       .sort({ position: 1 })
       .lean();
+
+    // Store in cache
+    productsCache.set(cacheKey, productsList);
 
     res.status(200).json({
       message: "Products fetched successfully",
