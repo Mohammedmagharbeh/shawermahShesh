@@ -1,53 +1,28 @@
 const express = require("express");
 const router = express.Router();
-const nodemailer = require("nodemailer");
 require("dotenv").config();
+const { Resend } = require("resend");
 
-// POST /api/email/send-email
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 router.post("/send-email", async (req, res) => {
   const { from_email, subject, message } = req.body;
 
-  if (!from_email || !subject || !message) {
-    return res.status(400).json({ message: "يرجى ملء جميع الحقول." });
-  }
-
   try {
-    // إعداد SMTP
-    // let transporter = nodemailer.createTransport({
-    //   host: process.env.EMAIL_HOST,
-    //   port: Number(process.env.EMAIL_PORT),
-    //   secure: true, // true للبورت 465
-    //   auth: {
-    //     user: process.env.EMAIL_USER,
-    //     pass: process.env.EMAIL_PASS,
-    //   },
-    // });
-    let transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: 2525, // بدل 465
-      secure: false, // false مع STARTTLS
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false, // يسمح بالاتصال حتى لو الشهادة غير موثوقة
-      },
+    const response = await resend.emails.send({
+      from: "Website <onboarding@resend.dev>", // ✅ Resend-approved sender
+      to: "ahmadjkff1@gmail.com",
+      reply_to: from_email, // ✅ User email goes here
+      subject: subject,
+      html: `<p>${message}</p>`,
     });
 
-    // إرسال الإيميل
-    await transporter.sendMail({
-      from: "website@shawermasheesh.com.jo",
-      to: process.env.EMAIL_USER, // تصل للصفحة أو للادمن
-      replyTo: from_email, // الرد يكون للمستخدم مباشرة
-      subject,
-      text: message,
-    });
+    console.log("Resend response:", response);
 
-    res.status(200).json({ message: "تم الإرسال بنجاح ✅" });
-  } catch (err) {
-    console.error("SMTP Email error:", err);
-    res.status(500).json({ message: "فشل الإرسال ❌", error: err.message });
+    res.status(200).json({ message: "تم الإرسال بنجاح" });
+  } catch (error) {
+    console.error("Resend error:", error);
+    res.status(500).json({ message: "فشل الإرسال", error });
   }
 });
 
