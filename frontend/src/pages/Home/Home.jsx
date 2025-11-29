@@ -2,25 +2,21 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, MapPin, Phone, Award, Users, Heart } from "lucide-react";
+import { Clock, Phone, Award, Users, Heart } from "lucide-react";
 import home_logo2 from "../../assets/home_logo2.jpeg";
 import { useTranslation } from "react-i18next";
 import Footer from "@/componenet/Footer";
 import ImageCarousel from "./ImageCarousel";
-import { useUser } from "@/contexts/UserContext";
-import emailjs from "emailjs-com";
 import telephone from "../../assets/telephone.jpeg";
 import workings from "../../assets/workings.png";
 import lololo from "../../assets/lololo.png";
-
 import toast from "react-hot-toast";
-import axios from "axios";
+
 export default function Home() {
   const location = useLocation();
   const [section2, setSection2] = useState();
   const { t, i18n } = useTranslation();
   const selectedLanguage = i18n.language;
-  const { user } = useUser();
 
   // الفورم
   const [openForm, setOpenForm] = useState(false);
@@ -34,10 +30,9 @@ export default function Home() {
       return;
     }
 
-    if (!/^07(88|85|9|7)\d{6}$/.test(phone)) {
-      toast.error(
-        "رقم الهاتف غير صحيح، يجب أن يبدأ بـ 0788 أو 0785 أو 079 أو 077 ويحتوي على 10 أرقام."
-      );
+    if (phone.length !== 10 || !/^(079|078|077)\d{7}$/.test(phone)) {
+      toast.error(t("invalid_phone"));
+
       return;
     }
 
