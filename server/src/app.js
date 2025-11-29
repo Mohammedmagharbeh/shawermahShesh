@@ -17,6 +17,9 @@ const additions = require("./routes/additions");
 const slideRoutes = require("./routes/slideRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 
+
+const emailRoutes = require("./routes/emailRoutes");
+
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -47,5 +50,7 @@ app.use("/api/myfatoorah", myfatoorah);
 app.use("/api/additions", additions);
 app.use("/api/slides", slideRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/email", emailRoutes);
+
 
 module.exports = server;
