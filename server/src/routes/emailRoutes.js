@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
@@ -23,24 +22,24 @@ router.post("/send-email", async (req, res) => {
     //     pass: process.env.EMAIL_PASS,
     //   },
     // });
-let transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: 587,           // بدل 465
-  secure: false,       // false مع STARTTLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false // يسمح بالاتصال حتى لو الشهادة غير موثوقة
-  }
-});
+    let transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: 2525, // بدل 465
+      secure: false, // false مع STARTTLS
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false, // يسمح بالاتصال حتى لو الشهادة غير موثوقة
+      },
+    });
 
     // إرسال الإيميل
     await transporter.sendMail({
-from: "website@shawermasheesh.com.jo",
+      from: "website@shawermasheesh.com.jo",
       to: process.env.EMAIL_USER, // تصل للصفحة أو للادمن
-      replyTo: from_email,        // الرد يكون للمستخدم مباشرة
+      replyTo: from_email, // الرد يكون للمستخدم مباشرة
       subject,
       text: message,
     });
