@@ -213,37 +213,38 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
-  const sendEmail = async () => {
-    if (!name || !email || !message) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة.");
-      return;
-    }
+const sendEmail = async () => {
+  if (!name || !email || !message) {
+    toast.error("يرجى ملء جميع الحقول المطلوبة.");
+    return;
+  }
 
-    try {
-      await emailjs.send(
-        "service_jamxkjk", // Service ID
-        "template_ff2olxu", // Template ID الجديد
-        {
-          from_name: name,
-          from_email: email,
-          phone: phone,
-          message: message,
-          project_name: "Shawarma Sheesh",
-        },
-        "qL3p4xBbLP-C6fqzq" // Public Key
-      );
+  try {
+    await emailjs.send(
+      "service_hzo8gfa",      // Service ID
+      "template_xkze6cd",     // Template ID
+      {
+        from_name: name,
+        from_email: email,
+        phone: phone,
+        message: message,
+        project_name: "Shawarma Sheesh"
+      },
+      "KrFWkCOJyFAwx__yC"     // Public Key
+    );
 
-      toast.success("✅ تم الإرسال بنجاح!");
-      setOpenForm(false);
-      setName("");
-      setPhone("");
-      setEmail("");
-      setMessage("");
-    } catch (err) {
-      console.error("EmailJS error:", err);
-      toast.error("❌ حدث خطأ أثناء الإرسال. حاول مرة أخرى.");
-    }
-  };
+    toast.success("✅ تم الإرسال بنجاح!");
+    setOpenForm(false);
+    setName("");
+    setPhone("");
+    setEmail("");
+    setMessage("");
+  } catch (err) {
+    console.error("EmailJS error:", err);
+    toast.error("❌ حدث خطأ أثناء الإرسال. حاول مرة أخرى.");
+  }
+};
+
 
   useEffect(() => {
     const fetchSection2 = async () => {
