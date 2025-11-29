@@ -1,5 +1,11 @@
 import axios from "axios";
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 
@@ -23,11 +29,76 @@ export const UserProvider = ({ children }) => {
     setUser(userData);
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     sessionStorage.removeItem("user");
     setUser(null);
     toast.error(t("session_expired") || "Session expired, please log in again");
-  };
+  }, [t]);
+
+  // ✅ Set up axios interceptor + fetch wrapper to handle "Invalid token" responses
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        // Check if the error response contains "Invalid token"
+        const errorMessage =
+          error.response?.data ||
+          error.response?.data?.message ||
+          error.message ||
+          "";
+
+        // Convert to string for comparison (handles both string and object responses)
+        const errorString =
+          typeof errorMessage === "string"
+            ? errorMessage
+            : JSON.stringify(errorMessage);
+
+        if (
+          errorString.includes("Invalid token") ||
+          (error.response?.status === 403 &&
+            errorString.toLowerCase().includes("invalid token"))
+        ) {
+          logout();
+        }
+
+        return Promise.reject(error);
+      }
+    );
+
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+
+      if (response.status === 403) {
+        try {
+          const cloned = response.clone();
+          const contentType = cloned.headers.get("content-type") || "";
+          let payload = "";
+
+          if (contentType.includes("application/json")) {
+            const data = await cloned.json();
+            payload = typeof data === "string" ? data : JSON.stringify(data);
+          } else {
+            payload = await cloned.text();
+          }
+
+          if (payload.toLowerCase().includes("invalid token")) {
+            logout();
+          }
+        } catch (err) {
+          console.error("Failed to inspect fetch response:", err);
+        }
+      }
+
+      return response;
+    };
+
+    // Cleanup: remove interceptor on unmount
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+      window.fetch = originalFetch;
+    };
+  }, [logout]);
 
   const updatePhone = async (newPhone, navigate) => {
     if (!user) throw new Error("No user logged in");
