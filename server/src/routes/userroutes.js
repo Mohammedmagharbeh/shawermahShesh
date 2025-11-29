@@ -14,6 +14,11 @@ const validateJWT = require("../middlewares/validateJWT");
 
 routes.get("/users", getuser);
 
+routes.get("/me", validateJWT, (req, res) => {
+  const { _id, phone, role } = req.user;
+  res.json({ _id, phone, role });
+});
+
 routes.post("/login", async (req, res) => {
   const { phone } = req.body; // ✅ client should send token if they have one
 

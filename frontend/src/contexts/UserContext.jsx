@@ -37,32 +37,73 @@ export const UserProvider = ({ children }) => {
   );
   const { t } = useTranslation();
 
-  // ✅ Load user from cookies on mount
-  useEffect(() => {
-    const savedUser = Cookies.get(COOKIE_KEY);
-
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (err) {
-        console.warn("Failed to parse user cookie, clearing it", err);
-        Cookies.remove(COOKIE_KEY);
-      }
-    }
-
-    setLoading(false);
-  }, [COOKIE_KEY]);
-
-  const login = (userData) => {
-    persistUser(userData);
-    setUser(userData);
-  };
-
   const logout = useCallback(() => {
     persistUser(null);
     setUser(null);
     toast.error(t("session_expired") || "Session expired, please log in again");
   }, [persistUser, t]);
+
+  const syncUserWithServer = useCallback(
+    async (token) => {
+      if (!token) return null;
+
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/me`, {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        });
+
+        const normalizedUser = { ...res.data, token };
+        setUser(normalizedUser);
+        persistUser(normalizedUser);
+        return normalizedUser;
+      } catch (error) {
+        console.error("Failed to sync user with server:", error);
+        logout();
+        return null;
+      }
+    },
+    [logout, persistUser]
+  );
+
+  // ✅ Load user from cookies on mount and revalidate with the server
+  useEffect(() => {
+    let isMounted = true;
+
+    const initializeUser = async () => {
+      const savedUser = Cookies.get(COOKIE_KEY);
+
+      if (savedUser) {
+        try {
+          const parsedUser = JSON.parse(savedUser);
+          if (isMounted) {
+            setUser(parsedUser);
+          }
+          await syncUserWithServer(parsedUser.token);
+        } catch (err) {
+          console.warn("Failed to parse user cookie, clearing it", err);
+          Cookies.remove(COOKIE_KEY);
+        }
+      }
+
+      if (isMounted) {
+        setLoading(false);
+      }
+    };
+
+    initializeUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [COOKIE_KEY, syncUserWithServer]);
+
+  const login = (userData) => {
+    persistUser(userData);
+    setUser(userData);
+    syncUserWithServer(userData.token);
+  };
 
   // ✅ Set up axios interceptor + fetch wrapper to handle "Invalid token" responses
   useEffect(() => {
@@ -186,6 +227,7 @@ export const UserProvider = ({ children }) => {
         updatePhone,
         getAllUsers,
         loading,
+        refreshUser: () => syncUserWithServer(user?.token),
       }}
     >
       {children}
