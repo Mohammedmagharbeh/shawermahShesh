@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 import {
   createContext,
   useContext,
@@ -15,25 +16,52 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
+  const COOKIE_KEY = "user";
+  const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+
+  const persistUser = useCallback(
+    (value) => {
+      if (!value) {
+        Cookies.remove(COOKIE_KEY);
+        return;
+      }
+
+      Cookies.set(COOKIE_KEY, JSON.stringify(value), {
+        expires: 7,
+        sameSite: "Strict",
+        secure: isHttps,
+      });
+    },
+    [COOKIE_KEY, isHttps]
+  );
   const { t } = useTranslation();
 
-  // ✅ Load user from sessionStorage on mount
+  // ✅ Load user from cookies on mount
   useEffect(() => {
-    const savedUser = JSON.parse(sessionStorage.getItem("user"));
-    if (savedUser) setUser(savedUser);
+    const savedUser = Cookies.get(COOKIE_KEY);
+
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (err) {
+        console.warn("Failed to parse user cookie, clearing it", err);
+        Cookies.remove(COOKIE_KEY);
+      }
+    }
+
     setLoading(false);
-  }, []);
+  }, [COOKIE_KEY]);
 
   const login = (userData) => {
-    sessionStorage.setItem("user", JSON.stringify(userData));
+    persistUser(userData);
     setUser(userData);
   };
 
   const logout = useCallback(() => {
-    sessionStorage.removeItem("user");
+    persistUser(null);
     setUser(null);
     toast.error(t("session_expired") || "Session expired, please log in again");
-  }, [t]);
+  }, [persistUser, t]);
 
   // ✅ Set up axios interceptor + fetch wrapper to handle "Invalid token" responses
   useEffect(() => {
@@ -122,7 +150,9 @@ export const UserProvider = ({ children }) => {
         });
       }
 
-      setUser({ ...user, phone: newPhone });
+      const updatedUser = { ...user, phone: newPhone };
+      setUser(updatedUser);
+      persistUser(updatedUser);
     } catch (error) {
       console.error("Failed to update phone number:", error);
       throw error;
