@@ -364,9 +364,8 @@ project_name: "Shawarma Sheesh"
               </p>
             </Card>
 
-           <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition relative">
-  {/* الكارد الخارجي للاتصال */}
-  <a href="tel:+96332019099" className="block">
+           <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition flex flex-col items-center gap-4">
+  <a href="tel:+96332019099" className="block w-full">
     <div className="bg-red-100 rounded-full p-4 sm:p-5 md:p-6 w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 aspect-square mx-auto mb-4 sm:mb-6 flex items-center justify-center">
       <Phone
         className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8"
@@ -390,7 +389,7 @@ project_name: "Shawarma Sheesh"
       e.stopPropagation(); // يمنع تشغيل الرابط عند الضغط على الزر
       setOpenForm(true);
     }}
-    className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg transition"
+    className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg transition w-full sm:w-auto"
   >
     تواصل معنا
   </button>
