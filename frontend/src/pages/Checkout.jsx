@@ -370,6 +370,7 @@ function Checkout() {
   </ul>
 )}
 
+
                       {product.notes && (
                         <p className="text-sm text-gray-500 italic mt-1">
                           {t("notes")}: {product.notes}
