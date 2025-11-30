@@ -226,8 +226,10 @@ const sendEmail = async () => {
 
   try {
     await emailjs.send(
-      "service_hzo8gfa",      // Service ID
-      "template_xkze6cd",     // Template ID
+      // "service_hzo8gfa",      // Service ID
+      // "template_xkze6cd",     // Template ID
+      "service_jamxkjk",
+      "template_ff2olxu",
       {
         from_name: name,
         from_email: email,
@@ -235,7 +237,8 @@ const sendEmail = async () => {
         message: message,
         project_name: "Shawarma Sheesh"
       },
-      "KrFWkCOJyFAwx__yC"     // Public Key
+      // "KrFWkCOJyFAwx__yC"     // Public Key
+"qL3p4xBbLP-C6fqzq"
     );
 
     toast.success("✅ تم الإرسال بنجاح!");
@@ -401,7 +404,7 @@ const sendEmail = async () => {
           </p>
           <p className="text-sm sm:text-base text-gray-600">{t("contact_info")}</p>
         </a>
-        {/* <button
+        <button
           onClick={(e) => {
             e.stopPropagation();
             setOpenForm(true);
@@ -409,7 +412,7 @@ const sendEmail = async () => {
           className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg transition w-full sm:w-auto"
         >
           تواصل معنا
-        </button> */}
+        </button>
       </Card>
 
       {/* بطاقة ساعات العمل */}
