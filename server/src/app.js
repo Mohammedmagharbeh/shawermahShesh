@@ -12,7 +12,9 @@ const userroutes = require("./routes/userroutes");
 const adminroutes = require("./routes/adminroutes");
 const cartRoutes = require("./routes/cartRoutes");
 const locationsRoute = require("./routes/locationsRoute");
-const myfatoorah = require("./routes/myfatoorah");
+// const myfatoorah = require("./routes/myfatoorah");
+const montypay = require("./routes/montypay");
+
 const additions = require("./routes/additions");
 const slideRoutes = require("./routes/slideRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -46,7 +48,9 @@ app.use("/api/admin", adminroutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/locations", locationsRoute);
-app.use("/api/myfatoorah", myfatoorah);
+// app.use("/api/myfatoorah", myfatoorah);
+app.use("/api/montypay", montypay);
+
 app.use("/api/additions", additions);
 app.use("/api/slides", slideRoutes);
 app.use("/api/categories", categoryRoutes);
