@@ -58,7 +58,6 @@ function Checkout() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState(null);
   const [orderType, setOrderType] = useState("delivery"); // default delivery
   const [details, setDetails] = useState({
     name: user?.name || "",
@@ -71,6 +70,9 @@ function Checkout() {
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const [searchParams] = useSearchParams();
   const isTestMode = searchParams.get("test") === "1";
+  const [paymentMethod, setPaymentMethod] = useState(
+    isTestMode ? "card" : null
+  );
 
   useEffect(() => {
     if (isTestMode) return;
@@ -154,14 +156,16 @@ function Checkout() {
       userId: user?._id,
       orderType: orderType || "pickup",
       userDetails: {
-        name: details.name || "ahmad",
+        name: "ahmad",
       },
+      paymentMethod: "card",
     };
+    if (isTestMode) {
+      body.isTest = true;
+      setPaymentMethod("card");
+      setDetails({ ...details, name: "ahmad" });
+    }
     if (paymentMethod === "card") {
-      if (isTestMode) {
-        body.isTest = true;
-      }
-
       try {
         await createOrder(body);
 
