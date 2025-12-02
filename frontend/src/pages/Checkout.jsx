@@ -1,14 +1,50 @@
+// try {
+//   const res = await axios.post(
+//     `${import.meta.env.VITE_BASE_URL}/montypay/session`,
+//     {
+//       amount: Number.parseFloat(totalWithDelivery.toFixed(2)),
+//       customerName: user?.name || "Customer",
+//       customerEmail: user?.email || "ahmadjkff1@gmial.com",
+//       customerMobile: user.phone,
+//       paymentUrl: `${window.location.origin}/payment-success`,
+//       errorUrl: `${window.location.origin}/payment-success`,
+//     },
+//     {
+//       headers: {
+//         "Content-Type": "application/json",
+//         authorization: `Bearer ${user.token}`,
+//       },
+//     }
+//   );
+//   if (!res.data?.IsSuccess) {
+//     toast.error(t("checkout_payment_failed"));
+//     return;
+//   }
+//   sessionStorage.setItem(
+//     "pendingOrder",
+//     JSON.stringify({
+//       ...cart,
+//       shippingAddress: selectedArea._id,
+//       orderType,
+//     })
+//   );
+//   window.location.href = res.data.Data.PaymentURL;
+// } catch (error) {
+//   toast.error(t("checkout_error"));
+//   console.error(error);
+// }
+
 import Loading from "@/componenet/common/Loading";
 import { useCart } from "@/contexts/CartContext";
 import { useOrder } from "@/contexts/OrderContext";
 import { useUser } from "@/contexts/UserContext";
-import axios from "axios";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { getAdditionsPrice, getProductPrice } from "@/constants";
+import { useSearchParams } from "react-router-dom";
 
 function Checkout() {
   const { cart, total, clearCart } = useCart();
@@ -33,6 +69,15 @@ function Checkout() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const [searchParams] = useSearchParams();
+  const isTestMode = searchParams.get("test") === "1";
+
+  useEffect(() => {
+    if (isTestMode) return;
+    if (!cart.products || cart.products.length < 1) {
+      navigate("/products");
+    }
+  }, [cart, navigate]);
 
   useEffect(() => {
     async function fetchAreas() {
@@ -83,48 +128,41 @@ function Checkout() {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (cart.products.length === 0) {
-      toast.error(t("checkout_cart_empty"));
-      return;
+      if (!isTestMode) {
+        toast.error(t("checkout_cart_empty"));
+        return;
+      }
     }
     if (!paymentMethod) {
-      toast.error(t("checkout_select_payment"));
-      return;
+      if (!isTestMode) {
+        toast.error(t("checkout_select_payment"));
+        return;
+      }
     }
     if (!selectedArea._id) {
-      toast.error(t("checkout_select_area"));
-      return;
+      if (!isTestMode) {
+        toast.error(t("checkout_select_area"));
+        return;
+      }
     }
+    const body = {
+      userId: user?._id,
+      orderType,
+      userDetails: details,
+    };
     if (paymentMethod === "card") {
+      if (isTestMode) {
+        body.isTest = true;
+      }
+
       try {
-        const res = await axios.post(
-          `${import.meta.env.VITE_BASE_URL}/myfatoorah/execute`,
-          {
-            paymentMethodId: 2,
-            amount: Number.parseFloat(totalWithDelivery.toFixed(2)),
-            customerName: user?.name || "Customer",
-            customerEmail: user?.email || "ahmadjkff1@gmial.com",
-            customerMobile: user.phone,
-            callbackUrl: `${window.location.origin}/payment-success`,
-            errorUrl: `${window.location.origin}/payment-success`,
-          },
-          { headers: { "Content-Type": "application/json" } }
-        );
-        if (!res.data?.IsSuccess) {
-          toast.error(t("checkout_payment_failed"));
-          return;
-        }
-        sessionStorage.setItem(
-          "pendingOrder",
-          JSON.stringify({
-            ...cart,
-            shippingAddress: selectedArea._id,
-            orderType,
-          })
-        );
-        window.location.href = res.data.Data.PaymentURL;
+        await createOrder(body);
+
+        toast.success(t("checkout_success"));
+        clearCart();
+        navigate("/products");
       } catch (error) {
-        toast.error(t("checkout_error"));
-        console.error(error);
+        toast.error(t("checkout_failed"));
       }
     } else {
       try {
@@ -164,11 +202,6 @@ function Checkout() {
         <p className="text-red-600">{error}</p>
       </div>
     );
-
-  if (!cart.products || cart?.products?.length < 1) {
-    navigate("/products");
-    return;
-  }
 
   return (
     <form
@@ -357,19 +390,19 @@ function Checkout() {
                       </div>
 
                       {/* 🧀 عرض الإضافات */}
-                     {product.additions.length > 0 && (
-  <ul className="mt-2 text-sm text-gray-600 list-disc list-inside flex gap-2">
-    {product.additions.map((addition, i) => (
-      <Badge key={i}>
-        {addition.name[selectedLanguage] || "Deleted Addition"}
-        {Number(addition.price) > 0 && (
-          <> ({addition.price.toFixed(2)} JOD)</>
-        )}
-      </Badge>
-    ))}
-  </ul>
-)}
-
+                      {product.additions.length > 0 && (
+                        <ul className="mt-2 text-sm text-gray-600 list-disc list-inside flex gap-2">
+                          {product.additions.map((addition, i) => (
+                            <Badge key={i}>
+                              {addition.name[selectedLanguage] ||
+                                "Deleted Addition"}
+                              {Number(addition.price) > 0 && (
+                                <> ({addition.price.toFixed(2)} JOD)</>
+                              )}
+                            </Badge>
+                          ))}
+                        </ul>
+                      )}
 
                       {product.notes && (
                         <p className="text-sm text-gray-500 italic mt-1">

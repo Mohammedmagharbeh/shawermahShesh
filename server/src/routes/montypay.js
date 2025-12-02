@@ -144,9 +144,12 @@ require("dotenv").config();
 
 // ========================
 // إعدادات MontyPay من env (اختياري للتست الحقيقي)
-const MONTY_BASE = process.env.MONTY_BASE_URL || "https://checkout.montypay.com/api/v1";
-const MERCHANT_KEY = process.env.MONTY_MERCHANT_KEY || "0d4d0efc-cb5f-11f0-87fe-5e5806863738";
-const MERCHANT_PASSWORD = process.env.MERCHANT_PASSWORD || "c1f940613823814205d1b43cd655bd43";
+const MONTY_BASE =
+  process.env.MONTY_BASE_URL || "https://checkout.montypay.com/api/v1";
+const MERCHANT_KEY =
+  process.env.MONTY_MERCHANT_KEY || "0d4d0efc-cb5f-11f0-87fe-5e5806863738";
+const MERCHANT_PASSWORD =
+  process.env.MERCHANT_PASSWORD || "c1f940613823814205d1b43cd655bd43";
 // ========================
 
 // 1) إنشاء جلسة دفع
@@ -208,20 +211,20 @@ router.post("/status", async (req, res) => {
   }
 });
 
-  // 3) Callback endpoint من MontyPay
-  router.post("/callback", express.json(), (req, res) => {
-    try {
-      const data = req.body;
-      console.log("MontyPay Callback Data:", data);
+// 3) Callback endpoint من MontyPay
+router.post("/callback", express.json(), (req, res) => {
+  try {
+    const data = req.body;
+    console.log("MontyPay Callback Data:", data);
 
-      // حفظ بيانات الاختبار في JSON
-      fs.writeFileSync("callback_test.json", JSON.stringify(data, null, 2));
+    // حفظ بيانات الاختبار في JSON
+    fs.writeFileSync("callback_test.json", JSON.stringify(data, null, 2));
 
-      res.status(200).send("OK");
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("error");
-    }
-  });
+    res.status(200).send("OK");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("error");
+  }
+});
 
-  module.exports = router;
+module.exports = router;
