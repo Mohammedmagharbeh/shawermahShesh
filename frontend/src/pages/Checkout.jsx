@@ -108,7 +108,12 @@ function Checkout() {
   }, []);
 
   const DETAILS = [
-    { name: t("checkout_name"), label: "name", required: true, type: "text" },
+    {
+      name: t("checkout_name"),
+      label: "name",
+      required: true && !isTestMode,
+      type: "text",
+    },
     {
       name: `${t("checkout_apartment_floor")} (${t("checkout_optional")})`,
       label: "apartment",
@@ -147,8 +152,10 @@ function Checkout() {
     }
     const body = {
       userId: user?._id,
-      orderType,
-      userDetails: details,
+      orderType: orderType || "pickup",
+      userDetails: {
+        name: details.name || "ahmad",
+      },
     };
     if (paymentMethod === "card") {
       if (isTestMode) {
@@ -328,7 +335,7 @@ function Checkout() {
                   <select
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-gray-50 hover:bg-white"
                     id="area"
-                    required
+                    required={!isTestMode}
                     onChange={(e) => {
                       const selected = areas.find(
                         (a) => a.name === e.target.value
