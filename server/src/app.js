@@ -20,6 +20,10 @@ const slideRoutes = require("./routes/slideRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 
 
+const jobRoutes = require("./routes/jobRoutes");
+const applicationRoutes = require("./routes/applicationRoutes");
+
+
 // const emailRoutes = require("./routes/emailRoutes");
 
 dotenv.config();
@@ -56,5 +60,10 @@ app.use("/api/slides", slideRoutes);
 app.use("/api/categories", categoryRoutes);
 // app.use("/api/email", emailRoutes);
 
+
+app.use("/uploads", express.static("uploads"));
+
+app.use("/jobs", jobRoutes);
+app.use("/apply", applicationRoutes);
 
 module.exports = server;

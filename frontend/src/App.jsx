@@ -23,11 +23,14 @@ import AdminSlides from "./pages/AdminSlides";
 import AdminProductPanel from "./pages/MenuManagement/AdminProductPanel";
 import Story from "./pages/story";
 import NotFound from "./componenet/NotFound";
+import AdminJobs from "./pages/AdminJobs";
+import JobsPage from "./pages/JobsPage";
 
 function App() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
+    
     const currentLang = localStorage.getItem("i18nextLng") || "ar";
     document.documentElement.setAttribute(
       "dir",
@@ -35,6 +38,39 @@ function App() {
     );
     document.documentElement.setAttribute("lang", currentLang);
   }, []);
+//   useEffect(() => {
+//   // --- ضبط اللغة والاتجاه ---
+//   const currentLang = localStorage.getItem("i18nextLng") || "ar";
+//   document.documentElement.setAttribute(
+//     "dir",
+//     currentLang === "ar" ? "rtl" : "ltr"
+//   );
+//   document.documentElement.setAttribute("lang", currentLang);
+
+//   // --- منع كليك يمين و Inspect ---
+//   const disableRightClick = (e) => e.preventDefault();
+
+//   const disableKeys = (e) => {
+//     if (
+//       e.key === "F12" ||
+//       (e.ctrlKey && e.shiftKey && e.key === "I") ||
+//       (e.ctrlKey && e.shiftKey && e.key === "C") ||
+//       (e.ctrlKey && e.key === "U")
+//     ) {
+//       e.preventDefault();
+//     }
+//   };
+
+//   document.addEventListener("contextmenu", disableRightClick);
+//   document.addEventListener("keydown", disableKeys);
+
+//   // --- تنظيف الأحداث عند الخروج ---
+//   return () => {
+//     document.removeEventListener("contextmenu", disableRightClick);
+//     document.removeEventListener("keydown", disableKeys);
+//   };
+// }, []);
+
 
   return (
     <div
@@ -45,6 +81,9 @@ function App() {
         <Header />
         <main className="pt-14">
           <Routes>
+ <Route path="/AdminJobs" element={<AdminJobs />} />
+        <Route path="/JobsPage" element={<JobsPage />} />
+
             <Route path="/" index element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/slides" element={<AdminSlides />} />

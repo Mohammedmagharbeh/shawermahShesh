@@ -1,6 +1,6 @@
 {
-  "orderId": "12345",
+  "sessionId": "abc123",
   "status": "SUCCESS",
-  "amount": 1,
+  "amount": 5,
   "currency": "JOD"
 }
