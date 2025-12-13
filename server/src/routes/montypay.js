@@ -1,155 +1,111 @@
-// // routes/myfatoorah.js
 // const express = require("express");
-// const axios = require("axios");
-// const crypto = require("crypto");
-// const dotenv = require("dotenv");
-// dotenv.config();
-
 // const router = express.Router();
-// const MF_BASE = process.env.MF_BASE_URL || "https://apitest.myfatoorah.com/v2";
-// const MF_TOKEN = process.env.MF_API_TOKEN;
+// const fs = require("fs");
+// const axios = require("axios");
+// require("dotenv").config();
 
-// // 1) InitiatePayment - get available methods (optional)
-// router.post("/initiate", async (req, res) => {
-//   try {
-//     const { amount, currency = "JOD" } = req.body;
-//     const resp = await axios.post(
-//       `${MF_BASE}/InitiatePayment`,
-//       { InvoiceAmount: amount, CurrencyIso: currency },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${MF_TOKEN}`,
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//     res.json(resp.data);
-//   } catch (err) {
-//     res.status(500).json({ error: err?.response?.data || err.message });
-//   }
-// });
+// // ========================
+// // إعدادات MontyPay من env (اختياري للتست الحقيقي)
+// const MONTY_BASE =
+//   process.env.MONTY_BASE_URL || "https://checkout.montypay.com/api/v1";
+// const MERCHANT_KEY =
+//   process.env.MONTY_MERCHANT_KEY || "0d4d0efc-cb5f-11f0-87fe-5e5806863738";
+// const MERCHANT_PASSWORD =
+//   process.env.MERCHANT_PASSWORD || "c1f940613823814205d1b43cd655bd43";
+// // ========================
 
-// // 2) ExecutePayment - create invoice & get PaymentURL
-// router.post("/execute", async (req, res) => {
+// // 1) إنشاء جلسة دفع
+// router.post("/session", async (req, res) => {
 //   try {
-//     const {
-//       paymentMethodId,
+//     const { amount, currency = "JOD", customerName, customerEmail } = req.body;
+
+//     // إذا بدك تختبر محلي بدون الاتصال بـ MontyPay
+//     const paymentUrl = "https://sandbox.montypay.com/payment/12345"; // مثال وهمي
+
+//     res.json({
+//       sessionId: "session_test_123",
+//       paymentUrl,
 //       amount,
-//       currency = "JOD",
+//       currency,
 //       customerName,
 //       customerEmail,
-//       customerMobile,
-//       callbackUrl,
-//       errorUrl,
-//     } = req.body;
-
-//     const body = {
-//       PaymentMethodId: paymentMethodId,
-//       InvoiceValue: amount,
-//       DisplayCurrencyIso: currency,
-//       CustomerName: customerName,
-//       CustomerEmail: customerEmail,
-//       CustomerMobile: customerMobile,
-//       CallBackUrl: callbackUrl,
-//       ErrorUrl: errorUrl,
-//       Language: "AR",
-//     };
-
-//     const resp = await axios.post(`${MF_BASE}/ExecutePayment`, body, {
-//       headers: {
-//         Authorization: `Bearer ${MF_TOKEN}`,
-//         "Content-Type": "application/json",
-//       },
 //     });
 
-//     // resp.data.Data.PaymentURL contains the URL to redirect the customer to
+//     // إذا بدك الاتصال الحقيقي، استخدم axios مع auth
+//     /*
+//     const resp = await axios.post(`${MONTY_BASE}/session`, {
+//       amount,
+//       currency,
+//       customer: { name: customerName, email: customerEmail },
+//     }, {
+//       auth: { username: MERCHANT_KEY, password: MERCHANT_PASSWORD },
+//       headers: { "Content-Type": "application/json" }
+//     });
 //     res.json(resp.data);
+//     */
 //   } catch (err) {
 //     res.status(500).json({ error: err?.response?.data || err.message });
 //   }
 // });
 
-// // 3) GetPaymentStatus — call when you have paymentId (from callback) to verify
+// // 2) التحقق من حالة الدفع
 // router.post("/status", async (req, res) => {
 //   try {
-//     const { paymentId } = req.body;
-//     const resp = await axios.post(
-//       `${MF_BASE}/GetPaymentStatus`,
-//       { Key: paymentId, KeyType: "PaymentId" },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${MF_TOKEN}`,
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
+//     const { sessionId } = req.body;
+
+//     // للتست المحلي
+//     res.json({
+//       sessionId,
+//       status: "SUCCESS",
+//       amount: 1,
+//       currency: "JOD",
+//     });
+//     // للتست الحقيقي مع MontyPay:
+//     /*
+//     const resp = await axios.get(`${MONTY_BASE}/session/${sessionId}`, {
+//       auth: { username: MERCHANT_KEY, password: MERCHANT_PASSWORD }
+//     });
 //     res.json(resp.data);
+//     */
 //   } catch (err) {
 //     res.status(500).json({ error: err?.response?.data || err.message });
 //   }
 // });
 
-// // 4) Webhook endpoint (raw body) — verify signature and update order
-// router.post(
-//   "/webhook",
-//   express.raw({ type: "application/json" }),
-//   async (req, res) => {
-//     try {
-//       const signature = req.headers["myfatoorah-signature"]; // header name per docs
-//       const secret = process.env.MF_WEBHOOK_SECRET;
-//       if (!signature || !secret)
-//         return res.status(400).send("missing signature/secret");
+// // 3) Callback endpoint من MontyPay
+// router.post("/callback", express.json(), (req, res) => {
+//   try {
+//     const data = req.body;
+//     console.log("MontyPay Callback Data:", data);
 
-//       // NOTE: MyFatoorah sends a signature header; verify with HMAC-SHA256 over raw body (see docs)
-//       const computed = crypto
-//         .createHmac("sha256", secret)
-//         .update(req.body)
-//         .digest("hex");
+//     // حفظ بيانات الاختبار في JSON
+//     fs.writeFileSync("callback_test.json", JSON.stringify(data, null, 2));
 
-//       // Timing-safe comparison
-//       const sigBuf = Buffer.from(signature, "utf8");
-//       const compBuf = Buffer.from(computed, "utf8");
-//       if (
-//         sigBuf.length !== compBuf.length ||
-//         !crypto.timingSafeEqual(sigBuf, compBuf)
-//       ) {
-//         return res.status(401).send("invalid signature");
-//       }
-
-//       const event = JSON.parse(req.body.toString("utf8"));
-//       // Example: if payment status changed:
-//       if (
-//         event &&
-//         event.Event &&
-//         event.Event.Name === "PAYMENT_STATUS_CHANGED"
-//       ) {
-//         // read event.Data.InvoiceId or Payment info then call /GetPaymentStatus to be sure
-//         // update your order record accordingly
-//       }
-
-//       res.status(200).send("OK");
-//     } catch (err) {
-//       res.status(500).send("err");
-//     }
+//     res.status(200).send("OK");
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("error");
+    
 //   }
-// );
+// });
 
 // module.exports = router;
 
+
+
 const express = require("express");
-const router = express.Router();
-const fs = require("fs");
 const axios = require("axios");
+const fs = require("fs");
 require("dotenv").config();
 
+const router = express.Router();
+
 // ========================
-// إعدادات MontyPay من env (اختياري للتست الحقيقي)
-const MONTY_BASE =
-  process.env.MONTY_BASE_URL || "https://checkout.montypay.com/api/v1";
-const MERCHANT_KEY =
-  process.env.MONTY_MERCHANT_KEY || "0d4d0efc-cb5f-11f0-87fe-5e5806863738";
-const MERCHANT_PASSWORD =
-  process.env.MERCHANT_PASSWORD || "c1f940613823814205d1b43cd655bd43";
+// إعدادات MontyPay من env
+const MONTY_BASE = process.env.MONTY_BASE_URL || "https://checkout.montypay.com/api/v1";
+const MERCHANT_KEY = process.env.MERCHANT_KEY;
+const MERCHANT_PASSWORD = process.env.MERCHANT_PASSWORD;
+
 // ========================
 
 // 1) إنشاء جلسة دفع
@@ -157,32 +113,23 @@ router.post("/session", async (req, res) => {
   try {
     const { amount, currency = "JOD", customerName, customerEmail } = req.body;
 
-    // إذا بدك تختبر محلي بدون الاتصال بـ MontyPay
-    const paymentUrl = "https://sandbox.montypay.com/payment/12345"; // مثال وهمي
-
-    res.json({
-      sessionId: "session_test_123",
-      paymentUrl,
-      amount,
-      currency,
-      customerName,
-      customerEmail,
-    });
-
-    // إذا بدك الاتصال الحقيقي، استخدم axios مع auth
-    /*
-    const resp = await axios.post(`${MONTY_BASE}/session`, {
+    const payload = {
       amount,
       currency,
       customer: { name: customerName, email: customerEmail },
-    }, {
+      success_url: "https://shawermahshesh-1.onrender.com/success", // صفحة الدفع الناجح عندك
+      cancel_url: "https://shawermahshesh-1.onrender.com/cancel",   // صفحة الدفع الملغي عندك
+    };
+
+    const response = await axios.post(`${MONTY_BASE}/session`, payload, {
       auth: { username: MERCHANT_KEY, password: MERCHANT_PASSWORD },
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     });
-    res.json(resp.data);
-    */
+
+    res.json(response.data); // يحتوي على sessionId وpaymentUrl
   } catch (err) {
-    res.status(500).json({ error: err?.response?.data || err.message });
+    console.error("Session error:", err.response?.data || err);
+    res.status(500).json({ error: err.response?.data || err.message });
   }
 });
 
@@ -191,23 +138,14 @@ router.post("/status", async (req, res) => {
   try {
     const { sessionId } = req.body;
 
-    // للتست المحلي
-    res.json({
-      sessionId,
-      status: "SUCCESS",
-      amount: 1,
-      currency: "JOD",
+    const response = await axios.get(`${MONTY_BASE}/session/${sessionId}`, {
+      auth: { username: MERCHANT_KEY, password: MERCHANT_PASSWORD },
     });
 
-    // للتست الحقيقي مع MontyPay:
-    /*
-    const resp = await axios.get(`${MONTY_BASE}/session/${sessionId}`, {
-      auth: { username: MERCHANT_KEY, password: MERCHANT_PASSWORD }
-    });
-    res.json(resp.data);
-    */
+    res.json(response.data);
   } catch (err) {
-    res.status(500).json({ error: err?.response?.data || err.message });
+    console.error("Status error:", err.response?.data || err);
+    res.status(500).json({ error: err.response?.data || err.message });
   }
 });
 
@@ -217,8 +155,8 @@ router.post("/callback", express.json(), (req, res) => {
     const data = req.body;
     console.log("MontyPay Callback Data:", data);
 
-    // حفظ بيانات الاختبار في JSON
-    fs.writeFileSync("callback_test.json", JSON.stringify(data, null, 2));
+    // حفظ البيانات في ملف log
+    fs.appendFileSync("callback_log.json", JSON.stringify(data, null, 2) + "\n");
 
     res.status(200).send("OK");
   } catch (err) {
@@ -227,4 +165,10 @@ router.post("/callback", express.json(), (req, res) => {
   }
 });
 
+// 4) صفحات الدفع للـ React
+router.get("/success", (req, res) => res.send("<h1>Payment Successful!</h1>"));
+router.get("/cancel", (req, res) => res.send("<h1>Payment Canceled!</h1>"));
+
 module.exports = router;
+
+
