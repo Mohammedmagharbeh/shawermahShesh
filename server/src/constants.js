@@ -1,5 +1,5 @@
 // product Constants
-export const CATEGORIES = [
+const CATEGORIES = [
   { en: "Burgers", ar: "برجر" },
   { en: "Snacks", ar: " سناكات" },
   { en: "Drinks", ar: "مشروبات" },
@@ -11,14 +11,22 @@ export const CATEGORIES = [
 ];
 
 // Order Constants
-export const ORDER_STATUSES = Object.freeze([
+const ORDER_STATUSES = Object.freeze([
   "Processing",
   "Confirmed",
   "Shipped",
   "Delivered",
   "Cancelled",
 ]);
-export const PAYMENT_METHODS = Object.freeze(["cash", "card"]);
-export const PAYMENT_STATUSES = Object.freeze(["unpaid", "paid"]);
+const PAYMENT_METHODS = Object.freeze(["cash", "card"]);
+const PAYMENT_STATUSES = Object.freeze(["unpaid", "paid"]);
 
-export const USER_ROLES = Object.freeze(["user", "employee", "admin"]);
+const USER_ROLES = Object.freeze(["user", "employee", "admin"]);
+
+module.exports = {
+  CATEGORIES,
+  ORDER_STATUSES,
+  PAYMENT_METHODS,
+  PAYMENT_STATUSES,
+  USER_ROLES,
+};

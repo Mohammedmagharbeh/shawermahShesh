@@ -1,6 +1,6 @@
 const productsModel = require("../models/products");
 const categoryModel = require("../models/Category");
-const { default: cloudinary } = require("../config/cloudinary");
+const { cloudinary } = require("../config/cloudinary");
 
 // ✅ POST: Create Product
 exports.postEat = async (req, res) => {
