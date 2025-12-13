@@ -1,5 +1,5 @@
 const Slide = require("../models/Slide"); // تأكد من المسار
-const { default: cloudinary } = require("../config/cloudinary");
+const { cloudinary } = require("../config/cloudinary");
 
 const getSlides = async (req, res) => {
   try {
