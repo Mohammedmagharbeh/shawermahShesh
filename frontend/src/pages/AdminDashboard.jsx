@@ -199,7 +199,9 @@ function AdminDashboard() {
       Products: order.products
         .map(
           (item) =>
-            `${item.productId?.name[selectedLanguage] || "Unknown"} (Qty: ${item.quantity})`
+            `${item.productId?.name[selectedLanguage] || "Unknown"} (Qty: ${
+              item.quantity
+            })`
         )
         .join(", "),
     }));
@@ -515,7 +517,7 @@ function AdminDashboard() {
                                   {item.quantity || 0}
                                 </span>
                               </p>
-{item.isSpicy && <Badge>حار</Badge>}
+                              {item.isSpicy && <Badge>حار</Badge>}
                               {item.additions && item.additions.length > 0 && (
                                 <div className="flex gap-1">
                                   {t("additions")}:
@@ -679,7 +681,9 @@ function AdminDashboard() {
           <p style="display:flex; justify-content:space-between;"><strong>Subtotal:</strong> <span>${(
             order.totalPrice - (order.shippingAddress?.deliveryCost || 0)
           ).toFixed(2)} JOD</span></p>
-          <p style="display:flex; justify-content:space-between;"><strong>Delivery:</strong> <span>${order.shippingAddress?.deliveryCost || 0} JOD</span></p>
+          <p style="display:flex; justify-content:space-between;"><strong>Delivery:</strong> <span>${
+            order.shippingAddress?.deliveryCost || 0
+          } JOD</span></p>
           <p style="display:flex; justify-content:space-between; font-size:1.1em; font-weight:bold; margin-top:6px;"><strong>Total:</strong> <span>${order.totalPrice.toFixed(
             2
           )} JOD</span></p>
