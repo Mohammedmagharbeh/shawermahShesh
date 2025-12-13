@@ -23,8 +23,8 @@ import AdminSlides from "./pages/AdminSlides";
 import AdminProductPanel from "./pages/MenuManagement/AdminProductPanel";
 import Story from "./pages/story";
 import NotFound from "./componenet/NotFound";
-import AdminJobs from "./pages/AdminJobs";
-import JobsPage from "./pages/JobsPage";
+// import AdminJobs from "./pages/AdminJobs";
+// import JobsPage from "./pages/JobsPage";
 
 function App() {
   const { i18n } = useTranslation();
@@ -81,8 +81,8 @@ function App() {
         <Header />
         <main className="pt-14">
           <Routes>
- <Route path="/AdminJobs" element={<AdminJobs />} />
-        <Route path="/JobsPage" element={<JobsPage />} />
+ {/* <Route path="/AdminJobs" element={<AdminJobs />} />
+        <Route path="/JobsPage" element={<JobsPage />} /> */}
 
             <Route path="/" index element={<Home />} />
             <Route path="/login" element={<Login />} />
