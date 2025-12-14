@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const products = require("../models/products");
 const dotenv = require("dotenv");
 const Category = require("../models/Category");
-const NodeCache = require("node-cache");
 dotenv.config();
 
 exports.getuser = async (req, res) => {
@@ -36,28 +35,28 @@ exports.userLogin = async (req, res) => {
   }
 };
 
-const productsCache = new NodeCache({ stdTTL: 60 });
+// const productsCache = new NodeCache({ stdTTL: 60 });
 
 exports.getAllProducts = async (req, res) => {
   try {
     const { category, isSpicy, hasTypeChoices, hasProteinChoices } = req.query;
 
     // Build a unique key based on the query parameters
-    const cacheKey = JSON.stringify({
-      category,
-      isSpicy,
-      hasTypeChoices,
-      hasProteinChoices,
-    });
+    // const cacheKey = JSON.stringify({
+    //   category,
+    //   isSpicy,
+    //   hasTypeChoices,
+    //   hasProteinChoices,
+    // });
 
     // Check if cached response exists
-    const cachedData = productsCache.get(cacheKey);
-    if (cachedData) {
-      return res.status(200).json({
-        message: "Products fetched successfully (from cache)",
-        data: cachedData,
-      });
-    }
+    // const cachedData = productsCache.get(cacheKey);
+    // if (cachedData) {
+    //   return res.status(200).json({
+    //     message: "Products fetched successfully (from cache)",
+    //     data: cachedData,
+    //   });
+    // }
 
     const query = {};
 
@@ -86,7 +85,7 @@ exports.getAllProducts = async (req, res) => {
       .lean();
 
     // Store in cache
-    productsCache.set(cacheKey, productsList);
+    // productsCache.set(cacheKey, productsList);
 
     res.status(200).json({
       message: "Products fetched successfully",

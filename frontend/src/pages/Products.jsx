@@ -336,7 +336,7 @@ export default function Products() {
                                       <Switch
                                         id={`inStock-${product._id}`}
                                         className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
-                                        checked={product.inStock}
+                                        checked={!isOutOfStock}
                                         onCheckedChange={(v) =>
                                           handleInStock(v, product)
                                         }

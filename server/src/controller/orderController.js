@@ -360,44 +360,44 @@ exports.deleteOrder = async (req, res) => {
 };
 
 // UPDATE order
-// exports.updateOrder = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const body = req.body;
-//     const allowedUpdates = [
-//       "status",
-//       "shippingAddress",
-//       "payment",
-//       "products",
-//       "totalPrice",
-//     ];
-//     const updates = {};
+exports.updateOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const body = req.body;
+    const allowedUpdates = [
+      "status",
+      "shippingAddress",
+      "payment",
+      "products",
+      "totalPrice",
+    ];
+    const updates = {};
 
-//     allowedUpdates.forEach(
-//       (f) => body[f] !== undefined && (updates[f] = body[f])
-//     );
-//     if (!Object.keys(updates).length)
-//       return res.status(400).json({ message: "No valid fields to update" });
+    allowedUpdates.forEach(
+      (f) => body[f] !== undefined && (updates[f] = body[f])
+    );
+    if (!Object.keys(updates).length)
+      return res.status(400).json({ message: "No valid fields to update" });
 
-//     const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
-//       new: true,
-//     })
-//       .populate("products.productId")
-//       .populate("userId")
-//       .populate("shippingAddress");
+    const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
+      new: true,
+    })
+      .populate("products.productId")
+      .populate("userId")
+      .populate("shippingAddress");
 
-//     if (!updatedOrder)
-//       return res.status(404).json({ message: "Order not found" });
+    if (!updatedOrder)
+      return res.status(404).json({ message: "Order not found" });
 
-//     // Send OTP if status confirmed
-//     if (updates.status === "Confirmed") {
-//       const { sendOrderConfirm } = require("../utils/otp");
-//       await sendOrderConfirm(updatedOrder.userId.phone);
-//     }
+    // Send OTP if status confirmed
+    if (updates.status === "Confirmed") {
+      const { sendOrderConfirm } = require("../utils/otp");
+      await sendOrderConfirm(updatedOrder.userId.phone);
+    }
 
-//     res.status(200).json(updatedOrder);
-//   } catch (err) {
-//     console.error("updateOrder error:", err);
-//     res.status(500).json({ message: err.message });
-//   }
-// };
+    res.status(200).json(updatedOrder);
+  } catch (err) {
+    console.error("updateOrder error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};

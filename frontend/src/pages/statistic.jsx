@@ -410,9 +410,9 @@ export default function StatisticsPage() {
                                 )}
                                 <p className="text-xs text-muted-foreground mt-1">
                                   تاريخ التسجيل:{" "}
-                                  {new Date(user.createdAt).toLocaleDateString(
-                                    "ar-SA"
-                                  )}
+                                  {new Date(
+                                    user.createdAt
+                                  ).toLocaleDateString()}
                                 </p>
                               </div>
                             </div>
