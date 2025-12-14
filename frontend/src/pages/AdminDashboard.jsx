@@ -663,35 +663,78 @@ function AdminDashboard() {
                       productsHtml += "</tbody></table>";
 
                       // Build the main invoice HTML
-                      orderDiv.innerHTML = `
-      <div style="font-family: 'Tahoma', sans-serif; width:100%; max-width:400px; margin:auto; padding:16px; border:1px solid #ccc; box-sizing:border-box;">
-        <h2 style="text-align:center; margin-bottom:12px;">فاتورة الطلب</h2>
-        <div style="margin-bottom:10px;">
-          <p><strong>رقم العميل:</strong> ${customerPhone}</p>
-          <p><strong>نوع الطلب:</strong> ${deliveryType}</p>
-          ${
-            deliveryType === "Delivery"
-              ? `<p><strong>المنطقة:</strong> ${area}</p>`
-              : ""
-          }
-        </div>
-        ${productsHtml}
-        <hr style="margin:12px 0;"/>
-        <div style="font-size:15px;">
-          <p style="display:flex; justify-content:space-between;"><strong>Subtotal:</strong> <span>${(
-            order.totalPrice - (order.shippingAddress?.deliveryCost || 0)
-          ).toFixed(2)} JOD</span></p>
-          <p style="display:flex; justify-content:space-between;"><strong>Delivery:</strong> <span>${
-            order.shippingAddress?.deliveryCost || 0
-          } JOD</span></p>
-          <p style="display:flex; justify-content:space-between; font-size:1.1em; font-weight:bold; margin-top:6px;"><strong>Total:</strong> <span>${order.totalPrice.toFixed(
-            2
-          )} JOD</span></p>
-        </div>
-        <hr style="margin:12px 0;"/>
-        <p style="text-align:center; margin-top:10px; font-weight:bold;">شاورما شيش</p>
-      </div>
-    `;
+                    orderDiv.innerHTML = `
+<div style="font-family: 'Tahoma', sans-serif; width:100%; max-width:480px; margin:auto; padding:16px; border:1px solid #ccc; box-sizing:border-box; background:#fff;">
+  <h2 style="text-align:center; margin-bottom:8px; font-size:20px; color:#333;">فاتورة الطلب</h2>
+  <p style="text-align:center; font-size:14px; color:#555; margin-bottom:12px;"><strong>رقم الطلب:</strong> #${order.sequenceNumber}</p>
+
+  <div style="margin-bottom:12px; font-size:14px; color:#333;">
+    <p><strong>رقم العميل:</strong> ${customerPhone}</p>
+    <p><strong>نوع الطلب:</strong> ${deliveryType}</p>
+    ${deliveryType === "Delivery" ? `<p><strong>المنطقة:</strong> ${area}</p>` : ""}
+  </div>
+
+  <table style="width:100%; border-collapse: collapse; font-size:14px;">
+    <thead>
+      <tr style="background:#f0f0f0;">
+        <th style="border-bottom:1px solid #000; text-align:left; padding:8px;">المنتج</th>
+        <th style="border-bottom:1px solid #000; text-align:center; padding:8px;">الكمية</th>
+        <th style="border-bottom:1px solid #000; text-align:right; padding:8px;">السعر (JOD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${order.products
+        .map((item) => {
+          const additions =
+            Array.isArray(item.additions) && item.additions.length > 0
+              ? `<div style="font-size:12px; color:#555;">+ ${item.additions
+                  .map((a) => a.name[selectedLanguage])
+                  .join(", ")}</div>`
+              : "";
+          const notes =
+            item.notes && item.notes.trim() !== ""
+              ? `<div style="font-size:12px; color:#777; font-style:italic;">ملاحظات: ${item.notes}</div>`
+              : "";
+          const typeChoice = item.selectedType
+            ? `<div style="font-size:12px; color:#555;">نوع: ${item.selectedType}</div>`
+            : "";
+          const proteinChoice = item.selectedProtein
+            ? `<div style="font-size:12px; color:#555;">بروتين: ${item.selectedProtein}</div>`
+            : "";
+          const spicy = item.isSpicy
+            ? `<div style="font-size:12px; color:#f00; font-weight:bold;">حار</div>`
+            : "";
+
+          return `
+          <tr>
+            <td style="padding:6px; vertical-align:top;">
+              ${item.productId?.name[selectedLanguage] || "Unknown"}
+              ${additions}
+              ${typeChoice}
+              ${proteinChoice}
+              ${spicy}
+              ${notes}
+            </td>
+            <td style="padding:6px; text-align:center; vertical-align:top;">${item.quantity}</td>
+            <td style="padding:6px; text-align:right; vertical-align:top;">${(item.priceAtPurchase * item.quantity).toFixed(2)}</td>
+          </tr>
+          `;
+        })
+        .join("")}
+    </tbody>
+  </table>
+
+  <div style="margin-top:12px; font-size:14px; color:#333;">
+    <p style="display:flex; justify-content:space-between;"><strong>Subtotal:</strong> <span>${(order.totalPrice - (order.shippingAddress?.deliveryCost || 0)).toFixed(2)} JOD</span></p>
+    <p style="display:flex; justify-content:space-between;"><strong>Delivery:</strong> <span>${order.shippingAddress?.deliveryCost || 0} JOD</span></p>
+    <p style="display:flex; justify-content:space-between; font-size:16px; font-weight:bold; margin-top:6px;"><strong>Total:</strong> <span>${order.totalPrice.toFixed(2)} JOD</span></p>
+  </div>
+
+  <hr style="margin:12px 0; border-color:#ccc;"/>
+  <p style="text-align:center; margin-top:10px; font-weight:bold; font-size:14px; color:#333;">شكراً لطلبكم من شاورما شيش 🍴</p>
+</div>
+`;
+
 
                       // Print logic
                       const printWindow = window.open(
