@@ -1,3 +1,6 @@
+
+// "use client";
+
 // import { Badge } from "@/components/ui/badge";
 // import { Button } from "@/components/ui/button";
 // import {
@@ -24,6 +27,7 @@
 // import NavLink from "./common/NavLink";
 // import { ADMIN_LINKS, PUBLIC_LINKS } from "@/constants";
 // import logo from "../assets/Logo Sheesh 2025.png";
+// import shosho from "../assets/shosho.png";
 
 // function Header() {
 //   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -52,27 +56,22 @@
 //             className="flex-shrink-0 group min-w-0"
 //           >
 //             <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
-//               <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full  ">
+//               {/* الشعار الأول (أكبر بشكل ملحوظ + Responsive ممتاز) */}
+//               <div className="w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 md:w-28 md:h-20 rounded-full">
+//                 <img
+//                   src={logo || "/placeholder.svg"}
+//                   alt="شاورما شيش"
+//                   className="w-full h-full object-contain"
+//                 />
+//               </div>
 
-//               {/* <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full  bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center flex-shrink-0 ring-2 ring-yellow-400 ring-offset-2 transition-transform group-hover:scale-105 duration-300"> */}
-//   <img
-//     src={logo}
-//     alt="شاورما شيش"
-//     className="w-full h-full object-contain"
-//   />
-// </div>
-
-//               <div className="min-w-0 flex-1">
-//                 <h1 className="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-700 via-red-600 to-red-700 bg-clip-text text-transparent drop-shadow-sm truncate">
-//                   {t("resturant_name")}
-//                 </h1>
-//                 <h2 className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic truncate">
-//                   {t("resturant_tagline")}
-//                 </h2>
-//                 {/* <h2 className="ml-4 text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-yellow-700 font-medium italic truncate">
-//   {t("resturant_tagline")}
-// </h2> */}
-
+//               {/* الشعار الثاني */}
+//               <div className="flex-shrink-0 min-w-0">
+//                 <img
+//                   src={shosho}
+//                   alt="YALLA SHEESH Logo"
+//                   className="h-10 xs2:w-40 xs:h-12 xs:w-40 sm:h-14 sm:w-44 md:h-16 md:w-50 lg:h-20 lg:w-70 w-auto object-contain"
+//                 />
 //               </div>
 //             </div>
 //           </Link>
@@ -224,9 +223,7 @@
 //               </div>
 
 //               <div
-//                 className={`pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${
-//                   !isAuthenticated && "border-yellow-300"
-//                 }`}
+//                 className={`pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!isAuthenticated && "border-yellow-300"}`}
 //               >
 //                 {isAuthenticated &&
 //                   ADMIN_LINKS.map(
@@ -356,7 +353,13 @@ function Header() {
               PUBLIC_LINKS.map((key) => (
                 <NavLink
                   key={key.label}
-                  to={key.label === "our_story" ? "/story" : `/#${key.label}`}
+                  to={
+                    key.label === "our_story" 
+                      ? "/story" 
+                      : key.label === "jobs"
+                      ? "/JobsPage"
+                      : `/#${key.label}`
+                  }
                   label={t(key.label)}
                   onClick={handleLinkClick}
                   className="text-sm xl:text-base text-gray-700 hover:text-red-700 font-semibold transition-all duration-300 whitespace-nowrap relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-red-600 after:to-yellow-500 hover:after:w-full after:transition-all after:duration-300"
@@ -487,7 +490,13 @@ function Header() {
                   <NavLink
                     className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
                     key={key.label}
-                    to={key.label === "our_story" ? "/story" : `/#${key.label}`}
+                    to={
+                      key.label === "our_story" 
+                        ? "/story" 
+                        : key.label === "jobs"
+                        ? "/JobsPage"
+                        : `/#${key.label}`
+                    }
                     label={t(key.label)}
                     onClick={handleLinkClick}
                   />

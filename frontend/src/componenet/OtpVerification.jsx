@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 
 function OtpVerification() {
   const [otp, setOtp] = useState("");
-  const [timer, setTimer] = useState(20);
+  const [timer, setTimer] = useState(60);
   const navigate = useNavigate();
   const location = useLocation();
   const phone = location.state?.phone;
@@ -69,7 +69,7 @@ function OtpVerification() {
       });
       if (res.data.msg === "OTP sent to your phone") {
         toast.success(t("otp_sent"));
-        setTimer(20);
+        setTimer(60);
       }
     } catch (error) {
       console.error(error);

@@ -365,5 +365,6 @@
   "is_in_stock": "Product is in Stock",
   "has_spicy": "Has Spicy",
   "session_expired": "Session expired, please log in again.",
-  "enable_reorder": "Enable Reorder Mode"
+  "enable_reorder": "Enable Reorder Mode",
+  "jobs": "Jobs"
 }

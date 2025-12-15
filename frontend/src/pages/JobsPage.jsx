@@ -92,11 +92,7 @@ export default function JobsPage() {
       <div className="bg-[#DA0103] border-b-4 border-[#FFC400] shadow-lg">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 text-center">
           <div className="mb-4">
-            <img
-              src="/images/whatsapp-20image-202025-11-22-20at-201.jpeg"
-              alt="يلا شيش"
-              className="h-16 sm:h-20 mx-auto"
-            />
+            <img className="h-16 sm:h-20 mx-auto" />
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#FFC400]">
             الوظائف المتاحة
