@@ -310,5 +310,5 @@ export default function JobsPage() {
         )}
       </div>
     </div>
-  );
+  );  
 }
