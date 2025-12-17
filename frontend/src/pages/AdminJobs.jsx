@@ -1,46 +1,44 @@
+"use client";
 
-
-"use client"
-
-import { useState, useEffect } from "react"
-import axios from "axios"
-import { toast, Toaster } from "react-hot-toast"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { toast, Toaster } from "react-hot-toast";
 
 export default function AdminJobs() {
-  const [jobs, setJobs] = useState([])
-  const [form, setForm] = useState({ title: "", type: "" })
-  const [selectedJob, setSelectedJob] = useState(null)
-  const [applications, setApplications] = useState([])
+  const [jobs, setJobs] = useState([]);
+  const [form, setForm] = useState({ title: "", type: "" });
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [applications, setApplications] = useState([]);
 
   useEffect(() => {
-    fetchJobs()
-  }, [])
+    fetchJobs();
+  }, []);
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/jobs")
-      setJobs(res.data)
+      const res = await axios.get("http://localhost:5000/jobs");
+      setJobs(res.data);
     } catch (err) {
-      toast.error("فشل تحميل الوظائف")
-      console.log(err)
+      toast.error("فشل تحميل الوظائف");
+      console.log(err);
     }
-  }
+  };
 
   const addJob = async () => {
     if (!form.title || !form.type) {
-      toast.error("يرجى تعبئة جميع الحقول")
-      return
+      toast.error("يرجى تعبئة جميع الحقول");
+      return;
     }
     try {
-      await axios.post("http://localhost:5000/jobs", form)
-      toast.success("تم إضافة الوظيفة بنجاح")
-      setForm({ title: "", type: "" })
-      fetchJobs()
+      await axios.post("http://localhost:5000/jobs", form);
+      toast.success("تم إضافة الوظيفة بنجاح");
+      setForm({ title: "", type: "" });
+      fetchJobs();
     } catch (err) {
-      toast.error("حدث خطأ أثناء إضافة الوظيفة")
-      console.log(err)
+      toast.error("حدث خطأ أثناء إضافة الوظيفة");
+      console.log(err);
     }
-  }
+  };
 
   const confirmDeleteJob = (jobId) => {
     toast((t) => (
@@ -49,8 +47,8 @@ export default function AdminJobs() {
         <div className="mt-3 flex gap-2 flex-row-reverse">
           <button
             onClick={async () => {
-              await deleteJob(jobId)
-              toast.dismiss(t.id)
+              await deleteJob(jobId);
+              toast.dismiss(t.id);
             }}
             className="px-3 py-1 bg-[#DA0103] text-white rounded hover:bg-red-700 transition-colors text-sm font-bold"
           >
@@ -64,34 +62,39 @@ export default function AdminJobs() {
           </button>
         </div>
       </span>
-    ))
-  }
+    ));
+  };
 
   const deleteJob = async (jobId) => {
     try {
-      await axios.delete(`http://localhost:5000/jobs/${jobId}`)
-      toast.success("تم حذف الوظيفة بنجاح")
-      fetchJobs()
-      if (selectedJob === jobId) setSelectedJob(null)
+      await axios.delete(`http://localhost:5000/jobs/${jobId}`);
+      toast.success("تم حذف الوظيفة بنجاح");
+      fetchJobs();
+      if (selectedJob === jobId) setSelectedJob(null);
     } catch (err) {
-      toast.error("حدث خطأ أثناء حذف الوظيفة")
-      console.log(err)
+      toast.error("حدث خطأ أثناء حذف الوظيفة");
+      console.log(err);
     }
-  }
+  };
 
   const viewApplications = async (jobId) => {
-    setSelectedJob(jobId)
+    setSelectedJob(jobId);
     try {
-      const res = await axios.get(`http://localhost:5000/jobs/applications/${jobId}`)
-      setApplications(res.data)
+      const res = await axios.get(
+        `http://localhost:5000/jobs/applications/${jobId}`
+      );
+      setApplications(res.data);
     } catch (err) {
-      toast.error("فشل تحميل المتقدمين")
-      console.log(err)
+      toast.error("فشل تحميل المتقدمين");
+      console.log(err);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8 font-sans" dir="rtl">
+    <div
+      className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8 font-sans"
+      dir="rtl"
+    >
       {/* Toast */}
       <Toaster
         position="center-top"
@@ -107,7 +110,9 @@ export default function AdminJobs() {
 
       {/* Header */}
       <div className="text-center mb-8 pb-6 border-b-4 border-[#DA0103]">
-        <h1 className="text-3xl md:text-4xl font-bold text-[#DA0103] m-0">لوحة إدارة الوظائف</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-[#DA0103] m-0">
+          لوحة إدارة الوظائف
+        </h1>
       </div>
 
       {/* Add Job Section */}
@@ -123,7 +128,9 @@ export default function AdminJobs() {
                 {field === "title" ? "اسم الوظيفة" : "وصف الوظيفة"}
               </label>
               <input
-                placeholder={field === "title" ? "أدخل اسم الوظيفة" : "أدخل وصف الوظيفة"}
+                placeholder={
+                  field === "title" ? "أدخل اسم الوظيفة" : "أدخل وصف الوظيفة"
+                }
                 value={form[field]}
                 onChange={(e) => setForm({ ...form, [field]: e.target.value })}
                 className="w-full px-4 py-3 md:py-4 border-2 border-[#FFC400] rounded-lg text-base md:text-lg focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all bg-white"
@@ -148,7 +155,9 @@ export default function AdminJobs() {
 
         {jobs.length === 0 ? (
           <div className="bg-white border-2 border-dashed border-[#FFC400] p-8 md:p-12 text-center rounded-lg">
-            <p className="text-gray-600 text-lg md:text-xl">لا توجد وظائف حالياً</p>
+            <p className="text-gray-600 text-lg md:text-xl">
+              لا توجد وظائف حالياً
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:gap-6">
@@ -157,7 +166,9 @@ export default function AdminJobs() {
                 key={job._id}
                 className="bg-white border-2 border-[#FFC400] border-l-8 border-l-[#DA0103] p-4 md:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
               >
-                <h3 className="text-[#DA0103] font-bold text-lg md:text-xl mb-2">{job.title}</h3>
+                <h3 className="text-[#DA0103] font-bold text-lg md:text-xl mb-2">
+                  {job.title}
+                </h3>
                 <p className="text-gray-700 mb-3">{job.type}</p>
 
                 <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
@@ -190,7 +201,9 @@ export default function AdminJobs() {
 
           {applications.length === 0 ? (
             <div className="bg-white border-2 border-dashed border-[#FFC400] p-8 md:p-12 text-center rounded-lg">
-              <p className="text-gray-600 text-lg md:text-xl">لا يوجد متقدمين بعد</p>
+              <p className="text-gray-600 text-lg md:text-xl">
+                لا يوجد متقدمين بعد
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:gap-6">
@@ -201,19 +214,23 @@ export default function AdminJobs() {
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4">
                     <p className="text-sm md:text-base">
-                      <b className="text-[#DA0103]">الاسم:</b> {app.applicantName}
+                      <b className="text-[#DA0103]">الاسم:</b>{" "}
+                      {app.applicantName}
                     </p>
                     <p className="text-sm md:text-base">
-                      <b className="text-[#DA0103]">الإيميل:</b> {app.applicantEmail}
+                      <b className="text-[#DA0103]">الإيميل:</b>{" "}
+                      {app.applicantEmail}
                     </p>
                     <p className="text-sm md:text-base">
                       <b className="text-[#DA0103]">رقم الهاتف:</b> {app.phone}
                     </p>
                     <p className="text-sm md:text-base">
-                      <b className="text-[#DA0103]">الجنسية:</b> {app.nationality}
+                      <b className="text-[#DA0103]">الجنسية:</b>{" "}
+                      {app.nationality}
                     </p>
                     <p className="text-sm md:text-base">
-                      <b className="text-[#DA0103]">المؤهل الدراسي:</b> {app.education}
+                      <b className="text-[#DA0103]">المؤهل الدراسي:</b>{" "}
+                      {app.education}
                     </p>
                     <p className="text-sm md:text-base">
                       <b className="text-[#DA0103]">العمر:</b> {app.age}
@@ -222,14 +239,15 @@ export default function AdminJobs() {
                       <b className="text-[#DA0103]">تاريخ البدء:</b>{" "}
                       {new Date(app.startDate).toLocaleDateString("ar-EG")}
                     </p>
-                    
                   </div>
 
                   <p className="text-sm md:text-base mb-3">
                     <b className="text-[#DA0103]">سبق العمل بمكان آخر:</b>{" "}
                     <span
                       className={`ms-2 px-3 py-1 rounded-full text-sm font-bold text-white inline-block ${
-                        app.workedBefore === "yes" ? "bg-[#DA0103]" : "bg-gray-600"
+                        app.workedBefore === "yes"
+                          ? "bg-[#DA0103]"
+                          : "bg-gray-600"
                       }`}
                     >
                       {app.workedBefore === "yes" ? "نعم" : "لا"}
@@ -239,20 +257,24 @@ export default function AdminJobs() {
                   {app.workedBefore === "yes" && (
                     <div className="bg-red-50 p-3 md:p-4 rounded-lg mb-4">
                       <p className="text-sm md:text-base mb-2">
-                        <b className="text-[#DA0103]">العمل السابق:</b> {app.previousJobs}
+                        <b className="text-[#DA0103]">العمل السابق:</b>{" "}
+                        {app.previousJobs}
                       </p>
                       <p className="text-sm md:text-base">
-                        <b className="text-[#DA0103]">المسمى الوظيفي السابق:</b> {app.previousTitle}
+                        <b className="text-[#DA0103]">المسمى الوظيفي السابق:</b>{" "}
+                        {app.previousTitle}
                       </p>
                     </div>
                   )}
 
                   <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                     <div className="flex-1">
-                      <b className="text-[#DA0103] block mb-2">السيرة الذاتية:</b>
+                      <b className="text-[#DA0103] block mb-2">
+                        السيرة الذاتية:
+                      </b>
                       {app.resume ? (
                         <a
-                          href={`http://localhost:5000/${app.resume}`}
+                          href={app.resume}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-block bg-[#DA0103] text-white px-3 md:px-4 py-2 rounded-lg text-sm md:text-base font-bold hover:bg-red-700 transition-colors"
@@ -267,7 +289,7 @@ export default function AdminJobs() {
                       <b className="text-[#DA0103] block mb-2">شهادة الخبرة:</b>
                       {app.experienceCertificate ? (
                         <a
-                          href={`http://localhost:5000/${app.experienceCertificate}`}
+                          href={app.experienceCertificate}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-block bg-[#FFC400] text-gray-900 px-3 md:px-4 py-2 rounded-lg text-sm md:text-base font-bold hover:bg-yellow-300 transition-colors"
@@ -286,5 +308,5 @@ export default function AdminJobs() {
         </div>
       )}
     </div>
-  )
+  );
 }

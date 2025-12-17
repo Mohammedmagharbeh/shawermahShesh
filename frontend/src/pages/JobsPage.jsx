@@ -209,14 +209,19 @@ export default function JobsPage() {
               />
 
               {/* Start Date - Full Width */}
-              <input
-                type="date"
-                value={form.startDate}
-                onChange={(e) =>
-                  setForm({ ...form, startDate: e.target.value })
-                }
-                className="col-span-1 sm:col-span-2 px-4 py-3 border-2 border-[#FFC400] rounded-lgbg-white-50 focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
-              />
+              <div className="flex items-center gap-2">
+                <label htmlFor="start-date">تاريخ الالتحاق بالعمل</label>
+                <input
+                  type="date"
+                  name="start-date"
+                  id="start-date"
+                  value={form.startDate}
+                  onChange={(e) =>
+                    setForm({ ...form, startDate: e.target.value })
+                  }
+                  className="col-span-1 sm:col-span-2 px-4 py-3 border-2 border-[#FFC400] rounded-lgbg-white-50 focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
+                />
+              </div>
             </div>
 
             {/* File Uploads */}

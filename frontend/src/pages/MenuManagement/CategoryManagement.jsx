@@ -52,15 +52,15 @@ function CategoryManagement() {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="w-full">
+      <CardHeader className="p-4 sm:p-6">
         <CardTitle>{t("manage_additions")}</CardTitle>
         <CardDescription>{t("add_addition_desc")}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6">
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col sm:flex-row gap-3 mb-4"
+          className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4"
         >
           <Input
             placeholder="اسم الفئة عربي"

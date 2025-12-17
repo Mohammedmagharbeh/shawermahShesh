@@ -1,5 +1,6 @@
 import {
   ChartNoAxesCombined,
+  FileUser,
   Image,
   LayoutDashboard,
   Package,
@@ -55,12 +56,18 @@ export const ADMIN_LINKS = [
     icon: Image,
     roles: ["admin"],
   },
+  {
+    to: "/adminjobs",
+    label: "jobs",
+    icon: FileUser,
+    roles: ["admin"],
+  },
 ];
 
 export const PUBLIC_LINKS = [
   { label: "home" },
   { label: "our_story" },
-  { label: "jobs" },       
+  { label: "jobs" },
   { label: "contact_us" },
 ];
 
