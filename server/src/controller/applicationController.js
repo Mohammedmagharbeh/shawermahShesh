@@ -5,27 +5,55 @@ exports.applyJob = async (req, res) => {
   try {
     const body = req.body;
 
-    const resume = req.files?.resume ? req.files.resume[0].path : "";
-    const experienceCertificate = req.files?.experienceCertificate
-      ? req.files.experienceCertificate[0].path
-      : "";
+    const resumeFile = req.files?.resume ? req.files.resume[0] : null;
+    const experienceFile = req.files?.experienceCertificate
+      ? req.files.experienceCertificate[0]
+      : null;
 
-    const uploadedResume = await cloudinary.uploader.upload(resume, {
-      folder: "documents",
-      resource_type: "raw", // REQUIRED for non-image/video files
-    });
+    let uploadedResumeUrl = "";
+    let uploadedExperienceCertificateUrl = "";
 
-    const uploadedExperienceCertificate = await cloudinary.uploader.upload(
-      experienceCertificate,
-      {
-        folder: "documents",
-        resource_type: "raw",
-      }
-    );
+    // helper لرفع ملف من buffer إلى Cloudinary بدون تخزينه في مجلد uploads
+    const uploadBufferToCloudinary = (buffer, filename) => {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "documents",
+            public_id: filename,
+            resource_type: "raw",
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+
+        uploadStream.end(buffer);
+      });
+    };
+
+    // ارفع السيرة الذاتية إذا كانت موجودة
+    if (resumeFile) {
+      const uploadedResume = await uploadBufferToCloudinary(
+        resumeFile.buffer,
+        resumeFile.originalname
+      );
+      uploadedResumeUrl = uploadedResume.secure_url;
+    }
+
+    // ارفع شهادة الخبرة إذا كانت موجودة
+    if (experienceFile) {
+      const uploadedExperienceCertificate = await uploadBufferToCloudinary(
+        experienceFile.buffer,
+        experienceFile.originalname
+      );
+      uploadedExperienceCertificateUrl =
+        uploadedExperienceCertificate.secure_url;
+    }
 
     const application = new Application({
-      resume: uploadedResume.secure_url,
-      experienceCertificate: uploadedExperienceCertificate.secure_url,
+      resume: uploadedResumeUrl,
+      experienceCertificate: uploadedExperienceCertificateUrl,
       ...body,
     });
 
