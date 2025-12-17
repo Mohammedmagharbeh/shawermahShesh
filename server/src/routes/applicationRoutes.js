@@ -3,17 +3,6 @@ const router = express.Router();
 const applicationController = require("../controller/applicationController");
 const multer = require("multer");
 
-// إعداد التخزين للملفات
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + file.originalname);
-  },
-});
-
 // فلترة الملفات PDF و Word
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
@@ -28,8 +17,13 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ storage, fileFilter });
+// تخزين الملفات في الذاكرة (Buffer) بدون حفظها على القرص
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter,
+});
 
+// نتوقع حقول ملفات بأسماء resume و experienceCertificate (اختيارية)
 router.post(
   "/",
   upload.fields([

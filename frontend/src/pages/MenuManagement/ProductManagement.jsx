@@ -181,7 +181,7 @@ function ProductManagement({
             </div>
 
             {/* Switches */}
-            <div className="flex gap-4 items-center mt-2">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 items-start sm:items-center mt-2">
               <div className="flex items-center gap-2">
                 <Switch
                   id="hasTypeChoices"
@@ -264,7 +264,7 @@ function ProductManagement({
               {formData.hasTypeChoices && !formData.hasProteinChoices && (
                 <div className="space-y-2 border p-3 rounded-md">
                   <p className="font-semibold text-sm">{t("type_prices")}</p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <div className="flex-1">
                       <Label>{t("sandwich_price")}</Label>
                       <Input
@@ -293,7 +293,7 @@ function ProductManagement({
               {!formData.hasTypeChoices && formData.hasProteinChoices && (
                 <div className="space-y-2 border p-3 rounded-md">
                   <p className="font-semibold text-sm">{t("protein_prices")}</p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <div className="flex-1">
                       <Label>{t("chicken_price")}</Label>
                       <Input
@@ -325,8 +325,8 @@ function ProductManagement({
 
             {/* Additions */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex gap-2">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-2">
+                <div className="flex gap-2 items-center">
                   <Label className="text-sm font-semibold">Additions</Label>
                   <button
                     type="button"
@@ -336,7 +336,7 @@ function ProductManagement({
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-2">
                   <Label className="inline-flex gap-2 items-center">
                     <Input
                       type="radio"
