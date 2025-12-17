@@ -60,7 +60,7 @@ app.use("/api/categories", categoryRoutes);
 
 // app.use("/uploads", express.static("uploads"));
 
-app.use("/jobs", jobRoutes);
-app.use("/apply", applicationRoutes);
+app.use("/api/jobs", jobRoutes);
+app.use("/api/apply", applicationRoutes);
 
 module.exports = server;

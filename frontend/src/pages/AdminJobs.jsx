@@ -16,7 +16,7 @@ export default function AdminJobs() {
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/jobs");
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/jobs`);
       setJobs(res.data);
     } catch (err) {
       toast.error("فشل تحميل الوظائف");
@@ -30,7 +30,7 @@ export default function AdminJobs() {
       return;
     }
     try {
-      await axios.post("http://localhost:5000/jobs", form);
+      await axios.post(`${import.meta.env.VITE_BASE_URL}/jobs`, form);
       toast.success("تم إضافة الوظيفة بنجاح");
       setForm({ title: "", type: "" });
       fetchJobs();
@@ -67,7 +67,7 @@ export default function AdminJobs() {
 
   const deleteJob = async (jobId) => {
     try {
-      await axios.delete(`http://localhost:5000/jobs/${jobId}`);
+      await axios.delete(`${import.meta.env.VITE_BASE_URL}/jobs/${jobId}`);
       toast.success("تم حذف الوظيفة بنجاح");
       fetchJobs();
       if (selectedJob === jobId) setSelectedJob(null);
@@ -81,7 +81,7 @@ export default function AdminJobs() {
     setSelectedJob(jobId);
     try {
       const res = await axios.get(
-        `http://localhost:5000/jobs/applications/${jobId}`
+        `${import.meta.env.VITE_BASE_URL}/jobs/applications/${jobId}`
       );
       setApplications(res.data);
     } catch (err) {
