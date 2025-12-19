@@ -2,8 +2,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 export default function JobsPage() {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
+
   const [jobs, setJobs] = useState([]);
   const [form, setForm] = useState({
     applicantName: "",
@@ -15,8 +19,7 @@ export default function JobsPage() {
     startDate: "",
     resume: null,
     experienceCertificate: null,
-    photo: null, // ✅ أضفنا الصورة الشخصية
-
+    photo: null,
     workedBefore: "no",
     previousJobs: "",
     previousTitle: "",
@@ -32,7 +35,7 @@ export default function JobsPage() {
       const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/jobs`);
       setJobs(res.data);
     } catch (err) {
-      toast.error("فشل تحميل الوظائف");
+      toast.error(t("failed_load_jobs"));
       console.log(err);
     }
   };
@@ -41,7 +44,9 @@ export default function JobsPage() {
     setForm({ ...form, [field]: e.target.files[0] });
   };
 
-  const applyJob = async () => {
+  const validateForm = () => {
+    const phoneRegex = /^\d{10}$/;
+
     if (
       !form.jobId ||
       !form.applicantName ||
@@ -50,9 +55,20 @@ export default function JobsPage() {
       !form.nationality ||
       !form.education
     ) {
-      toast.error("يرجى ملء الحقول الأساسية!");
-      return;
+      toast.error(t("fill_required_fields"));
+      return false;
     }
+
+    if (!phoneRegex.test(form.phone)) {
+      toast.error(t("invalid_phone_10_digits"));
+      return false;
+    }
+
+    return true;
+  };
+
+  const applyJob = async () => {
+    if (!validateForm()) return;
 
     const formData = new FormData();
     for (const key in form) {
@@ -63,7 +79,7 @@ export default function JobsPage() {
       await axios.post(`${import.meta.env.VITE_BASE_URL}/apply`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      toast.success("تم تقديم الطلب بنجاح!");
+      toast.success(t("application_success"));
       setForm({
         applicantName: "",
         applicantEmail: "",
@@ -81,25 +97,24 @@ export default function JobsPage() {
       });
     } catch (err) {
       console.log(err);
-      toast.error("حدث خطأ أثناء التقديم");
+      toast.error(t("application_error"));
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
+    <div className="min-h-screen bg-gray-50" dir={currentLang === "ar" ? "rtl" : "ltr"}>
       <Toaster position="center-top" reverseOrder={false} />
 
+      {/* Header */}
       <div className="bg-[#DA0103] border-b-4 border-[#FFC400] shadow-lg">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 text-center">
           <div className="mb-4">
             <img className="h-16 sm:h-20 mx-auto" />
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#FFC400]">
-            الوظائف المتاحة
+            {t("available_jobs")}
           </h1>
-          <p className="text-white mt-2 text-sm sm:text-base">
-            انضم لفريق يلا شيش
-          </p>
+          <p className="text-white mt-2 text-sm sm:text-base">{t("join_team")}</p>
         </div>
       </div>
 
@@ -108,14 +123,12 @@ export default function JobsPage() {
         {/* Jobs List Section */}
         <div className="mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#DA0103] pb-3 border-b-4 border-[#FFC400] mb-6">
-            الوظائف المتاحة
+            {t("available_jobs")}
           </h2>
 
           {jobs.length === 0 ? (
             <div className="bg-white border-2 border-dashed border-[#FFC400] p-6 sm:p-8 rounded-lg text-center">
-              <p className="text-gray-600 text-base sm:text-lg">
-                لا توجد وظائف متاحة حالياً
-              </p>
+              <p className="text-gray-600 text-base sm:text-lg">{t("no_jobs")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:gap-6">
@@ -127,20 +140,18 @@ export default function JobsPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex-1">
                       <h3 className="text-lg sm:text-xl font-bold text-[#DA0103] mb-2">
-                        {job.title}
+                        {currentLang === "ar" ? job.title.ar : job.title.en}
                       </h3>
                       <p className="text-gray-600 text-sm sm:text-base">
-                        <span className="font-semibold text-gray-900">
-                          النوع:
-                        </span>{" "}
-                        {job.type}
+                        <span className="font-semibold text-gray-900">{t("type")}:</span>{" "}
+                        {currentLang === "ar" ? job.type.ar : job.type.en}
                       </p>
                     </div>
                     <button
                       onClick={() => setForm({ ...form, jobId: job._id })}
                       className="w-full sm:w-auto bg-[#FFC400] text-[#DA0103] font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-[#DA0103] hover:text-[#FFC400] transition-all active:scale-95"
                     >
-                      أقدم على هذه الوظيفة
+                      {t("apply_job")}
                     </button>
                   </div>
                 </div>
@@ -153,64 +164,59 @@ export default function JobsPage() {
         {form.jobId && (
           <div className="bg-white border-2 border-[#DA0103] rounded-lg p-6 sm:p-8 shadow-lg">
             <h3 className="text-2xl sm:text-3xl font-bold text-[#DA0103] mt-0 pb-4 border-b-2 border-[#FFC400] mb-6">
-              تقديم على الوظيفة
+              {t("apply_for_job")}
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              {/* Name and Email */}
               <input
-                placeholder="اسمك"
+                placeholder={t("your_name")}
                 value={form.applicantName}
                 onChange={(e) =>
                   setForm({ ...form, applicantName: e.target.value })
                 }
-                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lg bg-white-50 focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
+                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lg bg-white focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
               />
               <input
-                placeholder="إيميلك"
+                placeholder={t("your_email")}
                 type="email"
                 value={form.applicantEmail}
                 onChange={(e) =>
                   setForm({ ...form, applicantEmail: e.target.value })
                 }
-                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lgbg-white-50 focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
+                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lg bg-white focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
               />
-
-              {/* Phone and Nationality */}
               <input
-                placeholder="رقم الهاتف"
+                placeholder={t("phone")}
+                type="number"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lgbg-white-50 focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
+                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lg bg-white focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
               />
               <input
-                placeholder="الجنسية"
+                placeholder={t("nationality")}
                 value={form.nationality}
                 onChange={(e) =>
                   setForm({ ...form, nationality: e.target.value })
                 }
-                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lgbg-white-50 focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
+                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lg bg-white focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
               />
-
-              {/* Education and Age */}
               <input
-                placeholder="المؤهل الدراسي"
+                placeholder={t("education")}
                 value={form.education}
                 onChange={(e) =>
                   setForm({ ...form, education: e.target.value })
                 }
-                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lgbg-white-50 focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
+                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lg bg-white focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
               />
               <input
-                placeholder="عمرك"
+                placeholder={t("age")}
                 value={form.age}
                 onChange={(e) => setForm({ ...form, age: e.target.value })}
-                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lgbg-white-50 focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
+                className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lg bg-white focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
               />
 
-              {/* Start Date - Full Width */}
-              <div className="flex items-center gap-2">
-                <label htmlFor="start-date">تاريخ الالتحاق بالعمل</label>
+              <div className="flex items-center gap-2 col-span-1 sm:col-span-2">
+                <label htmlFor="start-date">{t("start_date")}</label>
                 <input
                   type="date"
                   name="start-date"
@@ -219,7 +225,7 @@ export default function JobsPage() {
                   onChange={(e) =>
                     setForm({ ...form, startDate: e.target.value })
                   }
-                  className="col-span-1 sm:col-span-2 px-4 py-3 border-2 border-[#FFC400] rounded-lgbg-white-50 focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
+                  className="col-span-1 sm:col-span-2 px-4 py-3 border-2 border-[#FFC400] rounded-lg bg-white focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
                 />
               </div>
             </div>
@@ -228,7 +234,7 @@ export default function JobsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6">
               <div className="p-4 bg-red-50 border-l-4 border-[#DA0103] rounded-lg">
                 <label className="block text-[#DA0103] font-bold mb-3 text-sm sm:text-base">
-                  السيرة الذاتية (PDF أو Word):
+                  {t("resume")}
                 </label>
                 <input
                   type="file"
@@ -240,7 +246,7 @@ export default function JobsPage() {
 
               <div className="p-4 bg-red-50 border-l-4 border-[#DA0103] rounded-lg">
                 <label className="block text-[#DA0103] font-bold mb-3 text-sm sm:text-base">
-                  شهادة الخبرة (PDF أو Word):
+                  {t("experience_certificate")}
                 </label>
                 <input
                   type="file"
@@ -251,10 +257,10 @@ export default function JobsPage() {
               </div>
             </div>
 
-            {/* Work Experience Section */}
+            {/* Work Experience */}
             <div className="mt-6 p-4 sm:p-6 bg-red-50 border-2 border-dashed border-[#FFC400] rounded-lg">
               <label className="block text-[#DA0103] font-bold mb-4 text-sm sm:text-base">
-                هل سبق لك العمل في مكان قبل؟
+                {t("worked_before")}
               </label>
               <div className="flex gap-6 sm:gap-8 mb-4">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -266,7 +272,7 @@ export default function JobsPage() {
                     onChange={(e) => setForm({ ...form, workedBefore: "yes" })}
                     className="w-4 h-4 accent-[#DA0103]"
                   />
-                  <span className="text-gray-900 font-medium">نعم</span>
+                  <span className="text-gray-900 font-medium">{t("yes")}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -277,15 +283,14 @@ export default function JobsPage() {
                     onChange={(e) => setForm({ ...form, workedBefore: "no" })}
                     className="w-4 h-4 accent-[#DA0103]"
                   />
-                  <span className="text-gray-900 font-medium">لا</span>
+                  <span className="text-gray-900 font-medium">{t("no")}</span>
                 </label>
               </div>
 
-              {/* Previous Work Details */}
               {form.workedBefore === "yes" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <input
-                    placeholder="مكان العمل السابق"
+                    placeholder={t("previous_workplace")}
                     value={form.previousJobs}
                     onChange={(e) =>
                       setForm({ ...form, previousJobs: e.target.value })
@@ -293,7 +298,7 @@ export default function JobsPage() {
                     className="col-span-1 px-4 py-3 border-2 border-[#FFC400] rounded-lg bg-white focus:outline-none focus:border-[#DA0103] focus:ring-2 focus:ring-[#DA0103]/20 transition-all"
                   />
                   <input
-                    placeholder="المسمى الوظيفي السابق"
+                    placeholder={t("previous_title")}
                     value={form.previousTitle}
                     onChange={(e) =>
                       setForm({ ...form, previousTitle: e.target.value })
@@ -309,11 +314,11 @@ export default function JobsPage() {
               onClick={applyJob}
               className="w-full mt-8 bg-[#DA0103] text-[#FFC400] font-bold py-3 sm:py-4 px-6 rounded-lg text-base sm:text-lg hover:bg-[#FFC400] hover:text-[#DA0103] transition-all active:scale-95 shadow-lg hover:shadow-xl"
             >
-              تقديم الطلب
+              {t("submit_application")}
             </button>
           </div>
         )}
       </div>
     </div>
-  );  
+  );
 }

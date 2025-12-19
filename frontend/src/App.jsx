@@ -80,8 +80,7 @@ function App() {
         <Header />
         <main className="pt-14">
           <Routes>
-            <Route path="/AdminJobs" element={<AdminJobs />} />
-            <Route path="/JobsPage" element={<JobsPage />} />
+            <Route path="/JobsPage" element={ <JobsPage />  } />
 
             <Route path="/" index element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -105,6 +104,9 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/AdminJobs" element={<ProtectedRoute><AdminJobs /></ProtectedRoute>} />
+
+
             <Route path="/otp-verification" element={<OtpVerification />} />
             <Route
               path="/cart"
