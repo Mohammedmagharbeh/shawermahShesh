@@ -17,7 +17,7 @@ exports.createJob = async (req, res) => {
 
     const job = new Job({
       title: { ar: titleAr, en: titleEn },
-      type: { ar: typeAr, en: typeEn }
+      type: { ar: typeAr, en: typeEn },
     });
 
     await job.save();
