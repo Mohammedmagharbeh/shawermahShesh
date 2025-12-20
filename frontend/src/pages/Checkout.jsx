@@ -1,39 +1,3 @@
-// try {
-//   const res = await axios.post(
-//     `${import.meta.env.VITE_BASE_URL}/montypay/session`,
-//     {
-//       amount: Number.parseFloat(totalWithDelivery.toFixed(2)),
-//       customerName: user?.name || "Customer",
-//       customerEmail: user?.email || "ahmadjkff1@gmial.com",
-//       customerMobile: user.phone,
-//       paymentUrl: `${window.location.origin}/payment-success`,
-//       errorUrl: `${window.location.origin}/payment-success`,
-//     },
-//     {
-//       headers: {
-//         "Content-Type": "application/json",
-//         authorization: `Bearer ${user.token}`,
-//       },
-//     }
-//   );
-//   if (!res.data?.IsSuccess) {
-//     toast.error(t("checkout_payment_failed"));
-//     return;
-//   }
-//   sessionStorage.setItem(
-//     "pendingOrder",
-//     JSON.stringify({
-//       ...cart,
-//       shippingAddress: selectedArea._id,
-//       orderType,
-//     })
-//   );
-//   window.location.href = res.data.Data.PaymentURL;
-// } catch (error) {
-//   toast.error(t("checkout_error"));
-//   console.error(error);
-// }
-
 import Loading from "@/componenet/common/Loading";
 import { useCart } from "@/contexts/CartContext";
 import { useOrder } from "@/contexts/OrderContext";
@@ -45,6 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { getAdditionsPrice, getProductPrice } from "@/constants";
 import { useSearchParams } from "react-router-dom";
+
+// The specific ID that triggers Test Mode
+const TEST_PRODUCT_ID = "692f3104231cb0add4c67ca9";
 
 function Checkout() {
   const { cart, total, clearCart } = useCart();
@@ -58,7 +25,7 @@ function Checkout() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [orderType, setOrderType] = useState("delivery"); // default delivery
+  const [orderType, setOrderType] = useState("delivery");
   const [details, setDetails] = useState({
     name: user?.name || "",
     apartment: "",
@@ -69,17 +36,37 @@ function Checkout() {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const [searchParams] = useSearchParams();
-  const isTestMode = searchParams.get("test") === "1";
+
+  // Check if URL has ?test=1 OR if the specific product is in the cart
+  const hasTestProduct = cart.products.some((p) => {
+    const pId = p.productId._id || p.productId;
+    return pId === TEST_PRODUCT_ID;
+  });
+
+  const isTestMode = searchParams.get("test") === "1" || hasTestProduct;
+
   const [paymentMethod, setPaymentMethod] = useState(
     isTestMode ? "card" : null
   );
+
+  // Auto-fill test details if Test Mode is active
+  useEffect(() => {
+    if (isTestMode) {
+      setPaymentMethod("card");
+      setDetails((prev) => ({ ...prev, name: "MontyPay Tester" }));
+      // Optionally auto-select a dummy area for delivery logic to pass
+      if (!selectedArea._id) {
+        // You can set a dummy area here if needed, or rely on logic below
+      }
+    }
+  }, [isTestMode]);
 
   useEffect(() => {
     if (isTestMode) return;
     if (!cart.products || cart.products.length < 1) {
       navigate("/products");
     }
-  }, [cart, navigate]);
+  }, [cart, navigate, isTestMode]);
 
   useEffect(() => {
     async function fetchAreas() {
@@ -107,7 +94,7 @@ function Checkout() {
     }
 
     fetchAreas();
-  }, []);
+  }, [user.token, t]);
 
   const DETAILS = [
     {
@@ -134,60 +121,56 @@ function Checkout() {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    if (cart.products.length === 0) {
-      if (!isTestMode) {
-        toast.error(t("checkout_cart_empty"));
-        return;
-      }
+
+    if (cart.products.length === 0 && !isTestMode) {
+      toast.error(t("checkout_cart_empty"));
+      return;
     }
-    if (!paymentMethod) {
-      if (!isTestMode) {
-        toast.error(t("checkout_select_payment"));
-        return;
-      }
+    if (!paymentMethod && !isTestMode) {
+      toast.error(t("checkout_select_payment"));
+      return;
     }
-    if (!selectedArea._id) {
-      if (!isTestMode) {
-        toast.error(t("checkout_select_area"));
-        return;
-      }
+    if (!selectedArea._id && !isTestMode) {
+      toast.error(t("checkout_select_area"));
+      return;
     }
+
     const body = {
       userId: user?._id,
       orderType: orderType || "pickup",
       userDetails: {
-        name: "ahmad",
+        name: details.name || "Guest",
       },
-      paymentMethod: "card",
+      paymentMethod: paymentMethod || "card",
     };
-    // Inside handlePlaceOrder, under isTestMode block
+
+    // --- TEST MODE LOGIC ---
     if (isTestMode) {
       body.isTest = true;
-      // Add a dummy product so the backend validation passes
       body.products = [
         {
-          productId: "692f3104231cb0add4c67ca9", // Needs to be a valid MongoDB ObjectId format
+          productId: TEST_PRODUCT_ID, // Use the real ID so DB validation passes
           quantity: 1,
           price: 1,
         },
       ];
-      body.totalPrice = 1; // Force total to 1
-      setPaymentMethod("card");
-      setDetails({ ...details, name: "MontyPay Tester" });
-    }
-    // ... inside handlePlaceOrder
-    if (paymentMethod === "card") {
-      try {
-        // 1. Create the order in your DB first
-        const orderResponse = await createOrder(body);
+      body.totalPrice = 1; // Force total to 1 JOD for testing
 
-        // Check if response has data (adjust based on your actual API response structure)
+      // Ensure we have a payment method selected for the logic below
+      if (!paymentMethod) setPaymentMethod("card");
+    }
+    // -----------------------
+
+    // CARD PAYMENT FLOW (Includes Test Mode)
+    if (paymentMethod === "card" || isTestMode) {
+      try {
+        // 1. Create Order in DB
+        const orderResponse = await createOrder(body);
         const newOrder = orderResponse.data || orderResponse;
 
         if (!newOrder._id) throw new Error("Order creation failed");
 
-        // 2. Request a payment session from YOUR backend
-        // Calculate total explicitly or use the one from the order response
+        // 2. Request Payment Session
         const amountToPay = isTestMode ? 1 : totalWithDelivery;
 
         const paymentResponse = await fetch(
@@ -198,8 +181,8 @@ function Checkout() {
             body: JSON.stringify({
               amount: amountToPay,
               customerName: details.name,
-              customerEmail: user?.email || "test@example.com", // MontyPay usually requires email
-              orderId: newOrder._id, // IMPT: Send order ID to link it later
+              customerEmail: user?.email || "test@example.com",
+              orderId: newOrder._id,
             }),
           }
         );
@@ -207,16 +190,18 @@ function Checkout() {
         const paymentData = await paymentResponse.json();
 
         if (paymentData.redirect_url) {
-          // 3. Redirect the user to MontyPay
           window.location.href = paymentData.redirect_url;
         } else {
+          console.error("MontyPay Error:", paymentData);
           toast.error("Payment initialization failed");
         }
       } catch (error) {
         console.error(error);
         toast.error(t("checkout_failed"));
       }
-    } else {
+    }
+    // CASH PAYMENT FLOW
+    else {
       try {
         await createOrder({
           products: cart.products.map((p) => ({
@@ -225,8 +210,8 @@ function Checkout() {
             isSpicy: p.isSpicy || false,
             additions: p.additions || [],
             notes: p.notes || "",
-            selectedProtein: p.selectedProtein, // meat or chicken
-            selectedType: p.selectedType, // meal or sandwich
+            selectedProtein: p.selectedProtein,
+            selectedType: p.selectedType,
           })),
           userId: user?._id,
           shippingAddress: selectedArea._id,
@@ -264,6 +249,11 @@ function Checkout() {
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             {t("complete_order")}
+            {isTestMode && (
+              <span className="text-red-500 text-lg block">
+                (Test Mode Active)
+              </span>
+            )}
           </h1>
         </div>
 
@@ -516,6 +506,7 @@ function Checkout() {
                       id="bank"
                       name="PaymentMethod"
                       type="radio"
+                      checked={paymentMethod === "card"}
                       onChange={() => setPaymentMethod("card")}
                     />
                     <label
@@ -539,6 +530,7 @@ function Checkout() {
                       id="cash"
                       name="PaymentMethod"
                       type="radio"
+                      checked={paymentMethod === "cash"}
                       onChange={() => setPaymentMethod("cash")}
                     />
                     <label
