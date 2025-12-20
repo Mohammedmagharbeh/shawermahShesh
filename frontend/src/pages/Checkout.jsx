@@ -160,19 +160,60 @@ function Checkout() {
       },
       paymentMethod: "card",
     };
+    // Inside handlePlaceOrder, under isTestMode block
     if (isTestMode) {
       body.isTest = true;
+      // Add a dummy product so the backend validation passes
+      body.products = [
+        {
+          productId: "692f3104231cb0add4c67ca9", // Needs to be a valid MongoDB ObjectId format
+          quantity: 1,
+          price: 1,
+        },
+      ];
+      body.totalPrice = 1; // Force total to 1
       setPaymentMethod("card");
-      setDetails({ ...details, name: "ahmad" });
+      setDetails({ ...details, name: "MontyPay Tester" });
     }
+    // ... inside handlePlaceOrder
     if (paymentMethod === "card") {
       try {
-        await createOrder(body);
+        // 1. Create the order in your DB first
+        const orderResponse = await createOrder(body);
 
-        toast.success(t("checkout_success"));
-        clearCart();
-        navigate("/products");
+        // Check if response has data (adjust based on your actual API response structure)
+        const newOrder = orderResponse.data || orderResponse;
+
+        if (!newOrder._id) throw new Error("Order creation failed");
+
+        // 2. Request a payment session from YOUR backend
+        // Calculate total explicitly or use the one from the order response
+        const amountToPay = isTestMode ? 1 : totalWithDelivery;
+
+        const paymentResponse = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/montypay/session`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              amount: amountToPay,
+              customerName: details.name,
+              customerEmail: user?.email || "test@example.com", // MontyPay usually requires email
+              orderId: newOrder._id, // IMPT: Send order ID to link it later
+            }),
+          }
+        );
+
+        const paymentData = await paymentResponse.json();
+
+        if (paymentData.redirect_url) {
+          // 3. Redirect the user to MontyPay
+          window.location.href = paymentData.redirect_url;
+        } else {
+          toast.error("Payment initialization failed");
+        }
       } catch (error) {
+        console.error(error);
         toast.error(t("checkout_failed"));
       }
     } else {
