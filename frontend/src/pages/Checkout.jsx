@@ -100,7 +100,7 @@ function Checkout() {
     {
       name: t("checkout_name"),
       label: "name",
-      required: true && !isTestMode,
+      required: true,
       type: "text",
     },
     {
