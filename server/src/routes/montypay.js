@@ -47,8 +47,8 @@ router.post("/session", async (req, res) => {
         email: customerEmail,
       },
       // ✅ UPDATED: Pass orderId in URL so frontend can read it
-      success_url: `http://localhost:5173/success?orderId=${orderId}`,
-      cancel_url: `http://localhost:5173/cancel?orderId=${orderId}`,
+      success_url: `${process.env.FRONT_BASE}/success?orderId=${orderId}`,
+      cancel_url: `${process.env.FRONT_BASE}/cancel?orderId=${orderId}`,
     };
 
     // Hash Formula: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
@@ -77,7 +77,6 @@ router.post("/status", async (req, res) => {
     const { orderId } = req.body;
 
     if (!orderId) return res.status(400).json({ error: "Missing orderId" });
-    f;
 
     // Hash Formula for Status (by order_id):
     // SHA1(MD5(UPPER(order_id + merchant_pass)))
