@@ -11,16 +11,15 @@ import { useCategoryContext } from "@/contexts/CategoryContext";
 
 export default function ProductsList({ setFormData, setEditingId }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(
-    "6925a83f23f3a8dcdb91b714"
-  );
   const { t } = useTranslation();
+
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+  const { categories, fetchCategories } = useCategoryContext();
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]?._id);
   const { products, setProducts, loading, error } = useProducts(
     t,
     selectedCategory
   );
-  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
-  const { categories, fetchCategories } = useCategoryContext();
 
   useEffect(() => {
     fetchCategories();
