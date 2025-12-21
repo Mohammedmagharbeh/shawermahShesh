@@ -16,6 +16,12 @@ const TEST_PRODUCT_ID = "692f3104231cb0add4c67ca9";
 function Checkout() {
   const { cart, total, clearCart } = useCart();
   const { createOrder, loading } = useOrder();
+  const [searchParams] = useSearchParams();
+  const hasTestProduct = cart.products.some((p) => {
+    const pId = p.productId._id || p.productId;
+    return pId === TEST_PRODUCT_ID;
+  });
+  const isTestMode = searchParams.get("test") === "1" || hasTestProduct;
   const { user } = useUser();
   const [areas, setAreas] = useState([]);
   const [selectedArea, setSelectedArea] = useState({
@@ -27,7 +33,7 @@ function Checkout() {
   const [error, setError] = useState(null);
   const [orderType, setOrderType] = useState("delivery");
   const [details, setDetails] = useState({
-    name: user?.name || "",
+    name: isTestMode ? "MONTYPAY TESTER" : user?.name || "",
     apartment: "",
     phone: user?.phone || "",
     _id: user?._id || "",
@@ -35,15 +41,8 @@ function Checkout() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
-  const [searchParams] = useSearchParams();
 
   // Check if URL has ?test=1 OR if the specific product is in the cart
-  const hasTestProduct = cart.products.some((p) => {
-    const pId = p.productId._id || p.productId;
-    return pId === TEST_PRODUCT_ID;
-  });
-
-  const isTestMode = searchParams.get("test") === "1" || hasTestProduct;
 
   const [paymentMethod, setPaymentMethod] = useState(
     isTestMode ? "card" : null
@@ -55,9 +54,7 @@ function Checkout() {
       setPaymentMethod("card");
       setDetails((prev) => ({ ...prev, name: "MontyPay Tester" }));
       // Optionally auto-select a dummy area for delivery logic to pass
-      if (!selectedArea._id) {
-        // You can set a dummy area here if needed, or rely on logic below
-      }
+      setOrderType("pickup");
     }
   }, [isTestMode]);
 
@@ -102,6 +99,7 @@ function Checkout() {
       label: "name",
       required: true,
       type: "text",
+      defaultValue: details.name,
     },
     {
       name: `${t("checkout_apartment_floor")} (${t("checkout_optional")})`,
@@ -136,12 +134,20 @@ function Checkout() {
     }
 
     const body = {
+      products: cart.products.map((p) => ({
+        productId: p.productId._id,
+        quantity: p.quantity,
+        isSpicy: p.isSpicy || false,
+        additions: p.additions || [],
+        notes: p.notes || "",
+        selectedProtein: p.selectedProtein,
+        selectedType: p.selectedType,
+      })),
       userId: user?._id,
-      orderType: orderType || "pickup",
-      userDetails: {
-        name: details.name || "Guest",
-      },
-      paymentMethod: paymentMethod || "card",
+      shippingAddress: selectedArea._id,
+      paymentMethod,
+      orderType,
+      userDetails: details,
     };
 
     // --- TEST MODE LOGIC ---
@@ -203,30 +209,16 @@ function Checkout() {
     // CASH PAYMENT FLOW
     else {
       try {
-        await createOrder({
-          products: cart.products.map((p) => ({
-            productId: p.productId._id,
-            quantity: p.quantity,
-            isSpicy: p.isSpicy || false,
-            additions: p.additions || [],
-            notes: p.notes || "",
-            selectedProtein: p.selectedProtein,
-            selectedType: p.selectedType,
-          })),
-          userId: user?._id,
-          shippingAddress: selectedArea._id,
-          paymentMethod: "cash",
-          orderType,
-          userDetails: details,
-        });
+        await createOrder(body);
 
         toast.success(t("checkout_success"));
-        clearCart();
+
         navigate("/products");
       } catch (error) {
         toast.error(t("checkout_failed"));
       }
     }
+    clearCart();
   };
 
   const totalWithDelivery =
