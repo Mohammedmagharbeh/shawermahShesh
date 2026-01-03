@@ -387,7 +387,7 @@ function AdminDashboard() {
                       <span className="text-sm text-foreground">
                         {order.createdAt
                           ? new Date(order.createdAt).toLocaleDateString(
-                              "en-GB",
+                              `${selectedLanguage}-GB`,
                               {
                                 day: "numeric",
                                 month: "long",
@@ -663,7 +663,7 @@ function AdminDashboard() {
                       productsHtml += "</tbody></table>";
 
                       // Build the main invoice HTML
-                    orderDiv.innerHTML = `
+                      orderDiv.innerHTML = `
 <div style="font-family: 'Tahoma', sans-serif; width:100%; max-width:480px; margin:auto; padding:16px; border:1px solid #ccc; box-sizing:border-box; background:#fff;">
   <h2 style="text-align:center; margin-bottom:8px; font-size:20px; color:#333;">فاتورة الطلب</h2>
   <p style="text-align:center; font-size:14px; color:#555; margin-bottom:12px;"><strong>رقم الطلب:</strong> #${order.sequenceNumber}</p>
@@ -734,7 +734,6 @@ function AdminDashboard() {
   <p style="text-align:center; margin-top:10px; font-weight:bold; font-size:14px; color:#333;">شكراً لطلبكم من شاورما شيش 🍴</p>
 </div>
 `;
-
 
                       // Print logic
                       const printWindow = window.open(
