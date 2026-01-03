@@ -159,7 +159,7 @@
   "checkout_order_summary": "Order Summary",
   "checkout_payment_method": "Payment Method",
   "checkout_card_payment": "Credit / Debit Card",
-  "checkout_cash_payment": "Cash on Delivery",
+  "checkout_cash_payment": "Cash using click",
   "checkout_place_order": "Place Order",
   "no_permission": "You do not have permission to access this page",
   "login_success": "Login successful",
@@ -394,12 +394,6 @@
   "failed_load_jobs": "Failed to load jobs",
   "submit_application": "Submit Application",
 
-
-
-
-
-
-
   "failed_to_load_jobs": "Failed to load jobs",
   "fill_all_fields": "Please fill all fields",
   "job_added_success": "Job added successfully",
@@ -444,7 +438,4 @@
   "not_attached": "Not attached",
   "view_file": "View file",
   "resume": "Resume"
-
-
-
 }

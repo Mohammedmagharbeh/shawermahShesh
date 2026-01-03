@@ -105,7 +105,6 @@ exports.createOrder = async (req, res) => {
       products,
       status,
       shippingAddress,
-      paymentMethod,
       paymentStatus,
       transactionId,
       paidAt,
@@ -120,7 +119,6 @@ exports.createOrder = async (req, res) => {
       products.length === 0 ||
       !orderType ||
       (orderType === "delivery" && !shippingAddress) ||
-      !paymentMethod ||
       !userDetails?.name
     ) {
       return res
@@ -315,7 +313,6 @@ exports.createOrder = async (req, res) => {
       status: status || "Processing",
       shippingAddress: orderType === "delivery" ? shippingAddress : null,
       payment: {
-        method: paymentMethod,
         status: paymentStatus || "unpaid",
         transactionId: transactionId || null,
         paidAt: paidAt || null,

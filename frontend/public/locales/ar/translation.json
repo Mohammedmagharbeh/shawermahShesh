@@ -166,7 +166,7 @@
   "qty": "الكمية",
   "checkout_payment_method": "طريقة الدفع",
   "checkout_card_payment": "بطاقة ائتمان / خصم",
-  "checkout_cash_payment": "الدفع عند الاستلام",
+  "checkout_click_payment": "الدفع كليك",
   "checkout_place_order": "تقديم الطلب",
   "no_permission": "ليس لديك إذن للوصول إلى هذه الصفحة",
   "login_success": "تم تسجيل الدخول بنجاح",
@@ -405,12 +405,6 @@
   "failed_load_jobs": "فشل تحميل الوظائف",
   "submit_application": "تقديم الطلب",
 
-
-
-
-
-
-
   "failed_to_load_jobs": "فشل تحميل الوظائف",
   "fill_all_fields": "يرجى تعبئة جميع الحقول",
   "job_added_success": "تم إضافة الوظيفة بنجاح",
@@ -452,13 +446,9 @@
   "job_name_en": "اسم الوظيفة (إنجليزي)",
   "job_description_ar": "وصف الوظيفة (عربي)",
   "job_description_en": "وصف الوظيفة (إنجليزي)",
-  
+
   "not_attached": "لم يُرفق",
   "view_file": "عرض الملف",
   "resume": "السيرة الذاتية",
   "experience_certificate": "شهادة الخبرة"
-  
-
-  
-
 }
