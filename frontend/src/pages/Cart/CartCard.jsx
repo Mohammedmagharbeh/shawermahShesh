@@ -111,6 +111,71 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
             {t("quantity")}:
           </span>
           <div className="flex items-center space-x-2">
+            {/* Mobile: Up/Down Buttons */}
+            <div className="flex lg:hidden items-center space-x-2">
+              <button
+                onClick={() => {
+                  const newQuantity = Math.max(1, product.quantity - 1);
+                  updateQuantity(product.productId._id, {
+                    quantity: newQuantity,
+                    additions: product.additions.map((a) => a._id),
+                    isSpicy: product.isSpicy,
+                    notes: product.notes,
+                    selectedProtein: product.selectedProtein,
+                    selectedType: product.selectedType,
+                  });
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white rounded-lg p-2 transition-colors duration-200 shadow-md hover:shadow-lg active:scale-95"
+                aria-label="Decrease quantity"
+                disabled={product.quantity <= 1}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20 12H4"
+                  />
+                </svg>
+              </button>
+              <span className="w-12 px-3 py-2 border-2 border-red-200 rounded-lg text-center font-semibold bg-white">
+                {product.quantity}
+              </span>
+              <button
+                onClick={() => {
+                  updateQuantity(product.productId._id, {
+                    quantity: product.quantity + 1,
+                    additions: product.additions.map((a) => a._id),
+                    isSpicy: product.isSpicy,
+                    notes: product.notes,
+                    selectedProtein: product.selectedProtein,
+                    selectedType: product.selectedType,
+                  });
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white rounded-lg p-2 transition-colors duration-200 shadow-md hover:shadow-lg active:scale-95"
+                aria-label="Increase quantity"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              </button>
+            </div>
+            {/* Desktop: Input Field */}
             <input
               type="number"
               value={product.quantity}
@@ -124,7 +189,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
                   selectedType: product.selectedType,
                 })
               }
-              className="w-20 px-3 py-2 border-2 border-red-200 rounded-lg text-center font-semibold focus:border-red-500 focus:outline-none transition-colors"
+              className="hidden lg:block w-20 px-3 py-2 border-2 border-red-200 rounded-lg text-center font-semibold focus:border-red-500 focus:outline-none transition-colors"
               min="1"
             />
           </div>
