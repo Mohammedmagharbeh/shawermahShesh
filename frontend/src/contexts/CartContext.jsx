@@ -77,11 +77,8 @@ export const CartProvider = ({ children }) => {
 
         basePrice = Number(product.prices[selectedProtein]);
       } else {
-        console.log("4");
-
         basePrice = product.basePrice;
       }
-      console.log(item, selectedProtein);
 
       // ✅ Apply discount
       if (product.discount) {
