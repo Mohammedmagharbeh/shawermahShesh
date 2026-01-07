@@ -228,10 +228,10 @@ const sendEmail = async () => {
 
   try {
     await emailjs.send(
-      // "service_hzo8gfa",      // Service ID
-      // "template_xkze6cd",     // Template ID
-      "service_jamxkjk",
-      "template_ff2olxu",
+      "service_hzo8gfa",      // Service ID
+      "template_xkze6cd",     // Template ID
+      // "service_jamxkjk",
+      // "template_ff2olxu",
       {
         from_name: name,
         from_email: email,
@@ -239,8 +239,8 @@ const sendEmail = async () => {
         message: message,
         project_name: "Shawarma Sheesh"
       },
-      // "KrFWkCOJyFAwx__yC"     // Public Key
-"qL3p4xBbLP-C6fqzq"
+      "KrFWkCOJyFAwx__yC"     // Public Key
+// "qL3p4xBbLP-C6fqzq"
     );
 
     toast.success("✅ تم الإرسال بنجاح!");
@@ -413,7 +413,7 @@ const sendEmail = async () => {
           }}
           className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg transition w-full sm:w-auto"
         >
-          تواصل معنا
+{t("contact.title")}
         </button>
       </Card>
 
@@ -437,56 +437,62 @@ const sendEmail = async () => {
     {/* الفورم */}
     {openForm && (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white p-6 rounded-2xl w-[90%] max-w-md border-2 border-red-600 shadow-xl">
-          <h2 className="text-2xl font-bold mb-5 text-center text-red-600">
-            تواصل معنا
-          </h2>
-          <input
-            type="text"
-            placeholder="الاسم"
-            className="w-full border border-gray-300 p-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-red-600"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="رقم الهاتف"
-            className="w-full border border-gray-300 p-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-red-600"
-            value={phone}
-            onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, "");
-              if (val.length <= 10) setPhone(val);
-            }}
-          />
-          <input
-            type="email"
-            placeholder="الإيميل"
-            className="w-full border border-gray-300 p-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-red-600"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <textarea
-            placeholder="الرسالة"
-            className="w-full border border-gray-300 p-2 rounded-lg mb-4 h-28 resize-none focus:outline-none focus:ring-2 focus:ring-red-600"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          ></textarea>
-          <div className="flex gap-3">
-            <button
-              onClick={sendEmail}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg w-full transition"
-            >
-              إرسال
-            </button>
-            <button
-              onClick={() => setOpenForm(false)}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-lg w-full transition"
-            >
-              إغلاق
-            </button>
-          </div>
-        </div>
-      </div>
+  <div className="bg-white p-6 rounded-2xl w-[90%] max-w-md border-2 border-red-600 shadow-xl">
+    <h2 className="text-2xl font-bold mb-5 text-center text-red-600">
+      {t("contact.title")}
+    </h2>
+
+    <input
+      type="text"
+      placeholder={t("contact.name")}
+      className="w-full border border-gray-300 p-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-red-600"
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+    />
+
+    <input
+      type="text"
+      placeholder={t("contact.phone")}
+      className="w-full border border-gray-300 p-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-red-600"
+      value={phone}
+      onChange={(e) => {
+        const val = e.target.value.replace(/\D/g, "");
+        if (val.length <= 10) setPhone(val);
+      }}
+    />
+
+    <input
+      type="email"
+      placeholder={t("contact.email")}
+      className="w-full border border-gray-300 p-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-red-600"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+    />
+
+    <textarea
+      placeholder={t("contact.message")}
+      className="w-full border border-gray-300 p-2 rounded-lg mb-4 h-28 resize-none focus:outline-none focus:ring-2 focus:ring-red-600"
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+    ></textarea>
+
+    <div className="flex gap-3">
+      <button
+        onClick={sendEmail}
+        className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg w-full transition"
+      >
+        {t("contact.send")}
+      </button>
+
+      <button
+        onClick={() => setOpenForm(false)}
+        className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-lg w-full transition"
+      >
+        {t("contact.close")}
+      </button>
+    </div>
+  </div>
+</div>
     )}
   </div>
 </section>
