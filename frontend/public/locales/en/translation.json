@@ -437,5 +437,14 @@
   "job_description_en": "Job Description (English)",
   "not_attached": "Not attached",
   "view_file": "View file",
-  "resume": "Resume"
+  "resume": "Resume",
+  "contact": {
+    "title": "Contact Us",
+    "name": "Name",
+    "phone": "Phone Number",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send",
+    "close": "Close"
+  }
 }

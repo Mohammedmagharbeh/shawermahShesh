@@ -450,5 +450,18 @@
   "not_attached": "لم يُرفق",
   "view_file": "عرض الملف",
   "resume": "السيرة الذاتية",
-  "experience_certificate": "شهادة الخبرة"
+  "experience_certificate": "شهادة الخبرة",
+  "contact": {
+    "title": "تواصل معنا",
+    "name": "الاسم",
+    "phone": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "message": "الرسالة",
+    "send": "إرسال",
+    "close": "إغلاق",
+      "title": "تواصل معنا",
+        "title": "Contact Us"
+
+
+  }
 }
