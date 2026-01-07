@@ -31,6 +31,7 @@ function Checkout() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [orderType, setOrderType] = useState("delivery");
+  const [paymentMethod, setPaymentMethod] = useState("card");
   const [details, setDetails] = useState({
     name: isTestMode ? "MONTYPAY TESTER" : user?.name || "",
     apartment: "",
@@ -162,6 +163,7 @@ function Checkout() {
       const orderData = {
         ...body,
         totalPrice: totalWithDelivery,
+        paymentMethod: paymentMethod,
       };
       sessionStorage.setItem("pendingOrder", JSON.stringify(orderData));
 
@@ -477,7 +479,9 @@ function Checkout() {
                       id="bank"
                       name="PaymentMethod"
                       type="radio"
-                      checked={true}
+                      value="card"
+                      checked={paymentMethod === "card"}
+                      onChange={() => setPaymentMethod("card")}
                     />
                     <label
                       htmlFor="bank"

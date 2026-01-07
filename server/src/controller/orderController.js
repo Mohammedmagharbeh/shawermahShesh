@@ -106,6 +106,7 @@ exports.createOrder = async (req, res) => {
       status,
       shippingAddress,
       paymentStatus,
+      paymentMethod,
       transactionId,
       paidAt,
       orderType,
@@ -314,6 +315,7 @@ exports.createOrder = async (req, res) => {
       shippingAddress: orderType === "delivery" ? shippingAddress : null,
       payment: {
         status: paymentStatus || "unpaid",
+        method: paymentMethod || null,
         transactionId: transactionId || null,
         paidAt: paidAt || null,
       },

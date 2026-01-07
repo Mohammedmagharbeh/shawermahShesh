@@ -99,7 +99,6 @@ function PaymentSuccess() {
     try {
       // Check if we have a pending order in sessionStorage
       const pendingOrderData = sessionStorage.getItem("pendingOrder");
-      console.log(pendingOrderData);
 
       if (!pendingOrderData) {
         throw new Error("No pending order data found");
@@ -117,12 +116,12 @@ function PaymentSuccess() {
         userId: orderData.userId,
         shippingAddress: orderData.shippingAddress,
         paymentStatus: "paid",
+        paymentMethod: orderData.paymentMethod || "card",
         transactionId: paymentId,
         paidAt: new Date(),
         orderType: orderData.orderType,
         userDetails: orderData.userDetails,
-        paymentMethod: pendingOrderData.paymentMethod,
-        status: "Processing", // Set status to Confirmed since payment is successful
+        status: "Processing", // Set status to Processing since payment is successful
       });
 
       clearCart();
