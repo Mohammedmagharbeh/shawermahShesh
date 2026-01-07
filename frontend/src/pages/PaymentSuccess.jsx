@@ -16,6 +16,8 @@ const formatOrderProducts = (products) => {
     isSpicy: p.isSpicy || false,
     notes: p.notes || "",
     additions: p.additions || [],
+    selectedProtein: p.selectedProtein || null,
+    selectedType: p.selectedType || null,
   }));
 };
 
@@ -95,31 +97,37 @@ function PaymentSuccess() {
 
   const handleOrderCompletion = async (paymentId, orderIdFromUrl) => {
     try {
-      // Check if we have a pending cart in session
-      const storedCart = JSON.parse(sessionStorage.getItem("pendingOrder"));
+      // Check if we have a pending order in sessionStorage
+      const pendingOrderData = sessionStorage.getItem("pendingOrder");
+      console.log(pendingOrderData);
 
-      // If we found a pending cart, we create a NEW order (Standard Flow)
-      if (storedCart && user?._id) {
-        await createOrder({
-          products: formatOrderProducts(storedCart.products),
-          userId: user._id,
-          shippingAddress: storedCart.shippingAddress,
-          paymentMethod: "card",
-          paymentStatus: "paid",
-          transactionId: paymentId,
-          paidAt: new Date(),
-          orderType: storedCart.orderType || "unknown",
-        });
+      if (!pendingOrderData) {
+        throw new Error("No pending order data found");
+      }
 
-        clearCart();
-        sessionStorage.removeItem("pendingOrder");
-        toast.success(t("order_placed_successfully"));
+      const orderData = JSON.parse(pendingOrderData);
+
+      if (!orderData.userId || !user?._id) {
+        throw new Error("User ID is missing");
       }
-      // If no pending cart, we assume the Order was created BEFORE payment
-      // and we just verified it (Callback usually handles this, but this is a double check)
-      else {
-        console.log(`Order ${orderIdFromUrl} verified. (No local cart found)`);
-      }
+
+      // Create order after payment success
+      await createOrder({
+        products: formatOrderProducts(orderData.products),
+        userId: orderData.userId,
+        shippingAddress: orderData.shippingAddress,
+        paymentStatus: "paid",
+        transactionId: paymentId,
+        paidAt: new Date(),
+        orderType: orderData.orderType,
+        userDetails: orderData.userDetails,
+        paymentMethod: pendingOrderData.paymentMethod,
+        status: "Processing", // Set status to Confirmed since payment is successful
+      });
+
+      clearCart();
+      sessionStorage.removeItem("pendingOrder");
+      toast.success(t("order_placed_successfully"));
     } catch (error) {
       console.error("Order Creation Error:", error);
       throw new Error(t("order_creation_failed_try_again"));

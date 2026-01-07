@@ -1,6 +1,5 @@
 import Loading from "@/componenet/common/Loading";
 import { useCart } from "@/contexts/CartContext";
-import { useOrder } from "@/contexts/OrderContext";
 import { useUser } from "@/contexts/UserContext";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -14,9 +13,9 @@ import { useSearchParams } from "react-router-dom";
 const TEST_PRODUCT_ID = "692f3104231cb0add4c67ca9";
 
 function Checkout() {
-  const { cart, total, clearCart } = useCart();
-  const { createOrder, loading } = useOrder();
+  const { cart, total } = useCart();
   const [searchParams] = useSearchParams();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const hasTestProduct = cart.products.some((p) => {
     const pId = p.productId._id || p.productId;
     return pId === TEST_PRODUCT_ID;
@@ -154,14 +153,19 @@ function Checkout() {
       body.totalPrice = 1;
     }
 
+    setIsSubmitting(true);
     try {
-      // 1. Create Order in DB
-      const orderResponse = await createOrder(body);
-      const newOrder = orderResponse.data || orderResponse;
+      // 1. Generate session ID for payment (order will be created after payment success)
+      const sessionId = crypto.randomUUID();
 
-      if (!newOrder._id) throw new Error("Order creation failed");
+      // 2. Store order data in sessionStorage for later order creation
+      const orderData = {
+        ...body,
+        totalPrice: totalWithDelivery,
+      };
+      sessionStorage.setItem("pendingOrder", JSON.stringify(orderData));
 
-      // 2. Request Payment Session
+      // 3. Request Payment Session (using sessionId as orderId)
       const amountToPay = isTestMode ? 1 : totalWithDelivery;
 
       const paymentResponse = await fetch(
@@ -173,7 +177,7 @@ function Checkout() {
             amount: amountToPay,
             customerName: details.name,
             customerEmail: user?.email || "test@example.com",
-            orderId: newOrder._id,
+            orderId: sessionId,
           }),
         }
       );
@@ -181,17 +185,20 @@ function Checkout() {
       const paymentData = await paymentResponse.json();
 
       if (paymentData.redirect_url) {
+        // Don't clear cart here - will be cleared after successful payment
         window.location.href = paymentData.redirect_url;
       } else {
         console.error("MontyPay Error:", paymentData);
         toast.error("Payment initialization failed");
+        sessionStorage.removeItem("pendingOrder");
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error(error);
       toast.error(t("checkout_failed"));
+      sessionStorage.removeItem("pendingOrder");
+      setIsSubmitting(false);
     }
-
-    clearCart();
   };
 
   const totalWithDelivery =
@@ -510,11 +517,11 @@ function Checkout() {
               </div>
 
               <button
-                className={`w-full bg-gradient-to-r ${loading ? "from-gray-500 to bg-gray-600" : "from-red-500 to-red-600"} text-white py-4 px-8 rounded-xl font-bold text-lg ${loading ? "hover:from-gray-600 hover:to-gray-700" : "hover:from-red-600 hover:to-red-700"} transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl`}
+                className={`w-full bg-gradient-to-r ${isSubmitting ? "from-gray-500 to bg-gray-600" : "from-red-500 to-red-600"} text-white py-4 px-8 rounded-xl font-bold text-lg ${isSubmitting ? "hover:from-gray-600 hover:to-gray-700" : "hover:from-red-600 hover:to-red-700"} transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl`}
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
               >
-                {loading
+                {isSubmitting
                   ? "جار انشاء الطلب..."
                   : `🍽️ ${t("checkout_place_order")} - ${totalWithDelivery.toFixed(2)} JOD`}
               </button>

@@ -120,13 +120,23 @@ router.post("/callback", async (req, res) => {
       const orderId = data.order?.number || data.merchant_reference;
 
       if (orderId) {
-        await Order.findByIdAndUpdate(orderId, {
+        // Note: Orders are now created after payment success in PaymentSuccess.jsx
+        // This callback might run before the order is created, so we check if it exists
+        const updatedOrder = await Order.findByIdAndUpdate(orderId, {
           "payment.status": "paid",
           "payment.transactionId": data.payment_id || data.session_id,
           "payment.paidAt": new Date(),
           status: "Confirmed",
         });
-        console.log(`Order ${orderId} UPDATED to PAID.`);
+
+        if (updatedOrder) {
+          console.log(`Order ${orderId} UPDATED to PAID via callback.`);
+        } else {
+          // Order doesn't exist yet - it will be created in PaymentSuccess.jsx
+          console.log(
+            `Order ${orderId} not found in callback (will be created in PaymentSuccess).`
+          );
+        }
       }
     }
     res.status(200).send("OK");
