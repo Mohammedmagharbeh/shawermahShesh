@@ -66,7 +66,10 @@ export default function ProductCard({
         arDescription: data.description?.ar || "",
         enDescription: data.description?.en || "",
         image: data.image || "",
-        category: data.category || "",
+        category:
+          typeof data.category === "object" && data.category?._id
+            ? data.category._id
+            : data.category || "",
         isSpicy: Boolean(data.isSpicy),
         hasTypeChoices: !!data.hasTypeChoices,
         hasProteinChoices: !!data.hasProteinChoices,

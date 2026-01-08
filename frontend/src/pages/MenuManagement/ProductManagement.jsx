@@ -84,7 +84,7 @@ function ProductManagement({
         setProducts((prev) => [res.data, ...prev]);
       }
 
-      setFormData({ ...INITIAL_FORM_DATA, category: formData.category });
+      setFormData(INITIAL_FORM_DATA);
       toast.success(editingId ? t("product_updated") : t("product_added"));
     } catch (error) {
       console.error("خطأ في الإرسال:", error.response?.data || error.message);
