@@ -54,8 +54,12 @@ function CategoryManagement() {
   return (
     <Card className="w-full">
       <CardHeader className="p-4 sm:p-6">
-        <CardTitle>{t("manage_additions")}</CardTitle>
-        <CardDescription>{t("add_addition_desc")}</CardDescription>
+        <CardTitle className="text-base sm:text-lg">
+          {t("manage_additions")}
+        </CardTitle>
+        <CardDescription className="text-xs sm:text-sm">
+          {t("add_addition_desc")}
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
         <form
@@ -71,6 +75,8 @@ function CategoryManagement() {
               })
             }
             required
+            className="w-full sm:flex-1"
+            dir="rtl"
           />
           <Input
             placeholder="اسم الفئة انجليزي"
@@ -84,10 +90,12 @@ function CategoryManagement() {
               })
             }
             required
+            className="w-full sm:flex-1"
+            dir="ltr"
           />
 
-          <div className="flex gap-2">
-            <Button type="submit">
+          <div className="flex gap-2 sm:flex-shrink-0">
+            <Button type="submit" className="flex-1 sm:flex-initial">
               {editingId ? t("save_changes") : t("add_addition")}
             </Button>
             {editingId && (
@@ -98,13 +106,15 @@ function CategoryManagement() {
                   setEditingId(null);
                   setForm({ name: { ar: "", en: "" } });
                 }}
+                variant="destructive"
+                className="flex-1 sm:flex-initial"
               >
                 Delete Category
               </Button>
             )}
           </div>
         </form>
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin -mx-1 px-1">
           {categories.map((cat, i) => (
             <Button
               key={i}

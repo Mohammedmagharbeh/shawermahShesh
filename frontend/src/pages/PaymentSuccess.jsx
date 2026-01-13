@@ -28,6 +28,7 @@ function PaymentSuccess() {
   const { clearCart } = useCart();
   const { t } = useTranslation();
   const { user } = useUser();
+  const selectedLanguage = localStorage.getItem("i18nextLng");
 
   const [state, setState] = useState({
     loading: true,
@@ -171,9 +172,9 @@ function PaymentSuccess() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-green-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 text-center border border-green-100">
-        <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center rounded-full bg-green-100 text-green-600 text-3xl">
+    <div className="min-h-screen flex items-center justify-center bg-[#DA1030] px-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 text-center ">
+        <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center rounded-full bg-[#DA0103] text-[#FFC400] text-3xl">
           ✓
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -181,9 +182,11 @@ function PaymentSuccess() {
         </h2>
         <p className="text-gray-600 mb-4">{t("thank_you_payment_confirmed")}</p>
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-6 text-sm">
+        <div
+          className={`bg-gray-50 rounded-lg p-4 mb-6 text-sm ${selectedLanguage === "ar" ? "rtl" : "ltr"}`}
+        >
           <div className="flex justify-between mb-2">
-            <span className="text-gray-500">{t("status")}:</span>
+            <span className="text-gray-500">{t("status")}</span>
             <span className="font-medium text-green-600 uppercase">
               {state.status}
             </span>
@@ -200,8 +203,8 @@ function PaymentSuccess() {
 
         <div className="space-y-3">
           <button
-            onClick={() => navigate("/orders")}
-            className="w-full py-3 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-semibold transition"
+            onClick={() => navigate(`/orders/${user?._id}`)}
+            className="w-full py-3 rounded-lg bg-[#FFC400] text-balck hover:bg-[#DA0103] hover:text-white font-semibold transition"
           >
             {t("view_orders")}
           </button>

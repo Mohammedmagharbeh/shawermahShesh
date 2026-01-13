@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUser } from "@/contexts/UserContext";
+import { Label } from "@/components/ui/label";
 
 const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
@@ -269,9 +270,21 @@ function AdminDashboard() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>📦 New Order!</DialogTitle>
-                      <DialogDescription>
-                        Phone: {o?.userId.phone} <br />
-                        Total: {o?.totalPrice} JOD
+                      <DialogDescription
+                        className={`flex flex-col gap-4 ${selectedLanguage === "ar" ? "rtl" : "ltr"}`}
+                      >
+                        <div className="flex gap-2 items-center">
+                          <Label>{t("phone")}:</Label>
+                          {o?.userId.phone}
+                        </div>
+                        <div className="flex gap-2 items-center">
+                          <Label>{t("name")}:</Label>
+                          {o.userDetails.name}
+                        </div>
+                        <div className="flex gap-2 items-center">
+                          <Label>{t("total")}:</Label>
+                          {o?.totalPrice} JOD
+                        </div>
                       </DialogDescription>
                     </DialogHeader>
                     <div className="flex gap-2 mt-4 justify-end">

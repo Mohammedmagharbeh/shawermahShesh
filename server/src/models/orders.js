@@ -51,7 +51,7 @@ const ordersSchema = new mongoose.Schema(
       status: { type: String, enum: PAYMENT_STATUSES, default: "unpaid" },
       method: { type: String, enum: PAYMENT_METHODS },
       transactionId: { type: String },
-      paidAt: { type: Date },
+      paidAt: { type: Date, default: Date.now() },
     },
     orderType: {
       type: String,

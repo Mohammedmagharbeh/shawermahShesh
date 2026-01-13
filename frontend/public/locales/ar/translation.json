@@ -340,6 +340,11 @@
   "sandwich": "سندويشة",
   "choose_protein": "اختر الصنف",
   "choose_type": "نوع الطلب",
+  "payment_successful": "تم الدفع بنجاح",
+  "thank_you_payment_confirmed": "شكرا لطلبكم من شاورما شيش",
+  "invoice_id": "رقم الفاتورة",
+  "view_orders": "عرض طلباتي",
+  "continue_shopping": "طلب آخر؟",
 
   "story": {
     "title": "قصتنا",

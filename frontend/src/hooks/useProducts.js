@@ -14,17 +14,21 @@ export function useProducts(t, selectedCategory) {
   }, [selectedCategory]);
 
   const fetchProducts = async () => {
+    // Don't fetch if category is undefined
+    if (selectedCategory === undefined || selectedCategory === null) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/products?category=${selectedCategory}`,
-        {
-          headers: {
-            authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
+      const url = `${import.meta.env.VITE_BASE_URL}/products${selectedCategory ? `?category=${selectedCategory}` : ""}`;
+      const res = await axios.get(url, {
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      });
       setProducts(res.data.data || []);
     } catch (err) {
       console.error("Error fetching products:", err);

@@ -13,17 +13,17 @@ export default function AdminProductPanel() {
   const handlers = { setProducts, setFormData, setEditingId };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 w-full overflow-x-hidden">
       {/* Header */}
       <Header />
-      <div className="container flex mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           <ProductManagement
             formData={formData}
             editingId={editingId}
             {...handlers}
           />
-          <div className="grid col-span-2 gap-4">
+          <div className="grid lg:col-span-2 gap-4 w-full">
             <CategoryManagement />
             <ProductsList products={products} {...handlers} />
           </div>

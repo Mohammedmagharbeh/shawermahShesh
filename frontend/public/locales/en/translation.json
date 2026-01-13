@@ -329,6 +329,11 @@
   "sandwich": "Sandwich",
   "choose_protein": "Choose the category",
   "choose_type": "Choose Type",
+  "payment_successful": "Payment Successfull",
+  "thank_you_payment_confirmed": "Thank You for your order From Shawarma Sheesh",
+  "invoice_id": "Invoice ID",
+  "view_orders": "View My Orders",
+  "continue_shopping": "Continue shopping",
 
   "story": {
     "title": "Our Story",
