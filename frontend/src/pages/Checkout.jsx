@@ -158,7 +158,9 @@ function Checkout() {
     try {
       // 1. Generate session ID for payment (order will be created after payment success)
       const sessionId = crypto.randomUUID();
-
+      const sessionDescription = cart.products
+        .map((p) => p.productId.name.ar)
+        .join(" / ");
       // 2. Store order data in sessionStorage for later order creation
       const orderData = {
         ...body,
@@ -180,6 +182,7 @@ function Checkout() {
             customerName: details.name,
             customerEmail: user?.email || "test@example.com",
             orderId: sessionId,
+            description: sessionDescription,
           }),
         }
       );

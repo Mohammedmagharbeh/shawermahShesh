@@ -20,6 +20,7 @@ router.post("/session", async (req, res) => {
       customerName,
       customerEmail,
       orderId,
+      description,
     } = req.body;
 
     if (!amount || !customerName || !customerEmail || !orderId) {
@@ -31,7 +32,6 @@ router.post("/session", async (req, res) => {
       ? 3
       : 2;
     const formattedAmount = Number(amount).toFixed(decimals);
-    const description = `Order #${orderId}`;
 
     const payload = {
       merchant_key: MERCHANT_KEY,
