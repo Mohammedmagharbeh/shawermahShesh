@@ -187,10 +187,14 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
                 {product.discount > 0 ? (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
                     <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 break-words">
-                      JOD {getFinalPrice().toFixed(2)}
+                      {product.hasProteinChoices
+                        ? t("according_to_your_choice")
+                        : `JOD ${getFinalPrice().toFixed(2)}}`}
                     </p>
                     <p className="text-base sm:text-lg md:text-xl text-gray-400 line-through break-words">
-                      JOD {getProductPrice(product).toFixed(2)}
+                      {product.hasProteinChoices
+                        ? t("according_to_your_choice")
+                        : `JOD {getProductPrice(product).toFixed(2)`}
                     </p>
                     <Badge className="bg-green-500 text-white text-xs sm:text-sm w-fit flex-shrink-0">
                       {t("discount")} {product.discount}%
@@ -198,7 +202,9 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
                   </div>
                 ) : (
                   <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-3 sm:mb-4 break-words">
-                    JOD {getProductPrice(product).toFixed(2)}
+                    {product.hasProteinChoices && !selectedProtein
+                      ? t("according_to_your_choices")
+                      : `JOD ${getProductPrice(product).toFixed(2)}`}
                   </p>
                 )}
               </div>

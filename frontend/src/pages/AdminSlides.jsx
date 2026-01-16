@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { useUser } from "@/contexts/UserContext";
 import Loading from "@/componenet/common/Loading";
+import { useTranslation } from "react-i18next";
 
 const SERVER_URL = import.meta.env.VITE_BASE_URL;
 
@@ -24,6 +25,7 @@ export default function AdminSlides() {
   });
   const [editId, setEditId] = useState(null);
   const { user } = useUser();
+  const { t } = useTranslation();
 
   const fetchSlides = async () => {
     try {
@@ -102,26 +104,26 @@ export default function AdminSlides() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-            إدارة الصور
+            {t("images_upload")}
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
-            إضافة وتعديل وحذف صور العرض الرئيسية
+            {t("manage_slides_description")}
           </p>
         </div>
 
         {/* Form */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-8">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
-            {editId ? "تعديل السلايد" : "إضافة سلايد جديد"}
+            {editId ? t("edit_slide") : t("add_new_slide")}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Arabic Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                العنوان (عربي)
+                {t("arabic_name")}
               </label>
               <Input
-                placeholder="أدخل العنوان بالعربية"
+                placeholder={t("enter_arabic_title")}
                 value={form.title.ar}
                 onChange={(e) =>
                   setForm({
@@ -135,10 +137,10 @@ export default function AdminSlides() {
             {/* English Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Title (English)
+                {t("english_name")}
               </label>
               <Input
-                placeholder="Enter title in English"
+                placeholder={t("enter_english_title")}
                 value={form.title.en}
                 onChange={(e) =>
                   setForm({
@@ -152,10 +154,10 @@ export default function AdminSlides() {
             {/* Arabic Subtitle */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                الوصف (عربي)
+                {t("arabic_description")}
               </label>
               <Input
-                placeholder="أدخل الوصف بالعربية"
+                placeholder={t("enter_arabic_subtitle")}
                 value={form.subtitle.ar}
                 onChange={(e) =>
                   setForm({
@@ -169,10 +171,10 @@ export default function AdminSlides() {
             {/* English Subtitle */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Subtitle (English)
+                {t("english_description")}
               </label>
               <Input
-                placeholder="Enter subtitle in English"
+                placeholder={t("enter_english_subtitle")}
                 value={form.subtitle.en}
                 onChange={(e) =>
                   setForm({
@@ -186,7 +188,7 @@ export default function AdminSlides() {
             {/* Related To */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                تابعة ل
+                {t("related_to")}
               </label>
               <Select
                 value={form.relatedTo}
@@ -195,11 +197,11 @@ export default function AdminSlides() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر القسم" />
+                  <SelectValue placeholder={t("select_section")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="home-section1">Home Section 1</SelectItem>
-                  <SelectItem value="home-section2">Home Section 2</SelectItem>
+                  <SelectItem value="home-section1">{t("home_section_1")}</SelectItem>
+                  <SelectItem value="home-section2">{t("home_section_2")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -207,7 +209,7 @@ export default function AdminSlides() {
             {/* Image */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                الصورة
+                {t("image")}
               </label>
               <input
                 type="file"
@@ -221,7 +223,7 @@ export default function AdminSlides() {
             {form.image && (
               <div className="mt-4">
                 <p className="text-sm font-medium text-gray-700 mb-2">
-                  معاينة الصورة:
+                  {t("image_preview")}:
                 </p>
                 <img
                   src={form.image || "/placeholder.svg"}
@@ -237,7 +239,7 @@ export default function AdminSlides() {
                 type="submit"
                 className="bg-orange-500 hover:bg-orange-600 text-white px-6"
               >
-                {editId ? "تحديث السلايد" : "إضافة سلايد"}
+                {editId ? t("update_slide") : t("add_slide")}
               </Button>
               {editId && (
                 <Button
@@ -253,7 +255,7 @@ export default function AdminSlides() {
                   }}
                   className="bg-gray-500 hover:bg-gray-600 text-white"
                 >
-                  إلغاء
+                  {t("cancel")}
                 </Button>
               )}
             </div>
@@ -263,12 +265,12 @@ export default function AdminSlides() {
         {/* Slides List */}
         <div>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
-            الصور الحالية ({slides.length})
+            {t("current_images")} ({slides.length})
           </h2>
           {slides.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
               <p className="text-gray-500">
-                لا توجد صور حالياً. قم بإضافة صورة جديدة.
+                {t("no_images_yet")}
               </p>
             </div>
           ) : (
@@ -301,13 +303,13 @@ export default function AdminSlides() {
                         }}
                         className="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm"
                       >
-                        تعديل
+                        {t("edit")}
                       </Button>
                       <Button
                         onClick={() => handleDelete(slide._id)}
                         className="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm"
                       >
-                        حذف
+                        {t("delete")}
                       </Button>
                     </div>
                   </div>
