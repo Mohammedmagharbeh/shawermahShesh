@@ -322,7 +322,7 @@ function MyOrders() {
       <div className="mb-8 flex justify-between items-start flex-col sm:flex-row sm:items-center gap-4">
         <div className="flex items-center gap-3 mb-2">
           <Package className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">{t("your_orders")}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t("my past order")}</h1>
         </div>
         <p className="text-muted-foreground">
           {filteredOrders?.length === 0
