@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -7,7 +8,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/contexts/UserContext";
 
-// Helper to format cart items for order creation
+// مساعد لتنسيق المنتجات قبل إرسالها لقاعدة البيانات
 const formatOrderProducts = (products) => {
   if (!products) return [];
   return products.map((p) => ({
@@ -34,15 +35,15 @@ function PaymentSuccess() {
     loading: true,
     error: "",
     status: "",
-    paymentRef: "",
+    displayOrderId: "", // هنا سنخزن الرقم القصير (مثل 141-5520)
   });
 
   const isVerifying = useRef(false);
 
   useEffect(() => {
-    // 1. Get Order ID from URL Query Params (set in montyPay.js success_url)
+    // 1. استخراج الرقم من الرابط (URL) الذي أرسله MontyPay
     const params = new URLSearchParams(location.search);
-    const orderId = params.get("orderId");
+    const orderId = params.get("orderId"); 
 
     if (!orderId) {
       const errorMsg = t("missing_payment_reference");
@@ -51,12 +52,15 @@ function PaymentSuccess() {
       return;
     }
 
+    // تعيين الرقم القصير لعرضه فوراً في الواجهة
+    setState(prev => ({ ...prev, displayOrderId: orderId }));
+
     if (isVerifying.current) return;
     isVerifying.current = true;
 
     const verifyPayment = async () => {
       try {
-        // 2. Call MontyPay Status Endpoint
+        // 2. التحقق من حالة الدفع عبر السيرفر الخاص بك
         const res = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/montypay/status`,
           { orderId },
@@ -64,13 +68,12 @@ function PaymentSuccess() {
         );
 
         const data = res.data;
-        // Valid success statuses from MontyPay docs: 'settled', 'success', 'completed'
+        // الحالات التي تعتبر دفعاً ناجحاً
         const validStatuses = ["settled", "success", "completed", "paid"];
         const isPaid = validStatuses.includes(data.status?.toLowerCase());
 
         setState((prev) => ({
           ...prev,
-          paymentRef: data.payment_id || "",
           status: data.status,
         }));
 
@@ -78,7 +81,7 @@ function PaymentSuccess() {
           throw new Error(data.reason || t("payment_verification_failed"));
         }
 
-        // 3. Create/Update Order in Database
+        // 3. إتمام الطلب في قاعدة البيانات
         await handleOrderCompletion(data.payment_id, orderId);
 
         setState((prev) => ({ ...prev, loading: false }));
@@ -93,12 +96,11 @@ function PaymentSuccess() {
     };
 
     verifyPayment();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search]);
+  }, [location.search, t]);
 
   const handleOrderCompletion = async (paymentId, orderIdFromUrl) => {
     try {
-      // Check if we have a pending order in sessionStorage
+      // جلب بيانات الطلب المؤقتة من المتصفح
       const pendingOrderData = sessionStorage.getItem("pendingOrder");
 
       if (!pendingOrderData) {
@@ -107,22 +109,19 @@ function PaymentSuccess() {
 
       const orderData = JSON.parse(pendingOrderData);
 
-      if (!orderData.userId || !user?._id) {
-        throw new Error("User ID is missing");
-      }
-
-      // Create order after payment success
+      // إنشاء الطلب النهائي
       await createOrder({
         products: formatOrderProducts(orderData.products),
         userId: orderData.userId,
         shippingAddress: orderData.shippingAddress,
         paymentStatus: "paid",
         paymentMethod: orderData.paymentMethod || "card",
-        transactionId: paymentId,
+        transactionId: paymentId, // معرف البنك الطويل (للتدقيق)
+        customOrderId: orderIdFromUrl, // الرقم القصير الخاص بنا
         paidAt: new Date(),
         orderType: orderData.orderType,
         userDetails: orderData.userDetails,
-        status: "Processing", // Set status to Processing since payment is successful
+        status: "Processing", 
       });
 
       clearCart();
@@ -134,7 +133,7 @@ function PaymentSuccess() {
     }
   };
 
-  // --- UI RENDER ---
+  // --- واجهة العرض (UI) ---
 
   if (state.loading) {
     return (
@@ -191,20 +190,20 @@ function PaymentSuccess() {
               {state.status}
             </span>
           </div>
-          {state.paymentRef && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">{t("invoice_id")}:</span>
-              <span className="font-medium text-gray-900">
-                {state.paymentRef}
-              </span>
-            </div>
-          )}
+
+          {/* عرض الرقم القصير المفهوم مكان رقم الفاتورة */}
+          <div className="flex justify-between border-t pt-2">
+            <span className="text-gray-500">{t("invoice_id")}:</span>
+            <span className="font-bold text-gray-900">
+              {state.displayOrderId}
+            </span>
+          </div>
         </div>
 
         <div className="space-y-3">
           <button
             onClick={() => navigate(`/orders/${user?._id}`)}
-            className="w-full py-3 rounded-lg bg-[#FFC400] text-balck hover:bg-[#DA0103] hover:text-white font-semibold transition"
+            className="w-full py-3 rounded-lg bg-[#FFC400] text-black hover:bg-[#DA0103] hover:text-white font-semibold transition"
           >
             {t("view_orders")}
           </button>
