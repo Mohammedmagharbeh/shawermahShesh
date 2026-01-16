@@ -115,7 +115,12 @@ function AdminDashboard() {
   useEffect(() => {
     socket.on("newOrder", (order) => {
       getAllOrders();
-      incomingOrder.push(order);
+      setIncomingOrder((prev) => {
+        // Check if order already exists to avoid duplicates
+        const exists = prev?.some((o) => o._id === order._id);
+        if (exists) return prev;
+        return [...(prev || []), order];
+      });
 
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification("📦 New Order!", {
@@ -131,8 +136,29 @@ function AdminDashboard() {
       }
     });
 
-    return () => socket.off("newOrder");
-  }, [soundAllowed, sound]);
+    socket.on("updatedOrder", (updatedOrder) => {
+      getAllOrders();
+      // Remove the order from incomingOrder if it was updated
+      setIncomingOrder((prev) => {
+        if (!prev || prev.length === 0) return prev;
+        const filtered = prev.filter((order) => order._id !== updatedOrder._id);
+        const result = filtered.length === 0 ? [] : filtered;
+        // Stop sound if no more incoming orders or if order was confirmed
+        if (result.length === 0 || updatedOrder.status === "Confirmed") {
+          if (sound) {
+            sound.pause();
+            sound.currentTime = 0;
+          }
+        }
+        return result;
+      });
+    });
+
+    return () => {
+      socket.off("newOrder");
+      socket.off("updatedOrder");
+    };
+  }, [soundAllowed, sound, getAllOrders]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -141,8 +167,34 @@ function AdminDashboard() {
     fetchOrders();
   }, []);
 
-  const handleStatusChange = (orderId, newStatus) =>
+  const stopSound = () => {
+    if (sound) {
+      sound.pause();
+      sound.currentTime = 0;
+    }
+  };
+
+  // Stop sound when there are no more incoming orders
+  useEffect(() => {
+    if (!incomingOrder || incomingOrder.length === 0) {
+      stopSound();
+    }
+  }, [incomingOrder, sound]);
+
+  const handleStatusChange = (orderId, newStatus) => {
     updateOrder(orderId, { status: newStatus });
+    // Remove the order from incomingOrder if it exists there
+    setIncomingOrder((prev) => {
+      if (!prev || prev.length === 0) return prev;
+      const filtered = prev.filter((order) => order._id !== orderId);
+      const result = filtered.length === 0 ? [] : filtered;
+      // Stop sound if no more incoming orders or if order was confirmed
+      if (result.length === 0 || newStatus === "Confirmed") {
+        stopSound();
+      }
+      return result;
+    });
+  };
 
   const handleDeleteOrder = (orderId) => {
     toast(
@@ -260,11 +312,16 @@ function AdminDashboard() {
                   open={incomingOrder.length > 0}
                   key={o._id}
                   onOpenChange={(open) => {
-                    if (!open && sound) {
-                      sound.pause();
-                      sound.currentTime = 0;
+                    if (!open) {
+                      stopSound();
+                      setIncomingOrder((prev) => {
+                        if (!prev || prev.length === 0) return [];
+                        const filtered = prev.filter(
+                          (ord) => ord._id !== o._id
+                        );
+                        return filtered.length === 0 ? [] : filtered;
+                      });
                     }
-                    !open && setIncomingOrder(null);
                   }}
                 >
                   <DialogContent>
@@ -290,17 +347,19 @@ function AdminDashboard() {
                     <div className="flex gap-2 mt-4 justify-end">
                       <Button
                         onClick={() => {
-                          if (sound && incomingOrder.length === 1) {
-                            sound.pause();
-                            sound.currentTime = 0;
-                          }
-                          setIncomingOrder(null);
+                          // Stop sound when confirming order
+                          stopSound();
                           updateOrder(o._id, {
                             status: "Confirmed",
                           });
-                          setIncomingOrder(
-                            incomingOrder.filter((ord) => ord !== o)
-                          );
+                          // Remove the order from incomingOrder
+                          setIncomingOrder((prev) => {
+                            if (!prev || prev.length === 0) return [];
+                            const filtered = prev.filter(
+                              (ord) => ord._id !== o._id
+                            );
+                            return filtered.length === 0 ? [] : filtered;
+                          });
                         }}
                       >
                         Accept
