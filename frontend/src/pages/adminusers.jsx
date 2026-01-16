@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Loading from "@/componenet/common/Loading";
 import { useUser } from "@/contexts/UserContext";
+import { useTranslation } from "react-i18next";
 
 const AdminUsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -37,6 +38,7 @@ const AdminUsersPage = () => {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const { user } = useUser();
+  const { t } = useTranslation();
 
   // نجيب المستخدمين مرة واحدة عند تحميل الصفحة ليظهر عددهم دائمًا
   useEffect(() => {
@@ -56,7 +58,7 @@ const AdminUsersPage = () => {
       setUsers(data);
     } catch (err) {
       console.error("خطأ في جلب المستخدمين:", err);
-      toast.error("فشل في جلب المستخدمين");
+      toast.error(t("failed_fetch_users"));
     } finally {
       setLoading(false);
     }
@@ -64,7 +66,7 @@ const AdminUsersPage = () => {
 
   const handleAddUser = async () => {
     if (!newUser.phone) {
-      toast.error("يرجى ملء جميع الحقول");
+      toast.error(t("fill_all_fields"));
       return;
     }
     try {
@@ -81,11 +83,11 @@ const AdminUsersPage = () => {
       );
       setNewUser({ phone: "", role: "user" });
       fetchUsers();
-      toast.success("تم إضافة المستخدم بنجاح");
+      toast.success(t("user_added_success"));
     } catch (err) {
       console.error("خطأ في إضافة المستخدم:", err);
       // toast.error("فشل في إضافة المستخدم");
-      toast.error(err.response?.data?.message || "فشل في إضافة المستخدم");
+      toast.error(err.response?.data?.message || t("user_add_failed"));
     } finally {
       setActionLoading(false);
     }
@@ -108,10 +110,10 @@ const AdminUsersPage = () => {
       );
       setEditUserId(null);
       fetchUsers();
-      toast.success("تم تحديث الصلاحية بنجاح");
+      toast.success(t("role_updated_success"));
     } catch (err) {
       console.error("خطأ في تعديل الرول:", err);
-      toast.error("فشل في تحديث الصلاحية");
+      toast.error(t("role_update_failed"));
     } finally {
       setActionLoading(false);
     }
@@ -149,15 +151,15 @@ const AdminUsersPage = () => {
             </div>
             <div>
               <h1 className="text-3xl md:text-5xl font-bold text-red-700 leading-tight">
-                لوحة إدارة المستخدمين
+                {t("users_management")}
               </h1>
               <p className="text-gray-600 mt-1">
-                إدارة المستخدمين والصلاحيات بكل سهولة
+                {t("manage_users_permissions")}
               </p>
             </div>
           </div>
           <div className="px-6 py-3 bg-red-700 rounded-xl shadow-lg text-white text-center">
-            <p className="text-sm">إجمالي المستخدمين</p>
+            <p className="text-sm">{t("total_users")}</p>
             <p className="text-3xl font-bold">{users.length}</p>
           </div>
         </div>
@@ -167,14 +169,14 @@ const AdminUsersPage = () => {
           <div className="flex items-center gap-3 mb-6">
             <UserPlus className="w-6 h-6 text-red-700" />
             <h2 className="text-2xl font-bold text-gray-800">
-              إضافة مستخدم جديد
+              {t("add_new_user")}
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <Input
                 type="text"
-                placeholder="رقم الهاتف"
+                placeholder={t("phone_placeholder")}
                 value={newUser.phone}
                 onChange={(e) =>
                   setNewUser({ ...newUser, phone: e.target.value })
@@ -191,12 +193,12 @@ const AdminUsersPage = () => {
                 }
               >
                 <SelectTrigger className="border border-gray-300 rounded-xl h-12">
-                  <SelectValue placeholder="اختر الصلاحية" />
+                  <SelectValue placeholder={t("select_role")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">مستخدم</SelectItem>
-                  <SelectItem value="admin">مدير</SelectItem>
-                  <SelectItem value="employee">موظف</SelectItem>
+                  <SelectItem value="user">{t("user_role")}</SelectItem>
+                  <SelectItem value="admin">{t("admin_role")}</SelectItem>
+                  <SelectItem value="employee">{t("employee_role")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -211,7 +213,7 @@ const AdminUsersPage = () => {
                 ) : (
                   <UserPlus className="w-5 h-5 ml-2" />
                 )}
-                إضافة مستخدم
+                {t("add_user")}
               </Button>
             </div>
           </div>
@@ -222,7 +224,7 @@ const AdminUsersPage = () => {
           onClick={() => setShowUsers(!showUsers)}
           className="bg-red-700 text-white rounded-xl px-4 py-2 hover:bg-red-800"
         >
-          {showUsers ? "إخفاء المستخدمين" : "إظهار المستخدمين"}
+          {showUsers ? t("hide_users") : t("show_users")}
         </Button>
 
         {/* Users List */}
@@ -252,12 +254,16 @@ const AdminUsersPage = () => {
                     <div className="flex gap-2">
                       <Select value={editRole} onValueChange={setEditRole}>
                         <SelectTrigger className="border border-gray-300 rounded-xl h-10">
-                          <SelectValue placeholder="اختر الصلاحية" />
+                          <SelectValue placeholder={t("select_role")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="user">مستخدم</SelectItem>
-                          <SelectItem value="admin">مدير</SelectItem>
-                          <SelectItem value="employee">موظف</SelectItem>
+                          <SelectItem value="user">{t("user_role")}</SelectItem>
+                          <SelectItem value="admin">
+                            {t("admin_role")}
+                          </SelectItem>
+                          <SelectItem value="employee">
+                            {t("employee_role")}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <Button
@@ -265,14 +271,14 @@ const AdminUsersPage = () => {
                         disabled={actionLoading}
                         className="bg-red-700 text-white rounded-xl px-3"
                       >
-                        حفظ
+                        {t("save_changes")}
                       </Button>
                       <Button
                         onClick={() => setEditUserId(null)}
                         variant="outline"
                         className="border border-gray-300 rounded-xl px-3"
                       >
-                        إلغاء
+                        {t("cancel")}
                       </Button>
                     </div>
                   ) : (
@@ -284,7 +290,7 @@ const AdminUsersPage = () => {
                       variant="outline"
                       className="border border-red-700 text-red-700 rounded-xl px-3"
                     >
-                      تعديل الصلاحية
+                      {t("edit_role")}
                     </Button>
                   )}
                 </div>

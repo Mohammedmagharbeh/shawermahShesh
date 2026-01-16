@@ -394,6 +394,9 @@ exports.updateOrder = async (req, res) => {
       await sendOrderConfirm(updatedOrder.userId.phone);
     }
 
+    const io = req.app.get("io");
+    if (io) io.emit("updatedOrder", updatedOrder);
+
     res.status(200).json(updatedOrder);
   } catch (err) {
     console.error("updateOrder error:", err);

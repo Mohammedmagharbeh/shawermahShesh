@@ -129,7 +129,7 @@ function Orders() {
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-7xl pt-10">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold text-foreground">
@@ -196,23 +196,26 @@ function Orders() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground">
-                        {t("date")}:
+                        {t("date")}
                       </span>
                       <span className="text-sm text-foreground">
-                        {new Date(order.createdAt).toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(order.createdAt).toLocaleDateString(
+                          selectedLanguage === "ar" ? "ar" : "en-GB",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-muted-foreground">
-                      {t("status")}:
+                      {t("status")}
                     </span>
                     <Select
                       value={order.status || "Not Set"}
@@ -291,13 +294,19 @@ function Orders() {
                               </div>
                             )}
                             <div className="flex gap-1 mt-1">
-                              {item.isSpicy !== null && (
+                              {item.hasSpicy && item.isSpicy !== null && (
                                 <Badge>{item.isSpicy ? "حار" : "عادي"}</Badge>
                               )}
 
-                              <Badge>{t(item.selectedType)}</Badge>
-                              <Badge>{t(item.selectedProtein)}</Badge>
-                            </div>{" "}
+                              <div className="flex gap-1">
+                                {item.productId?.hasTypeChoices && (
+                                  <Badge>{t(item.selectedType)}</Badge>
+                                )}
+                                {item.productId?.hasProteinChoices && (
+                                  <Badge>{t(item.selectedProtein)}</Badge>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">

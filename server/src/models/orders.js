@@ -20,7 +20,6 @@ const ordersSchema = new mongoose.Schema(
             price: Number,
           },
         ],
-
         priceAtPurchase: { type: Number, required: true },
         isSpicy: { type: Boolean, default: false },
         notes: { type: String, default: "" },
@@ -65,10 +64,36 @@ const ordersSchema = new mongoose.Schema(
       },
       required: true,
     },
-    sequenceNumber: { type: Number, required: true },
+    // جعلناه غير مطلوب (required: false) لأننا سنولده تلقائياً بالأسفل
+    sequenceNumber: { type: Number, unique: true },
   },
   { timestamps: true }
 );
+
+
+ordersSchema.pre("save", async function (next) {
+  const doc = this;
+
+  if (doc.isNew) {
+    try {
+      const lastOrder = await mongoose
+        .model("orders")
+        .findOne({}, { sequenceNumber: 1 })
+        .sort({ sequenceNumber: -1 }); 
+
+      if (lastOrder && lastOrder.sequenceNumber) {
+        doc.sequenceNumber = lastOrder.sequenceNumber + 1;
+      } else {
+        doc.sequenceNumber = 3140;
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    next();
+  }
+});
 
 const Order = mongoose.model("orders", ordersSchema);
 module.exports = Order;

@@ -312,7 +312,7 @@ export default function Products() {
                                     >
                                       {product.hasProteinChoices ||
                                       product.hasTypeChoices
-                                        ? "According To Your Choices"
+                                        ? t("according_to_your_choices")
                                         : `${product.basePrice} ${t("jod")}`}
                                     </p>
                                   )}
