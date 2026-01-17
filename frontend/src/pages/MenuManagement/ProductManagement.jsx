@@ -52,6 +52,14 @@ function ProductManagement({
     fetchCategories();
   }, [fetchCategories]);
 
+  // أضف هذه الدالة داخل مكون ProductManagement
+const handleRadioChange = (e) => {
+  setFormData({
+    ...formData,
+    additionsSelectionType: e.target.value,
+  });
+};
+
   // --- Submit Product ---
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -336,31 +344,32 @@ function ProductManagement({
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-2">
-                  <Label className="inline-flex gap-2 items-center">
-                    <Input
-                      type="radio"
-                      name="additonSelectType"
-                      value="radio"
-                      required={formData.additions.length > 0}
-                      checked={formData.additionsSelectionType === "radio"}
-                      onChange={handleInputChange}
-                    />
-                    One Choice
-                  </Label>
-                  <Label className="inline-flex gap-2 items-center">
-                    <Input
-                      type="radio"
-                      name="additonSelectType"
-                      value="checkbox"
-                      required={formData.additions.length > 0}
-                      checked={formData.additionsSelectionType === "checkbox"}
-                      onChange={handleInputChange}
-                    />
-                    Multiple Choices
-                  </Label>
-                </div>
+               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-2">
+  <Label className="inline-flex gap-2 items-center">
+    <Input
+      type="radio"
+      name="additionsSelectionType" // صحح الخطأ الإملائي "additon" → "addition"
+      value="radio"
+      required={formData.additions.length > 0}
+      checked={formData.additionsSelectionType === "radio"}
+      onChange={handleRadioChange} 
+    />
+    {t("one_choice")}
+  </Label>
+  <Label className="inline-flex gap-2 items-center">
+    <Input
+      type="radio"
+      name="additionsSelectionType"
+      value="checkbox"
+      required={formData.additions.length > 0}
+      checked={formData.additionsSelectionType === "checkbox"}
+      onChange={handleRadioChange} 
+    />
+    {t("multiple_choices")}
+  </Label>
+</div>
               </div>
+
 
               {formData.additions?.length === 0 && (
                 <p className="text-sm text-muted-foreground">
@@ -574,3 +583,5 @@ function ProductManagement({
 }
 
 export default ProductManagement;
+
+
