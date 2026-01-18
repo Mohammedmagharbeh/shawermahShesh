@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const http = require("http");
 const { Server } = require("socket.io");
+const fixUserIndexes = require("./utils/fixIndexes");
 
 // Routes
 const orderRoutes = require("./routes/orderRoutes");
@@ -31,6 +32,11 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
 connectDB();
+
+// Fix database indexes
+setTimeout(() => {
+  fixUserIndexes();
+}, 2000);
 
 const server = http.createServer(app);
 const io = new Server(server, {

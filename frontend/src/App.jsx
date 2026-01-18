@@ -206,8 +206,8 @@
 
 // export default App;
 
-
 import Login from "./componenet/log";
+import EmployeeLogin from "./componenet/EmployeeLogin";
 import Home from "./pages/Home/Home";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Cart from "./pages/Cart/Cart";
@@ -253,7 +253,7 @@ function App() {
   useEffect(() => {
     const checkBanTime = () => {
       const hour = new Date().getHours();
-      
+
       const isBanTime = hour >= 3 && hour < 10;
 
       if (isBanTime && isAuthenticated && user?.role !== "admin") {
@@ -263,10 +263,10 @@ function App() {
           icon: "🌙",
           duration: 8000,
           style: {
-            borderRadius: '12px',
-            background: '#1e1e2e',
-            color: '#fff',
-            border: '1px solid #ff4b4b'
+            borderRadius: "12px",
+            background: "#1e1e2e",
+            color: "#fff",
+            border: "1px solid #ff4b4b",
           },
         });
       }
@@ -290,6 +290,7 @@ function App() {
             <Route path="/JobsPage" element={<JobsPage />} />
             <Route path="/" index element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/employee-login" element={<EmployeeLogin />} />
             <Route path="/slides" element={<AdminSlides />} />
             <Route path="/story" element={<Story />} />
             <Route path="/otp-verification" element={<OtpVerification />} />
@@ -302,7 +303,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            
+
             <Route
               path="/cart"
               element={
@@ -426,15 +427,16 @@ function App() {
           </Routes>
         </main>
       </BrowserRouter>
-      
+
       {/* مكون التنبيهات العام */}
-      <Toaster 
-        position="top-center" 
+      <Toaster
+        position="top-center"
         reverseOrder={false}
         toastOptions={{
           style: {
-            fontFamily: i18n.language === "ar" ? "Tajawal, sans-serif" : "inherit"
-          }
+            fontFamily:
+              i18n.language === "ar" ? "Tajawal, sans-serif" : "inherit",
+          },
         }}
       />
     </div>

@@ -1,4 +1,3 @@
-
 // "use client";
 
 // import { Badge } from "@/components/ui/badge";
@@ -354,11 +353,11 @@ function Header() {
                 <NavLink
                   key={key.label}
                   to={
-                    key.label === "our_story" 
-                      ? "/story" 
+                    key.label === "our_story"
+                      ? "/story"
                       : key.label === "jobs"
-                      ? "/JobsPage"
-                      : `/#${key.label}`
+                        ? "/JobsPage"
+                        : `/#${key.label}`
                   }
                   label={t(key.label)}
                   onClick={handleLinkClick}
@@ -450,16 +449,31 @@ function Header() {
                 <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             ) : (
-              <Link to="/login" className="hidden sm:block flex-shrink-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-gradient-to-r border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-9 sm:h-10 md:h-11 text-xs sm:text-sm font-bold gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105"
-                >
-                  <span>{t("login")}</span>
-                  <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                </Button>
-              </Link>
+              <div className="hidden sm:flex gap-2 flex-shrink-0">
+                <Link to="/login">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-gradient-to-r border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-9 sm:h-10 md:h-11 text-xs sm:text-sm font-bold gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105"
+                  >
+                    <span>{t("login")}</span>
+                    <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </Button>
+                </Link>
+                <Link to="/employee-login">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-gradient-to-r border-2 border-yellow-500 text-yellow-900 hover:bg-gradient-to-br hover:from-yellow-600 hover:to-yellow-700 hover:text-white h-9 sm:h-10 md:h-11 text-xs sm:text-sm font-bold gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 transition-all duration-300 hover:shadow-lg hover:scale-105"
+                  >
+                    <span className="hidden lg:inline">
+                      {t("employee_login") || "Employee"}
+                    </span>
+                    <span className="lg:hidden">👔</span>
+                    <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </Button>
+                </Link>
+              </div>
             )}
 
             <Button
@@ -491,11 +505,11 @@ function Header() {
                     className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
                     key={key.label}
                     to={
-                      key.label === "our_story" 
-                        ? "/story" 
+                      key.label === "our_story"
+                        ? "/story"
                         : key.label === "jobs"
-                        ? "/JobsPage"
-                        : `/#${key.label}`
+                          ? "/JobsPage"
+                          : `/#${key.label}`
                     }
                     label={t(key.label)}
                     onClick={handleLinkClick}
@@ -534,16 +548,36 @@ function Header() {
                     {t("logout")} <LogOut className="h-4 w-4 xs:h-5 xs:w-5" />
                   </Button>
                 ) : (
-                  <Link to="/login" className="block" onClick={handleLinkClick}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full bg-gradient-to-r border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-11 xs:h-12 text-sm xs:text-base font-bold gap-2 transition-all duration-300 shadow-md"
+                  <div className="flex flex-col gap-2 w-full">
+                    <Link
+                      to="/login"
+                      className="block"
+                      onClick={handleLinkClick}
                     >
-                      {t("login")}
-                      <LogIn className="h-4 w-4 xs:h-5 xs:w-5" />
-                    </Button>
-                  </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full bg-gradient-to-r border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-11 xs:h-12 text-sm xs:text-base font-bold gap-2 transition-all duration-300 shadow-md"
+                      >
+                        {t("login")}
+                        <LogIn className="h-4 w-4 xs:h-5 xs:w-5" />
+                      </Button>
+                    </Link>
+                    <Link
+                      to="/employee-login"
+                      className="block"
+                      onClick={handleLinkClick}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full bg-gradient-to-r border-2 border-yellow-500 text-yellow-900 hover:bg-gradient-to-br hover:from-yellow-600 hover:to-yellow-700 hover:text-white h-11 xs:h-12 text-sm xs:text-base font-bold gap-2 transition-all duration-300 shadow-md"
+                      >
+                        {t("employee_login") || "Employee Login"}
+                        <LogIn className="h-4 w-4 xs:h-5 xs:w-5" />
+                      </Button>
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>

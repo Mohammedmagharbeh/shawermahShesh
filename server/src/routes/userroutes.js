@@ -15,8 +15,8 @@ const validateJWT = require("../middlewares/validateJWT");
 routes.get("/users", getuser);
 
 routes.get("/me", validateJWT, (req, res) => {
-  const { _id, phone, role } = req.user;
-  res.json({ _id, phone, role });
+  const { _id, phone, role, username } = req.user;
+  res.json({ _id, phone, role, username });
 });
 
 routes.post("/login", async (req, res) => {
@@ -42,12 +42,50 @@ routes.post("/login", async (req, res) => {
   }
 });
 
-// Verify OTP → issue JWT
-routes.post("/verify-otp", async (req, res) => {
-  const { phone, newPhone, otp } = req.body;
+// Employee Login (no phone required, uses username/identifier)
+routes.post("/employee-login", async (req, res) => {
+  const { username } = req.body;
 
   try {
-    const user = await userModel.findOne({ phone });
+    const employeeUsername = username || "employee";
+    const EMPLOYEE_PHONE = "0799635582"; // Fixed phone number for OTP
+
+    let user = await userModel.findOne({
+      username: employeeUsername,
+      role: "employee",
+    });
+
+    if (!user) {
+      user = new userModel({ username: employeeUsername, role: "employee" });
+    }
+
+    const otp = generateOTP();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 5 * 60 * 1000;
+    await user.save();
+
+    // Send OTP to the fixed employee phone number
+    await sendOTP(EMPLOYEE_PHONE, otp);
+
+    return res.status(200).json({ msg: "OTP sent to your phone" });
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+});
+
+// Verify OTP → issue JWT
+routes.post("/verify-otp", async (req, res) => {
+  const { phone, newPhone, otp, username } = req.body;
+
+  try {
+    let user;
+    if (username) {
+      // Employee login verification
+      user = await userModel.findOne({ username, role: "employee" });
+    } else {
+      // Regular customer login
+      user = await userModel.findOne({ phone });
+    }
     if (!user) return res.status(400).json({ msg: "User not found" });
 
     // Validate OTP
@@ -59,12 +97,21 @@ routes.post("/verify-otp", async (req, res) => {
     // Clear OTP
     user.otp = null;
     user.otpExpires = null;
-    user.phone = newPhone ?? phone; // Update phone number if needed
+    if (phone && newPhone) {
+      user.phone = newPhone;
+    } else if (phone && !newPhone) {
+      user.phone = phone;
+    }
     await user.save();
 
     // Issue JWT
     const token = jwt.sign(
-      { id: user._id, phone: user.phone, role: user.role },
+      {
+        id: user._id,
+        phone: user.phone,
+        username: user.username,
+        role: user.role,
+      },
       process.env.JWT_SECRET,
       {
         expiresIn: "24h",
