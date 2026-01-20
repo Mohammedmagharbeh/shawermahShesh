@@ -499,7 +499,7 @@
 //                     >
 //                       {t("checkout_card_payment")}
 //                     </label>
-                    
+
 //                     {/* Small & Responsive Payment Icons */}
 //                     <div className="flex items-center gap-1 bg-white px-1.5 py-1 rounded border border-gray-50 shrink-0">
 //                       <img
@@ -571,9 +571,9 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { getAdditionsPrice, getProductPrice } from "@/constants";
 import { useSearchParams } from "react-router-dom";
-
+import cliq from '../../src/assets/cliq.png'
 // The specific ID that triggers Test Mode
-const TEST_PRODUCT_ID = "692f3104231cb0add4c67ca9";
+const TEST_PRODUCT_ID = "696f8dadfa26824a3b34e5af";
 
 function Checkout() {
   const { cart, total } = useCart();
@@ -722,7 +722,7 @@ function Checkout() {
       const sessionDescription = cart.products
         .map((p) => p.productId.name.ar)
         .join(" / ");
-        
+
       const orderData = {
         ...body,
         totalPrice: totalWithDelivery,
@@ -1002,50 +1002,45 @@ function Checkout() {
               </div>
 
               {/* Payment Method */}
-          {/* Payment Method */}
-<div className="pt-6 border-t border-gray-200">
-  <h3 className="font-semibold text-gray-900 mb-4 text-xs md:text-sm">
-    {t("checkout_payment_method")}
-  </h3>
-  <div className="space-y-2">
-    {/* خيار الدفع بالبطاقة */}
-    <div className={`flex items-center gap-2 p-2.5 border rounded-xl transition-all ${paymentMethod === "card" ? "border-red-500 bg-red-50/30" : "border-gray-200"}`}>
-      <input type="radio" id="card" name="PM" value="card" checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} className="text-red-500 w-3.5 h-3.5" />
-      <label htmlFor="card" className="flex-1 font-medium text-gray-700 cursor-pointer text-[11px] md:text-sm">
-        {t("checkout_card_payment")}
-      </label>
-      <div className="flex items-center gap-1 bg-white px-1.5 py-1 rounded border border-gray-50 shrink-0">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-2 md:h-2.5 w-auto object-contain" alt="Visa" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-3 md:h-3.5 w-auto object-contain" alt="Mastercard" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" className="h-2.5 md:h-3 w-auto object-contain" alt="Apple Pay" />
-      </div>
-    </div>
+              <div className="pt-6 border-t border-gray-200">
+                <h3 className="font-semibold text-gray-900 mb-4 text-xs md:text-sm">
+                  {t("checkout_payment_method")}
+                </h3>
+                <div className="space-y-2">
+                  {/* خيار الدفع بالبطاقة */}
+                  <div className={`flex items-center gap-2 p-2.5 border rounded-xl transition-all ${paymentMethod === "card" ? "border-red-500 bg-red-50/30" : "border-gray-200"}`}>
+                    <input type="radio" id="card" name="PM" value="card" checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} className="text-red-500 w-3.5 h-3.5" />
+                    <label htmlFor="card" className="flex-1 font-medium text-gray-700 cursor-pointer text-[11px] md:text-sm">
+                      {t("checkout_card_payment")}
+                    </label>
+                    <div className="flex items-center gap-1 bg-white px-1.5 py-1 rounded border border-gray-50 shrink-0">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-2 md:h-2.5 w-auto object-contain" alt="Visa" />
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-3 md:h-3.5 w-auto object-contain" alt="Mastercard" />
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" className="h-2.5 md:h-3 w-auto object-contain" alt="Apple Pay" />
+                    </div>
+                  </div>
 
-    {/* خيار الدفع كليك - مع الصورة */}
-    <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-red-300 transition-colors opacity-80 bg-gray-50/50">
-      <input 
-        className="w-4 h-4 text-red-500 border-gray-300 focus:ring-red-500 cursor-not-allowed" 
-        id="click" 
-        name="PaymentMethod" 
-        type="radio" 
-        // disabled={true}
-onClick={() => toast.error(t("cliq_unavailable_msg"))}      />
-      <label htmlFor="click" className="flex-1 font-medium text-gray-700 cursor-not-allowed">
-        {t("checkout_click_payment")}
-      </label>
-      
-      <img 
-        src="/src/assets/cliq.png" 
-        className="w-12 h-auto object-contain grayscale hover:grayscale-0 transition-all" 
-        alt="CliQ Payment"
-        onError={(e) => {
-          // في حال فشل تحميل الصورة المحلية، سيستخدم رابط مباشر لشعار كليك كخيار احتياطي
-          e.target.src = "https://www.jopacc.com/ebv4.0/root_storage/en/eb_list_page/cliq_logo.png";
-        }}
-      />
-    </div>
-  </div>
-</div>
+                  {/* خيار الدفع كليك - مع الصورة */}
+                  <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-red-300 transition-colors opacity-80 bg-gray-50/50">
+                    <input
+                      className="w-4 h-4 text-red-500 border-gray-300 focus:ring-red-500 cursor-not-allowed"
+                      id="click"
+                      name="PaymentMethod"
+                      type="radio"
+                      // disabled={true}
+                      onClick={() => toast.error(t("cliq_unavailable_msg"))} />
+                    <label htmlFor="click" className="flex-1 font-medium text-gray-700 cursor-not-allowed">
+                      {t("checkout_click_payment")}
+                    </label>
+
+                    <img
+                      src={cliq}
+                      className="w-12 h-auto object-contain grayscale hover:grayscale-0 transition-all"
+                      alt="CliQ Payment"
+                    />
+                  </div>
+                </div>
+              </div>
 
               <button
                 className={`w-full bg-gradient-to-r ${isSubmitting ? "from-gray-500 to-gray-600" : "from-red-500 to-red-600"} text-white py-4 px-8 rounded-xl font-bold text-lg transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl`}
