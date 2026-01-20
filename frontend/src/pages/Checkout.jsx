@@ -560,7 +560,6 @@
 
 // export default Checkout;
 
-
 import Loading from "@/componenet/common/Loading";
 import { useCart } from "@/contexts/CartContext";
 import { useUser } from "@/contexts/UserContext";
@@ -571,7 +570,7 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { getAdditionsPrice, getProductPrice } from "@/constants";
 import { useSearchParams } from "react-router-dom";
-import cliq from '../../src/assets/cliq.png'
+import cliq from "../../src/assets/cliq.png";
 // The specific ID that triggers Test Mode
 const TEST_PRODUCT_ID = "696f8dadfa26824a3b34e5af";
 
@@ -630,7 +629,7 @@ function Checkout() {
               "Content-Type": "application/json",
               authorization: `Bearer ${user.token}`,
             },
-          }
+          },
         );
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -744,7 +743,7 @@ function Checkout() {
             orderId: sessionId,
             description: sessionDescription,
           }),
-        }
+        },
       );
 
       const paymentData = await paymentResponse.json();
@@ -781,7 +780,7 @@ function Checkout() {
       className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50"
       onSubmit={handlePlaceOrder}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-18">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             {t("complete_order")}
@@ -887,7 +886,7 @@ function Checkout() {
                     required={!isTestMode}
                     onChange={(e) => {
                       const selected = areas.find(
-                        (a) => a.name === e.target.value
+                        (a) => a.name === e.target.value,
                       );
                       setSelectedArea(selected);
                     }}
@@ -949,7 +948,8 @@ function Checkout() {
                         <ul className="mt-2 text-sm text-gray-600 list-disc list-inside flex gap-2">
                           {product.additions.map((addition, i) => (
                             <Badge key={i}>
-                              {addition.name[selectedLanguage] || "Deleted Addition"}
+                              {addition.name[selectedLanguage] ||
+                                "Deleted Addition"}
                               {Number(addition.price) > 0 && (
                                 <> ({addition.price.toFixed(2)} JOD)</>
                               )}
@@ -972,7 +972,9 @@ function Checkout() {
                       </span>
                       <span className="text-sm text-gray-500">
                         {"+"}
-                        {getAdditionsPrice(product.additions).toFixed(2)} JOD {t("additions")}
+                        {getAdditionsPrice(product.additions).toFixed(
+                          2,
+                        )} JOD {t("additions")}
                       </span>
                     </div>
                   </div>
@@ -1008,30 +1010,64 @@ function Checkout() {
                 </h3>
                 <div className="space-y-2">
                   {/* خيار الدفع بالبطاقة */}
-                  <div className={`flex items-center gap-2 p-2.5 border rounded-xl transition-all ${paymentMethod === "card" ? "border-red-500 bg-red-50/30" : "border-gray-200"}`}>
-                    <input type="radio" id="card" name="PM" value="card" checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} className="text-red-500 w-3.5 h-3.5" />
-                    <label htmlFor="card" className="flex-1 font-medium text-gray-700 cursor-pointer text-[11px] md:text-sm">
+                  <div
+                    className={`flex items-center gap-2 p-2.5 border rounded-xl transition-all ${paymentMethod === "card" ? "border-red-500 bg-red-50/30" : "border-gray-200"}`}
+                  >
+                    <input
+                      type="radio"
+                      id="card"
+                      name="PM"
+                      value="card"
+                      checked={paymentMethod === "card"}
+                      onChange={() => setPaymentMethod("card")}
+                      className="text-red-500 w-3.5 h-3.5"
+                    />
+                    <label
+                      htmlFor="card"
+                      className="flex-1 font-medium text-gray-700 cursor-pointer text-[11px] md:text-sm"
+                    >
                       {t("checkout_card_payment")}
                     </label>
                     <div className="flex items-center gap-1 bg-white px-1.5 py-1 rounded border border-gray-50 shrink-0">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-2 md:h-2.5 w-auto object-contain" alt="Visa" />
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-3 md:h-3.5 w-auto object-contain" alt="Mastercard" />
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" className="h-2.5 md:h-3 w-auto object-contain" alt="Apple Pay" />
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
+                        className="h-2 md:h-2.5 w-auto object-contain"
+                        alt="Visa"
+                      />
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                        className="h-3 md:h-3.5 w-auto object-contain"
+                        alt="Mastercard"
+                      />
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg"
+                        className="h-2.5 md:h-3 w-auto object-contain"
+                        alt="Apple Pay"
+                      />
                     </div>
                   </div>
 
                   {/* خيار الدفع كليك - مع الصورة */}
-                  <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-red-300 transition-colors opacity-80 bg-gray-50/50">
+                  <div className="flex relative items-center gap-3 p-3 pt-9 border border-gray-200 rounded-lg hover:border-red-300 transition-colors opacity-80 bg-gray-50/50">
+                    <Badge className="text-sm absolute top-0 right-0 text-white font-medium mt-1">
+                      {t("checkout_click_coming_soon")}
+                    </Badge>
                     <input
                       className="w-4 h-4 text-red-500 border-gray-300 focus:ring-red-500 cursor-not-allowed"
                       id="click"
                       name="PaymentMethod"
                       type="radio"
-                      // disabled={true}
-                      onClick={() => toast.error(t("cliq_unavailable_msg"))} />
-                    <label htmlFor="click" className="flex-1 font-medium text-gray-700 cursor-not-allowed">
-                      {t("checkout_click_payment")}
-                    </label>
+                      disabled={true}
+                      onClick={() => toast.error(t("cliq_unavailable_msg"))}
+                    />
+                    <div className="flex-1">
+                      <label
+                        htmlFor="click"
+                        className="font-medium text-gray-700 cursor-not-allowed block"
+                      >
+                        {t("checkout_click_payment")}
+                      </label>
+                    </div>
 
                     <img
                       src={cliq}
