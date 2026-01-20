@@ -718,9 +718,9 @@ function Checkout() {
       const now = new Date();
       const sessionId = `${now.getDate()}${now.getMonth() + 1}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-      const sessionDescription = cart.products
-        .map((p) => p.productId.name.ar)
-        .join(" / ");
+      const sessionDescription = isTestMode
+        ? "Test"
+        : cart.products.map((p) => p.productId.name.ar).join(" / ");
 
       const orderData = {
         ...body,
