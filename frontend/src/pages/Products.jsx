@@ -25,6 +25,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableItem } from "@/components/SortableItem";
+import { Flame } from "lucide-react"; // Import an icon for hot deals
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -159,7 +160,7 @@ export default function Products() {
     <div className="min-h-screen bg-gray-50/50 arabic-font pt-16 pb-20" dir={i18n.dir()}>
       <div className="container mx-auto px-4 max-w-5xl">
 
-        {/* --- Category Tabs (Stickyish Horizontal Scroll) --- */}
+        {/* --- Category Tabs --- */}
         <div className="sticky top-16 z-30 bg-gray-50/95 backdrop-blur-sm py-2 -mx-4 px-4 mb-4 border-b border-gray-100/50">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
             <DndContext
@@ -231,6 +232,54 @@ export default function Products() {
               <div className="grid grid-cols-1 gap-4">
                 {products.map((product) => {
                   const isOutOfStock = !product.inStock;
+                  const hasDiscount = product.discount > 0;
+                  const discountPercent = product.discount;
+
+                  let priceDisplay;
+
+                  if (product.hasProteinChoices || product.hasTypeChoices) {
+                    priceDisplay = (
+                      <span className="text-xs sm:text-sm font-medium text-gray-600">
+                        {t("according_to_your_choices")}
+                      </span>
+                    );
+                  } else {
+                    const originalPrice = Number(product.basePrice);
+                    const discountedPrice = originalPrice - (originalPrice * discountPercent / 100);
+
+                    if (hasDiscount) {
+                      priceDisplay = (
+                        <div className="flex flex-col items-start leading-none gap-1">
+                          {/* Discounted Price (Big & Red) */}
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-red-600 text-lg sm:text-xl font-bold">
+                              {discountedPrice.toFixed(2)}
+                            </span>
+                            <span className="text-xs sm:text-sm font-medium text-red-600">{t("jod")}</span>
+                          </div>
+
+                          {/* Old Price + Savings Pill */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-400 line-through text-xs sm:text-sm decoration-gray-400">
+                              {originalPrice.toFixed(2)} {t("jod")}
+                            </span>
+                            <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded border border-green-200">
+                              {t("save")} {discountPercent}%
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      priceDisplay = (
+                        <div className="flex items-baseline gap-1">
+                          <span className={`text-base sm:text-xl font-bold ${isOutOfStock ? "text-gray-500" : "text-primary"}`}>
+                            {originalPrice.toFixed(2)}
+                          </span>
+                          <span className={`text-xs sm:text-sm font-normal ${isOutOfStock ? "text-gray-500" : "text-primary"}`}>{t("jod")}</span>
+                        </div>
+                      );
+                    }
+                  }
 
                   return (
                     <SortableItem key={product._id} id={product._id}>
@@ -244,18 +293,30 @@ export default function Products() {
                           <div className="flex gap-3 sm:gap-5 h-full">
 
                             {/* Product Image */}
-                            <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                            <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden border border-gray-100">
                               <img
                                 src={product.image || product_placeholder}
                                 alt={product.name[selectedLanguage]}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 loading="lazy"
                               />
+
+                              {/* Out of Stock Overlay */}
                               {isOutOfStock && (
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                  <Badge variant="destructive" className="text-[10px] sm:text-xs font-bold">
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                  <Badge variant="destructive" className="text-[10px] sm:text-xs font-bold px-2 py-1">
                                     {t("out_of_stock") || "Out of Stock"}
                                   </Badge>
+                                </div>
+                              )}
+
+                              {/* 🔥 PROMINENT DISCOUNT BADGE 🔥 */}
+                              {!isOutOfStock && hasDiscount && (
+                                <div className="absolute top-0 ltr:right-0 rtl:left-0 z-10">
+                                  <div className="bg-green-600 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-bl-lg rounded-tr-none ltr:rounded-tr-lg ltr:rounded-bl-lg rtl:rounded-tl-lg rtl:rounded-br-lg shadow-md flex items-center gap-1">
+                                    <Flame className="w-3 h-3 fill-white" />
+                                    {discountPercent}% OFF
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -274,39 +335,9 @@ export default function Products() {
                               </div>
 
                               <div className="flex items-end justify-between gap-2 mt-3">
-                                {/* Price Display */}
-                                <div className="font-bold">
-                                  {product.discount > 0 &&
-                                    !product.hasProteinChoices &&
-                                    !product.hasTypeChoices ? (
-                                    <div className="flex flex-col items-start leading-none">
-                                      <span className="text-orange-600 text-lg sm:text-xl">
-                                        {product.discountedPrice
-                                          ? Number(product.discountedPrice).toFixed(2)
-                                          : (
-                                            product.basePrice -
-                                            (product.basePrice * product.discount) / 100
-                                          ).toFixed(2)}
-                                        <span className="text-xs sm:text-sm font-normal mx-1">{t("jod")}</span>
-                                      </span>
-                                      <span className="text-gray-400 line-through text-xs">
-                                        {Number(product.basePrice).toFixed(2)}
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    <span className={`text-base sm:text-xl ${isOutOfStock ? "text-gray-500" : "text-primary"}`}>
-                                      {product.hasProteinChoices || product.hasTypeChoices ? (
-                                        <span className="text-xs sm:text-sm font-medium text-gray-600">
-                                          {t("according_to_your_choices")}
-                                        </span>
-                                      ) : (
-                                        <>
-                                          {Number(product.basePrice).toFixed(2)}
-                                          <span className="text-xs sm:text-sm font-normal mx-1">{t("jod")}</span>
-                                        </>
-                                      )}
-                                    </span>
-                                  )}
+                                {/* Price Display Section */}
+                                <div className="font-bold min-h-[2.5rem] flex items-end">
+                                  {priceDisplay}
                                 </div>
 
                                 {/* Actions */}
@@ -327,7 +358,7 @@ export default function Products() {
                                   <ProductDialog
                                     id={product._id}
                                     disabled={isOutOfStock}
-                                    className="h-8 w-8 sm:h-9 sm:w-9"
+                                    className={`h-8 w-8 sm:h-9 sm:w-9 ${hasDiscount && !isOutOfStock ? "bg-red-600 hover:bg-red-700 text-white border-none shadow-sm" : ""}`}
                                   />
                                 </div>
                               </div>
