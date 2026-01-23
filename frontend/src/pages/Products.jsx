@@ -16,6 +16,7 @@ import {
   closestCenter,
   PointerSensor,
   useSensors,
+  TouchSensor,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -24,7 +25,6 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableItem } from "@/components/SortableItem";
-import { TouchSensor } from "@dnd-kit/core";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -127,8 +127,6 @@ export default function Products() {
     }
   };
 
-  if (isLoading) return <Loading />;
-
   const handleInStock = async (v, product) => {
     try {
       const res = await fetch(
@@ -155,60 +153,70 @@ export default function Products() {
     }
   };
 
+  if (isLoading) return <Loading />;
+
   return (
-    <div className="min-h-screen bg-gray-50 arabic-font pt-12" dir="rtl">
-      <div className="container mx-auto px-2 xs:px-3 sm:px-4 py-6 sm:py-8 lg:py-10">
-        {/* Categories */}
-        <div className="flex gap-1 xs:gap-1.5 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 scrollbar-hide">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={(e) => handleDragEnd(e, categories, "categories")}
-          >
-            <SortableContext
-              items={categories.map((c) => c._id)} // ✅ Use categories, not products
-              strategy={horizontalListSortingStrategy}
-              disabled={!enableDND}
+    <div className="min-h-screen bg-gray-50/50 arabic-font pt-16 pb-20" dir={i18n.dir()}>
+      <div className="container mx-auto px-4 max-w-5xl">
+
+        {/* --- Category Tabs (Stickyish Horizontal Scroll) --- */}
+        <div className="sticky top-16 z-30 bg-gray-50/95 backdrop-blur-sm py-2 -mx-4 px-4 mb-4 border-b border-gray-100/50">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={(e) => handleDragEnd(e, categories, "categories")}
             >
-              {categories.map((cat) => {
-                const catLabel = cat.name?.[selectedLanguage];
-                return (
+              <SortableContext
+                items={categories.map((c) => c._id)}
+                strategy={horizontalListSortingStrategy}
+                disabled={!enableDND}
+              >
+                {categories.map((cat) => (
                   <SortableItem
                     key={cat._id}
                     id={cat._id}
                     disabled={!enableDND}
+                    className="snap-start"
                   >
                     <button
                       onClick={() => setSelectedCategory(cat._id)}
                       disabled={enableDND}
-                      className={`whitespace-nowrap px-3 xs:px-4 sm:px-6 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm sm:text-base rounded-lg transition flex-shrink-0 ${
-                        selectedCategory === cat._id
-                          ? "bg-yellow-500 text-white shadow-md"
-                          : "bg-white text-gray-700 border border-gray-300 hover:border-gray-400"
-                      }`}
+                      className={`
+                        whitespace-nowrap px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 border
+                        ${selectedCategory === cat._id
+                          ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
+                          : "bg-white text-muted-foreground border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                        }
+                      `}
                     >
-                      {catLabel}
+                      {cat.name?.[selectedLanguage] || cat.name?.ar}
                     </button>
                   </SortableItem>
-                );
-              })}
-            </SortableContext>
-          </DndContext>
+                ))}
+              </SortableContext>
+            </DndContext>
+          </div>
         </div>
 
+        {/* --- Admin Reorder Switch --- */}
         {user.role === "admin" && (
-          <div className="flex items-center w-fit mx-auto px-10 gap-2 py-5 my-5 font-semibold border-2 rounded-md ">
-            <Switch
-              id="dndconroller"
-              checked={enableDND}
-              onCheckedChange={(v) => setEnableDND(v)}
-              className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
-              dir={i18n.language === "ar" ? "rtl" : "ltr"}
-            />
-            <Label className="text-sm">{t("enable_reorder")}</Label>
+          <div className="flex justify-end mb-4">
+            <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border shadow-sm">
+              <Label htmlFor="dndconroller" className="text-sm cursor-pointer select-none">
+                {t("enable_reorder")}
+              </Label>
+              <Switch
+                id="dndconroller"
+                checked={enableDND}
+                onCheckedChange={setEnableDND}
+                dir="ltr"
+              />
+            </div>
           </div>
         )}
 
+        {/* --- Product List --- */}
         {products.length > 0 ? (
           <DndContext
             sensors={sensors}
@@ -220,129 +228,107 @@ export default function Products() {
               strategy={verticalListSortingStrategy}
               disabled={!enableDND}
             >
-              <div className="space-y-3 xs:space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 gap-4">
                 {products.map((product) => {
                   const isOutOfStock = !product.inStock;
 
                   return (
                     <SortableItem key={product._id} id={product._id}>
                       <Card
-                        className={`overflow-hidden border-0 shadow-sm transition bg-white ${
-                          isOutOfStock
-                            ? "opacity-60 grayscale hover:shadow-sm"
-                            : "hover:shadow-md"
-                        }`}
+                        className={`
+                          overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-200 bg-white group
+                          ${isOutOfStock ? "opacity-75 grayscale-[0.8]" : ""}
+                        `}
                       >
-                        <CardContent className="p-0">
-                          <div className="flex flex-row-reverse items-center gap-2 sm:gap-4 p-2 xs:p-3 sm:p-4 relative">
-                            {isOutOfStock && (
-                              <Badge
-                                variant="destructive"
-                                className="absolute top-1 xs:top-2 left-1 xs:left-2 z-10 text-xs xs:text-sm"
-                              >
-                                {t("out_of_stock") || "Out of Stock"}
-                              </Badge>
-                            )}
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="flex gap-3 sm:gap-5 h-full">
 
                             {/* Product Image */}
-                            <div className="flex-shrink-0 w-20 h-20 xs:w-24 xs:h-24 sm:w-32 sm:h-32 relative ml-2">
+                            <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
                               <img
                                 src={product.image || product_placeholder}
                                 alt={product.name[selectedLanguage]}
-                                className={`w-full h-full object-cover rounded-lg ${
-                                  isOutOfStock ? "grayscale opacity-70" : ""
-                                }`}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                loading="lazy"
                               />
+                              {isOutOfStock && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                  <Badge variant="destructive" className="text-[10px] sm:text-xs font-bold">
+                                    {t("out_of_stock") || "Out of Stock"}
+                                  </Badge>
+                                </div>
+                              )}
                             </div>
 
-                            {/* Product Info */}
-                            <div className="flex-1 flex flex-col justify-between min-w-0">
-                              <div className="min-w-0">
-                                <h3
-                                  className={`text-sm xs:text-base sm:text-lg font-bold mb-0.5 xs:mb-1 line-clamp-1 ${
-                                    isOutOfStock
-                                      ? "text-gray-500"
-                                      : "text-gray-900"
-                                  }`}
-                                >
-                                  {product.name[selectedLanguage]}
-                                </h3>
-                                <p
-                                  className={`text-xs xs:text-sm line-clamp-2 leading-6 ${isOutOfStock ? "text-gray-400" : "text-gray-600"}`}
-                                >
+                            {/* Product Details */}
+                            <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5">
+                              <div>
+                                <div className="flex justify-between items-start gap-2">
+                                  <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-tight line-clamp-2">
+                                    {product.name[selectedLanguage]}
+                                  </h3>
+                                </div>
+                                <p className="text-xs sm:text-sm text-gray-500 mt-1 line-clamp-2 leading-relaxed">
                                   {product?.description?.[selectedLanguage]}
                                 </p>
                               </div>
 
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-1 xs:mt-2 gap-2">
-                                {/* Price */}
-                                <div className="min-w-0">
+                              <div className="flex items-end justify-between gap-2 mt-3">
+                                {/* Price Display */}
+                                <div className="font-bold">
                                   {product.discount > 0 &&
-                                  !product.hasProteinChoices &&
-                                  !product.hasTypeChoices ? (
-                                    <div className="flex items-center gap-1 xs:gap-2">
-                                      <p
-                                        className={`text-base xs:text-lg sm:text-xl font-bold ${
-                                          isOutOfStock
-                                            ? "text-gray-400"
-                                            : "text-orange-500"
-                                        }`}
-                                      >
-                                        JOD{" "}
+                                    !product.hasProteinChoices &&
+                                    !product.hasTypeChoices ? (
+                                    <div className="flex flex-col items-start leading-none">
+                                      <span className="text-orange-600 text-lg sm:text-xl">
                                         {product.discountedPrice
-                                          ? product.discountedPrice.toFixed(2)
+                                          ? Number(product.discountedPrice).toFixed(2)
                                           : (
-                                              product.basePrice -
-                                              (product.basePrice *
-                                                product.discount) /
-                                                100
-                                            ).toFixed(2)}
-                                      </p>
-                                      <p className="text-gray-400 line-through text-xs xs:text-sm">
-                                        {product.basePrice}
-                                      </p>
+                                            product.basePrice -
+                                            (product.basePrice * product.discount) / 100
+                                          ).toFixed(2)}
+                                        <span className="text-xs sm:text-sm font-normal mx-1">{t("jod")}</span>
+                                      </span>
+                                      <span className="text-gray-400 line-through text-xs">
+                                        {Number(product.basePrice).toFixed(2)}
+                                      </span>
                                     </div>
                                   ) : (
-                                    <p
-                                      className={`text-base xs:text-lg sm:text-xl font-bold line-clamp-1 ${
-                                        isOutOfStock
-                                          ? "text-gray-400"
-                                          : "text-red-600"
-                                      }`}
-                                    >
-                                      {product.hasProteinChoices ||
-                                      product.hasTypeChoices
-                                        ? t("according_to_your_choices")
-                                        : `${product.basePrice} ${t("jod")}`}
-                                    </p>
+                                    <span className={`text-base sm:text-xl ${isOutOfStock ? "text-gray-500" : "text-primary"}`}>
+                                      {product.hasProteinChoices || product.hasTypeChoices ? (
+                                        <span className="text-xs sm:text-sm font-medium text-gray-600">
+                                          {t("according_to_your_choices")}
+                                        </span>
+                                      ) : (
+                                        <>
+                                          {Number(product.basePrice).toFixed(2)}
+                                          <span className="text-xs sm:text-sm font-normal mx-1">{t("jod")}</span>
+                                        </>
+                                      )}
+                                    </span>
                                   )}
                                 </div>
 
-                                {/* Product Dialog Button */}
-                                <div className="flex gap-5 flex-shrink-0">
-                                  <ProductDialog
-                                    id={product._id}
-                                    disabled={isOutOfStock}
-                                  />
-                                  {(user.role === "admin" ||
-                                    user.role === "employee") && (
-                                    <div className="flex flex-col">
-                                      <Label
-                                        htmlFor={`inStock-${product._id}`}
-                                        className="text-sm"
-                                      >
-                                        {t("is_in_stock")}
-                                      </Label>
+                                {/* Actions */}
+                                <div className="flex items-center gap-3">
+                                  {/* Admin Stock Toggle */}
+                                  {(user.role === "admin" || user.role === "employee") && (
+                                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                       <Switch
                                         id={`inStock-${product._id}`}
-                                        className={`${i18n.language === "ar" ? "flex-row-reverse" : ""}`}
                                         checked={!isOutOfStock}
-                                        onCheckedChange={(v) =>
-                                          handleInStock(v, product)
-                                        }
+                                        onCheckedChange={(v) => handleInStock(v, product)}
+                                        className="scale-75 data-[state=checked]:bg-green-600"
+                                        dir='ltr'
                                       />
                                     </div>
                                   )}
+
+                                  <ProductDialog
+                                    id={product._id}
+                                    disabled={isOutOfStock}
+                                    className="h-8 w-8 sm:h-9 sm:w-9"
+                                  />
                                 </div>
                               </div>
                             </div>
@@ -356,8 +342,11 @@ export default function Products() {
             </SortableContext>
           </DndContext>
         ) : (
-          !isLoading && ( // ✅ Only show when not loading
-            <p className="text-center text-gray-500">{t("no_products")}</p>
+          !isLoading && (
+            <div className="flex flex-col items-center justify-center py-20 text-center opacity-70">
+              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4 text-2xl">🍽️</div>
+              <p className="text-gray-500 font-medium">{t("no_products")}</p>
+            </div>
           )
         )}
       </div>

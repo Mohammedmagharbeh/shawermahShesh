@@ -114,19 +114,19 @@ function ProductManagement({ setProducts, formData, setFormData, editingId, setE
           {/* Configuration Switches */}
           <div className="bg-yellow-500 p-3 rounded-lg flex flex-col gap-4">
             <div className="flex items-center gap-2">
-              <Switch id="hasTypeChoices" checked={formData.hasTypeChoices} onCheckedChange={(v) => setFormData({ ...formData, hasTypeChoices: v })} className={i18n.language === "ar" ? "flex-row-reverse" : ""} />
+              <Switch id="hasTypeChoices" checked={formData.hasTypeChoices} onCheckedChange={(v) => setFormData({ ...formData, hasTypeChoices: v })} dir='ltr' />
               <Label htmlFor="hasTypeChoices" className="cursor-pointer">{t("has_type_choices")}</Label>
             </div>
             <div className="flex items-center gap-2">
-              <Switch id="hasProteinChoices" checked={formData.hasProteinChoices} onCheckedChange={(v) => setFormData({ ...formData, hasProteinChoices: v })} className={i18n.language === "ar" ? "flex-row-reverse" : ""} />
+              <Switch id="hasProteinChoices" checked={formData.hasProteinChoices} onCheckedChange={(v) => setFormData({ ...formData, hasProteinChoices: v })} dir='ltr' />
               <Label htmlFor="hasProteinChoices" className="cursor-pointer">{t("has_protein_choices")}</Label>
             </div>
             <div className="flex items-center gap-2">
-              <Switch id="isSpicy" checked={Boolean(formData.isSpicy)} onCheckedChange={(v) => setFormData((prev) => ({ ...prev, isSpicy: Boolean(v) }))} className={i18n.language === "ar" ? "flex-row-reverse" : ""} />
+              <Switch id="isSpicy" checked={Boolean(formData.isSpicy)} onCheckedChange={(v) => setFormData((prev) => ({ ...prev, isSpicy: Boolean(v) }))} dir='ltr' />
               <Label htmlFor="isSpicy" className="cursor-pointer">{t("has_spicy")}</Label>
             </div>
             <div className="flex items-center gap-2">
-              <Switch id="inStock" checked={Boolean(formData.inStock)} onCheckedChange={(v) => setFormData((prev) => ({ ...prev, inStock: Boolean(v) }))} className={i18n.language === "ar" ? "flex-row-reverse" : ""} />
+              <Switch id="inStock" checked={Boolean(formData.inStock)} onCheckedChange={(v) => setFormData((prev) => ({ ...prev, inStock: Boolean(v) }))} dir='ltr' />
               <Label htmlFor="inStock" className="cursor-pointer">{t("is_in_stock")}</Label>
             </div>
           </div>
