@@ -350,7 +350,7 @@ export default function Products() {
                                         checked={!isOutOfStock}
                                         onCheckedChange={(v) => handleInStock(v, product)}
                                         className="scale-75 data-[state=checked]:bg-green-600"
-                                        dir='ltr'
+                                        dir="ltr"
                                       />
                                     </div>
                                   )}
