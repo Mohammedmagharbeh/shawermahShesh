@@ -41,7 +41,7 @@ export function ProductDialog({ id, triggerLabel, disabled = false, className })
   const [selectedType, setSelectedType] = useState(null);
   const [selectedProtein, setSelectedProtein] = useState(null);
 
-  const buttonLabel = triggerLabel || t("view_product");
+  const buttonLabel = triggerLabel || t("View product");
 
   // --- Fetch Data ---
   useEffect(() => {
