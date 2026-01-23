@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 
 function EmployeeLogin() {
   const { t, i18n } = useTranslation();
-  const [employeeName, setEmployeeName] = useState(""); 
+  const [employeeName, setEmployeeName] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [timer, setTimer] = useState(0);
@@ -75,7 +75,7 @@ function EmployeeLogin() {
     try {
       const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/employee-login`, {
         username: EMPLOYEE_USERNAME,
-        employeeName: employeeName, 
+        employeeName: employeeName,
       });
 
       if (res.data.msg === "OTP sent to your phone") {
@@ -174,19 +174,19 @@ function EmployeeLogin() {
                 onChange={(e) => setEmployeeName(e.target.value)}
                 placeholder={t("employee_name_placeholder")}
                 className="w-full p-4 bg-white rounded-xl text-black text-center font-bold focus:ring-4 focus:ring-yellow-400/50 outline-none transition-all"
+                minLength={3}
                 required
               />
             </div>
-            
+
             <motion.button
               type="submit"
               whileHover={isOpen && !loading ? { scale: 1.02 } : {}}
               whileTap={isOpen && !loading ? { scale: 0.98 } : {}}
-              className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${
-                isOpen 
-                ? "bg-yellow-400 text-black hover:bg-yellow-500 shadow-yellow-600/20" 
+              className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${isOpen
+                ? "bg-yellow-400 text-black hover:bg-yellow-500 shadow-yellow-600/20"
                 : "bg-gray-500 text-gray-200 cursor-not-allowed opacity-70"
-              }`}
+                }`}
               disabled={loading || !isOpen}
             >
               {loading ? t("sending") : t("send_otp")}
@@ -210,11 +210,11 @@ function EmployeeLogin() {
             >
               {loading ? t("verifying") : t("verify_otp")}
             </motion.button>
-            
-            <button 
-              type="button" 
-              onClick={handleSendOTP} 
-              disabled={timer > 0 || loading} 
+
+            <button
+              type="button"
+              onClick={handleSendOTP}
+              disabled={timer > 0 || loading}
               className="text-white text-sm underline opacity-80 disabled:no-underline disabled:opacity-50"
             >
               {timer > 0 ? t("resend_after", { seconds: timer }) : t("resend_otp")}
