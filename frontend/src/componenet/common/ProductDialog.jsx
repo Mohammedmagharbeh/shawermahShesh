@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Dialog as DialogUi,
   DialogTrigger,
@@ -22,25 +22,30 @@ import { useUser } from "@/contexts/UserContext";
 import shesho from "@/assets/shesho.png";
 import shishi from "@/assets/shishsi.png";
 
-export function ProductDialog({ id, triggerLabel, disabled = false }) {
-  const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
+export function ProductDialog({ id, triggerLabel, disabled = false, className }) {
   const { t } = useTranslation();
+  const { user } = useUser();
+  const { addToCart } = useCart();
+  const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
 
-  const buttonLabel = triggerLabel || t("View product");
+  // --- State ---
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState({});
-  const [selectedAdditions, setSelectedAdditions] = useState([]);
+
+  // Selection State
+  const [quantity, setQuantity] = useState(1);
+  const [selectedAdditions, setSelectedAdditions] = useState([]); // Stores Array of IDs
   const [spicy, setSpicy] = useState(null);
   const [notes, setNotes] = useState("");
-  const { addToCart } = useCart();
-  const selectedLanguage = localStorage.getItem("i18nextLng");
-  const [open, setOpen] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedProtein, setSelectedProtein] = useState(null);
-  const { user } = useUser();
 
+  const buttonLabel = triggerLabel || t("view_product");
+
+  // --- Fetch Data ---
   useEffect(() => {
-    if (!open) return;
+    if (!open || !id) return;
 
     const fetchProductDetails = async () => {
       try {
@@ -54,60 +59,91 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
             },
           }
         );
-        if (!response.ok) throw new Error(t("fetch_product_failed"));
+        if (!response.ok) throw new Error("Failed");
         const data = await response.json();
         setProduct(data.data);
       } catch (error) {
-        console.error("Error fetching product details:", error);
+        console.error(error);
+        toast.error(t("fetch_error"));
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchProductDetails();
-  }, [id, open]);
+    fetchProductDetails();
+  }, [id, open, user.token]);
+
+  // --- 💰 PRICE CALCULATION ENGINE 💰 ---
+
+  // 1. Determine the Base Price (Standard or Matrix)
+  const basePrice = useMemo(() => {
+    if (!product) return 0;
+    let price = Number(product.basePrice || 0);
+
+    // If product has choices, override base price from matrix
+    if (product.hasProteinChoices && product.hasTypeChoices) {
+      if (selectedProtein && selectedType) {
+        price = Number(product.prices?.[selectedProtein]?.[selectedType] ?? price);
+      }
+    } else if (product.hasProteinChoices) {
+      if (selectedProtein) {
+        price = Number(product.prices?.[selectedProtein] ?? price);
+      }
+    } else if (product.hasTypeChoices) {
+      if (selectedType) {
+        price = Number(product.prices?.[selectedType] ?? price);
+      }
+    }
+    return price;
+  }, [product, selectedProtein, selectedType]);
+
+  // 2. Calculate Discount on Base Price Only
+  const discountedBasePrice = useMemo(() => {
+    if (product.discount > 0) {
+      const discountAmount = (basePrice * product.discount) / 100;
+      return basePrice - discountAmount;
+    }
+    return basePrice;
+  }, [basePrice, product.discount]);
+
+  // 3. Calculate Additions Total
+  const additionsPrice = useMemo(() => {
+    if (!product.additions) return 0;
+    return selectedAdditions.reduce((total, id) => {
+      const addition = product.additions.find((a) => a._id === id);
+      return total + (addition ? Number(addition.price || 0) : 0);
+    }, 0);
+  }, [selectedAdditions, product.additions]);
+
+  // 4. Final Total per Unit
+  const pricePerUnit = discountedBasePrice + additionsPrice;
+
+  // 5. Grand Total
+  const grandTotal = pricePerUnit * quantity;
+
+
+  // --- Handlers ---
 
   const handleQuantityChange = (increment) => {
     setQuantity((prev) => Math.max(1, prev + increment));
   };
 
-  const getProductPrice = (product) => {
-    if (!product) return 0;
-    let basePrice = Number(product?.basePrice || 0);
-
-    if (product.hasProteinChoices && product.hasTypeChoices) {
-      basePrice = Number(
-        product.prices[selectedProtein]?.[selectedType] ?? basePrice
-      );
-    } else if (product.hasProteinChoices) {
-      basePrice = Number(product.prices[selectedProtein] ?? basePrice);
-    } else if (product.hasTypeChoices) {
-      basePrice = Number(product.prices?.[selectedType] ?? basePrice);
-    }
-
-    return basePrice;
-  };
-
-  const getFinalPrice = () => {
-    const price = getProductPrice(product);
-    if (product.discount && product.discount > 0) {
-      return price - (price * product.discount) / 100;
-    }
-    return price;
-  };
-
-  const getTotalPrice = () => {
-    const basePrice = getFinalPrice();
-    const additionsPrice = selectedAdditions.reduce((sum, additionId) => {
-      const addition = product.additions?.find((a) => a._id === additionId);
-      return sum + (addition ? Number(addition.price) : 0);
-    }, 0);
-
-    return (basePrice + additionsPrice) * quantity;
+  const resetForm = () => {
+    setSelectedAdditions([]);
+    setSpicy(null);
+    setSelectedProtein(null);
+    setSelectedType(null);
+    setNotes("");
+    setQuantity(1);
   };
 
   const handleAddToCart = (e) => {
     e.preventDefault();
+
+    // Validation
+    if (product.hasProteinChoices && !selectedProtein) return toast.error(t("choose_protein_req"));
+    if (product.hasTypeChoices && !selectedType) return toast.error(t("choose_type_req"));
+    if (product.isSpicy && spicy === null) return toast.error(t("choose_spicy_req"));
 
     const selectedFullAdditions = product.additions?.filter((a) =>
       selectedAdditions.includes(a._id)
@@ -122,350 +158,267 @@ export function ProductDialog({ id, triggerLabel, disabled = false }) {
       { selectedProtein, selectedType }
     );
 
-    // Reset selections
-    setSelectedAdditions([]);
-    setSpicy(null);
-    setSelectedProtein(null);
-    setSelectedType(null);
-    setNotes("");
-    setQuantity(1);
-
-    toast.success(
-      `${t("added_successfully")} ${quantity} ${t("of")} ${product.name[selectedLanguage]}`
-    );
     setOpen(false);
+    resetForm();
+    toast.success(t("added_to_cart"));
+  };
+
+  // Helper: Should we show the price yet?
+  const isSelectionComplete = () => {
+    if (product.hasProteinChoices && !selectedProtein) return false;
+    if (product.hasTypeChoices && !selectedType) return false;
+    return true;
   };
 
   return (
-    <DialogUi open={open} onOpenChange={setOpen}>
+    <DialogUi open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+      {/* Trigger Button - Styled cleanly */}
       <DialogTrigger asChild>
-        <Button variant="outline" disabled={disabled}>
+        <Button
+          variant="outline"
+          disabled={disabled}
+          className={`hover:bg-accent hover:text-accent-foreground transition-colors `}
+        >
           {buttonLabel}
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-[95vw] sm:w-full sm:max-w-2xl md:max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
-        <DialogHeader className="px-0 sm:px-4">
-          <DialogTitle className="text-lg sm:text-xl md:text-2xl font-bold break-words">
-            {product.name?.[selectedLanguage] || t("product_details")}
-          </DialogTitle>
-          <DialogDescription className="text-sm sm:text-base break-words">
-            {product.category?.name?.[selectedLanguage] || "category"}
-          </DialogDescription>
-        </DialogHeader>
+      {/* FIX: Added max-h-[90vh] and flex-col to parent. 
+         This ensures the modal has a hard limit on height.
+      */}
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-2xl md:max-w-4xl max-h-[90vh] flex flex-col p-0 bg-white gap-0 outline-none overflow-hidden">
 
         {loading ? (
-          <Loading />
+          <div className="p-10"><Loading /></div>
         ) : (
-          <form
-            onSubmit={handleAddToCart}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 py-2 sm:py-4 min-w-0"
-          >
-            {/* Image */}
-            <div className="relative w-full min-w-0">
-              <div className="aspect-square bg-gray-50 rounded-xl sm:rounded-2xl overflow-hidden shadow-md sm:shadow-lg">
-                <img
-                  src={product.image || product_placeholder}
-                  alt={product.name?.[selectedLanguage]}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
+          <form onSubmit={handleAddToCart} className="flex flex-col h-full overflow-hidden">
+
+            {/* FIX: Added 'min-h-0'. 
+                This allows this flex child to shrink below its content size and activate scrollbars 
+                instead of pushing the footer off screen.
+            */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-h-0">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+                {/* --- Image Section --- */}
+                <div className="relative w-full h-fit shrink-0">
+                  <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                    <img
+                      src={product.image || product_placeholder}
+                      alt={product.name?.[selectedLanguage]}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {product.discount > 0 && (
+                    <Badge className="absolute top-4 right-4 bg-red-600 text-white text-sm px-3 py-1 shadow-md">
+                      {t("save")} {product.discount}%
+                    </Badge>
+                  )}
+                </div>
+
+                {/* --- Details Section --- */}
+                <div className="flex flex-col space-y-6">
+
+                  {/* Header & Price */}
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                      {product.name?.[selectedLanguage]}
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {product.category?.name?.[selectedLanguage]}
+                    </p>
+
+                    {/* Price Display */}
+                    <div className="flex items-center gap-3">
+                      {!isSelectionComplete() ? (
+                        <p className="text-lg font-medium text-primary">
+                          {t("according_to_choices")}
+                        </p>
+                      ) : (
+                        <>
+                          <span className="text-3xl font-bold text-red-600">
+                            {pricePerUnit.toFixed(2)} {t("jod")}
+                          </span>
+                          {product.discount > 0 && (
+                            <span className="text-lg text-gray-400 line-through">
+                              {(basePrice + additionsPrice).toFixed(2)}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    <p className="mt-3 text-gray-600 leading-relaxed text-sm">
+                      {product.description?.[selectedLanguage]}
+                    </p>
+                  </div>
+
+                  {/* Options (Protein, Type, Spicy) */}
+                  <div className="space-y-5 pb-4">
+
+                    {/* Protein */}
+                    {product.hasProteinChoices && (
+                      <div className="space-y-3">
+                        <Label className="text-base font-semibold">{t("choose_protein")} <span className="text-red-500">*</span></Label>
+                        <div className="flex flex-wrap gap-3">
+                          {["chicken", "meat"].map((opt) => (
+                            <div
+                              key={opt}
+                              onClick={() => setSelectedProtein(opt)}
+                              className={`px-4 py-2 rounded-lg border cursor-pointer transition-all flex items-center gap-2 ${selectedProtein === opt ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 hover:border-gray-300"}`}
+                            >
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedProtein === opt ? "border-red-600" : "border-gray-400"}`}>
+                                {selectedProtein === opt && <div className="w-2 h-2 bg-red-600 rounded-full" />}
+                              </div>
+                              <span className="text-sm font-medium">{t(opt)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Type */}
+                    {product.hasTypeChoices && (
+                      <div className="space-y-3">
+                        <Label className="text-base font-semibold">{t("choose_type")} <span className="text-red-500">*</span></Label>
+                        <div className="flex flex-wrap gap-3">
+                          {["sandwich", "meal"].map((opt) => (
+                            <div
+                              key={opt}
+                              onClick={() => setSelectedType(opt)}
+                              className={`px-4 py-2 rounded-lg border cursor-pointer transition-all flex items-center gap-2 ${selectedType === opt ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 hover:border-gray-300"}`}
+                            >
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedType === opt ? "border-red-600" : "border-gray-400"}`}>
+                                {selectedType === opt && <div className="w-2 h-2 bg-red-600 rounded-full" />}
+                              </div>
+                              <span className="text-sm font-medium">{t(opt)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Spicy */}
+                    {product.isSpicy && (
+                      <div className="space-y-3">
+                        <Label className="text-base font-semibold">{t("choose_spicy_level")} <span className="text-red-500">*</span></Label>
+                        <div className="flex flex-wrap gap-3">
+                          {[true, false].map((val) => (
+                            <div
+                              key={val.toString()}
+                              onClick={() => setSpicy(val)}
+                              className={`px-4 py-2 rounded-lg border cursor-pointer transition-all flex items-center gap-2 ${spicy === val ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 hover:border-gray-300"}`}
+                            >
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${spicy === val ? "border-red-600" : "border-gray-400"}`}>
+                                {spicy === val && <div className="w-2 h-2 bg-red-600 rounded-full" />}
+                              </div>
+                              <span className="text-sm font-medium">{val ? t("spicy") : t("not_spicy")}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Additions */}
+                    {product.additions?.length > 0 && (
+                      <div className="space-y-3">
+                        <Label className="text-base font-semibold">{t("additions")}</Label>
+                        <div className="grid grid-cols-1 gap-2">
+                          {product.additions.map((addition) => {
+                            const isChecked = selectedAdditions.includes(addition._id);
+                            const isCheckbox = product.additionsSelectionType === "checkbox";
+                            const price = Number(addition.price);
+
+                            return (
+                              <div
+                                key={addition._id}
+                                onClick={() => {
+                                  if (isCheckbox) {
+                                    setSelectedAdditions(prev => prev.includes(addition._id) ? prev.filter(id => id !== addition._id) : [...prev, addition._id]);
+                                  } else {
+                                    setSelectedAdditions(prev => prev.includes(addition._id) ? [] : [addition._id]); // Radio toggle
+                                  }
+                                }}
+                                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${isChecked ? "border-red-500 bg-red-50/30" : "border-gray-200 hover:border-gray-300"}`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-5 h-5 flex items-center justify-center border transition-all ${isChecked ? "bg-red-600 border-red-600 text-white" : "bg-white border-gray-300"} ${isCheckbox ? "rounded-md" : "rounded-full"}`}>
+                                    {isChecked && (isCheckbox ? <div className="w-2.5 h-1.5 border-l-2 border-b-2 border-white rotate-[-45deg] mb-0.5" /> : <div className="w-2 h-2 bg-white rounded-full" />)}
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-gray-900">{addition.name?.[selectedLanguage]}</span>
+                                    {price > 0 && <span className="text-xs text-gray-500">+ {price.toFixed(2)} {t("jod")}</span>}
+                                  </div>
+                                </div>
+
+                                {/* Optional Images */}
+                                {product.category?.name?.en === "Kids" && (
+                                  <div className="flex-shrink-0">
+                                    {(addition.name?.[selectedLanguage]?.toLowerCase().includes("boy") || addition.name?.[selectedLanguage]?.includes("ولادي")) && (
+                                      <img src={shesho} alt="Boy" className="h-8 w-8 object-contain" />
+                                    )}
+                                    {(addition.name?.[selectedLanguage]?.toLowerCase().includes("girl") || addition.name?.[selectedLanguage]?.includes("بناتي")) && (
+                                      <img src={shishi} alt="Girl" className="h-8 w-8 object-contain" />
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Notes */}
+                    <div className="space-y-3 flex gap-2">
+                      <Label htmlFor="notes" className="text-base font-semibold">{t("notes")}</Label>
+                      <Textarea
+                        id="notes"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder={t("add_notes")}
+                        className="resize-none min-h-[80px] border p-2"
+                      />
+                    </div>
+
+                  </div>
+                </div>
               </div>
-              {product.category?.name && (
-                <Badge className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 max-w-[calc(100%-1rem)] truncate">
-                  {product.category.name?.[selectedLanguage]}
-                </Badge>
-              )}
             </div>
 
-            {/* Product details */}
-            <div className="flex flex-col space-y-3 sm:space-y-4 md:space-y-5 min-w-0">
-              <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 break-words">
-                  {product.name?.[selectedLanguage]}
-                </h1>
+            {/* FIX: Added 'shrink-0'. 
+               This ensures the footer never gets squashed or hidden by the flex-1 content above it.
+            */}
+            <div className="border-t p-4 sm:p-6 bg-gray-50/80 backdrop-blur-sm mt-auto shrink-0 z-10 w-full">
+              <div className="flex flex-col sm:flex-row items-stretch gap-4 max-w-4xl mx-auto">
 
-                {product.discount > 0 ? (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
-                    <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 break-words">
-                      {product.hasProteinChoices
-                        ? t("according_to_your_choice")
-                        : `JOD ${getFinalPrice().toFixed(2)}}`}
-                    </p>
-                    <p className="text-base sm:text-lg md:text-xl text-gray-400 line-through break-words">
-                      {product.hasProteinChoices
-                        ? t("according_to_your_choice")
-                        : `JOD {getProductPrice(product).toFixed(2)`}
-                    </p>
-                    <Badge className="bg-green-500 text-white text-xs sm:text-sm w-fit flex-shrink-0">
-                      {t("discount")} {product.discount}%
-                    </Badge>
-                  </div>
-                ) : (
-                  <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-3 sm:mb-4 break-words">
-                    {product.hasProteinChoices && !selectedProtein
-                      ? t("according_to_your_choices")
-                      : `JOD ${getProductPrice(product).toFixed(2)}`}
-                  </p>
-                )}
-              </div>
-
-              <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed break-words">
-                {product.description?.[selectedLanguage]}
-              </p>
-
-              {/* Protein choice */}
-              {product.hasProteinChoices && (
-                <div className="mt-2 sm:mt-4">
-                  <span className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3 block">
-                    {t("choose_protein")}
-                  </span>
-                  <div className="flex flex-wrap gap-3 sm:gap-4">
-                    {["chicken", "meat"].map((option) => (
-                      <Label
-                        key={option}
-                        className="inline-flex gap-2 items-center cursor-pointer"
-                      >
-                        <Input
-                          type="radio"
-                          name="protein"
-                          value={option}
-                          checked={selectedProtein === option}
-                          onChange={() => setSelectedProtein(option)}
-                          required
-                          className="w-4 h-4 sm:w-5 sm:h-5"
-                        />
-                        <span className="text-sm sm:text-base">
-                          {t(option)}
-                        </span>
-                      </Label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Type choice */}
-              {product.hasTypeChoices && (
-                <div className="mt-2 sm:mt-4">
-                  <span className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3 block">
-                    {t("choose_type")}
-                  </span>
-                  <div className="flex flex-wrap gap-3 sm:gap-4">
-                    {["sandwich", "meal"].map((option) => (
-                      <Label
-                        key={option}
-                        className="inline-flex gap-2 items-center cursor-pointer"
-                      >
-                        <Input
-                          type="radio"
-                          name="type"
-                          value={option}
-                          checked={selectedType === option}
-                          onChange={() => setSelectedType(option)}
-                          required
-                          className="w-4 h-4 sm:w-5 sm:h-5"
-                        />
-                        <span className="text-sm sm:text-base">
-                          {t(option)}
-                        </span>
-                      </Label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Spicy level */}
-              {product.isSpicy && (
-                <div className="mt-2 sm:mt-4">
-                  <span className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3 block">
-                    {t("choose_spicy_level")}
-                  </span>
-                  <div className="flex flex-wrap gap-3 sm:gap-4">
-                    <Label className="inline-flex gap-2 items-center cursor-pointer">
-                      <Input
-                        type="radio"
-                        name="spicy"
-                        value="yes"
-                        onChange={() => setSpicy(true)}
-                        className="w-4 h-4 sm:w-5 sm:h-5"
-                      />
-                      <span className="text-sm sm:text-base">{t("spicy")}</span>
-                    </Label>
-                    <Label className="inline-flex gap-2 items-center cursor-pointer">
-                      <Input
-                        type="radio"
-                        name="spicy"
-                        value="no"
-                        defaultChecked
-                        onChange={() => setSpicy(false)}
-                        className="w-4 h-4 sm:w-5 sm:h-5"
-                      />
-                      <span className="text-sm sm:text-base">
-                        {t("not_spicy")}
-                      </span>
-                    </Label>
-                  </div>
-                </div>
-              )}
-
-              {/* Additions */}
-              {product.additions && product.additions.length > 0 && (
-                <div className="mt-2 sm:mt-4">
-                  <span className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3 block">
-                    {t("additions") || "Additions"}
-                  </span>
-                  <div className="space-y-2 sm:space-y-3">
-                    {product.additions.map((addition) => {
-                      const isChecked = selectedAdditions.includes(
-                        addition._id
-                      );
-                      const isCheckbox =
-                        product.additionsSelectionType === "checkbox";
-                      const additionName =
-                        addition.name?.[selectedLanguage] || "";
-                      const additionPrice = Number(addition.price);
-
-                      return (
-                        <div
-                          key={addition._id}
-                          className="flex items-start sm:items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          {isCheckbox ? (
-                            <Input
-                              type="checkbox"
-                              id={addition._id}
-                              value={addition._id}
-                              checked={isChecked}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedAdditions((prev) => [
-                                    ...prev,
-                                    addition._id,
-                                  ]);
-                                } else {
-                                  setSelectedAdditions((prev) =>
-                                    prev.filter((id) => id !== addition._id)
-                                  );
-                                }
-                              }}
-                              className="w-4 h-4 sm:w-5 sm:h-5 mt-1 sm:mt-0 flex-shrink-0"
-                            />
-                          ) : (
-                            <Input
-                              type="radio"
-                              id={addition._id}
-                              value={addition._id}
-                              checked={isChecked}
-                              onChange={() =>
-                                setSelectedAdditions([addition._id])
-                              }
-                              className="w-4 h-4 sm:w-5 sm:h-5 mt-1 sm:mt-0 flex-shrink-0"
-                            />
-                          )}
-
-                          <Label
-                            htmlFor={addition._id}
-                            className="flex flex-wrap items-center gap-2 text-gray-700 text-sm sm:text-base cursor-pointer flex-1 min-w-0"
-                          >
-                            <span className="break-words min-w-0">
-                              {additionName}
-                            </span>
-
-                            {additionPrice > 0 && (
-                              <span className="text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap flex-shrink-0">
-                                (JOD {additionPrice.toFixed(2)})
-                              </span>
-                            )}
-
-                            {product.category?.name?.en === "Kids" && (
-                              <>
-                                {(additionName?.toLowerCase().includes("boy") ||
-                                  additionName?.includes("ولادي")) && (
-                                  <img
-                                    src={shesho}
-                                    alt="Boy"
-                                    className="rounded-xl max-h-12 sm:max-h-16 object-contain flex-shrink-0"
-                                  />
-                                )}
-
-                                {(additionName
-                                  ?.toLowerCase()
-                                  .includes("girl") ||
-                                  additionName?.includes("بناتي")) && (
-                                  <img
-                                    src={shishi}
-                                    alt="Girl"
-                                    className="rounded-xl max-h-12 sm:max-h-16 object-contain flex-shrink-0"
-                                  />
-                                )}
-                              </>
-                            )}
-                          </Label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Notes */}
-              <div className="mt-2 sm:mt-4">
-                <Label
-                  htmlFor="notes"
-                  className="text-sm sm:text-base font-medium text-gray-900 mb-2 block"
-                >
-                  {t("notes")}
-                </Label>
-                <Textarea
-                  id="notes"
-                  name="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="min-h-[80px] sm:min-h-[100px] text-sm sm:text-base resize-y w-full min-w-0 border-2 rounded-md"
-                  placeholder={
-                    t("add_notes") || "Add any special instructions..."
-                  }
-                />
-              </div>
-
-              {/* Quantity & Add to Cart */}
-              <div className="flex flex-col -mx-5 sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-4 sm:mt-6 pt-2 sm:pt-4 border-t border-gray-200 min-w-0">
-                <div className="flex items-center justify-center border-2 border-gray-200 rounded-lg w-full sm:w-auto flex-shrink-0">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-10 w-10 sm:h-12 sm:w-12 hover:bg-orange-50 hover:text-orange-500 p-0"
-                    onClick={() => handleQuantityChange(-1)}
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
+                {/* Quantity */}
+                <div className="flex items-center justify-between bg-white border rounded-lg px-2 sm:w-40 shadow-sm h-12">
+                  <Button type="button" variant="ghost" size="icon" onClick={() => handleQuantityChange(-1)} className="h-full w-10 text-gray-500 hover:text-red-600">
+                    <Minus className="w-4 h-4" />
                   </Button>
-                  <span className="w-12 sm:w-16 text-center font-semibold text-base sm:text-lg">
-                    {quantity}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-10 w-10 sm:h-12 sm:w-12 hover:bg-orange-50 hover:text-orange-500 p-0"
-                    onClick={() => handleQuantityChange(1)}
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-lg font-bold text-gray-900">{quantity}</span>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => handleQuantityChange(1)} className="h-full w-10 text-gray-500 hover:text-red-600">
+                    <Plus className="w-4 h-4" />
                   </Button>
                 </div>
 
+                {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 text-white h-10 sm:h-12 text-sm sm:text-base md:text-lg font-semibold w-full sm:w-auto min-w-0"
+                  disabled={!isSelectionComplete()}
+                  className="flex-1 h-12 text-base font-bold text-white shadow-md transition-transform active:scale-[0.99]"
+                  style={{ backgroundColor: "var(--color-button2)" }}
                 >
-                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" />
-                  <span className="truncate">
-                    {t("add_to_cart")} JOD {getTotalPrice().toFixed(2)}
-                  </span>
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  {t("add_to_cart")}
+                  <span className="mx-2 opacity-50">|</span>
+                  {grandTotal.toFixed(2)} {t("jod")}
                 </Button>
+
               </div>
             </div>
+
           </form>
         )}
       </DialogContent>
