@@ -88,7 +88,7 @@ function ProductManagement({ setProducts, formData, setFormData, editingId, setE
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Grid for Name Inputs */}
-          <div className="grid grid-cols-1 min-[30rem]:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="arName">{t("arabic_name")}</Label>
               <Input id="arName" value={formData.arName} onChange={handleInputChange} required dir="rtl" />
@@ -100,7 +100,7 @@ function ProductManagement({ setProducts, formData, setFormData, editingId, setE
           </div>
 
           {/* Grid for Base Price & Discount */}
-          <div className="grid grid-cols-1 min-[30rem]:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="basePrice">{t("base_price")}</Label>
               <Input id="basePrice" type="number" min="0" step="0.01" value={formData.basePrice} onChange={handleInputChange} required />
@@ -112,7 +112,7 @@ function ProductManagement({ setProducts, formData, setFormData, editingId, setE
           </div>
 
           {/* Configuration Switches */}
-          <div className="bg-yellow-500 p-3 rounded-lg flex flex-col gap-4">
+          <div className="p-3 rounded-lg flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <Switch id="hasTypeChoices" checked={formData.hasTypeChoices} onCheckedChange={(v) => setFormData({ ...formData, hasTypeChoices: v })} dir='ltr' />
               <Label htmlFor="hasTypeChoices" className="cursor-pointer">{t("has_type_choices")}</Label>
