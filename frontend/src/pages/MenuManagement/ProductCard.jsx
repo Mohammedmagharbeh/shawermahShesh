@@ -1,4 +1,3 @@
-/* ProductCard.jsx */
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +8,12 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useUser } from "@/contexts/UserContext";
 
-export default function ProductCard({ product, setProducts, setFormData, setEditingId }) {
+export default function ProductCard({
+  product,
+  setProducts,
+  setFormData,
+  setEditingId,
+}) {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const { user } = useUser();
@@ -22,6 +26,7 @@ export default function ProductCard({ product, setProducts, setFormData, setEdit
 
   const handleEdit = async () => {
     try {
+      // 1. Fetch the latest data to ensure we have the full object
       const res = await fetch(
         `${import.meta.env.VITE_BASE_URL}/products/${product._id}`,
         {
@@ -30,30 +35,47 @@ export default function ProductCard({ product, setProducts, setFormData, setEdit
           },
         }
       );
-      let data = await res.json();
+
+      let responseJson = await res.json();
+
       if (!res.ok) {
-        toast.error(data.message);
+        toast.error(responseJson.message);
         return;
       }
-      data = data.data;
+
+      const data = responseJson.data;
+
+      // 2. Prepare the Prices Object based on the 4 Cases
+      let formattedPrices = {};
+
+      // CASE A: Both Protein (Chicken/Meat) AND Type (Sandwich/Meal)
       if (data.hasTypeChoices && data.hasProteinChoices) {
-        data.prices = {
-          chicken: {
-            sandwich: data.prices.chicken?.sandwich || "",
-            meal: data.prices.chicken?.meal || "",
-          },
-        };
-      } else if (data.hasTypeChoices) {
-        data.prices = {
-          sandwich: data.prices?.sandwich?.toString() || "",
-          meal: data.prices?.meal?.toString() || "",
-        };
-      } else if (data.hasProteinChoices) {
-        data.prices = {
-          chicken: data.prices?.chicken?.toString() || "",
-          meat: data.prices?.meat?.toString() || "",
+        // Flatten nested objects to match ProductManagement inputs: prices['chicken_sandwich']
+        formattedPrices = {
+          chicken_sandwich: data.prices?.chicken?.sandwich || "",
+          chicken_meal: data.prices?.chicken?.meal || "",
+          meat_sandwich: data.prices?.meat?.sandwich || "",
+          meat_meal: data.prices?.meat?.meal || "",
         };
       }
+      // CASE B: Type Only (Sandwich/Meal)
+      else if (data.hasTypeChoices) {
+        formattedPrices = {
+          sandwich: data.prices?.sandwich || "",
+          meal: data.prices?.meal || "",
+        };
+      }
+      // CASE C: Protein Only (Chicken/Meat)
+      else if (data.hasProteinChoices) {
+        formattedPrices = {
+          chicken: data.prices?.chicken || "",
+          meat: data.prices?.meat || "",
+        };
+      }
+      // CASE D: Base Price only
+      // No specific prices object needed, handled by basePrice field
+
+      // 3. Map to Form Data Structure
       setFormData({
         arName: data.name?.ar || "",
         enName: data.name?.en || "",
@@ -62,23 +84,35 @@ export default function ProductCard({ product, setProducts, setFormData, setEdit
         arDescription: data.description?.ar || "",
         enDescription: data.description?.en || "",
         image: data.image || "",
-        category:
-          typeof data.category === "object" && data.category?._id
-            ? data.category._id
-            : data.category || "",
+
+        // Handle Category (It might come as an object or an ID string)
+        category: typeof data.category === "object" && data.category?._id
+          ? data.category._id
+          : data.category || "",
+
+        // Booleans
         isSpicy: Boolean(data.isSpicy),
-        hasTypeChoices: !!data.hasTypeChoices,
-        hasProteinChoices: !!data.hasProteinChoices,
-        additions: data.additions || [],
-        additionsSelectionType: data.additionsSelectionType,
-        prices: data.prices || {},
+        hasTypeChoices: Boolean(data.hasTypeChoices),
+        hasProteinChoices: Boolean(data.hasProteinChoices),
         inStock: Boolean(data.inStock),
+
+        // Arrays & Complex Objects
+        additions: data.additions || [],
+        additionsSelectionType: data.additionsSelectionType || "radio", // Default to radio if missing
+
+        // The formatted prices object we built above
+        prices: formattedPrices,
       });
+
+      // 4. Set Editing Mode
       setEditingId(data._id);
+
+      // Optional: Scroll to top to show the form on mobile
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
     } catch (error) {
       console.error(error);
-
-      toast.error("Something went wrong");
+      toast.error("Failed to load product details");
     }
   };
 
@@ -128,7 +162,7 @@ export default function ProductCard({ product, setProducts, setFormData, setEdit
 
   return (
     <Card className="overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow">
-      {/* Image Container with Aspect Ratio */}
+      {/* Image Container */}
       <div className="relative w-full aspect-[4/3] bg-muted">
         <img
           src={product.image || product_placeholder}
