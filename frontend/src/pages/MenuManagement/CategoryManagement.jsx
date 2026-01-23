@@ -7,21 +7,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useCategoryContext } from "@/contexts/CategoryContext";
-import { Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Trash2, Save, X } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function CategoryManagement() {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+
   const {
     categories,
     getCategory,
@@ -29,14 +23,21 @@ function CategoryManagement() {
     deleteCategory,
     addCategory,
   } = useCategoryContext();
+
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ name: { ar: "", en: "" } });
 
   const handleEdit = async (id) => {
     setEditingId(id);
     const category = await getCategory(id);
+    if (category) {
+      setForm({ name: { ar: category.name.ar, en: category.name.en } });
+    }
+  };
 
-    setForm({ name: { ar: category.name.ar, en: category.name.en } });
+  const resetForm = () => {
+    setEditingId(null);
+    setForm({ name: { ar: "", en: "" } });
   };
 
   const handleSubmit = async (e) => {
@@ -46,86 +47,79 @@ function CategoryManagement() {
     } else {
       addCategory(form.name);
     }
-
-    setForm({ name: { ar: "", en: "" } });
-    setEditingId(null);
+    resetForm();
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-base sm:text-lg">
-          {t("manage_additions")}
-        </CardTitle>
-        <CardDescription className="text-xs sm:text-sm">
-          {t("add_addition_desc")}
-        </CardDescription>
+    <Card className="w-full shadow-sm border border-border/50">
+      <CardHeader className="p-4 sm:p-5 pb-2">
+        <CardTitle className="text-lg font-semibold">{t("manage_additions")}</CardTitle>
+        <CardDescription>{t("add_addition_desc")}</CardDescription>
       </CardHeader>
-      <CardContent className="p-4 sm:p-6">
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4"
-        >
-          <Input
-            placeholder="اسم الفئة عربي"
-            value={form.name?.ar || ""}
-            onChange={(e) =>
-              setForm({
-                name: { ar: e.target.value, en: form.name?.en },
-              })
-            }
-            required
-            className="w-full sm:flex-1"
-            dir="rtl"
-          />
-          <Input
-            placeholder="اسم الفئة انجليزي"
-            value={form.name?.en || ""}
-            onChange={(e) =>
-              setForm({
-                name: {
-                  ar: form.name?.ar,
-                  en: e.target.value,
-                },
-              })
-            }
-            required
-            className="w-full sm:flex-1"
-            dir="ltr"
-          />
+      <CardContent className="p-4 sm:p-5 pt-2">
+        <form onSubmit={handleSubmit} className="space-y-4">
 
-          <div className="flex gap-2 sm:flex-shrink-0">
-            <Button type="submit" className="flex-1 sm:flex-initial">
+          {/* Inputs: Stack on mobile, Side-by-side on 30rem+ */}
+          <div className="grid grid-cols-1 min-[30rem]:grid-cols-2 gap-3">
+            <Input
+              placeholder="اسم الفئة عربي"
+              value={form.name?.ar || ""}
+              onChange={(e) => setForm({ name: { ...form.name, ar: e.target.value } })}
+              required
+              dir="rtl"
+            />
+            <Input
+              placeholder="Category Name (EN)"
+              value={form.name?.en || ""}
+              onChange={(e) => setForm({ name: { ...form.name, en: e.target.value } })}
+              required
+              dir="ltr"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex flex-col-reverse min-[30rem]:flex-row gap-2">
+            {editingId && (
+              <Button type="button" variant="ghost" onClick={resetForm} className="min-[30rem]:w-auto w-full">
+                <X className="w-4 h-4 ltr:mr-2 rtl:ml-2" /> {t("Cancel") || "Cancel"}
+              </Button>
+            )}
+
+            <Button type="submit" className="min-[30rem]:w-auto w-full flex-1 min-[30rem]:flex-none">
+              <Save className="w-4 h-4 ltr:mr-2 rtl:ml-2" />
               {editingId ? t("save_changes") : t("add_addition")}
             </Button>
+
             {editingId && (
               <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  deleteCategory(editingId);
-                  setEditingId(null);
-                  setForm({ name: { ar: "", en: "" } });
-                }}
-                variant="destructive"
-                className="flex-1 sm:flex-initial"
+                type="button"
+                onClick={(e) => { e.preventDefault(); deleteCategory(editingId); resetForm(); }}
+                className="min-[30rem]:w-auto w-full text-white min-[30rem]:ml-auto"
+                style={{ backgroundColor: "var(--color-button2)" }}
               >
-                Delete Category
+                <Trash2 className="w-4 h-4 ltr:mr-2 rtl:ml-2" /> {t("Delete") || "Delete"}
               </Button>
             )}
           </div>
         </form>
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin -mx-1 px-1">
+
+        <div className="h-px bg-button2 w-full my-4" />
+
+        {/* Categories List */}
+        <div className="flex flex-wrap gap-2">
           {categories.map((cat, i) => (
             <Button
               key={i}
-              variant="outline"
+              type="button"
+              variant={editingId === cat._id ? "default" : "white"}
               onClick={() => handleEdit(cat._id)}
               size="sm"
-              className="whitespace-nowrap flex-shrink-0"
+              className={`transition-all ${editingId !== cat._id ? "border hover:opacity-80" : ""}`}
             >
               {cat.name?.[selectedLanguage] || cat.name.ar}
             </Button>
           ))}
+          {categories.length === 0 && <p className="text-sm text-muted-foreground">{t("no_categories")}</p>}
         </div>
       </CardContent>
     </Card>

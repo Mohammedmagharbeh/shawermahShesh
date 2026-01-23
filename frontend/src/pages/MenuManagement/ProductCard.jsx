@@ -1,3 +1,4 @@
+/* ProductCard.jsx */
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,12 +9,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useUser } from "@/contexts/UserContext";
 
-export default function ProductCard({
-  product,
-  setProducts,
-  setFormData,
-  setEditingId,
-}) {
+export default function ProductCard({ product, setProducts, setFormData, setEditingId }) {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
   const { user } = useUser();
@@ -131,57 +127,43 @@ export default function ProductCard({
   };
 
   return (
-    <Card className="overflow-hidden">
-      <div className="relative h-40 sm:h-48 bg-muted">
+    <Card className="overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow">
+      {/* Image Container with Aspect Ratio */}
+      <div className="relative w-full aspect-[4/3] bg-muted">
         <img
           src={product.image || product_placeholder}
           alt={product.name?.[selectedLanguage]}
           className="w-full h-full object-cover"
         />
-        <div className="absolute top-3 left-3">
-          <Badge>
-            {product.category?.name?.[selectedLanguage] ||
-              product.category?.name?.ar}
+        <div className="absolute top-2 left-2 right-2 flex justify-between">
+          <Badge variant="secondary" className="bg-white/90 text-black backdrop-blur-sm shadow-sm">
+            {product.category?.name?.[selectedLanguage] || product.category?.name?.ar}
           </Badge>
+          {product.discount > 0 && <Badge variant="destructive">-{product.discount}%</Badge>}
         </div>
       </div>
 
-      <CardContent className="p-4">
+      <CardContent className="p-4 flex flex-col flex-1 gap-2">
         <div className="flex justify-between items-start gap-2">
-          <h3 className="font-semibold text-sm sm:text-base line-clamp-1">
-            {product.name?.[selectedLanguage]}
-          </h3>
-          <span className="font-semibold text-primary text-sm sm:text-base whitespace-nowrap">
-            {getDisplayPrice()}
-          </span>
+          <h3 className="font-bold text-base line-clamp-1">{product.name?.[selectedLanguage]}</h3>
+          <span className="font-semibold text-primary text-sm whitespace-nowrap">{getDisplayPrice()}</span>
         </div>
 
-        {product.discount > 0 && (
-          <p className="text-xs text-red-500 mt-1">
-            {t("discount")}: {product.discount}%
-          </p>
-        )}
-
-        <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+        <p className="text-xs text-muted-foreground line-clamp-2 flex-1">
           {product.description?.[selectedLanguage]}
         </p>
 
-        <div className="flex gap-2 mt-3">
-          <Button
-            onClick={handleEdit}
-            variant="outline"
-            size="sm"
-            className="flex-1"
-          >
-            <Edit2 className="mr-1 h-4 w-4" /> {t("edit")}
+        <div className="flex gap-2 mt-2 pt-2 border-t border-border/50">
+          <Button onClick={handleEdit} variant="outline" size="sm" className="flex-1 h-8">
+            <Edit2 className="w-3.5 h-3.5 ltr:mr-1.5 rtl:ml-1.5" /> {t("edit")}
           </Button>
           <Button
             onClick={() => handleDelete(product._id)}
-            variant="destructive"
             size="sm"
-            className="flex-1"
+            className="flex-1 h-8 text-white hover:opacity-90"
+            style={{ backgroundColor: "var(--color-button2)" }}
           >
-            <Trash2 className="mr-1 h-4 w-4" /> {t("delete")}
+            <Trash2 className="w-3.5 h-3.5 ltr:mr-1.5 rtl:ml-1.5" /> {t("delete")}
           </Button>
         </div>
       </CardContent>

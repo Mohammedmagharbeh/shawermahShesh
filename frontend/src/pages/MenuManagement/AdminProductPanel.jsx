@@ -13,20 +13,28 @@ export default function AdminProductPanel() {
   const handlers = { setProducts, setFormData, setEditingId };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 w-full overflow-x-hidden">
-      {/* Header */}
+    <div className="min-h-screen w-full bg-background overflow-x-hidden">
       <Header />
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          <ProductManagement
-            formData={formData}
-            editingId={editingId}
-            {...handlers}
-          />
-          <div className="grid lg:col-span-2 gap-4 w-full">
+
+      {/* Main Container */}
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+
+          {/* Left Column: Product Form (Sticky on Desktop) */}
+          <div className="w-full lg:w-1/3 lg:sticky lg:top-24 z-0">
+            <ProductManagement
+              formData={formData}
+              editingId={editingId}
+              {...handlers}
+            />
+          </div>
+
+          {/* Right Column: Categories & List */}
+          <div className="w-full lg:w-2/3 flex flex-col gap-6">
             <CategoryManagement />
             <ProductsList products={products} {...handlers} />
           </div>
+
         </div>
       </div>
     </div>
