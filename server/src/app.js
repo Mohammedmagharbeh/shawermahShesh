@@ -22,6 +22,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
+const zainCash = require("./routes/zainCash")
 
 // const emailRoutes = require("./routes/emailRoutes");
 
@@ -63,10 +64,8 @@ app.use("/api/additions", additions);
 app.use("/api/slides", slideRoutes);
 app.use("/api/categories", categoryRoutes);
 // app.use("/api/email", emailRoutes);
-
-// app.use("/uploads", express.static("uploads"));
-
 app.use("/api/jobs", jobRoutes);
 app.use("/api/apply", applicationRoutes);
+app.use("/api/zaincash", zainCash);
 
 module.exports = server;
