@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 const TEST_PRODUCT_ID = "696f8dadfa26824a3b34e5af";
-const API_URL = import.meta.env.VITE_BASE_URL; // Centralized Env Var
+const API_URL = import.meta.env.VITE_BASE_URL;
 
 export const useCheckoutLogic = (t) => {
   const { cart } = useCart();
@@ -175,7 +175,7 @@ export const useCheckoutLogic = (t) => {
 
   const handleZainCashFlow = async () => {
     // Note: Assuming logic from original code regarding "initiate" vs "confirm"
-    await axios.post(`http://localhost:5000/api/zaincash/zain/initiate`, {
+    await axios.post(`${API_URL}/zaincash/zain/initiate`, {
       amount: orderSummary.total.toFixed(3),
       mobile: `962799635582`, // Kept hardcoded as per original, strictly should be dynamic
     });
@@ -186,7 +186,7 @@ export const useCheckoutLogic = (t) => {
   const confirmCliqPayment = async () => {
     setIsSubmitting(true);
     try {
-      const { data } = await axios.post(`http://localhost:5000/api/zaincash/zain/confirm`, {
+      const { data } = await axios.post(`${API_URL}/zaincash/zain/confirm`, {
         amount: orderSummary.total.toFixed(3),
         mobile: formState.details.phone,
         otp: formState.otp,
