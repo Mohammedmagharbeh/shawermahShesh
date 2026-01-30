@@ -1,16 +1,14 @@
-
-
-import Login from "./componenet/log";
-import EmployeeLogin from "./componenet/EmployeeLogin";
+import Login from "./components/log";
+import EmployeeLogin from "./components/EmployeeLogin";
 import Home from "./pages/Home/Home";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Cart from "./pages/Cart/Cart";
 import Checkout from "./pages/Checkout";
 import ProductView from "./pages/ProductView";
 import PaymentSuccess from "./pages/PaymentSuccess";
-import OtpVerification from "./componenet/OtpVerification";
+import OtpVerification from "./components/OtpVerification";
 import { Toaster } from "react-hot-toast";
-import Header from "./componenet/Header";
+import Header from "./components/Header";
 import Orders from "./pages/Orders";
 import PaymentFailed from "./pages/PaymentFailed";
 import MyOrders from "./pages/MyOrders";
@@ -25,53 +23,24 @@ import Products from "./pages/Products";
 import AdminSlides from "./pages/AdminSlides";
 import AdminProductPanel from "./pages/MenuManagement/AdminProductPanel";
 import Story from "./pages/story";
-import NotFound from "./componenet/NotFound";
+import NotFound from "./components/NotFound";
 import JobsPage from "./pages/JobsPage";
 import AdminJobs from "./pages/AdminJobs";
-import { useUser } from "./contexts/UserContext"; // سياق المستخدم
-import toast from "react-hot-toast";
+import { useBusinessHours } from "./hooks/useBusinessHours";
 
 function App() {
-  const { i18n, t } = useTranslation();
-  const { logout, isAuthenticated, user } = useUser();
+  const { i18n } = useTranslation();
+
+  useBusinessHours();
 
   useEffect(() => {
     const currentLang = localStorage.getItem("i18nextLng") || "ar";
     document.documentElement.setAttribute(
       "dir",
-      currentLang === "ar" ? "rtl" : "ltr"
+      currentLang === "ar" ? "rtl" : "ltr",
     );
     document.documentElement.setAttribute("lang", currentLang);
   }, [i18n.language]);
-
-  useEffect(() => {
-    const checkBanTime = () => {
-      const hour = new Date().getHours();
-
-      const isBanTime = hour >= 3 && hour < 10;
-
-      if (isBanTime && isAuthenticated && user?.role !== "admin") {
-        logout();
-        toast.error(t("restaurant_closed_msg"), {
-          id: "force-logout-toast",
-          icon: "🌙",
-          duration: 8000,
-          style: {
-            borderRadius: "12px",
-            background: "#1e1e2e",
-            color: "#fff",
-            border: "1px solid #ff4b4b",
-          },
-        });
-      }
-    };
-
-    checkBanTime();
-    // راقب كل دقيقة معلم
-    const timer = setInterval(checkBanTime, 60000);
-
-    return () => clearInterval(timer);
-  }, [isAuthenticated, logout, user, t]);
 
   return (
     <div
@@ -161,7 +130,7 @@ function App() {
               }
             />
 
-            {/* مسارات الإدارة (للمدراء فقط) */}
+            {/* Admin Routes */}
             <Route
               path="/admin/users-control"
               element={
@@ -216,13 +185,13 @@ function App() {
               }
             />
 
-            {/* صفحة الخطأ 404 */}
+            {/* 404 Page */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
       </BrowserRouter>
 
-      {/* مكون التنبيهات العام */}
+      {/* Global Toaster */}
       <Toaster
         position="top-center"
         reverseOrder={false}

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useParams } from "react-router-dom";
 import product_placeholder from "../assets/product_placeholder.jpeg";
-import Loading from "@/componenet/common/Loading";
+import Loading from "@/components/common/Loading";
 import toast from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
 

@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/card";
 import { useState } from "react";
 import { User, Phone, Palette, Trash2, AlertCircle } from "lucide-react";
-import Loading from "@/componenet/common/Loading";
-import LanguageSwitcher from "@/componenet/LanguageSwitcher";
+import Loading from "@/components/common/Loading";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useUser } from "@/contexts/UserContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";

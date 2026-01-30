@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser } from "@/contexts/UserContext";
-import Loading from "@/componenet/common/Loading";
+import Loading from "@/components/common/Loading";
 import { useTranslation } from "react-i18next";
 
 const SERVER_URL = import.meta.env.VITE_BASE_URL;

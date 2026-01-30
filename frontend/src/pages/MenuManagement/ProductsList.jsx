@@ -4,34 +4,44 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Package, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
-import Loading from "@/componenet/common/Loading"; // Ensure path is correct
+import { useState, useMemo } from "react";
+import Loading from "@/components/common/Loading";
 import ProductCard from "./ProductCard";
-import { useProducts } from "@/hooks/useProducts";
-import { useCategoryContext } from "@/contexts/CategoryContext";
 
-export default function ProductsList({ setFormData, setEditingId }) {
+export default function ProductsList({
+  products,
+  setProducts,
+  setFormData,
+  setEditingId,
+  loading,
+  error,
+  selectedCategory,
+  setSelectedCategory,
+  categories,
+}) {
   const [searchTerm, setSearchTerm] = useState("");
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
-  const { categories, fetchCategories } = useCategoryContext();
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const { products, setProducts, loading, error } = useProducts(t, selectedCategory);
 
-  useEffect(() => { fetchCategories(); }, [fetchCategories]);
-  useEffect(() => {
-    if (categories.length > 0 && !selectedCategory) setSelectedCategory(categories[0]._id);
-  }, [categories, selectedCategory]);
-
-  const filteredProducts = products.filter((p) => {
-    const term = searchTerm.toLowerCase();
-    const name = p.name?.[selectedLanguage]?.toLowerCase() || "";
-    const category = typeof p.category === "string" ? p.category?.toLowerCase() : p.category?.name?.[selectedLanguage]?.toLowerCase() || "";
-    return name.includes(term) || category.includes(term);
-  });
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const term = searchTerm.toLowerCase();
+      const name = p.name?.[selectedLanguage]?.toLowerCase() || "";
+      const categoryName =
+        typeof p.category === "string"
+          ? p.category?.toLowerCase()
+          : p.category?.name?.[selectedLanguage]?.toLowerCase() || "";
+      return name.includes(term) || categoryName.includes(term);
+    });
+  }, [products, searchTerm, selectedLanguage]);
 
   if (loading) return <Loading />;
-  if (error) return <Card className="p-6 text-center text-red-500 font-medium">{t("fetch_products_error")}</Card>;
+  if (error)
+    return (
+      <Card className="p-6 text-center text-red-500 font-medium">
+        {t("fetch_products_error")}
+      </Card>
+    );
 
   return (
     <div className="w-full space-y-4">

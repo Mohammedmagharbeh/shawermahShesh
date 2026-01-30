@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useOrder } from "@/contexts/OrderContext";
-import Loading from "@/componenet/common/Loading";
+import Loading from "@/components/common/Loading";
 import { io } from "socket.io-client";
 import newOrderSound from "../assets/newOrder.mp3";
 import * as XLSX from "xlsx";

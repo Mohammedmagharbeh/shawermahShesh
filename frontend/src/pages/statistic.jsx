@@ -37,7 +37,7 @@ import { Link } from "react-router-dom";
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import Loading from "@/componenet/common/Loading";
+import Loading from "@/components/common/Loading";
 
 export default function StatisticsPage() {
   const { getAllUsers } = useUser();

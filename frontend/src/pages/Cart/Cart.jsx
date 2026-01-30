@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { useUser } from "@/contexts/UserContext";
-import Loading from "@/componenet/common/Loading";
+import Loading from "@/components/common/Loading";
 import CartCard from "./CartCard";
 import { useTranslation } from "react-i18next";
 

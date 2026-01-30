@@ -1,4 +1,4 @@
-import Loading from "@/componenet/common/Loading";
+import Loading from "@/components/common/Loading";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/contexts/UserContext";
 import { useEffect, useState } from "react";

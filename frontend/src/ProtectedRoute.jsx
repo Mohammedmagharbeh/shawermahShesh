@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import Loading from "./componenet/common/Loading";
+import Loading from "./components/common/Loading";
 import { useUser } from "./contexts/UserContext";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";

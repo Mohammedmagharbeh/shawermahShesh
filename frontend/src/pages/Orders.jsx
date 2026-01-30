@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useOrder } from "@/contexts/OrderContext";
-import Loading from "../componenet/common/Loading";
+import Loading from "../components/common/Loading";
 import product_placeholder from "../assets/product_placeholder.jpeg";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";

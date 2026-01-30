@@ -22,7 +22,7 @@ import {
   Phone,
   Loader2,
 } from "lucide-react";
-import Loading from "@/componenet/common/Loading";
+import Loading from "@/components/common/Loading";
 import { useUser } from "@/contexts/UserContext";
 import { useTranslation } from "react-i18next";
 

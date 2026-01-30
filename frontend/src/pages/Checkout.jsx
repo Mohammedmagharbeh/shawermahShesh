@@ -1,4 +1,4 @@
-import Loading from "@/componenet/common/Loading";
+import Loading from "@/components/common/Loading";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import cliq from "../../src/assets/cliq.png";
