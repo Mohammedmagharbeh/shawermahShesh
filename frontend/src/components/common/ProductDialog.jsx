@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import Loading from "@/componenet/common/Loading";
+import Loading from "@/components/common/Loading";
 import toast from "react-hot-toast";
 import product_placeholder from "../../assets/product_placeholder.jpeg";
 import { Input } from "@/components/ui/input";

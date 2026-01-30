@@ -22,7 +22,7 @@ import {
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "@/componenet/LanguageSwitcher";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import NavLink from "./common/NavLink";
 import { ADMIN_LINKS, PUBLIC_LINKS } from "@/constants";
 import logo from "../assets/Logo Sheesh 2025.png";
