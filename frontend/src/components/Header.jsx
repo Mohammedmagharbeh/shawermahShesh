@@ -143,7 +143,7 @@ function Header() {
                                 </span>
                               </DropdownMenuItem>
                             </Link>
-                          )
+                          ),
                       )}
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -221,92 +221,85 @@ function Header() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div
-            className={`lg:hidden mt-3 xs:mt-4 pb-3 xs:pb-4 border-t-2 ${
-              !isAuthenticated && "border-yellow-300"
-            } animate-in slide-in-from-top-2 duration-300 bg-gradient-to-b from-yellow-50/50 to-transparent rounded-b-lg`}
-          >
-            <div className="flex flex-col gap-1.5 xs:gap-2 pt-3 xs:pt-4">
-              {!isAuthenticated &&
-                PUBLIC_LINKS.map((key) => (
-                  <NavLink
-                    className="text-sm xs:text-base sm:text-lg text-gray-700 hover:text-red-700 font-semibold py-2.5 xs:py-3 px-3 xs:px-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-lg transition-all duration-300 border-l-4 border-transparent hover:border-red-600"
-                    key={key.label}
-                    to={
-                      key.label === "our_story"
-                        ? "/story"
-                        : key.label === "jobs"
-                          ? "/JobsPage"
-                          : `/#${key.label}`
-                    }
-                    label={t(key.label)}
-                    onClick={handleLinkClick}
-                  />
-                ))}
+          <div className="absolute top-full left-0 w-full bg-white/95 backdrop-blur-md shadow-xl border-t border-gray-100 lg:hidden overflow-y-auto max-h-[85vh] animate-in slide-in-from-top-5 fade-in duration-200">
+            <div className="flex flex-col p-4 space-y-4">
+              {/* Public Links */}
+              {!isAuthenticated && (
+                <div className="flex flex-col space-y-2">
+                  {PUBLIC_LINKS.map((key) => (
+                    <NavLink
+                      className="block px-4 py-3 text-base font-semibold text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+                      key={key.label}
+                      to={
+                        key.label === "our_story"
+                          ? "/story"
+                          : key.label === "jobs"
+                            ? "/JobsPage"
+                            : `/#${key.label}`
+                      }
+                      label={t(key.label)}
+                      onClick={handleLinkClick}
+                    />
+                  ))}
+                </div>
+              )}
 
-              <div className="sm:hidden px-3 xs:px-4 py-2">
-                <LanguageSwitcher />
+              {/* Mobile Language Switcher */}
+              <div className="sm:hidden px-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-500">
+                    {t("language")}
+                  </span>
+                  <LanguageSwitcher />
+                </div>
               </div>
 
-              <div
-                className={`pt-2.5 xs:pt-3 mt-1.5 xs:mt-2 border-t-2 ${!isAuthenticated && "border-yellow-300"}`}
-              >
-                {isAuthenticated &&
-                  ADMIN_LINKS.map(
-                    (link) =>
-                      link.roles.includes(user.role) && (
-                        <Link to={link.to} key={link.to} onClick={toggleMenu}>
-                          <div className="cursor-pointer flex items-center hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 rounded-md p-3 transition-all duration-200 focus:bg-gradient-to-r focus:from-red-50 focus:to-yellow-50">
-                            <link.icon className="h-4 w-4 ml-2 text-red-600" />
-                            <span className="font-semibold text-gray-700">
-                              {t(link.label)}
-                            </span>
-                          </div>
-                        </Link>
-                      )
-                  )}
-
-                {isAuthenticated ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleLogout}
-                    className="w-full bg-gradient-to-r border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-11 xs:h-12 text-sm xs:text-base font-bold gap-2 transition-all duration-300 shadow-md"
-                  >
-                    {t("logout")} <LogOut className="h-4 w-4 xs:h-5 xs:w-5" />
-                  </Button>
-                ) : (
-                  <div className="flex flex-col gap-2 w-full">
-                    <Link
-                      to="/login"
-                      className="block"
-                      onClick={handleLinkClick}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full bg-gradient-to-r border-2 border-red-600 text-red-900 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 hover:text-white h-11 xs:h-12 text-sm xs:text-base font-bold gap-2 transition-all duration-300 shadow-md"
-                      >
-                        {t("login")}
-                        <LogIn className="h-4 w-4 xs:h-5 xs:w-5" />
-                      </Button>
-                    </Link>
-                    {/* <Link
-                      to="/employee-login"
-                      className="block"
-                      onClick={handleLinkClick}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full bg-gradient-to-r border-2 border-yellow-500 text-yellow-900 hover:bg-gradient-to-br hover:from-yellow-600 hover:to-yellow-700 hover:text-white h-11 xs:h-12 text-sm xs:text-base font-bold gap-2 transition-all duration-300 shadow-md"
-                      >
-                        {t("employee_login") || "Employee Login"}
-                        <LogIn className="h-4 w-4 xs:h-5 xs:w-5" />
-                      </Button>
-                    </Link> */}
+              {/* Admin & User Links */}
+              <div className="pt-2 border-t border-gray-100">
+                {isAuthenticated && (
+                  <div className="grid grid-cols-1 gap-2 mt-2">
+                    {ADMIN_LINKS.map(
+                      (link) =>
+                        link.roles.includes(user.role) && (
+                          <Link to={link.to} key={link.to} onClick={toggleMenu}>
+                            <div className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-50 hover:text-red-600 transition-colors">
+                              <link.icon className="w-5 h-5 text-red-500" />
+                              <span className="font-medium">
+                                {t(link.label)}
+                              </span>
+                            </div>
+                          </Link>
+                        ),
+                    )}
                   </div>
                 )}
+
+                <div className="mt-4">
+                  {isAuthenticated ? (
+                    <Button
+                      variant="default"
+                      size="lg"
+                      onClick={handleLogout}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-sm"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      {t("logout")}
+                    </Button>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      <Link to="/login" onClick={handleLinkClick}>
+                        <Button
+                          variant="default"
+                          size="lg"
+                          className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-sm"
+                        >
+                          <LogIn className="w-4 h-4 mr-2" />
+                          {t("login")}
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

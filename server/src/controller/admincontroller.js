@@ -1,5 +1,7 @@
 const productsModel = require("../models/products");
 const categoryModel = require("../models/Category");
+const userModel = require("../models/user");
+const { USER_ROLES } = require("../constants");
 const { cloudinary } = require("../config/cloudinary");
 
 // ✅ POST: Create Product
@@ -224,7 +226,7 @@ exports.updatedfood = async (req, res) => {
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     if (!updatedProduct) {
@@ -274,7 +276,7 @@ exports.reorderProducts = async (req, res) => {
 
     // Update position for each product
     const updates = orderedIds.map((id, index) =>
-      productsModel.findByIdAndUpdate(id, { position: index }, { new: true })
+      productsModel.findByIdAndUpdate(id, { position: index }, { new: true }),
     );
 
     await Promise.all(updates);
@@ -283,5 +285,53 @@ exports.reorderProducts = async (req, res) => {
   } catch (err) {
     console.error("Reorder error:", err);
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+exports.updateUserRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    if (!id || !role) {
+      return res.status(400).json({ message: "User ID and role are required" });
+    }
+    if (!USER_ROLES.includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+    const user = await userModel.findByIdAndUpdate(
+      id,
+      { role: role },
+      { new: true },
+    );
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.addUser = async (req, res) => {
+  try {
+    const { phone, role } = req.body;
+    if (!phone) {
+      return res.status(400).json({ message: "phone number is required" });
+    }
+
+    const user = await userModel.findOne({ phone: phone });
+    if (user) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    if (role && !USER_ROLES.includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+    const newUser = new userModel({
+      phone,
+      role: role || "user",
+    });
+
+    await newUser.save();
+    res.status(201).json(newUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };

@@ -1,6 +1,4 @@
 const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
 const validateJWT = require("../middlewares/validateJWT.js");
 
 const {
@@ -11,8 +9,6 @@ const {
   getOrdersByUserId,
   updateOrder,
 } = require("../controller/orderController.js");
-
-dotenv.config();
 
 const router = express.Router();
 

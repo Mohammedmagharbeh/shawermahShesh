@@ -9,6 +9,8 @@ const {
   getCategory,
   reorderCategories,
 } = require("../controller/categoryController.js");
+const validateJWT = require("../middlewares/validateJWT");
+const requireRole = require("../middlewares/requireRole");
 
 // جلب كل الـ categories
 router.get("/", getCategories);
@@ -16,14 +18,14 @@ router.get("/", getCategories);
 router.get("/:id", getCategory);
 
 // إضافة category جديدة
-router.post("/", addCategory);
+router.post("/", validateJWT, requireRole("admin"), addCategory);
 
-router.put("/reorder", reorderCategories);
+router.put("/reorder", validateJWT, requireRole("admin"), reorderCategories);
 
 // تعديل category
-router.put("/:id", updateCategory);
+router.put("/:id", validateJWT, requireRole("admin"), updateCategory);
 
 // حذف category
-router.delete("/:id", deleteCategory);
+router.delete("/:id", validateJWT, requireRole("admin"), deleteCategory);
 
 module.exports = router;

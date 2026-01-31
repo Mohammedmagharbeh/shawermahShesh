@@ -1,13 +1,27 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { useUser } from "@/contexts/UserContext";
 import toast from "react-hot-toast";
-import axios from "axios";
+import {
+  TEST_PRODUCT_ID,
+  DEFAULT_FORM_STATE,
+  TEST_MODE_DEFAULTS,
+  CLIQ_STEPS,
+  PAYMENT_METHODS,
+  ORDER_TYPES,
+  VALIDATION_KEYS,
+} from "@/components/checkout/constants";
+import { validateOrder } from "@/utils/orderValidation";
+import { sanitizeAndValidateInput } from "@/utils/orderValidation";
+import PaymentService from "@/services/paymentService";
 
-const TEST_PRODUCT_ID = "696f8dadfa26824a3b34e5af";
-const API_URL = import.meta.env.VITE_BASE_URL;
-
+/**
+ * Custom hook for checkout logic
+ * Manages form state, validation, payment processing, and area fetching
+ * @param {Function} t - Translation function
+ * @returns {Object} Checkout state and handlers
+ */
 export const useCheckoutLogic = (t) => {
   const { cart } = useCart();
   const { user } = useUser();
@@ -19,194 +33,246 @@ export const useCheckoutLogic = (t) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  
-  const [formState, setFormState] = useState({
-    orderType: "delivery",
-    paymentMethod: "card",
-    selectedArea: null,
-    otp: "",
-    cliqStep: "INIT", // INIT | OTP_SENT | PAID
+
+  const [formState, setFormState] = useState(() => ({
+    ...DEFAULT_FORM_STATE,
     details: {
+      ...DEFAULT_FORM_STATE.details,
       name: user?.name || "",
-      apartment: "",
       phone: user?.phone || "",
-    }
-  });
+    },
+  }));
 
   // --- Derived State (Test Mode) ---
   const isTestMode = useMemo(() => {
-    const hasTestProduct = cart.products.some((p) => (p.productId._id || p.productId) === TEST_PRODUCT_ID);
+    const hasTestProduct = cart.products.some(
+      (p) => (p.productId._id || p.productId) === TEST_PRODUCT_ID,
+    );
     return searchParams.get("test") === "1" || hasTestProduct;
   }, [cart.products, searchParams]);
 
-  // --- Price Calculation Engine ---
+  // --- Price Calculation Engine (Memoized) ---
   const orderSummary = useMemo(() => {
     let originalSubtotal = 0;
     let finalSubtotal = 0;
 
     cart.products.forEach((item) => {
-      const { productId, additions, quantity, selectedProtein, selectedType } = item;
+      const {
+        productId,
+        additions = [],
+        quantity,
+        selectedProtein,
+        selectedType,
+      } = item;
       let basePrice = Number(productId.basePrice || 0);
 
       // Handle Matrix Pricing
       if (productId.prices) {
-        if (selectedProtein && selectedType) basePrice = productId.prices[selectedProtein]?.[selectedType] ?? basePrice;
-        else if (selectedProtein) basePrice = productId.prices[selectedProtein] ?? basePrice;
-        else if (selectedType) basePrice = productId.prices[selectedType] ?? basePrice;
+        if (selectedProtein && selectedType) {
+          basePrice =
+            productId.prices[selectedProtein]?.[selectedType] ?? basePrice;
+        } else if (selectedProtein) {
+          basePrice = productId.prices[selectedProtein] ?? basePrice;
+        } else if (selectedType) {
+          basePrice = productId.prices[selectedType] ?? basePrice;
+        }
       }
 
-      const additionsCost = additions.reduce((sum, add) => sum + Number(add.price || 0), 0);
-      const discountAmount = (basePrice * (Number(productId.discount || 0))) / 100;
+      const additionsCost = additions.reduce(
+        (sum, add) => sum + Number(add.price || 0),
+        0,
+      );
+      const discountAmount =
+        (basePrice * Number(productId.discount || 0)) / 100;
 
       originalSubtotal += (basePrice + additionsCost) * quantity;
-      finalSubtotal += ((basePrice - discountAmount) + additionsCost) * quantity;
+      finalSubtotal += (basePrice - discountAmount + additionsCost) * quantity;
     });
 
-    const deliveryCost = formState.orderType === "delivery" ? (formState.selectedArea?.deliveryCost || 0) : 0;
+    const deliveryCost =
+      formState.orderType === ORDER_TYPES.DELIVERY
+        ? formState.selectedArea?.deliveryCost || 0
+        : 0;
 
     return {
       subtotal: finalSubtotal,
       originalSubtotal,
       savings: originalSubtotal - finalSubtotal,
       deliveryCost,
-      total: isTestMode ? 1 : finalSubtotal + deliveryCost
+      total: isTestMode
+        ? TEST_MODE_DEFAULTS.TOTAL_AMOUNT
+        : finalSubtotal + deliveryCost,
     };
   }, [cart.products, formState.orderType, formState.selectedArea, isTestMode]);
 
   // --- Effects ---
+
+  // Handle test mode and empty cart redirect
   useEffect(() => {
     if (isTestMode) {
-      setFormState(prev => ({ ...prev, orderType: "pickup", details: { ...prev.details, name: "MONTYPAY TESTER" } }));
+      setFormState((prev) => ({
+        ...prev,
+        orderType: TEST_MODE_DEFAULTS.ORDER_TYPE,
+        details: {
+          ...prev.details,
+          name: TEST_MODE_DEFAULTS.NAME,
+        },
+      }));
     } else if (!cart.products?.length) {
       navigate("/products");
     }
-  }, [isTestMode, cart, navigate]);
+  }, [isTestMode, cart.products, navigate]);
 
+  // Fetch delivery areas
   useEffect(() => {
     const fetchAreas = async () => {
+      if (!user?.token) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const { data } = await axios.get(`${API_URL}/locations/get`, {
-          headers: { authorization: `Bearer ${user.token}` }
-        });
-        setAreas(data.locations);
+        const locations = await PaymentService.fetchAreas(user.token);
+        setAreas(locations);
       } catch (e) {
-        console.error("Loc Error", e);
-        setError(t("checkout_fetch_area_error"));
+        console.error("Location fetch error:", e);
+        setError(t(VALIDATION_KEYS.FETCH_AREA_ERROR));
       } finally {
         setIsLoading(false);
       }
     };
-    if (user.token) fetchAreas();
-  }, [user.token, t]);
 
-  // --- Handlers ---
-  const updateForm = (field, value) => {
-    setFormState(prev => ({ ...prev, [field]: value }));
-  };
+    fetchAreas();
+  }, [user?.token, t]);
 
-  const updateDetails = (field, value) => {
-    setFormState(prev => ({ ...prev, details: { ...prev.details, [field]: value } }));
-  };
+  // --- Handlers (Memoized with useCallback) ---
 
-  // --- Payment Logic ---
-  const handlePayment = async (e) => {
-    e.preventDefault();
-    if (!validateOrder()) return;
+  /**
+   * Updates a top-level form field
+   */
+  const updateForm = useCallback((field, value) => {
+    setFormState((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
-    setIsSubmitting(true);
-    
-    try {
-      if (formState.paymentMethod === "cliq") {
-        await handleZainCashFlow();
-      } else {
-        await handleMontyPayFlow();
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(t("checkout_failed"));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const validateOrder = () => {
-    if (cart.products.length === 0 && !isTestMode) return toast.error(t("checkout_cart_empty"));
-    if (!formState.selectedArea?._id && formState.orderType === "delivery" && !isTestMode) return toast.error(t("checkout_select_area"));
-    return true;
-  };
-
-  const handleMontyPayFlow = async () => {
-    const now = new Date();
-    const sessionId = `${now.getDate()}${now.getMonth() + 1}-${Math.floor(1000 + Math.random() * 9000)}`;
-    
-    const payload = {
-      amount: orderSummary.total,
-      customerName: formState.details.name,
-      customerEmail: user?.email || "test@example.com",
-      orderId: sessionId,
-      description: isTestMode ? "Test" : cart.products.map(p => p.productId.name.ar).join(" / "),
-    };
-
-    // Save pending order
-    sessionStorage.setItem("pendingOrder", JSON.stringify({
-      products: cart.products.map(p => ({
-         productId: p.productId._id,
-         quantity: p.quantity,
-         isSpicy: p.isSpicy || false,
-         additions: p.additions || [],
-         notes: p.notes || "",
-         selectedProtein: p.selectedProtein,
-         selectedType: p.selectedType,
-      })),
-      userId: user?._id,
-      shippingAddress: formState.selectedArea?._id,
-      orderType: formState.orderType,
-      userDetails: formState.details,
-      totalPrice: orderSummary.total,
-      paymentMethod: formState.paymentMethod,
-      isTest: isTestMode
+  /**
+   * Updates a nested details field with sanitization
+   */
+  const updateDetails = useCallback((field, value) => {
+    const sanitizedValue = sanitizeAndValidateInput(field, value);
+    setFormState((prev) => ({
+      ...prev,
+      details: { ...prev.details, [field]: sanitizedValue },
     }));
+  }, []);
 
-    const { data } = await axios.post(`${API_URL}/montypay/session`, payload);
-    
-    if (data.redirect_url) window.location.href = data.redirect_url;
-    else throw new Error("No redirect URL");
-  };
+  /**
+   * Validates and initiates payment flow
+   */
+  const handlePayment = useCallback(
+    async (e) => {
+      e.preventDefault();
 
-  const handleZainCashFlow = async () => {
-    // Note: Assuming logic from original code regarding "initiate" vs "confirm"
-    await axios.post(`${API_URL}/zaincash/zain/initiate`, {
-      amount: orderSummary.total.toFixed(3),
-      mobile: `962799635582`, // Kept hardcoded as per original, strictly should be dynamic
-    });
-    setFormState(prev => ({ ...prev, cliqStep: "OTP_SENT" }));
-    toast.success("OTP sent");
-  };
+      // Validate order
+      const validation = validateOrder({ cart, formState, isTestMode });
+      if (!validation.isValid) {
+        validation.errors.forEach((err) => toast.error(t(err) || err));
+        return;
+      }
 
-  const confirmCliqPayment = async () => {
-    setIsSubmitting(true);
+      setIsSubmitting(true);
+
+      try {
+        if (formState.paymentMethod === PAYMENT_METHODS.CLIQ) {
+          await handleZainCashFlow();
+        } else {
+          await handleMontyPayFlow();
+        }
+      } catch (err) {
+        console.error("Payment error:", err);
+        toast.error(err.message || t(VALIDATION_KEYS.CHECKOUT_FAILED));
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [cart, formState, isTestMode, t],
+  );
+
+  /**
+   * Handles MontyPay payment flow
+   */
+  const handleMontyPayFlow = useCallback(async () => {
     try {
-      const { data } = await axios.post(`${API_URL}/zaincash/zain/confirm`, {
-        amount: orderSummary.total.toFixed(3),
-        mobile: formState.details.phone,
+      const redirectUrl = await PaymentService.montyPay({
+        cart,
+        formState,
+        user,
+        orderSummary,
+        isTestMode,
+      });
+
+      window.location.href = redirectUrl;
+    } catch (error) {
+      throw error;
+    }
+  }, [cart, formState, user, orderSummary, isTestMode]);
+
+  /**
+   * Handles ZainCash (CliQ) payment initiation
+   */
+  const handleZainCashFlow = useCallback(async () => {
+    try {
+      await PaymentService.zainCash.initiate({
+        orderSummary,
+        phone: formState.details.phone,
+      });
+
+      setFormState((prev) => ({ ...prev, cliqStep: CLIQ_STEPS.OTP_SENT }));
+      toast.success("OTP sent to your mobile number");
+    } catch (error) {
+      throw error;
+    }
+  }, [orderSummary, formState.details.phone]);
+
+  /**
+   * Confirms ZainCash payment with OTP
+   */
+  const confirmCliqPayment = useCallback(async () => {
+    setIsSubmitting(true);
+
+    try {
+      await PaymentService.zainCash.confirm({
+        orderSummary,
+        phone: formState.details.phone,
         otp: formState.otp,
       });
 
-      if (data?.ErrorObj?.ErrorCode === "0") {
-        navigate("/order-success");
-      } else {
-        toast.error(data?.ErrorObj?.ErrorMessage || "Payment failed");
-      }
-    } catch (e) {
-      toast.error("Verification Failed");
+      toast.success("Payment successful!");
+      navigate("/order-success");
+    } catch (error) {
+      console.error("CliQ confirmation error:", error);
+      toast.error(error.message || "Verification failed");
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [orderSummary, formState.details.phone, formState.otp, navigate]);
 
+  // --- Return Hook API ---
   return {
-    areas, isLoading, error, isSubmitting, isTestMode,
-    formState, updateForm, updateDetails, confirmCliqPayment,
-    orderSummary, handlePayment
+    // Data
+    areas,
+    orderSummary,
+    formState,
+
+    // State flags
+    isLoading,
+    isSubmitting,
+    isTestMode,
+    error,
+
+    // Handlers
+    updateForm,
+    updateDetails,
+    handlePayment,
+    confirmCliqPayment,
   };
 };

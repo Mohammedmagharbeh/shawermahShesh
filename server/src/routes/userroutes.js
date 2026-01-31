@@ -1,161 +1,32 @@
-
 const express = require("express");
 const routes = express.Router();
 require("dotenv").config();
-const jwt = require("jsonwebtoken");
 const {
   getuser,
   getAllProducts,
   getSingleProduct,
+  getCurrentUser,
+  sendLoginOTP,
+  sendEmployeeLoginOTP,
+  verifyLoginOTP,
+  updatePhone,
 } = require("../controller/usercontroller");
-const { generateOTP, sendOTP } = require("../utils/otp");
-const userModel = require("../models/user");
 const validateJWT = require("../middlewares/validateJWT");
 
 routes.get("/users", getuser);
 
-routes.get("/me", validateJWT, (req, res) => {
-  const { _id, phone, role, username } = req.user;
-  res.json({ _id, phone, role, username });
-});
+routes.get("/me", validateJWT, getCurrentUser);
 
-routes.post("/login", async (req, res) => {
-  const { phone } = req.body;
-
-  try {
-    let user = await userModel.findOne({ phone });
-
-    if (!user) {
-      user = new userModel({ phone });
-    }
-
-    const otp = generateOTP();
-    user.otp = otp;
-    user.otpExpires = Date.now() + 5 * 60 * 1000;
-    await user.save();
-
-    await sendOTP(user.phone, otp);
-
-    return res.status(200).json({ msg: "OTP sent to your phone" });
-  } catch (error) {
-    res.status(500).json({ msg: error.message });
-  }
-});
+routes.post("/login", sendLoginOTP);
 
 // التعديل هنا: استقبال اسم الموظف وإرساله مع الـ OTP
-routes.post("/employee-login", async (req, res) => {
-  const { username, employeeName } = req.body; // استقبال employeeName من الفرونت إند
+routes.post("/employee-login", sendEmployeeLoginOTP);
 
-  try {
-    const employeeUsername = username || "employee";
-    const EMPLOYEE_PHONE = "0799446641"; 
-
-    let user = await userModel.findOne({
-      username: employeeUsername,
-      role: "employee",
-    });
-
-    if (!user) {
-      user = new userModel({ username: employeeUsername, role: "employee" });
-    }
-
-    const otp = generateOTP();
-    user.otp = otp;
-    user.otpExpires = Date.now() + 5 * 60 * 1000;
-    await user.save();
-
-    // نمرر اسم الموظف لدالة إرسال الرسائل لكي تضمنه في النص
-    // ملاحظة: تأكد أن دالة sendOTP لديك مهيئة لاستقبال باراميتر ثالث (الاسم)
-    await sendOTP(EMPLOYEE_PHONE, otp, employeeName);
-
-    return res.status(200).json({ msg: "OTP sent to your phone" });
-  } catch (error) {
-    res.status(500).json({ msg: error.message });
-  }
-});
-
-routes.post("/verify-otp", async (req, res) => {
-  const { phone, newPhone, otp, username } = req.body;
-
-  try {
-    let user;
-    if (username) {
-      user = await userModel.findOne({ username, role: "employee" });
-    } else {
-      user = await userModel.findOne({ phone });
-    }
-    if (!user) return res.status(400).json({ msg: "User not found" });
-
-    if (user.otp !== otp) {
-      return res.status(400).json({ msg: "Invalid OTP" });
-    }
-    if (user.otpExpires < Date.now())
-      return res.status(400).json({ msg: "OTP has expired" });
-
-    user.otp = null;
-    user.otpExpires = null;
-    if (phone && newPhone) {
-      user.phone = newPhone;
-    } else if (phone && !newPhone) {
-      user.phone = phone;
-    }
-    await user.save();
-
-    const token = jwt.sign(
-      {
-        id: user._id,
-        phone: user.phone,
-        username: user.username,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "24h",
-      }
-    );
-
-    return res.status(200).json({
-      msg: "Login successful",
-      token,
-      _id: user._id,
-      phone: user.phone,
-      role: user.role,
-    });
-  } catch (err) {
-    res.status(500).json({ msg: err.message });
-  }
-});
+routes.post("/verify-otp", verifyLoginOTP);
 
 routes.get("/products", validateJWT, getAllProducts);
 routes.get("/products/:id", validateJWT, getSingleProduct);
 
-routes.put("/update-phone", validateJWT, async (req, res) => {
-  try {
-    const { newPhone } = req.body;
-    const userId = req.user._id;
-
-    const user = await userModel.findById(userId);
-    if (!user) return res.status(404).json({ msg: "User not found" });
-
-    const existingUser = await userModel.findOne({ phone: newPhone });
-    if (existingUser)
-      return res.status(400).json({ msg: "Phone number already in use" });
-    if (user.phone === newPhone)
-      return res
-        .status(400)
-        .json({ msg: "New phone number must be different" });
-
-    const otp = generateOTP();
-    user.otp = otp;
-    user.otpExpires = Date.now() + 5 * 60 * 1000;
-    await user.save();
-    await sendOTP(newPhone, otp);
-
-    res.json({ msg: "OTP sent to your phone" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Failed to send OTP" });
-  }
-});
+routes.put("/update-phone", validateJWT, updatePhone);
 
 module.exports = routes;

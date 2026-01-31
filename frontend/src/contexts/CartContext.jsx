@@ -29,7 +29,7 @@ export const CartProvider = ({ children }) => {
               "Content-Type": "application/json",
               authorization: `Bearer ${user.token}`,
             },
-          }
+          },
         );
         if (!res.ok) throw new Error("Failed to fetch cart");
         const data = await res.json();
@@ -63,18 +63,12 @@ export const CartProvider = ({ children }) => {
         selectedType &&
         product.prices?.[selectedProtein]?.[selectedType] != null
       ) {
-        console.log("1");
-
         basePrice = Number(product.prices[selectedProtein][selectedType]);
       }
       // ✅ Handle flat prices { sandwich, meal }
       else if (selectedType && product.prices[selectedType] !== null) {
-        console.log("2");
-
         basePrice = Number(product.prices[selectedType]);
       } else if (selectedProtein) {
-        console.log("3");
-
         basePrice = Number(product.prices[selectedProtein]);
       } else {
         basePrice = product.basePrice;
@@ -89,7 +83,7 @@ export const CartProvider = ({ children }) => {
       const additionsPrice =
         item.additions?.reduce(
           (sum, add) => sum + (Number(add.price) || 0),
-          0
+          0,
         ) || 0;
 
       return acc + (basePrice + additionsPrice) * (item.quantity || 1);
@@ -105,7 +99,7 @@ export const CartProvider = ({ children }) => {
     isSpicy,
     additions,
     notes,
-    { selectedProtein, selectedType } = {} // new selections
+    { selectedProtein, selectedType } = {}, // new selections
   ) => {
     if (!isAuthenticated) {
       toast.error(t("please_login_to_add_items"));
@@ -129,7 +123,7 @@ export const CartProvider = ({ children }) => {
             selectedProtein: selectedProtein || null,
             selectedType: selectedType || null,
           }),
-        }
+        },
       );
       if (!res.ok) throw new Error("Failed to add to cart");
       const data = await res.json();
@@ -143,7 +137,7 @@ export const CartProvider = ({ children }) => {
   // Update quantity or selections
   const updateQuantity = async (
     productId,
-    { quantity, additions, isSpicy, notes, selectedProtein, selectedType }
+    { quantity, additions, isSpicy, notes, selectedProtein, selectedType },
   ) => {
     try {
       const res = await fetch(
@@ -163,7 +157,7 @@ export const CartProvider = ({ children }) => {
             selectedProtein: selectedProtein || null,
             selectedType: selectedType || null,
           }),
-        }
+        },
       );
       if (!res.ok) throw new Error("Failed to update cart");
       const data = await res.json();
@@ -180,7 +174,7 @@ export const CartProvider = ({ children }) => {
     isSpicy,
     notes,
     selectedProtein,
-    selectedType
+    selectedType,
   ) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}/cart/remove`, {
@@ -220,7 +214,7 @@ export const CartProvider = ({ children }) => {
             "Content-Type": "application/json",
             authorization: `Bearer ${user.token}`,
           },
-        }
+        },
       );
       if (!res.ok) throw new Error("Failed to clear cart");
       const data = await res.json();

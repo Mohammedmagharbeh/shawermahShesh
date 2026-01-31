@@ -5,15 +5,11 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const http = require("http");
 const { Server } = require("socket.io");
-const fixUserIndexes = require("./utils/fixIndexes");
-
-// Routes
 const orderRoutes = require("./routes/orderRoutes");
 const userroutes = require("./routes/userroutes");
 const adminroutes = require("./routes/adminroutes");
 const cartRoutes = require("./routes/cartRoutes");
 const locationsRoute = require("./routes/locationsRoute");
-// const myfatoorah = require("./routes/myfatoorah");
 const montypay = require("./routes/montypay");
 
 const additions = require("./routes/additions");
@@ -22,7 +18,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
-const zainCash = require("./routes/zainCash")
+const zainCash = require("./routes/zainCash");
 
 // const emailRoutes = require("./routes/emailRoutes");
 
@@ -34,14 +30,14 @@ app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
 connectDB();
 
-// Fix database indexes
-setTimeout(() => {
-  fixUserIndexes();
-}, 2000);
+// // Fix database indexes
+// setTimeout(() => {
+//   fixUserIndexes();
+// }, 2000);
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] },
+  cors: { origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] }, // to-do
 });
 
 io.on("connection", (socket) => {
@@ -57,7 +53,6 @@ app.use("/api/admin", adminroutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/locations", locationsRoute);
-// app.use("/api/myfatoorah", myfatoorah);
 app.use("/api/montypay", montypay);
 
 app.use("/api/additions", additions);
