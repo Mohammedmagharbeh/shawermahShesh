@@ -1,15 +1,6 @@
 const Job = require("../models/Job");
 const Application = require("../models/Application");
 
-// exports.createJob = async (req, res) => {
-//   try {
-//     const job = new Job(req.body);
-//     await job.save();
-//     res.json(job);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
 
 exports.createJob = async (req, res) => {
   try {
