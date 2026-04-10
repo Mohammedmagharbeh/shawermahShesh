@@ -31,10 +31,17 @@ function formatAmount(amount) {
 exports.initiatePayment = async ({ amount, mobile }) => {
   const formattedMobile = formatMobile(mobile);
   
+  // Best guess at where the Wallet ID (Service Name) and PIN go.
+  // Zain cash typically references these as MerchServiceName and MerchPIN.
+  const walletId = process.env.ZC_WALLET_ID || process.env.ZAIN_SERVICE_NAME;
+  const walletPin = process.env.ZC_WALLET_PIN || process.env.ZAIN_SERVICE_PIN;
+
   const requestData = {
     ZCInitMerchDebitReq: {
       Amount: formatAmount(amount),
       MSISDN962: formattedMobile,
+      MerchPIN: walletPin,
+      MerchServiceName: walletId,
     },
     GeneralData: generalData,
     AuthenticationData: {
@@ -55,6 +62,21 @@ exports.initiatePayment = async ({ amount, mobile }) => {
     console.log("[ZainCash] Requesting SOAP client for Initiate...");
     const client = await soap.createClientAsync(ZAIN_WSDL_URL);
 
+    // ==========================================
+    // THE WSDL HACK (Self-Diagnosis)
+    // ==========================================
+    // Dump the exact map of parameters required by the server for this method:
+    try {
+      const describeNode = client.describe();
+      // Most WCF nodes look like: describe().ZCPublicVPNAPI.BasicHttpBinding_IZCPublicVPNAPI.ZCInitiateMerchDebitPayByMerch
+      // We will securely deep log whatever the WSDL describes as parameters.
+      console.log("\n================ WSDL SCHEMA DUMP ================");
+      console.dir(describeNode, { depth: null, colors: true });
+      console.log("==================================================\n");
+    } catch (e) {
+      console.error("Failed to describe WSDL:", e.message);
+    }
+    
     console.log("[ZainCash] initiatePayment Payload:", JSON.stringify(requestData, null, 2));
 
     const [result] = await client.ZCInitiateMerchDebitPayByMerchAsync(requestData);
