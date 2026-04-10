@@ -30,28 +30,14 @@ function formatAmount(amount) {
 // 1. Initiate Payment (Send OTP)
 exports.initiatePayment = async ({ amount, mobile }) => {
   const formattedMobile = formatMobile(mobile);
-  
-  // Best guess at where the Wallet ID (Service Name) and PIN go.
-  // Zain cash typically references these as MerchServiceName and MerchPIN.
-  const walletId = process.env.ZC_WALLET_ID || process.env.ZAIN_SERVICE_NAME;
-  const walletPin = process.env.ZC_WALLET_PIN || process.env.ZAIN_SERVICE_PIN;
 
   const requestData = {
     ZCInitMerchDebitReq: {
       Amount: formatAmount(amount),
       MSISDN962: formattedMobile,
-      MerchPIN: walletPin,
-      MerchServiceName: walletId,
     },
-    GeneralData: generalData,
-    AuthenticationData: {
-      ServiceID: "1000000013",
-      UserName: process.env.ZAIN_API_USERNAME,
-      Password: process.env.ZAIN_API_PASSWORD,
-    },
-    // V3 APIs often use "Auth" instead of "AuthenticationData".
-    // node-soap will ignore the one that isn't strictly defined in the WSDL schema.
-    Auth: {
+    generalData: generalData,
+    AuthData: {
       ServiceID: "1000000013",
       UserName: process.env.ZAIN_API_USERNAME,
       Password: process.env.ZAIN_API_PASSWORD,
@@ -62,21 +48,6 @@ exports.initiatePayment = async ({ amount, mobile }) => {
     console.log("[ZainCash] Requesting SOAP client for Initiate...");
     const client = await soap.createClientAsync(ZAIN_WSDL_URL);
 
-    // ==========================================
-    // THE WSDL HACK (Self-Diagnosis)
-    // ==========================================
-    // Dump the exact map of parameters required by the server for this method:
-    try {
-      const describeNode = client.describe();
-      // Most WCF nodes look like: describe().ZCPublicVPNAPI.BasicHttpBinding_IZCPublicVPNAPI.ZCInitiateMerchDebitPayByMerch
-      // We will securely deep log whatever the WSDL describes as parameters.
-      console.log("\n================ WSDL SCHEMA DUMP ================");
-      console.dir(describeNode, { depth: null, colors: true });
-      console.log("==================================================\n");
-    } catch (e) {
-      console.error("Failed to describe WSDL:", e.message);
-    }
-    
     console.log("[ZainCash] initiatePayment Payload:", JSON.stringify(requestData, null, 2));
 
     const [result] = await client.ZCInitiateMerchDebitPayByMerchAsync(requestData);
@@ -105,13 +76,8 @@ exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
       // Include MerchRefID if using the V2 endpoint. V1 endpoint ignores it.
       MerchRefID: orderId || null,
     },
-    GeneralData: generalData,
-    AuthenticationData: {
-      ServiceID: "1000000014",
-      UserName: process.env.ZAIN_API_USERNAME,
-      Password: process.env.ZAIN_API_PASSWORD,
-    },
-    Auth: {
+    generalData: generalData,
+    AuthData: {
       ServiceID: "1000000014",
       UserName: process.env.ZAIN_API_USERNAME,
       Password: process.env.ZAIN_API_PASSWORD,
