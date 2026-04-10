@@ -1,15 +1,22 @@
 const express = require("express");
-const { initiatePayment, triggerPayment } = require("../controller/zainCash.js");
+const {
+  initiatePayment,
+  triggerPayment,
+} = require("../controller/zainCash.js");
 
 const router = express.Router();
 
 // Route 1: Initiate — sends OTP to customer's phone
 router.post("/zain/initiate", async (req, res) => {
   try {
+    console.log(req.body);
+
     const { amount, mobile } = req.body;
 
     if (!amount || !mobile) {
-      return res.status(400).json({ message: "Amount and mobile number are required" });
+      return res
+        .status(400)
+        .json({ message: "Amount and mobile number are required" });
     }
 
     const result = await initiatePayment({ amount, mobile });
@@ -46,7 +53,9 @@ router.post("/zain/confirm", async (req, res) => {
     const { amount, mobile, otp, orderId } = req.body;
 
     if (!amount || !mobile || !otp) {
-      return res.status(400).json({ message: "Amount, mobile, and OTP are required" });
+      return res
+        .status(400)
+        .json({ message: "Amount, mobile, and OTP are required" });
     }
 
     const result = await triggerPayment({
