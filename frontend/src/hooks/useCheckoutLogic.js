@@ -240,11 +240,17 @@ export const useCheckoutLogic = (t) => {
     setIsSubmitting(true);
 
     try {
-      await PaymentService.zainCash.confirm({
+      const result = await PaymentService.zainCash.confirm({
         orderSummary,
         phone: formState.details.phone,
         otp: formState.otp,
+        orderId: formState.orderId || null,
       });
+
+      const refId = result?.refId || result?.data?.RefID;
+      if (refId) {
+        console.log("[ZainCash] Payment RefID:", refId);
+      }
 
       toast.success("Payment successful!");
       navigate("/order-success");
@@ -254,7 +260,7 @@ export const useCheckoutLogic = (t) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [orderSummary, formState.details.phone, formState.otp, navigate]);
+  }, [orderSummary, formState.details.phone, formState.otp, formState.orderId, navigate]);
 
   // --- Return Hook API ---
   return {

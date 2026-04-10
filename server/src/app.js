@@ -1,7 +1,9 @@
+const dotenv = require("dotenv");
+dotenv.config(); // MUST be first — before any module that reads process.env
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -22,18 +24,12 @@ const zainCash = require("./routes/zainCash");
 
 // const emailRoutes = require("./routes/emailRoutes");
 
-dotenv.config();
 const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
 connectDB();
-
-// // Fix database indexes
-// setTimeout(() => {
-//   fixUserIndexes();
-// }, 2000);
 
 const server = http.createServer(app);
 const io = new Server(server, {
