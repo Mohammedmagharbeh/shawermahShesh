@@ -1,8 +1,8 @@
 const soap = require("soap");
 
 // Default to the VPN/STG singleWsdl URL if not provided by `.env`
-const ZAIN_WSDL_URL = process.env.ZAIN_BASE_URL 
-  ? `${process.env.ZAIN_BASE_URL}?singleWsdl` 
+const ZAIN_WSDL_URL = process.env.ZAIN_BASE_URL
+  ? `${process.env.ZAIN_BASE_URL}?singleWsdl`
   : "https://zcstgpublic.jo.zain.com:5001/ZCPublicVPNAPI.svc?singleWsdl";
 
 // Optionally ignore self-signed certs for the staging soap connection
@@ -36,28 +36,41 @@ exports.initiatePayment = async ({ amount, mobile }) => {
       Amount: formatAmount(amount),
       MSISDN962: formattedMobile,
     },
-    generalData: generalData,
+    generalData: {
+      LanguageID: "English",
+      TerminalShopID: process.env.ZC_TERMINAL_SHOP_ID || "1",
+      TerminalUserID: "1",
+    },
     AuthData: {
-      ServiceID: "1000000013",
-      UserName: process.env.ZAIN_API_USERNAME,
-      Password: process.env.ZAIN_API_PASSWORD,
-    }
+      Password: process.env.ZAIN_API_PASSWORD, // Must be first!
+      ServiceID: "1000000013", // Must be second!
+      UserName: process.env.ZAIN_API_USERNAME, // Must be third!
+    },
   };
 
   try {
     console.log("[ZainCash] Requesting SOAP client for Initiate...");
     const client = await soap.createClientAsync(ZAIN_WSDL_URL);
 
-    console.log("[ZainCash] initiatePayment Payload:", JSON.stringify(requestData, null, 2));
+    console.log(
+      "[ZainCash] initiatePayment Payload:",
+      JSON.stringify(requestData, null, 2),
+    );
 
-    const [result] = await client.ZCInitiateMerchDebitPayByMerchAsync(requestData);
+    const [result] =
+      await client.ZCInitiateMerchDebitPayByMerchAsync(requestData);
 
-    console.log("[ZainCash] initiatePayment Response:", JSON.stringify(result, null, 2));
+    console.log(
+      "[ZainCash] initiatePayment Response:",
+      JSON.stringify(result, null, 2),
+    );
     return result;
   } catch (error) {
     console.error("[ZainCash] SOAP Error (Initiate):", error.message || error);
     // Throw error so the router catches it properly
-    throw typeof error.Fault !== 'undefined' ? new Error("SOAP Fault: " + error.Fault.faultstring) : error;
+    throw typeof error.Fault !== "undefined"
+      ? new Error("SOAP Fault: " + error.Fault.faultstring)
+      : error;
   }
 };
 
@@ -81,29 +94,37 @@ exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
       ServiceID: "1000000014",
       UserName: process.env.ZAIN_API_USERNAME,
       Password: process.env.ZAIN_API_PASSWORD,
-    }
+    },
   };
 
   try {
     console.log("[ZainCash] Requesting SOAP client for Confirm...");
     const client = await soap.createClientAsync(ZAIN_WSDL_URL);
 
-    console.log("[ZainCash] confirmPayment Payload:", JSON.stringify(requestData, null, 2));
+    console.log(
+      "[ZainCash] confirmPayment Payload:",
+      JSON.stringify(requestData, null, 2),
+    );
 
-    // Notice: ZCMerchDebitTrigerPaymentV2 is the modern endpoint used to include MerchRefID. 
+    // Notice: ZCMerchDebitTrigerPaymentV2 is the modern endpoint used to include MerchRefID.
     // If the WSDL does not expose the V2 method, you must remove the "V2" suffix. Let's try V2 first.
     let result;
     if (client.ZCMerchDebitTrigerPaymentV2Async) {
-        [result] = await client.ZCMerchDebitTrigerPaymentV2Async(requestData);
+      [result] = await client.ZCMerchDebitTrigerPaymentV2Async(requestData);
     } else {
-        // Fallback to V1
-        [result] = await client.ZCMerchDebitTrigerPaymentAsync(requestData);
+      // Fallback to V1
+      [result] = await client.ZCMerchDebitTrigerPaymentAsync(requestData);
     }
 
-    console.log("[ZainCash] confirmPayment Response:", JSON.stringify(result, null, 2));
+    console.log(
+      "[ZainCash] confirmPayment Response:",
+      JSON.stringify(result, null, 2),
+    );
     return result;
   } catch (error) {
     console.error("[ZainCash] SOAP Error (Confirm):", error.message || error);
-    throw typeof error.Fault !== 'undefined' ? new Error("SOAP Fault: " + error.Fault.faultstring) : error;
+    throw typeof error.Fault !== "undefined"
+      ? new Error("SOAP Fault: " + error.Fault.faultstring)
+      : error;
   }
 };
