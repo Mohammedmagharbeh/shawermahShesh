@@ -42,9 +42,9 @@ exports.initiatePayment = async ({ amount, mobile }) => {
       TerminalUserID: "1",
     },
     AuthData: {
-      Password: process.env.ZAIN_API_PASSWORD, // Must be first!
-      ServiceID: "1000000013", // Must be second!
-      UserName: process.env.ZAIN_API_USERNAME, // Must be third!
+      Password: process.env.ZAIN_API_PASSWORD,
+      ServiceID: "ZCInitiateMerchDebitPayByMerch", // <--- Changed from "1000000013"
+      UserName: process.env.ZAIN_API_USERNAME,
     },
   };
 
