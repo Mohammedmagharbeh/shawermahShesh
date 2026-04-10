@@ -177,7 +177,7 @@ export const initiateZainCashPayment = async ({ orderSummary, phone }) => {
  * @param {Object} params - Confirmation parameters
  * @returns {Promise<Object>} - API response
  */
-export const confirmZainCashPayment = async ({ orderSummary, phone, otp }) => {
+export const confirmZainCashPayment = async ({ orderSummary, phone, otp, orderId }) => {
   try {
     if (!otp || otp.length < 4) {
       throw new Error("Valid OTP is required");
@@ -187,6 +187,7 @@ export const confirmZainCashPayment = async ({ orderSummary, phone, otp }) => {
       amount: orderSummary.total.toFixed(3),
       mobile: phone,
       otp: otp,
+      orderId: orderId || null,
     };
 
     const { data } = await apiClient.post(
@@ -194,8 +195,8 @@ export const confirmZainCashPayment = async ({ orderSummary, phone, otp }) => {
       payload,
     );
 
-    // Check for error in response
-    if (data?.ErrorObj?.ErrorCode !== "0") {
+    // Zain returns ErrorCode "0" on success; any other code is a failure
+    if (data?.ErrorObj && data.ErrorObj.ErrorCode !== "0") {
       throw new Error(
         data?.ErrorObj?.ErrorMessage || "Payment verification failed",
       );
