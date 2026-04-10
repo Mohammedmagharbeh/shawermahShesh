@@ -10,8 +10,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const generalData = {
   LanguageID: "English",
-  TerminalShopID: process.env.ZC_TERMINAL_SHOP_ID || "1",
-  TerminalUserID: process.env.ZC_TERMINAL_USER_ID || "1",
+  TerminalShopID: process.env.ZAIN_API_USERNAME || "1",
+  TerminalUserID: process.env.ZAIN_API_USERNAME || "1",
 };
 
 /** Normalize mobile → 962XXXXXXXXX */
@@ -38,8 +38,8 @@ exports.initiatePayment = async ({ amount, mobile }) => {
     },
     generalData: {
       LanguageID: "English",
-      TerminalShopID: process.env.ZC_TERMINAL_SHOP_ID || "1",
-      TerminalUserID: "1",
+      TerminalShopID: process.env.ZAIN_API_USERNAME || "1",
+      TerminalUserID: process.env.ZAIN_API_USERNAME || "1",
     },
     AuthData: {
       Password: process.env.ZAIN_API_PASSWORD,
