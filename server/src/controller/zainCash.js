@@ -3,7 +3,7 @@ const soap = require("soap");
 // Default to the VPN/STG singleWsdl URL if not provided by `.env`
 const ZAIN_WSDL_URL = process.env.ZAIN_BASE_URL
   ? `${process.env.ZAIN_BASE_URL}?singleWsdl`
-  : "https://zcstgpublic.jo.zain.com:5001/ZCPublicVPNAPI.svc?singleWsdl";
+  : "https://176.29.197.103:5001/ZCPublicVPNAPI.svc?singleWsdl";
 
 // Optionally ignore self-signed certs for the staging soap connection
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
