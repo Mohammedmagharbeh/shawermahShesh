@@ -32,7 +32,7 @@ exports.initiatePayment = async ({ amount, mobile }) => {
   const formattedMobile = formatMobile(mobile);
 
   const requestData = {
-    ZCInitMerchDebitReq: {
+    req: {
       Amount: formatAmount(amount),
       MSISDN962: formattedMobile,
     },
