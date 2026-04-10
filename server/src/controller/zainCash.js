@@ -10,8 +10,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const generalData = {
   LanguageID: "English",
-  TerminalShopID: "1",
-  TerminalUserID: "1",
+  TerminalShopID: process.env.ZC_TERMINAL_SHOP_ID || "1",
+  TerminalUserID: process.env.ZC_TERMINAL_USER_ID || "1",
 };
 
 /** Normalize mobile → 962XXXXXXXXX */
@@ -42,6 +42,13 @@ exports.initiatePayment = async ({ amount, mobile }) => {
       UserName: process.env.ZAIN_API_USERNAME,
       Password: process.env.ZAIN_API_PASSWORD,
     },
+    // V3 APIs often use "Auth" instead of "AuthenticationData".
+    // node-soap will ignore the one that isn't strictly defined in the WSDL schema.
+    Auth: {
+      ServiceID: "1000000013",
+      UserName: process.env.ZAIN_API_USERNAME,
+      Password: process.env.ZAIN_API_PASSWORD,
+    }
   };
 
   try {
@@ -82,6 +89,11 @@ exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
       UserName: process.env.ZAIN_API_USERNAME,
       Password: process.env.ZAIN_API_PASSWORD,
     },
+    Auth: {
+      ServiceID: "1000000014",
+      UserName: process.env.ZAIN_API_USERNAME,
+      Password: process.env.ZAIN_API_PASSWORD,
+    }
   };
 
   try {
