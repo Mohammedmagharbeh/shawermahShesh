@@ -6,12 +6,10 @@ const ZAIN_WSDL_URL = process.env.ZAIN_BASE_URL
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-// ─── Exact field names confirmed from WSDL describe() output ─────────────────
-// req          → "req"          (both methods)
-// generalData  → "generalData"  (lowercase g)
-// AuthData     → "AuthData"     (NOT AuthenticationData)
-// ServiceID    → method name string (NOT numeric ID)
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── CRITICAL: WCF DataContractSerializer requires ALL fields in ALPHABETICAL order ───
+// AuthData fields must be: Password → ServiceID → UserName  (P < S < U)
+// If the order is wrong, WCF throws DeserializationFailed even if values are correct.
+// ─────────────────────────────────────────────────────────────────────────────────────
 
 function formatMobile(mobile) {
   const clean = (mobile || "").replace(/[\s-]/g, "");
@@ -37,27 +35,21 @@ async function getClient() {
 exports.initiatePayment = async ({ amount, mobile }) => {
   const client = await getClient();
 
-  // Log raw XML for debugging (remove after confirmed working)
-  client.on("request", (xml) =>
-    console.log("[ZainCash] RAW XML SENT (initiate):\n", xml),
-  );
-
   const requestData = {
     req: {
-      Amount: formatAmount(amount), // "2.700" — 3 decimal string
+      Amount: formatAmount(amount), // "2.700"
       MSISDN962: formatMobile(mobile), // "962XXXXXXXXX"
     },
     generalData: {
-      // lowercase "generalData" — confirmed from WSDL
       LanguageID: "English",
       TerminalShopID: "1",
       TerminalUserID: "1",
     },
     AuthData: {
-      // "AuthData" — confirmed from WSDL (NOT AuthenticationData)
-      ServiceID: "ZCInitiateMerchDebitPayByMerch", // method name string — confirmed from WSDL enum
-      UserName: process.env.ZAIN_API_USERNAME,
-      Password: process.env.ZAIN_API_PASSWORD,
+      Password: process.env.ZAIN_API_PASSWORD, // P  ← must be FIRST
+      ServiceID: "ZCInitiateMerchDebitPayByMerch", // S  ← second
+      UserName: process.env.ZAIN_API_USERNAME, // U  ← third
+      // WCF DataContractSerializer reads fields alphabetically: P < S < U ✓
     },
   };
 
@@ -86,10 +78,6 @@ exports.initiatePayment = async ({ amount, mobile }) => {
 exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
   const client = await getClient();
 
-  client.on("request", (xml) =>
-    console.log("[ZainCash] RAW XML SENT (confirm):\n", xml),
-  );
-
   const requestData = {
     req: {
       Amount: formatAmount(amount),
@@ -98,19 +86,17 @@ exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
       MerchPIN: process.env.ZAIN_SERVICE_PIN,
       MerchServiceName: process.env.ZAIN_SERVICE_NAME,
       Note: note || "ShawarmaShee sh Order",
-      // MerchRefID only exists in V2 — V1 WSDL method doesn't have it
     },
     generalData: {
-      // lowercase — confirmed from WSDL
       LanguageID: "English",
       TerminalShopID: "1",
       TerminalUserID: "1",
     },
     AuthData: {
-      // "AuthData" — confirmed from WSDL
-      ServiceID: "ZCMerchDebitTrigerPayment", // method name string
-      UserName: process.env.ZAIN_API_USERNAME,
-      Password: process.env.ZAIN_API_PASSWORD,
+      Password: process.env.ZAIN_API_PASSWORD, // P  ← first
+      ServiceID: "ZCMerchDebitTrigerPayment", // S  ← second
+      UserName: process.env.ZAIN_API_USERNAME, // U  ← third
+      // P < S < U  ✓
     },
   };
 
