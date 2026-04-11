@@ -10,8 +10,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const generalData = {
   LanguageID: "English",
-  TerminalShopID: process.env.ZAIN_API_USERNAME || "1",
-  TerminalUserID: process.env.ZAIN_API_USERNAME || "1",
+  TerminalShopID: process.env.ZC_TERMINAL_SHOP_ID || "1",
+  TerminalUserID: process.env.ZC_TERMINAL_USER_ID || "1",
 };
 
 /** Normalize mobile → 962XXXXXXXXX */
@@ -38,12 +38,12 @@ exports.initiatePayment = async ({ amount, mobile }) => {
     },
     generalData: {
       LanguageID: "English",
-      TerminalShopID: process.env.ZAIN_API_USERNAME || "1",
-      TerminalUserID: process.env.ZAIN_API_USERNAME || "1",
+      TerminalShopID: process.env.ZC_TERMINAL_SHOP_ID || "1",
+      TerminalUserID: process.env.ZC_TERMINAL_USER_ID || "1",
     },
     AuthData: {
       Password: process.env.ZAIN_API_PASSWORD,
-      ServiceID: "ZCInitiateMerchDebitPayByMerch", // <--- Changed from "1000000013"
+      ServiceID: process.env.ZC_SERVICE_ID_INITIATE || "1000000013",
       UserName: process.env.ZAIN_API_USERNAME,
     },
   };
@@ -91,7 +91,7 @@ exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
     },
     generalData: generalData,
     AuthData: {
-      ServiceID: "1000000014",
+      ServiceID: process.env.ZC_SERVICE_ID_CONFIRM || "1000000014",
       UserName: process.env.ZAIN_API_USERNAME,
       Password: process.env.ZAIN_API_PASSWORD,
     },
