@@ -6,11 +6,6 @@ const ZAIN_WSDL_URL = process.env.ZAIN_BASE_URL
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-// ─── CRITICAL: WCF DataContractSerializer requires ALL fields in ALPHABETICAL order ───
-// AuthData fields must be: Password → ServiceID → UserName  (P < S < U)
-// If the order is wrong, WCF throws DeserializationFailed even if values are correct.
-// ─────────────────────────────────────────────────────────────────────────────────────
-
 function formatMobile(mobile) {
   const clean = (mobile || "").replace(/[\s-]/g, "");
   if (clean.startsWith("962")) return clean;
@@ -22,7 +17,6 @@ function formatAmount(amount) {
   return parseFloat(amount).toFixed(3);
 }
 
-// ─── Cached SOAP client ───────────────────────────────────────────────────────
 let _client = null;
 async function getClient() {
   if (_client) return _client;
@@ -31,14 +25,13 @@ async function getClient() {
   return _client;
 }
 
-// ─── 1. Initiate Payment — sends OTP to customer's phone ─────────────────────
 exports.initiatePayment = async ({ amount, mobile }) => {
   const client = await getClient();
 
   const requestData = {
     req: {
-      Amount: formatAmount(amount), // "2.700"
-      MSISDN962: formatMobile(mobile), // "962XXXXXXXXX"
+      Amount: formatAmount(amount),
+      MSISDN962: formatMobile(mobile),
     },
     generalData: {
       LanguageID: "English",
@@ -46,10 +39,9 @@ exports.initiatePayment = async ({ amount, mobile }) => {
       TerminalUserID: "1",
     },
     AuthData: {
-      Password: process.env.ZAIN_API_PASSWORD, // P  ← must be FIRST
-      ServiceID: "ZCInitiateMerchDebitPayByMerch", // S  ← second
-      UserName: process.env.ZAIN_API_USERNAME, // U  ← third
-      // WCF DataContractSerializer reads fields alphabetically: P < S < U ✓
+      Password: process.env.ZAIN_API_PASSWORD,
+      ServiceID: "ZCInitiateMerchDebitPayByMerch",
+      UserName: process.env.ZAIN_API_USERNAME,
     },
   };
 
@@ -74,7 +66,6 @@ exports.initiatePayment = async ({ amount, mobile }) => {
   }
 };
 
-// ─── 2. Confirm Payment — customer submits OTP, money moves ──────────────────
 exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
   const client = await getClient();
 
@@ -93,10 +84,9 @@ exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
       TerminalUserID: "1",
     },
     AuthData: {
-      Password: process.env.ZAIN_API_PASSWORD, // P  ← first
-      ServiceID: "ZCMerchDebitTrigerPayment", // S  ← second
-      UserName: process.env.ZAIN_API_USERNAME, // U  ← third
-      // P < S < U  ✓
+      Password: process.env.ZAIN_API_PASSWORD,
+      ServiceID: "ZCMerchDebitTrigerPayment",
+      UserName: process.env.ZAIN_API_USERNAME,
     },
   };
 
