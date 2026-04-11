@@ -6,11 +6,12 @@ const ZAIN_WSDL_URL = process.env.ZAIN_BASE_URL
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const generalData = {
-  LanguageID: "English",
-  TerminalShopID: process.env.ZC_TERMINAL_SHOP_ID || "1",
-  TerminalUserID: process.env.ZC_TERMINAL_USER_ID || "1",
-};
+// ─── Exact field names confirmed from WSDL describe() output ─────────────────
+// req          → "req"          (both methods)
+// generalData  → "generalData"  (lowercase g)
+// AuthData     → "AuthData"     (NOT AuthenticationData)
+// ServiceID    → method name string (NOT numeric ID)
+// ─────────────────────────────────────────────────────────────────────────────
 
 function formatMobile(mobile) {
   const clean = (mobile || "").replace(/[\s-]/g, "");
@@ -23,31 +24,38 @@ function formatAmount(amount) {
   return parseFloat(amount).toFixed(3);
 }
 
-// ─── Helper: create + cache SOAP client ───────────────────────────────────────
+// ─── Cached SOAP client ───────────────────────────────────────────────────────
 let _client = null;
 async function getClient() {
   if (_client) return _client;
   console.log("[ZainCash] Creating SOAP client from:", ZAIN_WSDL_URL);
   _client = await soap.createClientAsync(ZAIN_WSDL_URL);
-
-  // ONE-TIME: log all available methods so you can confirm exact names
-  console.log("[ZainCash] Available WSDL methods:", Object.keys(_client));
   return _client;
 }
 
-// ─── 1. Initiate Payment (Send OTP) ──────────────────────────────────────────
+// ─── 1. Initiate Payment — sends OTP to customer's phone ─────────────────────
 exports.initiatePayment = async ({ amount, mobile }) => {
   const client = await getClient();
 
+  // Log raw XML for debugging (remove after confirmed working)
+  client.on("request", (xml) =>
+    console.log("[ZainCash] RAW XML SENT (initiate):\n", xml),
+  );
+
   const requestData = {
     req: {
-      Amount: formatAmount(amount),
-      MSISDN962: formatMobile(mobile),
+      Amount: formatAmount(amount), // "2.700" — 3 decimal string
+      MSISDN962: formatMobile(mobile), // "962XXXXXXXXX"
     },
-    generalData,
-    // Try "AuthenticationData" — if still fails, try "AuthData"
-    AuthenticationData: {
-      ServiceID: process.env.ZC_SERVICE_ID_INITIATE || "1000000013",
+    generalData: {
+      // lowercase "generalData" — confirmed from WSDL
+      LanguageID: "English",
+      TerminalShopID: "1",
+      TerminalUserID: "1",
+    },
+    AuthData: {
+      // "AuthData" — confirmed from WSDL (NOT AuthenticationData)
+      ServiceID: "ZCInitiateMerchDebitPayByMerch", // method name string — confirmed from WSDL enum
       UserName: process.env.ZAIN_API_USERNAME,
       Password: process.env.ZAIN_API_PASSWORD,
     },
@@ -74,9 +82,13 @@ exports.initiatePayment = async ({ amount, mobile }) => {
   }
 };
 
-// ─── 2. Confirm Payment (Verify OTP) ─────────────────────────────────────────
+// ─── 2. Confirm Payment — customer submits OTP, money moves ──────────────────
 exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
   const client = await getClient();
+
+  client.on("request", (xml) =>
+    console.log("[ZainCash] RAW XML SENT (confirm):\n", xml),
+  );
 
   const requestData = {
     req: {
@@ -86,11 +98,17 @@ exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
       MerchPIN: process.env.ZAIN_SERVICE_PIN,
       MerchServiceName: process.env.ZAIN_SERVICE_NAME,
       Note: note || "ShawarmaShee sh Order",
-      MerchRefID: orderId || null,
+      // MerchRefID only exists in V2 — V1 WSDL method doesn't have it
     },
-    generalData,
-    AuthenticationData: {
-      ServiceID: process.env.ZC_SERVICE_ID_CONFIRM || "1000000014",
+    generalData: {
+      // lowercase — confirmed from WSDL
+      LanguageID: "English",
+      TerminalShopID: "1",
+      TerminalUserID: "1",
+    },
+    AuthData: {
+      // "AuthData" — confirmed from WSDL
+      ServiceID: "ZCMerchDebitTrigerPayment", // method name string
       UserName: process.env.ZAIN_API_USERNAME,
       Password: process.env.ZAIN_API_PASSWORD,
     },
@@ -102,12 +120,7 @@ exports.confirmPayment = async ({ amount, mobile, otp, note, orderId }) => {
   );
 
   try {
-    const methodName = client.ZCMerchDebitTrigerPaymentV2Async
-      ? "ZCMerchDebitTrigerPaymentV2Async"
-      : "ZCMerchDebitTrigerPaymentAsync";
-
-    console.log("[ZainCash] Using confirm method:", methodName);
-    const [result] = await client[methodName](requestData);
+    const [result] = await client.ZCMerchDebitTrigerPaymentAsync(requestData);
     console.log(
       "[ZainCash] confirmPayment Response:",
       JSON.stringify(result, null, 2),
