@@ -94,10 +94,24 @@ export default function Home() {
   }, [location.hash]);
 
   return (
-    <div
-      className="min-h-screen bg-background arabic-font pt-14 xs2:pt-4"
-      dir="rtl"
-    >
+    // <div
+    //   className="min-h-screen bg-background arabic-font pt-14 xs2:pt-4"
+    //   dir="rtl"
+    // >
+
+//     <div
+//   className="min-h-screen bg-background arabic-font -mt-[64px] pt-0 m-0 overflow-x-hidden"
+//   dir="rtl"
+// >
+<div
+  className="min-h-screen bg-background arabic-font mt-[1px] lg:-mt-[60px] p-0 m-0 overflow-x-hidden"
+  dir="rtl"
+>
+{/* <div
+  className="min-h-screen bg-background arabic-font pt-[2px] lg:pt-0 lg:-mt-[60px] m-0 overflow-x-hidden"
+  dir="rtl"
+> */}
+
       <ImageCarousel />
 
       {/* قسم قصتنا */}
