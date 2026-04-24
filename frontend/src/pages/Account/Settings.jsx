@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useState } from "react";
-import { User, Phone, Palette, Trash2, AlertCircle } from "lucide-react";
+import { User, Phone, Palette } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useUser } from "@/contexts/UserContext";
@@ -70,7 +70,7 @@ function Settings() {
                   <Input
                     id="phone"
                     type="tel"
-                    value={user.phone}
+                    value={phone || user.phone}
                     onChange={(e) => handlePhoneChange(e.target.value)}
                     maxLength={10}
                     placeholder={t("enter_phone")}
