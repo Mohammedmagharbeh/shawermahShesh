@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,6 +9,7 @@ import { useUser } from "@/contexts/UserContext";
 
 // مساعد لتنسيق المنتجات قبل إرسالها لقاعدة البيانات
 const formatOrderProducts = (products) => {
+  console.log(products);
   if (!products) return [];
   return products.map((p) => ({
     productId: p.productId?._id || p.productId,
@@ -43,7 +43,7 @@ function PaymentSuccess() {
   useEffect(() => {
     // 1. استخراج الرقم من الرابط (URL) الذي أرسله MontyPay
     const params = new URLSearchParams(location.search);
-    const orderId = params.get("orderId"); 
+    const orderId = params.get("orderId");
 
     if (!orderId) {
       const errorMsg = t("missing_payment_reference");
@@ -53,7 +53,7 @@ function PaymentSuccess() {
     }
 
     // تعيين الرقم القصير لعرضه فوراً في الواجهة
-    setState(prev => ({ ...prev, displayOrderId: orderId }));
+    setState((prev) => ({ ...prev, displayOrderId: orderId }));
 
     if (isVerifying.current) return;
     isVerifying.current = true;
@@ -64,7 +64,7 @@ function PaymentSuccess() {
         const res = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/montypay/status`,
           { orderId },
-          { headers: { "Content-Type": "application/json" } }
+          { headers: { "Content-Type": "application/json" } },
         );
 
         const data = res.data;
@@ -121,7 +121,7 @@ function PaymentSuccess() {
         paidAt: new Date(),
         orderType: orderData.orderType,
         userDetails: orderData.userDetails,
-        status: "Processing", 
+        status: "Processing",
       });
 
       clearCart();

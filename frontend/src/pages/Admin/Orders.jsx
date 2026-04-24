@@ -307,6 +307,18 @@ function Orders() {
                                 )}
                               </div>
                             </div>
+                            {item.notes && (
+                              <div className="flex gap-1 flex-wrap">
+                                {t("notes")}:{" "}
+                                <Badge
+                                  className={
+                                    "bg-[#FFC400] text-black font-bold"
+                                  }
+                                >
+                                  {item.notes}
+                                </Badge>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="text-right">
