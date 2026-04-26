@@ -88,9 +88,11 @@ export const VALIDATION_KEYS = {
 
 // External resources
 export const PAYMENT_LOGOS = {
-  VISA: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg",
+  VISA: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiM94VhYmT8xU6PmAKaXJr9WySnjARL7CyGA&s",
   MASTERCARD:
     "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg",
+  ApplePay:
+    "https://1000logos.net/wp-content/uploads/2023/03/Apple-Pay-logo.png",
 };
 
 // Currency

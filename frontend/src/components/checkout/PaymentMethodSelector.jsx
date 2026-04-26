@@ -56,58 +56,68 @@ const PaymentMethodSelector = React.memo(({ method, setMethod, t }) => {
           </span>
 
           {/* Payment Logos */}
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1.5">
             {isValidImageUrl(PAYMENT_LOGOS.VISA) && (
-              <img
-                src={PAYMENT_LOGOS.VISA}
-                className="h-3"
-                alt="Visa"
-                loading="lazy"
-              />
+              <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm h-7 w-12">
+                <img
+                  src={PAYMENT_LOGOS.VISA}
+                  className="h-3.5 w-auto object-contain"
+                  alt="Visa"
+                  loading="lazy"
+                />
+              </span>
             )}
             {isValidImageUrl(PAYMENT_LOGOS.MASTERCARD) && (
-              <img
-                src={PAYMENT_LOGOS.MASTERCARD}
-                className="h-4"
-                alt="Mastercard"
-                loading="lazy"
-              />
+              <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-1 shadow-sm h-7 w-12">
+                <img
+                  src={PAYMENT_LOGOS.MASTERCARD}
+                  className="h-5 w-auto object-contain"
+                  alt="Mastercard"
+                  loading="lazy"
+                />
+              </span>
+            )}
+            {isValidImageUrl(PAYMENT_LOGOS.ApplePay) && (
+              <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-1 shadow-sm h-7 w-12">
+                <img
+                  src={PAYMENT_LOGOS.ApplePay}
+                  className="h-5 w-auto object-contain"
+                  alt="Mastercard"
+                  loading="lazy"
+                />
+              </span>
             )}
           </div>
         </div>
 
-        {/* CliQ Payment Option */}
+        {/* CliQ Payment Option — Disabled (Coming Soon) */}
         <div
-          onClick={handleCliqClick}
-          className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition-all ${
-            method === PAYMENT_METHODS.CLIQ
-              ? "border-red-500 bg-red-50/30 shadow-sm"
-              : "border-gray-200 hover:border-red-300"
-          }`}
+          className="relative flex items-center gap-2 p-3 border rounded-xl border-gray-200 opacity-50 cursor-not-allowed select-none"
           role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && handleCliqClick()}
+          aria-disabled="true"
+          tabIndex={-1}
         >
-          {/* Radio Button */}
-          <div
-            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-              method === PAYMENT_METHODS.CLIQ
-                ? "border-red-500"
-                : "border-gray-400"
-            }`}
+          {/* Coming Soon Badge */}
+          <span
+            className="absolute -top-2 right-3 text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full text-white shadow-md"
+            style={{
+              background: "linear-gradient(135deg, #6b7280, #374151)",
+              letterSpacing: "0.12em",
+            }}
           >
-            {method === PAYMENT_METHODS.CLIQ && (
-              <div className="w-2 h-2 bg-red-500 rounded-full" />
-            )}
-          </div>
+            Coming Soon
+          </span>
+
+          {/* Radio Button (always unselected) */}
+          <div className="w-4 h-4 rounded-full border border-gray-300 flex items-center justify-center" />
 
           {/* Label */}
-          <span className="flex-1 font-medium text-sm">
+          <span className="flex-1 font-medium text-sm text-gray-400">
             {t("checkout_click_payment")}
           </span>
 
           {/* CliQ Logo */}
-          <img src={cliq} className="w-8" alt="CliQ" loading="lazy" />
+          <img src={cliq} className="w-8 grayscale" alt="CliQ" loading="lazy" />
         </div>
       </div>
     </div>

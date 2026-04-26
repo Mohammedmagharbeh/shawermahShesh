@@ -1,19 +1,27 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@/contexts/UserContext";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 
+// Jordanian phone validation: must start with 079/078/077, total 10 digits
+const JO_PHONE_RE = /^(079|078|077)\d{7}$/;
+
 function Login() {
   const [phone, setphone] = useState("");
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const phoneInputRef = useRef(null);
   const navigate = useNavigate();
   const { login, isAuthenticated } = useUser();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
+
+  const phoneValid = JO_PHONE_RE.test(phone);
+  const phoneInvalid = phoneTouched && phone.length > 0 && !phoneValid;
 
   // إدارة حالة فتح/إغلاق المطعم وتنسيقات الصفحة
   useEffect(() => {
@@ -70,7 +78,7 @@ function Login() {
 
     setLoading(true);
 
-    if (phone.length !== 10 || !/^(079|078|077)\d{7}$/.test(phone)) {
+    if (!phoneValid) {
       toast.error(t("invalid_phone"));
       setLoading(false);
       return;
@@ -182,36 +190,119 @@ function Login() {
         <p className="text-white/90 text-sm mb-8">{t("enter_phone_to_continue")}</p>
 
         <form onSubmit={Loginhandler} className="flex flex-col gap-5">
-          <motion.div whileFocus={{ scale: 1.01 }} className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-            </div>
-            <input
-              type="tel"
-              placeholder={t("phone_placeholder")}
-              value={phone}
-              maxLength={10}
-              onChange={(e) => setphone(e.target.value)}
-              required
-              className="w-full p-4 pr-4 pl-12 border-2 border-gray-200 rounded-xl text-base focus:border-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-400/30 placeholder:text-gray-400 text-right transition-all duration-200 bg-white"
-            />
-          </motion.div>
+          {/* Phone number field */}
+          <div className="flex flex-col gap-1.5" dir="ltr">
+            <motion.div
+              animate={phoneInvalid ? { x: [-6, 6, -4, 4, 0] } : {}}
+              transition={{ duration: 0.35 }}
+              className={`
+                flex items-stretch rounded-xl border-2 overflow-hidden bg-white
+                transition-all duration-200
+                ${phoneInvalid
+                  ? "border-red-400 shadow-md shadow-red-500/20"
+                  : phoneValid
+                    ? "border-green-400 shadow-md shadow-green-500/20"
+                    : "border-white/40 focus-within:border-yellow-400 focus-within:shadow-md focus-within:shadow-yellow-400/30"
+                }
+              `}
+            >
+              {/* Country code prefix */}
+              <div className="flex items-center gap-1.5 px-3 bg-gray-50 border-r border-gray-200 select-none shrink-0">
+                <span className="text-lg leading-none">🇯🇴</span>
+                <span className="text-sm font-semibold text-gray-600">+962</span>
+              </div>
+
+              {/* Number input */}
+              <input
+                ref={phoneInputRef}
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="07XXXXXXXX"
+                value={phone}
+                maxLength={10}
+                dir="ltr"
+                autoComplete="tel-national"
+                onFocus={() => setPhoneTouched(false)}
+                onBlur={() => setPhoneTouched(true)}
+                onChange={(e) => {
+                  // Digits only
+                  const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setphone(digits);
+                }}
+                required
+                className="flex-1 py-4 px-3 text-base outline-none bg-transparent text-gray-800 placeholder:text-gray-300 tracking-wider font-mono"
+              />
+
+              {/* Validation indicator */}
+              <div className="flex items-center pr-3">
+                <AnimatePresence mode="wait">
+                  {phone.length > 0 && (
+                    phoneValid ? (
+                      <motion.svg
+                        key="check"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-green-500"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </motion.svg>
+                    ) : (
+                      <motion.div
+                        key="dot"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        className="h-2.5 w-2.5 rounded-full bg-red-400"
+                      />
+                    )
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+
+            {/* Hint text */}
+            <AnimatePresence>
+              {phoneInvalid && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="text-xs text-red-200 text-right pr-1"
+                >
+                  {t("invalid_phone")}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
 
           <div className="flex flex-col gap-3 mt-2">
             <motion.button
               type="submit"
-              whileHover={isOpen && !loading && phone.length === 10 ? { scale: 1.02, y: -2 } : {}}
-              whileTap={isOpen && !loading && phone.length === 10 ? { scale: 0.98 } : {}}
+              whileHover={isOpen && !loading && phoneValid ? { scale: 1.02, y: -2 } : {}}
+              whileTap={isOpen && !loading && phoneValid ? { scale: 0.98 } : {}}
               className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg
-                ${isOpen 
-                  ? "bg-yellow-400 text-black shadow-yellow-500/30 hover:bg-yellow-500 hover:shadow-yellow-600/50" 
-                  : "bg-gray-500 text-gray-200 cursor-not-allowed opacity-80"}
+                ${!isOpen
+                  ? "bg-gray-500 text-gray-200 cursor-not-allowed opacity-80"
+                  : loading || !phoneValid
+                    ? "bg-yellow-400/60 text-black/50 cursor-not-allowed"
+                    : "bg-yellow-400 text-black shadow-yellow-500/30 hover:bg-yellow-500 hover:shadow-yellow-600/50"
+                }
               `}
-              disabled={loading}
+              disabled={loading || !phoneValid || !isOpen}
             >
-              {loading ? t("logging_in") + "..." : isOpen ? t("login") : t("closed_btn")}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                  </svg>
+                  {t("logging_in")}...
+                </span>
+              ) : isOpen ? t("login") : t("closed_btn")}
             </motion.button>
           </div>
         </form>

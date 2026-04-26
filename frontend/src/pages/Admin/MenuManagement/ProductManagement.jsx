@@ -71,7 +71,7 @@ function ProductManagement({
           },
         );
         setProducts((prev) =>
-          prev.map((p) => (p._id === editingId ? res.data : p)),
+          prev.map((p) => (p._id === editingId ? res.data.data : p)),
         );
         setEditingId(null);
       } else {
