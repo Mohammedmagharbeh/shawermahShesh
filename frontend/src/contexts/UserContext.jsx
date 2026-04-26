@@ -282,7 +282,7 @@ export const UserProvider = ({ children }) => {
     persistUser(null);
     setUser(null);
     // مسح أي بيانات أخرى قد تؤثر على الدخول القادم
-    window.location.href = "/employee-login"; 
+    window.location.href = "/"; 
   }, [persistUser]);
 
   const syncUserWithServer = useCallback(
