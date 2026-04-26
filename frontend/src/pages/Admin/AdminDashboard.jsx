@@ -187,19 +187,52 @@ function AdminDashboard() {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const exportToExcel = () => {
-    const data = filteredOrders.map((order) => ({
-      "Order ID": order.sequenceNumber || "N/A",
-      "Customer Phone": order.userId?.phone || "N/A",
-      Date: new Date(order.createdAt).toLocaleString(),
-      Status: order.status,
-      "Total Price": order.totalPrice,
-    }));
+    const data = [];
+
+    filteredOrders.forEach((order) => {
+      // تحويل المنتجات إلى نص مقروء
+      const productsDetails = order.products?.map((item) => {
+        const productName = item.productId?.name[selectedLanguage] || t("deleted_product");
+        const additions = item.additions?.length > 0 
+          ? ` (${item.additions.map(a => a.name[selectedLanguage]).join(", ")})` 
+          : "";
+        const spicy = item.isSpicy ? ` [${t("spicy")}]` : "";
+        const note = item.notes ? ` - ملاحظة: ${item.notes}` : "";
+        
+        return `${productName} x ${item.quantity}${additions}${spicy}${note}`;
+      }).join(" | ");
+
+      data.push({
+        [t("order_id")]: order.sequenceNumber || "N/A",
+        [t("customer_name")]: order.userDetails?.name || "N/A",
+        [t("phone")]: order.userId?.phone || "N/A",
+        [t("order_type")]: order.orderType === "delivery" ? t("delivery") : t("pickup"),
+        [t("address")]: order.shippingAddress?.name || order.userDetails?.apartment || "N/A",
+        [t("status")]: t(order.status?.toLowerCase()) || "N/A",
+        [t("payment_status")]: order.payment?.status ? t(order.payment.status) : "N/A",
+        [t("payment_method")]: order.payment?.method || "N/A",
+        "تفاصيل المنتجات": productsDetails, // سرد كامل للمنتجات مع إضافاتها
+        [t("order_subtotal")]: (order.totalPrice - (order.shippingAddress?.deliveryCost || 0)).toFixed(2),
+        [t("delivery_cost")]: order.shippingAddress?.deliveryCost || 0,
+        [t("order_total")]: order.totalPrice.toFixed(2),
+        [t("date")]: new Date(order.createdAt).toLocaleString(selectedLanguage === "ar" ? "ar-JO" : "en-GB"),
+      });
+    });
+
     const worksheet = XLSX.utils.json_to_sheet(data);
+    
+    // تحديد اتجاه النص للعربية إذا كانت اللغة مختارة
+    if (selectedLanguage === "ar") {
+      worksheet["!dir"] = "rtl";
+    }
+
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders Detail");
+    
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     saveAs(
-      new Blob([XLSX.write(workbook, { bookType: "xlsx", type: "array" })]),
-      `Orders_${filterDate}.xlsx`,
+      new Blob([excelBuffer], { type: "application/octet-stream" }),
+      `Orders_Detailed_${filterDate}.xlsx`
     );
   };
 
@@ -496,6 +529,22 @@ function AdminDashboard() {
                             {item.isSpicy && (
                               <Badge className="w-fit">{t("spicy")}</Badge>
                             )}
+                            {/* ملاحظة بحجم صغير ومختصر */}
+{item.notes && (
+  <div className="mt-1 flex items-center gap-1.5 text-[12px] bg-[#FFD700] px-2 py-0.5 rounded-md w-fit border border-[#E6C200] text-amber-950">
+    <span className="font-bold shrink-0">{t("notes")}:</span>
+    <span className="truncate max-w-[200px]">{item.notes}</span>
+  </div>
+)}
+{/* إظهار نوع البروتين باستخدام ملفات الترجمة t() */}
+{item.selectedProtein && (
+  <div className="mt-2 mb-2">
+    <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-md shadow-sm inline-block">
+      {/* نحول النص لـ lowercase ليتطابق مع المفاتيح في ملف الترجمة */}
+      {t(item.selectedProtein.toLowerCase())}
+    </span>
+  </div>
+)}
                             {item.additions?.length > 0 && (
                               <div className="flex gap-1 flex-wrap">
                                 {t("additions")}:{" "}
@@ -576,9 +625,13 @@ function AdminDashboard() {
                           <h2 style="text-align:center; margin-bottom:8px;">${t("invoice_title")} #${order.sequenceNumber}</h2>
                           <p style="text-align:center; font-size:14px;"><strong>${t("invoice_customer")}</strong> ${customerName}</p>
                           <p style="text-align:center; font-size:14px;"><strong>${t("invoice_phone")}</strong> ${customerPhone}</p>
-                          <p style="text-align:center; font-size:14px;"><strong>${t("invoice_order_type")}</strong> ${deliveryType}</p>
-                          ${order.orderType === "delivery" ? `<p style="text-align:center; font-size:14px;"><strong>${t("invoice_area")}</strong> ${area}</p>` : ""}
-                          <hr/>
+                          <p style="text-align:center; font-size:14px;"><strong>${t("order_type")}</strong> ${deliveryType}</p>
+${order.orderType === "delivery" && area ? 
+  `<p style="text-align:center; font-size:14px; background:#f9f9f9; padding:4px;">
+    <strong>${t("area")}:</strong> ${area}
+   </p>` 
+  : ""
+}                          <hr/>
                           <table style="width:100%; border-collapse: collapse; font-size:14px;">
                             <thead>
                               <tr style="background:#f0f0f0;">
@@ -594,9 +647,11 @@ function AdminDashboard() {
                                     item.additions?.length > 0
                                       ? `<div style="font-size:12px; color:#555;">+ ${item.additions.map((a) => a.name[selectedLanguage]).join(", ")}</div>`
                                       : "";
-                                  const protein = item.selectedProtein
-                                    ? `<div style="font-size:12px; color:#555;">${t("protein")}: ${item.selectedProtein[selectedLanguage]}</div>`
-                                    : "";
+                                const protein = item.selectedProtein
+  ? `<div style="font-size: 13px; color: #000; font-weight: bold; margin-top: 2px;">
+      ${t("protein")}: ${t(item.selectedProtein.toLowerCase())}
+     </div>`
+  : "";
                                   const spicy = item.isSpicy
                                     ? `<div style="color:red; font-size:12px;">${t("spicy")}</div>`
                                     : "";
