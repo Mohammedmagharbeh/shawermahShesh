@@ -514,10 +514,21 @@ function AdminDashboard() {
                         className="flex items-center justify-between gap-4 rounded-lg border p-4 bg-muted/30"
                       >
                         <div className="flex items-center gap-4">
-                          <img
+                          {/* <img
                             src={product_placeholder}
                             className="h-16 w-16 rounded-md object-cover"
-                          />
+                          /> */}
+
+                          <img
+  // نتحقق إذا كانت الصورة موجودة في بيانات المنتج، وإلا نستخدم الـ placeholder
+  src={item.productId?.image || product_placeholder} 
+  alt={item.productId?.name[selectedLanguage]}
+  className="h-16 w-16 rounded-md object-cover"
+  // في حال فشل تحميل الرابط من السيرفر، يتم عرض الـ placeholder
+  onError={(e) => {
+    e.target.src = product_placeholder;
+  }}
+/>
                           <div className="flex flex-col gap-1">
                             <p className="font-semibold">
                               {item.productId?.name[selectedLanguage] ||
@@ -530,12 +541,12 @@ function AdminDashboard() {
                               <Badge className="w-fit">{t("spicy")}</Badge>
                             )}
                             {/* ملاحظة بحجم صغير ومختصر */}
-{item.notes && (
+{/* {item.notes && (
   <div className="mt-1 flex items-center gap-1.5 text-[12px] bg-[#FFD700] px-2 py-0.5 rounded-md w-fit border border-[#E6C200] text-amber-950">
     <span className="font-bold shrink-0">{t("notes")}:</span>
-    <span className="truncate max-w-[200px]">{item.notes}</span>
+    <span className="truncate max-w-[200px]">{item.notes}</span>/
   </div>
-)}
+)} */}
 {/* إظهار نوع البروتين باستخدام ملفات الترجمة t() */}
 {item.selectedProtein && (
   <div className="mt-2 mb-2">
