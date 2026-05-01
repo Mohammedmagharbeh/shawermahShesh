@@ -233,6 +233,15 @@ exports.updatedfood = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // Emit real-time stock update to all connected clients
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("product:stockUpdated", {
+        productId: updatedProduct._id,
+        inStock: updatedProduct.inStock,
+      });
+    }
+
     return res.status(200).json({
       message: "✅ Product updated successfully",
       data: updatedProduct,

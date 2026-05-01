@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import socket from "@/utils/socket";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/contexts/UserContext";
@@ -75,6 +76,24 @@ export default function Products() {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Real-time stock updates via Socket.io
+  useEffect(() => {
+    socket.connect();
+
+    socket.on("product:stockUpdated", ({ productId, inStock }) => {
+      setProducts((prev) =>
+        prev.map((p) =>
+          p._id === productId ? { ...p, inStock } : p,
+        ),
+      );
+    });
+
+    return () => {
+      socket.off("product:stockUpdated");
+      socket.disconnect();
+    };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
