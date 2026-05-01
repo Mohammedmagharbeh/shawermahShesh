@@ -14,7 +14,12 @@ const validateJWT = require("../middlewares/validateJWT");
 const requireRole = require("../middlewares/requireRole");
 
 routes.post("/postfood", validateJWT, requireRole("admin"), postEat);
-routes.put("/updatefood/:id", validateJWT, requireRole("admin"), updatedfood);
+routes.put(
+  "/updatefood/:id",
+  validateJWT,
+  requireRole("admin", "employee"),
+  updatedfood,
+);
 routes.delete("/deletefood/:id", validateJWT, requireRole("admin"), deletefood);
 routes.put("/reorder", validateJWT, requireRole("admin"), reorderProducts);
 
