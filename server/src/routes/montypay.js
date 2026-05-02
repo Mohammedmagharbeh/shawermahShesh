@@ -162,8 +162,10 @@ router.post("/session", async (req, res) => {
         description: safeDescription,
       },
       customer: { name: customerName, email: customerEmail },
-      success_url: `${process.env.FRONT_BASE}/success?dbOrderId=${dbOrderId}`,
+      success_url: `${process.env.FRONT_BASE}/success?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`,
       cancel_url: `${process.env.FRONT_BASE}/cancel?dbOrderId=${dbOrderId}`,
+      // Tell MontyPay where to send the server-to-server payment confirmation
+      callback_url: `${process.env.BACK_BASE}/api/montypay/callback`,
     };
 
     // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
@@ -207,7 +209,7 @@ router.post("/callback", async (req, res) => {
             "payment.status": "paid",
             "payment.transactionId": data.payment_id || data.session_id || null,
             "payment.paidAt": new Date(),
-            status: "Confirmed",
+            status: "Processing", // stays Processing — staff must confirm manually
           },
           { new: true }
         )
@@ -258,6 +260,73 @@ router.post("/status", async (req, res) => {
   } catch (err) {
     console.error("Status check error:", err.response?.data || err);
     res.status(500).json({ error: "Status Check Failed", details: err.response?.data });
+  }
+});
+
+// ─── 4) Verify & Confirm — fallback called from PaymentSuccess page ──────────
+// Used as a safety net if the callback was delayed or missed.
+router.post("/verify", async (req, res) => {
+  try {
+    const { dbOrderId, orderRef } = req.body;
+
+    if (!dbOrderId || !orderRef) {
+      return res.status(400).json({ error: "Missing dbOrderId or orderRef" });
+    }
+
+    // Check if order is already confirmed (callback may have already fired)
+    const existingOrder = await Order.findById(dbOrderId);
+    if (!existingOrder) return res.status(404).json({ error: "Order not found" });
+
+    if (existingOrder.payment?.status === "paid") {
+      // Already confirmed — nothing to do
+      return res.json({ success: true, alreadyConfirmed: true });
+    }
+
+    // Order not yet paid — ask MontyPay for status
+    const rawString = `${orderRef}${MERCHANT_PASSWORD}`.toUpperCase();
+    const md5Hash = crypto.createHash("md5").update(rawString).digest("hex");
+    const hash = crypto.createHash("sha1").update(md5Hash).digest("hex");
+
+    const montyRes = await axios.post(
+      `${MONTY_BASE}/payment/status`,
+      { merchant_key: MERCHANT_KEY, order_id: orderRef, hash },
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    const montyData = montyRes.data;
+    const isPaid = ["settled", "success", "completed", "paid"].includes(
+      montyData.status?.toLowerCase()
+    );
+
+    if (!isPaid) {
+      return res.json({ success: false, status: montyData.status, reason: montyData.reason });
+    }
+
+    // MontyPay confirms payment — update the order
+    const updatedOrder = await Order.findByIdAndUpdate(
+      dbOrderId,
+      {
+        "payment.status": "paid",
+        "payment.transactionId": montyData.payment_id || montyData.session_id || null,
+        "payment.paidAt": new Date(),
+        status: "Processing", // stays Processing — staff must confirm manually
+      },
+      { new: true }
+    )
+      .populate("products.productId")
+      .populate("userId")
+      .populate("shippingAddress");
+
+    if (updatedOrder) {
+      console.log(`✅ Order ${dbOrderId} confirmed via /verify fallback.`);
+      const io = req.app.get("io");
+      if (io) io.emit("newOrder", updatedOrder);
+    }
+
+    return res.json({ success: true, alreadyConfirmed: false });
+  } catch (err) {
+    console.error("Verify error:", err.response?.data || err.message || err);
+    res.status(500).json({ error: "Verification failed", details: err.response?.data || err.message });
   }
 });
 

@@ -1,14 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useCart } from "@/contexts/CartContext";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/contexts/UserContext";
 
 /**
- * PaymentSuccess — display-only page.
- * The order was already created server-side before the user was redirected here.
- * The MontyPay server-to-server callback confirms the order (sets it to Confirmed + paid).
- * This page just clears the cart and shows a success UI.
+ * PaymentSuccess — reads dbOrderId + orderRef from URL, then:
+ * 1. Calls /montypay/verify to confirm the order (fallback if callback was delayed)
+ * 2. Clears the cart
+ * 3. Shows success UI
+ *
+ * The MontyPay server-to-server callback is the PRIMARY confirmation.
+ * This verify call is a SAFETY NET in case it fires before the callback.
  */
 function PaymentSuccess() {
   const location = useLocation();
@@ -19,25 +23,63 @@ function PaymentSuccess() {
   const selectedLanguage = localStorage.getItem("i18nextLng");
 
   const [dbOrderId, setDbOrderId] = useState("");
-  const cartCleared = useRef(false);
+  const [loading, setLoading] = useState(true);
+  const hasVerified = useRef(false);
 
   useEffect(() => {
-    // Extract the DB order ID embedded in the URL by the server
     const params = new URLSearchParams(location.search);
     const id = params.get("dbOrderId");
+    const orderRef = params.get("orderRef");
+
     if (id) setDbOrderId(id);
 
-    // Clear the cart once (the order is already safely in the DB)
-    if (!cartCleared.current) {
-      cartCleared.current = true;
-      clearCart();
+    // Clear the cart — order is already in DB regardless of payment status
+    clearCart();
+
+    // Call /verify as fallback in case the MontyPay callback was delayed
+    if (!hasVerified.current && id && orderRef) {
+      hasVerified.current = true;
+
+      axios
+        .post(`${import.meta.env.VITE_BASE_URL}/montypay/verify`, {
+          dbOrderId: id,
+          orderRef: decodeURIComponent(orderRef),
+        })
+        .then((res) => {
+          if (res.data?.success) {
+            console.log(
+              res.data.alreadyConfirmed
+                ? "[PaymentSuccess] Order already confirmed by callback."
+                : "[PaymentSuccess] Order confirmed via verify fallback."
+            );
+          }
+        })
+        .catch((err) => {
+          console.error("[PaymentSuccess] Verify call failed:", err.message);
+          // Non-fatal — the callback may still confirm it
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, [location.search, clearCart]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="text-center">
+          <div className="mx-auto mb-4 w-12 h-12 rounded-full border-4 border-emerald-200 border-t-emerald-500 animate-spin" />
+          <h2 className="text-xl font-semibold text-gray-800">
+            {t("verifying_payment")}...
+          </h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#DA1030] px-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 text-center">
-        {/* Success icon */}
         <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center rounded-full bg-[#DA0103] text-[#FFC400] text-3xl">
           ✓
         </div>

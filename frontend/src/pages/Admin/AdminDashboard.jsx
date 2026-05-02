@@ -79,7 +79,13 @@ function AdminDashboard() {
         },
       );
       const data = await res.json();
-      setIncomingOrder(data.data);
+
+      // Exclude unpaid card orders — they're awaiting MontyPay callback.
+      // Only show: cash orders (always visible) or already-paid card orders.
+      const readyOrders = (data.data || []).filter(
+        (o) => o.payment?.method === "cash" || o.payment?.status === "paid"
+      );
+      setIncomingOrder(readyOrders);
     } catch (error) {
       console.error("Error fetching pending orders:", error);
     }
@@ -175,14 +181,19 @@ function AdminDashboard() {
       const matchesStatus =
         order.status === "Processing" || order.status === "Confirmed";
 
+      // Hide unpaid card orders — they haven't been confirmed by MontyPay yet.
+      // Cash orders are always visible; card orders must have payment.status === "paid".
+      const matchesPayment =
+        order.payment?.method === "cash" || order.payment?.status === "paid";
+
       const sTerm = searchTerm.toLowerCase();
       const matchesSearch =
         searchTerm === "" ||
-        order.sequenceNumber?.toString().includes(sTerm) || // بحث برقم الطلب
-        order.userId?.phone?.includes(sTerm) || // بحث برقم التلفون
-        order.userDetails?.name?.toLowerCase().includes(sTerm); // بحث بالاسم
+        order.sequenceNumber?.toString().includes(sTerm) ||
+        order.userId?.phone?.includes(sTerm) ||
+        order.userDetails?.name?.toLowerCase().includes(sTerm);
 
-      return matchesDate && matchesStatus && matchesSearch;
+      return matchesDate && matchesStatus && matchesPayment && matchesSearch;
     })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
