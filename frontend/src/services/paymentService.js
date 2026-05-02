@@ -104,7 +104,7 @@ export const initiateMontyPayPayment = async ({
       orderId: sessionId,
       description: isTestMode
         ? "Test"
-        : cart.products.map((p) => p.productId.name.ar).join(" / "),
+        : cart.products.map((p) => p.productId.name.en || p.productId.name.ar).join(" / "),
     };
 
     // Save pending order

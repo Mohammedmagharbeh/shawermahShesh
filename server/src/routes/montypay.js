@@ -52,8 +52,12 @@ router.post("/session", async (req, res) => {
     };
 
     // Hash Formula: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
-    let rawString = `${orderId}${formattedAmount}${currency}${description}${MERCHANT_PASSWORD}`;
-    rawString = rawString.toUpperCase();
+    // IMPORTANT: Only use ASCII-safe fields in the hash. Description may contain Arabic text
+    // which breaks the hash when uppercased. Use a safe ASCII-only description for hashing.
+    const safeDescription = description
+      ? description.replace(/[^\x00-\x7F]/g, "").trim() || "ORDER"
+      : "ORDER";
+    const rawString = `${orderId}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase();
 
     const md5Hash = crypto.createHash("md5").update(rawString).digest("hex");
     payload.hash = crypto.createHash("sha1").update(md5Hash).digest("hex");
