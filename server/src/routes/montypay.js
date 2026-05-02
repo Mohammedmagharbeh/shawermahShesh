@@ -40,6 +40,13 @@ router.post("/session", async (req, res) => {
       : 2;
     const formattedAmount = Number(amount).toFixed(decimals);
 
+    // Strip non-ASCII chars (e.g. Arabic) from description so the hash is consistent.
+    // MontyPay recomputes the hash from order.description they receive,
+    // so the value in order.description MUST match exactly what we hash.
+    const safeDescription = description
+      ? description.replace(/[^\x00-\x7F]/g, "").trim() || "ORDER"
+      : "ORDER";
+
     const payload = {
       merchant_key: MERCHANT_KEY,
       operation: "purchase",
@@ -47,23 +54,17 @@ router.post("/session", async (req, res) => {
         number: orderNumber,
         amount: formattedAmount,
         currency: currency,
-        description: description,
+        description: safeDescription,
       },
       customer: {
         name: customerName,
         email: customerEmail,
       },
-      // ✅ UPDATED: Pass orderId in URL so frontend can read it
       success_url: `${process.env.FRONT_BASE}/success?orderId=${orderId}`,
       cancel_url: `${process.env.FRONT_BASE}/cancel?orderId=${orderId}`,
     };
 
     // Hash Formula: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
-    // IMPORTANT: Only use ASCII-safe fields in the hash. Description may contain Arabic text
-    // which breaks the hash when uppercased. Use a safe ASCII-only description for hashing.
-    const safeDescription = description
-      ? description.replace(/[^\x00-\x7F]/g, "").trim() || "ORDER"
-      : "ORDER";
     const rawString = `${orderNumber}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase();
 
     const md5Hash = crypto.createHash("md5").update(rawString).digest("hex");
