@@ -28,7 +28,7 @@ import NotFound from "./components/NotFound";
 import JobsPage from "./pages/General/JobsPage";
 import AdminJobs from "./pages/Admin/AdminJobs";
 import { useBusinessHours } from "./hooks/useBusinessHours";
-import AuthChoice from "./pages/AuthChoice";
+// import AuthChoice from "./pages/AuthChoice";
 
 function App() {
   const { i18n } = useTranslation();
@@ -59,7 +59,8 @@ function App() {
             <Route path="/slides" element={<AdminSlides />} />
             <Route path="/story" element={<Story />} />
             <Route path="/otp-verification" element={<OtpVerification />} />
-            <Route path="/auth-choice" element={<AuthChoice />} />
+            {/* <Route path="/auth-choice" element={<AuthChoice />} /> */}
+          
             <Route
               path="/products"
               element={

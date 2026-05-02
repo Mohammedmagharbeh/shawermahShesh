@@ -94,7 +94,7 @@ const ImageCarousel = () => {
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white mb-6 sm:mb-8 drop-shadow-lg">
                 {slide.subtitle[selectedLanguage]}
               </p>
-              <div className="absolute bottom-10 sm:bottom-14 w-full flex justify-center z-20">
+              {/* <div className="absolute bottom-10 sm:bottom-14 w-full flex justify-center z-20">
                 <Link to={"/login"}>
                   <Button
                     size="lg"
@@ -104,7 +104,20 @@ const ImageCarousel = () => {
                     {t("products_and_shopping")}
                   </Button>
                 </Link>
-              </div>
+              </div> */}
+              <div className="absolute bottom-10 sm:bottom-14 w-full flex justify-center z-20 px-4">
+  <Link to={"/login"}>
+    <Button
+      size="lg"
+      className="text-sm sm:text-base md:text-lg px-8 sm:px-12 
+                 py-8 sm:py-10 
+                 text-white font-bold shadow-xl hover:scale-105 transition-transform"
+      style={{ backgroundColor: "#dc0606" }}
+    >
+      {t("products_and_shopping")}
+    </Button>
+  </Link>
+</div>
             </div>
           </div>
         ))}
