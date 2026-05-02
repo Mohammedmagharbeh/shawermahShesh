@@ -109,8 +109,8 @@ async function createPendingOrder({ userId, products, shippingAddress, orderType
     { path: "shippingAddress" },
   ]);
 
-  // Notify admin dashboard of new order
-  if (io) io.emit("newOrder", populatedOrder);
+  // Do NOT emit "newOrder" here — the order is unpaid.
+  // The MontyPay callback will emit "newOrder" once payment is confirmed.
 
   return populatedOrder;
 }
@@ -210,13 +210,18 @@ router.post("/callback", async (req, res) => {
             status: "Confirmed",
           },
           { new: true }
-        ).populate("userId");
+        )
+          .populate("products.productId")
+          .populate("userId")
+          .populate("shippingAddress");
 
         if (updatedOrder) {
           console.log(`✅ Order ${dbOrderId} confirmed via MontyPay callback.`);
-          // Notify admin dashboard in real time
           const io = req.app.get("io");
-          if (io) io.emit("updatedOrder", updatedOrder);
+          if (io) {
+            // Emit "newOrder" so the dashboard popup + sound triggers for paid orders
+            io.emit("newOrder", updatedOrder);
+          }
         } else {
           console.warn(`⚠️  Callback: order ${dbOrderId} not found in DB.`);
         }
