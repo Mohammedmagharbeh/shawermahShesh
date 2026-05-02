@@ -60,24 +60,8 @@ const createOrderPayload = ({
 };
 
 /**
- * Saves pending order to session storage
- * @param {Object} orderData - Order data to save
- */
-const savePendingOrder = (orderData) => {
-  try {
-    const sanitizedData = sanitizeObject(orderData);
-    sessionStorage.setItem(
-      STORAGE_KEYS.PENDING_ORDER,
-      JSON.stringify(sanitizedData),
-    );
-  } catch (error) {
-    console.error("Error saving pending order:", error);
-    throw new Error("Failed to save order data");
-  }
-};
-
-/**
- * MontyPay payment flow
+ * MontyPay payment flow — order is pre-created server-side before redirect.
+ * No sessionStorage used. The server creates the order and returns redirect_url.
  * @param {Object} params - Payment parameters
  * @returns {Promise<string>} - Redirect URL
  */
@@ -89,51 +73,44 @@ export const initiateMontyPayPayment = async ({
   isTestMode,
 }) => {
   try {
-    // Validate amount
     const amountValidation = validatePaymentAmount(orderSummary.total);
-    if (!amountValidation.isValid) {
-      throw new Error(amountValidation.error);
-    }
-
-    const sessionId = generateSessionId();
+    if (!amountValidation.isValid) throw new Error(amountValidation.error);
 
     const payload = {
       amount: orderSummary.total,
       customerName: formState.details.name,
       customerEmail: user?.email || "test@example.com",
       customerPhone: formState.details.phone || user?.phone || "",
-      orderId: sessionId,
       description: isTestMode
         ? "Test"
         : cart.products.map((p) => p.productId.name.en || p.productId.name.ar).join(" / "),
+      // Full order data — server creates the DB order before redirecting
+      orderData: sanitizeObject({
+        products: cart.products.map((p) => ({
+          productId: p.productId._id,
+          quantity: p.quantity,
+          isSpicy: p.isSpicy || false,
+          additions: p.additions || [],
+          notes: p.notes || "",
+          selectedProtein: p.selectedProtein || null,
+          selectedType: p.selectedType || null,
+        })),
+        userId: user?._id,
+        shippingAddress: formState.selectedArea?._id || null,
+        orderType: formState.orderType,
+        userDetails: formState.details,
+        paymentMethod: "card",
+      }),
     };
 
-    // Save pending order
-    const orderData = createOrderPayload({
-      cart,
-      formState,
-      user,
-      orderSummary,
-      isTestMode,
-    });
-    savePendingOrder(orderData);
+    const { data } = await apiClient.post(API_ENDPOINTS.MONTYPAY_SESSION, payload);
 
-    // Make API request
-    const { data } = await apiClient.post(
-      API_ENDPOINTS.MONTYPAY_SESSION,
-      payload,
-    );
-
-    if (!data.redirect_url) {
-      throw new Error("No redirect URL received from payment gateway");
-    }
+    if (!data.redirect_url) throw new Error("No redirect URL received from payment gateway");
 
     return data.redirect_url;
   } catch (error) {
     console.error("MontyPay payment error:", error);
-    throw new Error(
-      error.response?.data?.message || "Payment initiation failed",
-    );
+    throw new Error(error.response?.data?.error || error.response?.data?.message || "Payment initiation failed");
   }
 };
 
