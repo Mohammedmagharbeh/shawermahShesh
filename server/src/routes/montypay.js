@@ -19,6 +19,7 @@ router.post("/session", async (req, res) => {
       currency = "JOD",
       customerName,
       customerEmail,
+      customerPhone,
       orderId,
       description,
     } = req.body;
@@ -26,6 +27,12 @@ router.post("/session", async (req, res) => {
     if (!amount || !customerName || !customerEmail || !orderId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
+
+    // Use phone number as the MontyPay order reference (visible in their dashboard)
+    // Append a short unique suffix so multiple orders from the same user don't clash
+    const orderNumber = customerPhone
+      ? `${customerPhone}-${orderId}`
+      : orderId.toString();
 
     const threeDecimalCurrencies = ["JOD", "KWD", "OMR", "BHD", "TND"];
     const decimals = threeDecimalCurrencies.includes(currency.toUpperCase())
@@ -37,7 +44,7 @@ router.post("/session", async (req, res) => {
       merchant_key: MERCHANT_KEY,
       operation: "purchase",
       order: {
-        number: orderId.toString(),
+        number: orderNumber,
         amount: formattedAmount,
         currency: currency,
         description: description,
@@ -57,7 +64,7 @@ router.post("/session", async (req, res) => {
     const safeDescription = description
       ? description.replace(/[^\x00-\x7F]/g, "").trim() || "ORDER"
       : "ORDER";
-    const rawString = `${orderId}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase();
+    const rawString = `${orderNumber}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase();
 
     const md5Hash = crypto.createHash("md5").update(rawString).digest("hex");
     payload.hash = crypto.createHash("sha1").update(md5Hash).digest("hex");

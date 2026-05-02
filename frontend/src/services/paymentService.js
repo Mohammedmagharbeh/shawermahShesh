@@ -101,6 +101,7 @@ export const initiateMontyPayPayment = async ({
       amount: orderSummary.total,
       customerName: formState.details.name,
       customerEmail: user?.email || "test@example.com",
+      customerPhone: formState.details.phone || user?.phone || "",
       orderId: sessionId,
       description: isTestMode
         ? "Test"
