@@ -461,6 +461,15 @@ exports.sendLoginOTP = async (req, res) => {
   const { phone } = req.body;
   try {
     let user = await userModel.findOne({ phone });
+    
+    // Rate limit: Prevent sending more than 1 OTP per 60 seconds
+    if (user && user.otpExpires) {
+      const timeSinceLastOTP = Date.now() - (user.otpExpires.getTime() - 5 * 60 * 1000);
+      if (timeSinceLastOTP < 60000) { // 60 seconds
+        return res.status(429).json({ msg: "Please wait 60 seconds before requesting a new OTP." });
+      }
+    }
+
     if (!user) {
       user = new userModel({ phone, role: "user" });
     }
@@ -583,6 +592,14 @@ exports.updatePhone = async (req, res) => {
     const { newPhone } = req.body;
     const user = await userModel.findById(req.user.id || req.user._id);
     if (!user) return res.status(404).json({ msg: "User not found" });
+
+    // Rate limit: Prevent sending more than 1 OTP per 60 seconds
+    if (user && user.otpExpires) {
+      const timeSinceLastOTP = Date.now() - (user.otpExpires.getTime() - 5 * 60 * 1000);
+      if (timeSinceLastOTP < 60000) { // 60 seconds
+        return res.status(429).json({ msg: "Please wait 60 seconds before requesting a new OTP." });
+      }
+    }
     
     const otp = generateOTP();
     user.otp = otp;
