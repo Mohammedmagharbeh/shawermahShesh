@@ -430,6 +430,19 @@ function Orders() {
     updateOrder(orderId, { status: newStatus });
   };
 
+  const handlePaymentStatusChange = (orderId, newPaymentStatus) => {
+    const orderToUpdate = orders.find((o) => o._id === orderId);
+    if (!orderToUpdate) return;
+    
+    updateOrder(orderId, { 
+      payment: { 
+        ...orderToUpdate.payment, 
+        status: newPaymentStatus,
+        paidAt: newPaymentStatus === "paid" ? new Date() : orderToUpdate.payment?.paidAt
+      } 
+    });
+  };
+
   // الفلترة هنا للبحث فقط، وتعرض كل الطلبات بدون استثناء تاريخ
   const filteredOrders = orders
     .filter((order) => {
@@ -495,9 +508,22 @@ function Orders() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Badge className={order.payment?.status === "paid" ? "bg-green-600" : "bg-secondary text-secondary-foreground"}>
-                            {t(order.payment?.status || "unpaid")}
-                        </Badge>
+                        <Select
+                          value={order.payment?.status || "unpaid"}
+                          onValueChange={(value) => handlePaymentStatusChange(order._id, value)}
+                        >
+                          <SelectTrigger className="w-[160px]">
+                            <SelectValue>
+                              <Badge className={order.payment?.status === "paid" ? "bg-green-600 text-white" : "bg-secondary text-secondary-foreground"}>
+                                {order.payment?.status ? t(order.payment.status) : t("unpaid")} ({order.payment?.method || "N/A"})
+                              </Badge>
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unpaid">{t("unpaid")}</SelectItem>
+                            <SelectItem value="paid">{t("paid")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <Select value={order.status} onValueChange={(val) => handleStatusChange(order._id, val)}>
                             <SelectTrigger className="w-[160px]">
                                 <SelectValue>
