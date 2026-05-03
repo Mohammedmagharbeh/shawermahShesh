@@ -197,16 +197,20 @@ router.post("/callback", async (req, res) => {
     console.log("MontyPay Callback status received:", rawStatus);
 
     const PAID_STATUSES = [
-      "COMPLETED", "PAID", "SUCCESS", "SETTLED",
+      "COMPLETED", "PAID", "SUCCESS", "SETTLED", "SALE", "ACCEPTED",
       // Apple Pay & other wallet statuses:
       "CAPTURED", "AUTHORIZED", "APPROVED", "PURCHASE", "CHARGED",
     ];
-    const isPaid = PAID_STATUSES.includes(rawStatus);
+
+    // Some endpoints or payment methods return a top-level result="SUCCESS" or success=true
+    const isPaid = PAID_STATUSES.includes(rawStatus) || 
+                   data.result === "SUCCESS" || 
+                   data.success === true || 
+                   data.result === true;
 
     if (isPaid) {
-      // order.number = "${phone}-${dbOrderId}" or just "${dbOrderId}"
       // Extract the MongoDB _id (last part after final dash, or the whole string)
-      const orderRef = data.order?.number || data.merchant_reference || "";
+      const orderRef = data.order?.number || data.order_id || data.merchant_reference || "";
       const parts = orderRef.split("-");
       const dbOrderId = parts[parts.length - 1]; // last segment is always the _id
 
@@ -215,7 +219,7 @@ router.post("/callback", async (req, res) => {
           dbOrderId,
           {
             "payment.status": "paid",
-            "payment.transactionId": data.payment_id || data.session_id || null,
+            "payment.transactionId": data.payment_id || data.session_id || data.trans_id || null,
             "payment.paidAt": new Date(),
             status: "Processing", // stays Processing — staff must confirm manually
           },
@@ -240,10 +244,12 @@ router.post("/callback", async (req, res) => {
       }
     }
 
+    // Must return "OK" exactly, as per MontyPay documentation
     res.status(200).send("OK");
   } catch (err) {
     console.error("Callback Error:", err);
-    res.status(500).send("error");
+    // Must return "ERROR" exactly, as per MontyPay documentation
+    res.status(500).send("ERROR");
   }
 });
 
@@ -306,11 +312,16 @@ router.post("/verify", async (req, res) => {
     console.log("MontyPay /verify status received:", rawStatus);
 
     const PAID_STATUSES = [
-      "settled", "success", "completed", "paid",
+      "settled", "success", "completed", "paid", "sale", "accepted",
       // Apple Pay & other wallet statuses:
       "captured", "authorized", "approved", "purchase", "charged",
     ];
-    const isPaid = PAID_STATUSES.includes(rawStatus);
+    
+    // Some endpoints or payment methods return a top-level result="SUCCESS" or success=true
+    const isPaid = PAID_STATUSES.includes(rawStatus) || 
+                   montyData.result === "SUCCESS" || 
+                   montyData.success === true || 
+                   montyData.result === true;
 
     if (!isPaid) {
       return res.json({ success: false, status: montyData.status, reason: montyData.reason });
