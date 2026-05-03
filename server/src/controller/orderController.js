@@ -757,6 +757,19 @@ exports.updateOrder = async (req, res) => {
     if (!Object.keys(updates).length)
       return res.status(400).json({ message: "No valid fields to update" });
 
+    const existingOrder = await Order.findById(id);
+    if (!existingOrder) return res.status(404).json({ message: "Order not found" });
+
+    // Enforce logic: Unpaid orders cannot be confirmed
+    if (updates.status === "Confirmed") {
+      const isCurrentlyUnpaid = existingOrder.payment?.status !== "paid";
+      const isBeingMarkedPaid = updates.payment && updates.payment.status === "paid";
+      
+      if (isCurrentlyUnpaid && !isBeingMarkedPaid) {
+        return res.status(400).json({ message: "Cannot confirm an unpaid order." });
+      }
+    }
+
     const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
       new: true,
     })

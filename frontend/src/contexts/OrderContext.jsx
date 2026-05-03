@@ -129,6 +129,7 @@ export const OrderProvider = ({ children }) => {
       const msg = err.response?.data?.message || t("failed_update_order");
 
       setError(err.response?.data?.message || "Failed to update order");
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

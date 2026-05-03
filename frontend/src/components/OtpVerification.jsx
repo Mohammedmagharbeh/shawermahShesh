@@ -195,7 +195,6 @@
 
 // // export default OtpVerification;
 
-
 // "use client";
 
 // import { useState, useEffect } from "react";
@@ -340,7 +339,7 @@
 //             initial={{ scale: 0.9, opacity: 0 }}
 //             animate={{ scale: 1, opacity: 1 }}
 //             transition={{ delay: 0.3 }}
-            
+
 //             // --- إعدادات التعبئة التلقائية ---
 //             type="text"
 //             inputMode="numeric"        // يظهر لوحة الأرقام فقط
@@ -566,7 +565,7 @@
 
 //     } catch (error) {
 //       toast.error(t("otp_invalid"));
-//       setOtp(""); 
+//       setOtp("");
 //       isVerifying.current = false;
 //       if (res.data.role === "employee") {
 //         navigate("/admin/dashboard");
@@ -675,7 +674,7 @@
 //             required
 //             className="p-5 border-2 border-gray-200 rounded-xl text-2xl font-bold text-center tracking-[0.5em] focus:border-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-400/30 placeholder:text-gray-300 transition-all duration-200 bg-white"
 //         <form onSubmit={verifyOtp} className="flex flex-col gap-6">
-         
+
 //           <input
 //             type="text"
 //             inputMode="numeric"
@@ -909,16 +908,19 @@ function OtpVerification() {
 
   const handleVerify = async (currentOtp) => {
     if (isVerifying.current || currentOtp.length < OTP_LENGTH) return;
-    
+
     isVerifying.current = true;
     setLoading(true);
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/verify-otp`, {
-        phone,
-        newPhone,
-        otp: currentOtp,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/verify-otp`,
+        {
+          phone,
+          newPhone,
+          otp: currentOtp,
+        },
+      );
 
       login({
         _id: res.data._id,
@@ -970,7 +972,10 @@ function OtpVerification() {
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, OTP_LENGTH);
     if (!pasted) return;
 
     const newDigits = Array(OTP_LENGTH).fill("");
@@ -983,7 +988,9 @@ function OtpVerification() {
 
   const resendOtp = async () => {
     try {
-      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, { phone });
+      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/login`, {
+        phone,
+      });
       if (res.data.msg === "OTP sent to your phone") {
         toast.success(t("otp_sent"));
         setTimer(60);
@@ -997,31 +1004,57 @@ function OtpVerification() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#b80505]" dir={isRtl ? "rtl" : "ltr"}>
+    <div
+      className="flex justify-center items-center min-h-screen bg-[#b80505]"
+      dir={isRtl ? "rtl" : "ltr"}
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md p-10 bg-[#dc0606] rounded-2xl shadow-2xl border border-red-700 text-center"
       >
         <div className="mx-auto w-20 h-20 mb-6 bg-white rounded-full flex items-center justify-center">
-          <svg className="h-10 w-10 text-[#dc0606]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          <svg
+            className="h-10 w-10 text-[#dc0606]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
           </svg>
         </div>
 
         <div className="flex flex-col items-center mb-6">
-          <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/yalla%20sheesh-wYD9LCTpwgPKc6YoFDJwUVLwLBnmMW.png" alt="Yalla Sheesh" className="h-20 w-auto" />
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/yalla%20sheesh-wYD9LCTpwgPKc6YoFDJwUVLwLBnmMW.png"
+            alt="Yalla Sheesh"
+            className="h-20 w-auto"
+          />
         </div>
 
-        <h1 className="text-3xl font-bold text-white mb-2">{t("enter_otp_title", "أدخل رمز التحقق")}</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">
+          {t("enter_otp_title", "أدخل رمز التحقق")}
+        </h1>
         <p className="text-white/80 text-sm mb-8">
-          {t("otp_sent_to", "تم إرسال رمز التحقق إلى")} <span dir="ltr">{phone}</span>
+          {t("otp_sent_to", "تم إرسال رمز التحقق إلى")}{" "}
+          <span dir="ltr">{phone}</span>
         </p>
 
-        <form onSubmit={(e) => { e.preventDefault(); handleVerify(otp); }} className="flex flex-col gap-6">
-          <motion.div 
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleVerify(otp);
+          }}
+          className="flex flex-col gap-6"
+        >
+          <motion.div
             animate={shake ? { x: [-8, 8, -6, 6, -4, 4, 0] } : {}}
-            className="flex justify-center gap-3" 
+            className="flex justify-center gap-3"
             dir="ltr"
           >
             {digits.map((digit, index) => (
@@ -1049,18 +1082,26 @@ function OtpVerification() {
           </button>
 
           {timer === 0 ? (
-            <button type="button" onClick={resendOtp} className="text-white/80 hover:text-white">
+            <button
+              type="button"
+              onClick={resendOtp}
+              className="text-white/80 hover:text-white"
+            >
               {t("didnt_receive_otp", "إعادة الإرسال")}
             </button>
           ) : (
             <p className="text-white/70 text-sm">
-              {t("resend_after", "إعادة الإرسال بعد")} <span className="font-bold text-yellow-400">{timer}</span> ثانية
+              {t("resend_after", "إعادة الإرسال بعد")}{" "}
+              <span className="font-bold text-yellow-400">{timer}</span> ثانية
             </p>
           )}
         </form>
 
-        <button onClick={() => navigate(-1)} className="mt-8 text-white/70 flex items-center justify-center gap-2 mx-auto">
-           {t("back_to_login", "العودة")}
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-8 text-white/70 flex items-center justify-center gap-2 mx-auto"
+        >
+          {t("back_to_login", "العودة")}
         </button>
       </motion.div>
     </div>

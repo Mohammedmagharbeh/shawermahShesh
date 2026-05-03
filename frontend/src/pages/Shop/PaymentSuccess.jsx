@@ -25,6 +25,7 @@ function PaymentSuccess() {
   const [dbOrderId, setDbOrderId] = useState("");
   const [loading, setLoading] = useState(true);
   const hasVerified = useRef(false);
+  const hasCleared = useRef(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -33,8 +34,11 @@ function PaymentSuccess() {
 
     if (id) setDbOrderId(id);
 
-    // Clear the cart — order is already in DB regardless of payment status
-    clearCart();
+    // Clear the cart exactly once — order is already in DB regardless of payment status
+    if (!hasCleared.current) {
+      hasCleared.current = true;
+      clearCart();
+    }
 
     // Call /verify as fallback in case the MontyPay callback was delayed
     if (!hasVerified.current && id && orderRef) {
