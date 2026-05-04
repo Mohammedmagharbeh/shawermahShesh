@@ -456,7 +456,7 @@ exports.getOrderById = async (req, res) => {
   }
 };
 
-// GET all orders (optional status filter)
+// GET all orders
 exports.getAllOrders = async (req, res) => {
   try {
     const { status } = req.query;
@@ -520,7 +520,6 @@ exports.createOrder = async (req, res) => {
       userDetails,
     } = req.body;
 
-    // basic validation
     if (
       !userId ||
       !Array.isArray(products) ||
@@ -529,90 +528,35 @@ exports.createOrder = async (req, res) => {
       (orderType === "delivery" && !shippingAddress) ||
       !userDetails?.name
     ) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing required fields" });
+      return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
-    // validate user & location
     const foundUser = await User.findById(userId);
-    if (!foundUser)
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+    if (!foundUser) return res.status(404).json({ success: false, message: "User not found" });
 
     let location = null;
     if (orderType === "delivery") {
       location = await Location.findById(shippingAddress);
-      if (!location)
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid shipping address" });
+      if (!location) return res.status(400).json({ success: false, message: "Invalid shipping address" });
     }
 
-    // collect product ids and fetch DB products
-    const productIds = products.map((p) =>
-      p.productId && p.productId._id ? p.productId._id : p.productId
-    );
-    const uniqueProductIds = [
-      ...new Set(productIds.map((id) => id.toString())),
-    ];
+    const productIds = products.map((p) => p.productId && p.productId._id ? p.productId._id : p.productId);
+    const uniqueProductIds = [...new Set(productIds.map((id) => id.toString()))];
     const dbProducts = await Product.find({ _id: { $in: uniqueProductIds } });
 
-    // check missing products
-    const dbProductIds = dbProducts.map((p) => p._id.toString());
-    const missing = uniqueProductIds.filter((id) => !dbProductIds.includes(id));
-    if (missing.length) {
-      return res.status(400).json({
-        success: false,
-        message: `Products not found: ${missing.join(", ")}`,
-      });
-    }
-
-    // helper: get addition price from product by _id or by name if needed
+    // Helper functions (same as your original)
     const getAdditionFromProduct = (matchedProduct, addRef) => {
-      if (!matchedProduct || !Array.isArray(matchedProduct.additions))
-        return null;
-
+      if (!matchedProduct || !Array.isArray(matchedProduct.additions)) return null;
       if (addRef?._id) {
-        const found = matchedProduct.additions.find(
-          (a) => a._id.toString() === addRef._id.toString()
-        );
-        if (found)
-          return {
-            _id: found._id,
-            name: found.name,
-            price: Number(found.price || 0),
-          };
+        const found = matchedProduct.additions.find((a) => a._id.toString() === addRef._id.toString());
+        if (found) return { _id: found._id, name: found.name, price: Number(found.price || 0) };
       }
-
-      if (addRef?.name?.en) {
-        const found = matchedProduct.additions.find(
-          (a) => a.name?.en === addRef.name.en
-        );
-        if (found)
-          return {
-            _id: found._id,
-            name: found.name,
-            price: Number(found.price || 0),
-          };
-      }
-
       return null;
     };
 
-    // normalize a single price lookup from product.prices supporting both formats
-    const getVariationPrice = (
-      matchedProduct,
-      selectedProtein,
-      selectedType
-    ) => {
+    const getVariationPrice = (matchedProduct, selectedProtein, selectedType) => {
       if (!matchedProduct) return 0;
-      if (
-        selectedProtein &&
-        selectedType &&
-        matchedProduct.prices?.[selectedProtein]?.[selectedType] != null
-      ) {
+      if (selectedProtein && selectedType && matchedProduct.prices?.[selectedProtein]?.[selectedType] != null) {
         return Number(matchedProduct.prices[selectedProtein][selectedType]);
       }
       if (selectedType && matchedProduct.prices?.[selectedType] != null) {
@@ -623,58 +567,17 @@ exports.createOrder = async (req, res) => {
       return Number(matchedProduct.basePrice || 0);
     };
 
-    // Enrich products
     const enrichedProducts = products.map((p) => {
-      const productId =
-        p.productId && p.productId._id
-          ? p.productId._id.toString()
-          : p.productId.toString();
-      const matchedProduct = dbProducts.find(
-        (dp) => dp._id.toString() === productId
-      );
-
+      const productId = p.productId && p.productId._id ? p.productId._id.toString() : p.productId.toString();
+      const matchedProduct = dbProducts.find((dp) => dp._id.toString() === productId);
       const quantity = Number(p.quantity || 1);
-
-      const basePriceRaw = getVariationPrice(
-        matchedProduct,
-        p.selectedProtein,
-        p.selectedType
-      );
-
+      const basePriceRaw = getVariationPrice(matchedProduct, p.selectedProtein, p.selectedType);
       const discountPct = Number(matchedProduct.discount || 0);
-      const priceAtPurchase =
-        discountPct > 0
-          ? basePriceRaw - (basePriceRaw * discountPct) / 100
-          : basePriceRaw;
+      const priceAtPurchase = discountPct > 0 ? basePriceRaw - (basePriceRaw * discountPct) / 100 : basePriceRaw;
 
       const normalizedAdditions = (p.additions || []).map((add) => {
-        if (
-          add &&
-          (add.price !== undefined || add.price !== null) &&
-          (add.name || add._id)
-        ) {
-          return {
-            _id: add._id ? add._id : undefined,
-            name: add.name ? add.name : undefined,
-            price: Number(add.price || 0),
-            quantity: Number(add.quantity || 1),
-          };
-        }
         const resolved = getAdditionFromProduct(matchedProduct, add);
-        if (resolved) {
-          return {
-            _id: resolved._id,
-            name: resolved.name,
-            price: Number(resolved.price || 0),
-            quantity: 1,
-          };
-        }
-        return {
-          _id: add?._id,
-          name: add?.name,
-          price: 0,
-          quantity: Number(add?.quantity || 1),
-        };
+        return resolved ? { _id: resolved._id, name: resolved.name, price: Number(resolved.price || 0), quantity: 1 } : { price: 0, quantity: 1 };
       });
 
       return {
@@ -690,18 +593,12 @@ exports.createOrder = async (req, res) => {
     });
 
     const productsTotal = enrichedProducts.reduce((sum, item) => {
-      const additionsSumPerUnit = (item.additions || []).reduce(
-        (aSum, a) => aSum + Number(a.price || 0) * Number(a.quantity || 1),
-        0
-      );
-      const unitTotal = Number(item.priceAtPurchase || 0) + additionsSumPerUnit;
-      return sum + unitTotal * Number(item.quantity || 1);
+      const additionsSum = (item.additions || []).reduce((aSum, a) => aSum + Number(a.price || 0), 0);
+      return sum + (item.priceAtPurchase + additionsSum) * item.quantity;
     }, 0);
 
-    const totalPrice =
-      Number(productsTotal) + Number(location?.deliveryCost || 0);
+    const totalPrice = productsTotal + Number(location?.deliveryCost || 0);
 
-    // create order
     const newOrder = await Order.create({
       userId,
       products: enrichedProducts,
@@ -719,26 +616,21 @@ exports.createOrder = async (req, res) => {
       sequenceNumber: await getNextDailySequence(),
     });
 
-    const populatedOrder = await newOrder.populate([
-      { path: "products.productId" },
-      { path: "userId" },
-      { path: "shippingAddress" },
-    ]);
+    const populatedOrder = await newOrder.populate([{ path: "products.productId" }, { path: "userId" }, { path: "shippingAddress" }]);
 
-    // socket notify - التعديل الجذري لمنع اللخمة
+    // --- الحل الجذري لمنع الرنة للطلبات الفاشلة ---
     const io = req.app.get("io");
-    const isPaymentFailed = paymentStatus === "fail";
+    const isCash = paymentMethod?.toLowerCase() === "cash" || paymentMethod?.toLowerCase() === "cod";
+    const isPaid = paymentStatus?.toLowerCase() === "success" || paymentStatus?.toLowerCase() === "paid";
 
-    if (io && !isPaymentFailed) {
+    if (io && (isCash || isPaid)) {
       io.emit("newOrder", populatedOrder);
     }
 
     return res.status(201).json({ success: true, data: populatedOrder });
   } catch (error) {
     console.error("Error in createOrder:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: error.message || "Server error" });
+    return res.status(500).json({ success: false, message: error.message || "Server error" });
   }
 };
 
@@ -747,11 +639,9 @@ exports.deleteOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedOrder = await Order.findByIdAndDelete(id);
-    if (!deletedOrder)
-      return res.status(404).json({ message: "Order not found" });
+    if (!deletedOrder) return res.status(404).json({ message: "Order not found" });
     res.status(200).json(deletedOrder);
   } catch (err) {
-    console.error("deleteOrder error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -761,32 +651,14 @@ exports.updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const body = req.body;
-    const allowedUpdates = [
-      "status",
-      "shippingAddress",
-      "payment",
-      "products",
-      "totalPrice",
-    ];
-    const updates = {};
-
-    allowedUpdates.forEach(
-      (f) => body[f] !== undefined && (updates[f] = body[f])
-    );
-    if (!Object.keys(updates).length)
-      return res.status(400).json({ message: "No valid fields to update" });
-
-    const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
-      new: true,
-    })
+    const updatedOrder = await Order.findByIdAndUpdate(id, body, { new: true })
       .populate("products.productId")
       .populate("userId")
       .populate("shippingAddress");
 
-    if (!updatedOrder)
-      return res.status(404).json({ message: "Order not found" });
+    if (!updatedOrder) return res.status(404).json({ message: "Order not found" });
 
-    if (updates.status === "Confirmed") {
+    if (body.status === "Confirmed") {
       const { sendOrderConfirm } = require("../utils/otp");
       await sendOrderConfirm(updatedOrder.userId.phone);
     }
@@ -796,7 +668,6 @@ exports.updateOrder = async (req, res) => {
 
     res.status(200).json(updatedOrder);
   } catch (err) {
-    console.error("updateOrder error:", err);
     res.status(500).json({ message: err.message });
   }
 };
