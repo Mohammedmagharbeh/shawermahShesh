@@ -103,6 +103,15 @@ function AdminDashboard() {
     }
   }, [orders]);
 
+  useEffect(() => {
+    if (!user?.token) return;
+
+    fetchPendingOrders();
+    const intervalId = setInterval(fetchPendingOrders, 15000);
+
+    return () => clearInterval(intervalId);
+  }, [user?.token]);
+
   const enableSound = () => {
     if (sound) {
       sound
@@ -162,6 +171,19 @@ function AdminDashboard() {
 
   const handleStatusChange = (orderId, newStatus) => {
     updateOrder(orderId, { status: newStatus });
+  };
+
+  const handlePaymentStatusChange = (orderId, newPaymentStatus) => {
+    const orderToUpdate = orders.find((o) => o._id === orderId);
+    if (!orderToUpdate) return;
+    
+    updateOrder(orderId, { 
+      payment: { 
+        ...orderToUpdate.payment, 
+        status: newPaymentStatus,
+        paidAt: newPaymentStatus === "paid" ? new Date() : orderToUpdate.payment?.paidAt
+      } 
+    });
   };
 
   const handleDeleteOrder = (orderId) => {
@@ -464,16 +486,29 @@ function AdminDashboard() {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    <Badge
-                      className={
-                        order.payment?.status === "paid"
-                          ? "bg-green-600 text-white"
-                          : "bg-secondary text-secondary-foreground"
-                      }
+                    <Select
+                      value={order.payment?.status || "unpaid"}
+                      onValueChange={(value) => handlePaymentStatusChange(order._id, value)}
                     >
-                      {order.payment?.status ? t(order.payment.status) : "N/A"}{" "}
-                      ({order.payment?.method || "N/A"})
-                    </Badge>
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue>
+                          <Badge
+                            className={
+                              order.payment?.status === "paid"
+                                ? "bg-green-600 text-white"
+                                : "bg-secondary text-secondary-foreground"
+                            }
+                          >
+                            {order.payment?.status ? t(order.payment.status) : t("unpaid")}{" "}
+                            ({order.payment?.method || "N/A"})
+                          </Badge>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unpaid">{t("unpaid")}</SelectItem>
+                        <SelectItem value="paid">{t("paid")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground">
                         {t("status")}
