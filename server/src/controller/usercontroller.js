@@ -559,7 +559,7 @@ exports.employeeLogin = async (req, res) => {
     // البحث عن المستخدم إذا كان employee أو admin
     const user = await userModel.findOne({ 
       username: name, 
-      role: { $in: ["employee", "admin"] } 
+      role: { $in: ["employee", "admin","hr"] } 
     });
     
     if (!user || !user.password) {

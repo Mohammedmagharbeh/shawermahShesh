@@ -113,7 +113,7 @@ function Header() {
             )}
 
             {isAuthenticated &&
-              (user.role === "admin" || user.role === "employee") && (
+              (user.role === "admin" || user.role === "employee"|| user.role === "hr") && (
                 <div className="hidden lg:block">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

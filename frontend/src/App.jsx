@@ -78,7 +78,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
+<Route
+  path="/AdminJobs"
+  element={
+    <ProtectedRoute allowedRoles={[ "hr"]}> {/* أضفنا hr هنا */}
+      <AdminJobs />
+    </ProtectedRoute>
+  }
+/>
             <Route
               path="/checkout"
               element={

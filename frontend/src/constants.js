@@ -60,7 +60,7 @@ export const ADMIN_LINKS = [
     to: "/adminjobs",
     label: "jobs",
     icon: FileUser,
-    roles: ["admin"],
+    roles: ["admin","hr"],
   },
 ];
 

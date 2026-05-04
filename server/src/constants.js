@@ -21,7 +21,7 @@ const ORDER_STATUSES = Object.freeze([
 const PAYMENT_METHODS = Object.freeze(["cash", "card"]);
 const PAYMENT_STATUSES = Object.freeze(["unpaid", "paid"]);
 
-const USER_ROLES = Object.freeze(["user", "employee", "admin"]);
+const USER_ROLES = Object.freeze(["user", "employee", "admin","hr"]);
 
 module.exports = {
   CATEGORIES,
