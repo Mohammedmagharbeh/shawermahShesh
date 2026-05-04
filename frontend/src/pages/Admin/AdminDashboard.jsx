@@ -47,7 +47,7 @@ function AdminDashboard() {
   const [filterDate, setFilterDate] = useState(
     new Date().toLocaleDateString("en-CA"),
   );
-  const [searchTerm, setSearchTerm] = useState(""); // State للبحث
+  const [searchTerm, setSearchTerm] = useState("");
   const [soundAllowed, setSoundAllowed] = useState(false);
   const [sound, setSound] = useState(null);
   const [incomingOrder, setIncomingOrder] = useState([]);
@@ -83,7 +83,7 @@ function AdminDashboard() {
       // Exclude unpaid card orders — they're awaiting MontyPay callback.
       // Only show: cash orders (always visible) or already-paid card orders.
       const readyOrders = (data.data || []).filter(
-        (o) => o.payment?.method === "cash" || o.payment?.status === "paid"
+        (o) => o.payment?.method === "cash" || o.payment?.status === "paid",
       );
       setIncomingOrder(readyOrders);
     } catch (error) {
@@ -178,13 +178,16 @@ function AdminDashboard() {
   const handlePaymentStatusChange = (orderId, newPaymentStatus) => {
     const orderToUpdate = orders.find((o) => o._id === orderId);
     if (!orderToUpdate) return;
-    
-    updateOrder(orderId, { 
-      payment: { 
-        ...orderToUpdate.payment, 
+
+    updateOrder(orderId, {
+      payment: {
+        ...orderToUpdate.payment,
         status: newPaymentStatus,
-        paidAt: newPaymentStatus === "paid" ? new Date() : orderToUpdate.payment?.paidAt
-      } 
+        paidAt:
+          newPaymentStatus === "paid"
+            ? new Date()
+            : orderToUpdate.payment?.paidAt,
+      },
     });
   };
 
@@ -226,36 +229,48 @@ function AdminDashboard() {
 
     filteredOrders.forEach((order) => {
       // تحويل المنتجات إلى نص مقروء
-      const productsDetails = order.products?.map((item) => {
-        const productName = item.productId?.name[selectedLanguage] || t("deleted_product");
-        const additions = item.additions?.length > 0 
-          ? ` (${item.additions.map(a => a.name[selectedLanguage]).join(", ")})` 
-          : "";
-        const spicy = item.isSpicy ? ` [${t("spicy")}]` : "";
-        const note = item.notes ? ` - ملاحظة: ${item.notes}` : "";
-        
-        return `${productName} x ${item.quantity}${additions}${spicy}${note}`;
-      }).join(" | ");
+      const productsDetails = order.products
+        ?.map((item) => {
+          const productName =
+            item.productId?.name[selectedLanguage] || t("deleted_product");
+          const additions =
+            item.additions?.length > 0
+              ? ` (${item.additions.map((a) => a.name[selectedLanguage]).join(", ")})`
+              : "";
+          const spicy = item.isSpicy ? ` [${t("spicy")}]` : "";
+          const note = item.notes ? ` - ملاحظة: ${item.notes}` : "";
+
+          return `${productName} x ${item.quantity}${additions}${spicy}${note}`;
+        })
+        .join(" | ");
 
       data.push({
         [t("order_id")]: order.sequenceNumber || "N/A",
         [t("customer_name")]: order.userDetails?.name || "N/A",
         [t("phone")]: order.userId?.phone || "N/A",
-        [t("order_type")]: order.orderType === "delivery" ? t("delivery") : t("pickup"),
-        [t("address")]: order.shippingAddress?.name || order.userDetails?.apartment || "N/A",
+        [t("order_type")]:
+          order.orderType === "delivery" ? t("delivery") : t("pickup"),
+        [t("address")]:
+          order.shippingAddress?.name || order.userDetails?.apartment || "N/A",
         [t("status")]: t(order.status?.toLowerCase()) || "N/A",
-        [t("payment_status")]: order.payment?.status ? t(order.payment.status) : "N/A",
+        [t("payment_status")]: order.payment?.status
+          ? t(order.payment.status)
+          : "N/A",
         [t("payment_method")]: order.payment?.method || "N/A",
         "تفاصيل المنتجات": productsDetails, // سرد كامل للمنتجات مع إضافاتها
-        [t("order_subtotal")]: (order.totalPrice - (order.shippingAddress?.deliveryCost || 0)).toFixed(2),
+        [t("order_subtotal")]: (
+          order.totalPrice - (order.shippingAddress?.deliveryCost || 0)
+        ).toFixed(2),
         [t("delivery_cost")]: order.shippingAddress?.deliveryCost || 0,
         [t("order_total")]: order.totalPrice.toFixed(2),
-        [t("date")]: new Date(order.createdAt).toLocaleString(selectedLanguage === "ar" ? "ar-JO" : "en-GB"),
+        [t("date")]: new Date(order.createdAt).toLocaleString(
+          selectedLanguage === "ar" ? "ar-JO" : "en-GB",
+        ),
       });
     });
 
     const worksheet = XLSX.utils.json_to_sheet(data);
-    
+
     // تحديد اتجاه النص للعربية إذا كانت اللغة مختارة
     if (selectedLanguage === "ar") {
       worksheet["!dir"] = "rtl";
@@ -263,11 +278,14 @@ function AdminDashboard() {
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Orders Detail");
-    
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
     saveAs(
       new Blob([excelBuffer], { type: "application/octet-stream" }),
-      `Orders_Detailed_${filterDate}.xlsx`
+      `Orders_Detailed_${filterDate}.xlsx`,
     );
   };
 
@@ -490,7 +508,9 @@ function AdminDashboard() {
                   <div className="flex flex-col gap-3">
                     <Select
                       value={order.payment?.status || "unpaid"}
-                      onValueChange={(value) => handlePaymentStatusChange(order._id, value)}
+                      onValueChange={(value) =>
+                        handlePaymentStatusChange(order._id, value)
+                      }
                     >
                       <SelectTrigger className="w-[160px]">
                         <SelectValue>
@@ -501,7 +521,9 @@ function AdminDashboard() {
                                 : "bg-secondary text-secondary-foreground"
                             }
                           >
-                            {order.payment?.status ? t(order.payment.status) : t("unpaid")}{" "}
+                            {order.payment?.status
+                              ? t(order.payment.status)
+                              : t("unpaid")}{" "}
                             ({order.payment?.method || "N/A"})
                           </Badge>
                         </SelectValue>
@@ -568,15 +590,15 @@ function AdminDashboard() {
                           /> */}
 
                           <img
-  // نتحقق إذا كانت الصورة موجودة في بيانات المنتج، وإلا نستخدم الـ placeholder
-  src={item.productId?.image || product_placeholder} 
-  alt={item.productId?.name[selectedLanguage]}
-  className="h-16 w-16 rounded-md object-cover"
-  // في حال فشل تحميل الرابط من السيرفر، يتم عرض الـ placeholder
-  onError={(e) => {
-    e.target.src = product_placeholder;
-  }}
-/>
+                            // نتحقق إذا كانت الصورة موجودة في بيانات المنتج، وإلا نستخدم الـ placeholder
+                            src={item.productId?.image || product_placeholder}
+                            alt={item.productId?.name[selectedLanguage]}
+                            className="h-16 w-16 rounded-md object-cover"
+                            // في حال فشل تحميل الرابط من السيرفر، يتم عرض الـ placeholder
+                            onError={(e) => {
+                              e.target.src = product_placeholder;
+                            }}
+                          />
                           <div className="flex flex-col gap-1">
                             <p className="font-semibold">
                               {item.productId?.name[selectedLanguage] ||
@@ -589,21 +611,21 @@ function AdminDashboard() {
                               <Badge className="w-fit">{t("spicy")}</Badge>
                             )}
                             {/* ملاحظة بحجم صغير ومختصر */}
-{/* {item.notes && (
+                            {/* {item.notes && (
   <div className="mt-1 flex items-center gap-1.5 text-[12px] bg-[#FFD700] px-2 py-0.5 rounded-md w-fit border border-[#E6C200] text-amber-950">
     <span className="font-bold shrink-0">{t("notes")}:</span>
     <span className="truncate max-w-[200px]">{item.notes}</span>/
   </div>
 )} */}
-{/* إظهار نوع البروتين باستخدام ملفات الترجمة t() */}
-{item.selectedProtein && (
-  <div className="mt-2 mb-2">
-    <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-md shadow-sm inline-block">
-      {/* نحول النص لـ lowercase ليتطابق مع المفاتيح في ملف الترجمة */}
-      {t(item.selectedProtein.toLowerCase())}
-    </span>
-  </div>
-)}
+                            {/* إظهار نوع البروتين باستخدام ملفات الترجمة t() */}
+                            {item.selectedProtein && (
+                              <div className="mt-2 mb-2">
+                                <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-md shadow-sm inline-block">
+                                  {/* نحول النص لـ lowercase ليتطابق مع المفاتيح في ملف الترجمة */}
+                                  {t(item.selectedProtein.toLowerCase())}
+                                </span>
+                              </div>
+                            )}
                             {item.additions?.length > 0 && (
                               <div className="flex gap-1 flex-wrap">
                                 {t("additions")}:{" "}
@@ -697,11 +719,12 @@ function AdminDashboard() {
                           <p style="text-align:center; font-size:14px;"><strong>${t("invoice_customer")}</strong> ${customerName}</p>
                           <p style="text-align:center; font-size:14px;"><strong>${t("invoice_phone")}</strong> ${customerPhone}</p>
                           <p style="text-align:center; font-size:14px;"><strong>${t("order_type")}</strong> ${deliveryType}</p>
-${order.orderType === "delivery" && area ? 
-  `<p style="text-align:center; font-size:14px; background:#f9f9f9; padding:4px;">
+${
+  order.orderType === "delivery" && area
+    ? `<p style="text-align:center; font-size:14px; background:#f9f9f9; padding:4px;">
     <strong>${t("area")}:</strong> ${area}
-   </p>` 
-  : ""
+   </p>`
+    : ""
 }                          <hr/>
                           <table style="width:100%; border-collapse: collapse; font-size:14px;">
                             <thead>
@@ -718,11 +741,11 @@ ${order.orderType === "delivery" && area ?
                                     item.additions?.length > 0
                                       ? `<div style="font-size:12px; color:#555;">+ ${item.additions.map((a) => a.name[selectedLanguage]).join(", ")}</div>`
                                       : "";
-                                const protein = item.selectedProtein
-  ? `<div style="font-size: 13px; color: #000; font-weight: bold; margin-top: 2px;">
+                                  const protein = item.selectedProtein
+                                    ? `<div style="font-size: 13px; color: #000; font-weight: bold; margin-top: 2px;">
       ${t("protein")}: ${t(item.selectedProtein.toLowerCase())}
      </div>`
-  : "";
+                                    : "";
                                   const spicy = item.isSpicy
                                     ? `<div style="color:red; font-size:12px;">${t("spicy")}</div>`
                                     : "";
