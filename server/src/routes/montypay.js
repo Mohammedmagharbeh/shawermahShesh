@@ -14,26 +14,100 @@ const MONTY_BASE = process.env.MONTY_BASE;
 const MERCHANT_KEY = process.env.MERCHANT_KEY;
 const MERCHANT_PASSWORD = process.env.MERCHANT_PASSWORD;
 
+const PAID_STATUSES = new Set([
+  "COMPLETED",
+  "PAID",
+  "SUCCESS",
+  "SETTLED",
+  "SALE",
+  "ACCEPTED",
+  "SUCCESSFUL",
+  "CAPTURED",
+  "AUTHORIZED",
+  "AUTHORISED",
+  "APPROVED",
+  "PURCHASE",
+  "CHARGED",
+]);
+
+const getUpperString = (value) =>
+  value == null ? "" : String(value).toUpperCase().trim();
+
+const isSuccessfulMontyPayment = (payload = {}) => {
+  const candidates = [
+    payload.status,
+    payload.payment_status,
+    payload.order?.status,
+    payload.transaction?.status,
+    payload.payment?.status,
+    payload.result,
+    payload.response_status,
+  ];
+
+  const hasPaidStatus = candidates.some((value) =>
+    PAID_STATUSES.has(getUpperString(value)),
+  );
+  const hasSuccessFlag =
+    payload.success === true ||
+    String(payload.success).toLowerCase() === "true";
+
+  return hasPaidStatus || hasSuccessFlag;
+};
+
+const extractDbOrderId = (...possibleRefs) => {
+  for (const ref of possibleRefs) {
+    if (ref == null) continue;
+    const text = String(ref);
+    const direct = text.trim();
+    if (mongoose.Types.ObjectId.isValid(direct)) return direct;
+
+    const matches = text.match(/[a-fA-F0-9]{24}/g);
+    if (!matches?.length) continue;
+
+    for (let i = matches.length - 1; i >= 0; i -= 1) {
+      if (mongoose.Types.ObjectId.isValid(matches[i])) return matches[i];
+    }
+  }
+
+  return null;
+};
+
 // ─── Shared helpers (same logic as orderController) ──────────────────────────
 
 const getAdditionFromProduct = (matchedProduct, addRef) => {
   if (!matchedProduct || !Array.isArray(matchedProduct.additions)) return null;
   if (addRef?._id) {
     const found = matchedProduct.additions.find(
-      (a) => a._id.toString() === addRef._id.toString()
+      (a) => a._id.toString() === addRef._id.toString(),
     );
-    if (found) return { _id: found._id, name: found.name, price: Number(found.price || 0) };
+    if (found)
+      return {
+        _id: found._id,
+        name: found.name,
+        price: Number(found.price || 0),
+      };
   }
   if (addRef?.name?.en) {
-    const found = matchedProduct.additions.find((a) => a.name?.en === addRef.name.en);
-    if (found) return { _id: found._id, name: found.name, price: Number(found.price || 0) };
+    const found = matchedProduct.additions.find(
+      (a) => a.name?.en === addRef.name.en,
+    );
+    if (found)
+      return {
+        _id: found._id,
+        name: found.name,
+        price: Number(found.price || 0),
+      };
   }
   return null;
 };
 
 const getVariationPrice = (matchedProduct, selectedProtein, selectedType) => {
   if (!matchedProduct) return 0;
-  if (selectedProtein && selectedType && matchedProduct.prices?.[selectedProtein]?.[selectedType] != null)
+  if (
+    selectedProtein &&
+    selectedType &&
+    matchedProduct.prices?.[selectedProtein]?.[selectedType] != null
+  )
     return Number(matchedProduct.prices[selectedProtein][selectedType]);
   if (selectedType && matchedProduct.prices?.[selectedType] != null)
     return Number(matchedProduct.prices[selectedType]);
@@ -46,7 +120,15 @@ const getVariationPrice = (matchedProduct, selectedProtein, selectedType) => {
  * Creates an order document in MongoDB.
  * Throws on validation errors so the caller can handle them.
  */
-async function createPendingOrder({ userId, products, shippingAddress, orderType, userDetails, paymentMethod, io }) {
+async function createPendingOrder({
+  userId,
+  products,
+  shippingAddress,
+  orderType,
+  userDetails,
+  paymentMethod,
+  io,
+}) {
   const foundUser = await User.findById(userId);
   if (!foundUser) throw new Error("User not found");
 
@@ -56,41 +138,87 @@ async function createPendingOrder({ userId, products, shippingAddress, orderType
     if (!location) throw new Error("Invalid shipping address");
   }
 
-  const productIds = products.map((p) => (p.productId?._id ? p.productId._id : p.productId));
+  const productIds = products.map((p) =>
+    p.productId?._id ? p.productId._id : p.productId,
+  );
   const uniqueProductIds = [...new Set(productIds.map((id) => id.toString()))];
   const dbProducts = await Product.find({ _id: { $in: uniqueProductIds } });
 
   const missing = uniqueProductIds.filter(
-    (id) => !dbProducts.some((dp) => dp._id.toString() === id)
+    (id) => !dbProducts.some((dp) => dp._id.toString() === id),
   );
-  if (missing.length) throw new Error(`Products not found: ${missing.join(", ")}`);
+  if (missing.length)
+    throw new Error(`Products not found: ${missing.join(", ")}`);
 
   const enrichedProducts = products.map((p) => {
-    const productId = p.productId?._id ? p.productId._id.toString() : p.productId.toString();
-    const matchedProduct = dbProducts.find((dp) => dp._id.toString() === productId);
+    const productId = p.productId?._id
+      ? p.productId._id.toString()
+      : p.productId.toString();
+    const matchedProduct = dbProducts.find(
+      (dp) => dp._id.toString() === productId,
+    );
     const quantity = Number(p.quantity || 1);
-    const basePriceRaw = getVariationPrice(matchedProduct, p.selectedProtein, p.selectedType);
+    const basePriceRaw = getVariationPrice(
+      matchedProduct,
+      p.selectedProtein,
+      p.selectedType,
+    );
     const discountPct = Number(matchedProduct.discount || 0);
-    const priceAtPurchase = discountPct > 0 ? basePriceRaw - (basePriceRaw * discountPct) / 100 : basePriceRaw;
+    const priceAtPurchase =
+      discountPct > 0
+        ? basePriceRaw - (basePriceRaw * discountPct) / 100
+        : basePriceRaw;
 
     const normalizedAdditions = (p.additions || []).map((add) => {
       if (add && add.price !== undefined && (add.name || add._id)) {
-        return { _id: add._id || undefined, name: add.name || undefined, price: Number(add.price || 0), quantity: Number(add.quantity || 1) };
+        return {
+          _id: add._id || undefined,
+          name: add.name || undefined,
+          price: Number(add.price || 0),
+          quantity: Number(add.quantity || 1),
+        };
       }
       const resolved = getAdditionFromProduct(matchedProduct, add);
-      if (resolved) return { _id: resolved._id, name: resolved.name, price: Number(resolved.price || 0), quantity: 1 };
-      return { _id: add?._id, name: add?.name, price: 0, quantity: Number(add?.quantity || 1) };
+      if (resolved)
+        return {
+          _id: resolved._id,
+          name: resolved.name,
+          price: Number(resolved.price || 0),
+          quantity: 1,
+        };
+      return {
+        _id: add?._id,
+        name: add?.name,
+        price: 0,
+        quantity: Number(add?.quantity || 1),
+      };
     });
 
-    return { productId, quantity, additions: normalizedAdditions, priceAtPurchase: Number(priceAtPurchase || 0), isSpicy: Boolean(p.isSpicy || false), notes: p.notes || "", selectedProtein: p.selectedProtein || null, selectedType: p.selectedType || null };
+    return {
+      productId,
+      quantity,
+      additions: normalizedAdditions,
+      priceAtPurchase: Number(priceAtPurchase || 0),
+      isSpicy: Boolean(p.isSpicy || false),
+      notes: p.notes || "",
+      selectedProtein: p.selectedProtein || null,
+      selectedType: p.selectedType || null,
+    };
   });
 
   const productsTotal = enrichedProducts.reduce((sum, item) => {
-    const addSum = (item.additions || []).reduce((a, add) => a + Number(add.price || 0) * Number(add.quantity || 1), 0);
-    return sum + (Number(item.priceAtPurchase || 0) + addSum) * Number(item.quantity || 1);
+    const addSum = (item.additions || []).reduce(
+      (a, add) => a + Number(add.price || 0) * Number(add.quantity || 1),
+      0,
+    );
+    return (
+      sum +
+      (Number(item.priceAtPurchase || 0) + addSum) * Number(item.quantity || 1)
+    );
   }, 0);
 
-  const totalPrice = Number(productsTotal) + Number(location?.deliveryCost || 0);
+  const totalPrice =
+    Number(productsTotal) + Number(location?.deliveryCost || 0);
 
   const newOrder = await Order.create({
     userId,
@@ -98,7 +226,12 @@ async function createPendingOrder({ userId, products, shippingAddress, orderType
     totalPrice,
     status: "Processing",
     shippingAddress: orderType === "delivery" ? shippingAddress : null,
-    payment: { status: "unpaid", method: paymentMethod || "card", transactionId: null, paidAt: null },
+    payment: {
+      status: "unpaid",
+      method: paymentMethod || "card",
+      transactionId: null,
+      paidAt: null,
+    },
     orderType,
     userDetails,
   });
@@ -139,7 +272,9 @@ router.post("/session", async (req, res) => {
 
     // Step 2: Build MontyPay session
     const threeDecimalCurrencies = ["JOD", "KWD", "OMR", "BHD", "TND"];
-    const decimals = threeDecimalCurrencies.includes(currency.toUpperCase()) ? 3 : 2;
+    const decimals = threeDecimalCurrencies.includes(currency.toUpperCase())
+      ? 3
+      : 2;
     const formattedAmount = Number(amount).toFixed(decimals);
 
     // Use ASCII-safe description — MUST be identical in payload and hash
@@ -169,7 +304,8 @@ router.post("/session", async (req, res) => {
     };
 
     // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
-    const rawString = `${orderNumber}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase();
+    const rawString =
+      `${orderNumber}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase();
     const md5Hash = crypto.createHash("md5").update(rawString).digest("hex");
     payload.hash = crypto.createHash("sha1").update(md5Hash).digest("hex");
 
@@ -181,7 +317,12 @@ router.post("/session", async (req, res) => {
     res.json({ ...response.data, dbOrderId });
   } catch (err) {
     console.error("Session error:", err.response?.data || err.message || err);
-    res.status(500).json({ error: "Payment Session Failed", details: err.response?.data || err.message });
+    res
+      .status(500)
+      .json({
+        error: "Payment Session Failed",
+        details: err.response?.data || err.message,
+      });
   }
 });
 
@@ -193,37 +334,43 @@ router.post("/callback", async (req, res) => {
 
     // Apple Pay / card payments may return different status strings depending on payment method.
     // Log the full status so we can diagnose any new ones from server logs.
-    const rawStatus = data.status?.toUpperCase() || "";
+    const rawStatus = getUpperString(
+      data.status || data.payment_status || data.result,
+    );
     console.log("MontyPay Callback status received:", rawStatus);
-
-    const PAID_STATUSES = [
-      "COMPLETED", "PAID", "SUCCESS", "SETTLED", "SALE", "ACCEPTED",
-      // Apple Pay & other wallet statuses:
-      "CAPTURED", "AUTHORIZED", "APPROVED", "PURCHASE", "CHARGED",
-    ];
-
-    // Some endpoints or payment methods return a top-level result="SUCCESS" or success=true
-    const isPaid = PAID_STATUSES.includes(rawStatus) || 
-                   data.result === "SUCCESS" || 
-                   data.success === true || 
-                   data.result === true;
+    const isPaid = isSuccessfulMontyPayment(data);
 
     if (isPaid) {
-      // Extract the MongoDB _id (last part after final dash, or the whole string)
-      const orderRef = data.order?.number || data.order_id || data.merchant_reference || "";
-      const parts = orderRef.split("-");
-      const dbOrderId = parts[parts.length - 1]; // last segment is always the _id
+      const orderRef =
+        data.order?.number ||
+        data.order_id ||
+        data.merchant_reference ||
+        data.reference ||
+        data.merchant_order_id ||
+        data.order_number ||
+        "";
+      const dbOrderId = extractDbOrderId(
+        data.dbOrderId,
+        data.order?.number,
+        data.order?.id,
+        data.order_id,
+        data.merchant_reference,
+        data.reference,
+        data.merchant_order_id,
+        data.order_number,
+      );
 
-      if (dbOrderId && mongoose.Types.ObjectId.isValid(dbOrderId)) {
+      if (dbOrderId) {
         const updatedOrder = await Order.findByIdAndUpdate(
           dbOrderId,
           {
             "payment.status": "paid",
-            "payment.transactionId": data.payment_id || data.session_id || data.trans_id || null,
+            "payment.transactionId":
+              data.payment_id || data.session_id || data.trans_id || null,
             "payment.paidAt": new Date(),
             status: "Processing", // stays Processing — staff must confirm manually
           },
-          { new: true }
+          { new: true },
         )
           .populate("products.productId")
           .populate("userId")
@@ -239,9 +386,16 @@ router.post("/callback", async (req, res) => {
         } else {
           console.warn(`⚠️  Callback: order ${dbOrderId} not found in DB.`);
         }
-      } else {
-        console.warn("⚠️  Callback: could not extract valid order ID from:", orderRef);
-      }
+      } else
+        console.warn(
+          "⚠️  Callback: could not extract valid order ID from:",
+          orderRef,
+        );
+    } else {
+      console.warn(
+        "⚠️  Callback: Payment not marked as paid. rawStatus:",
+        rawStatus,
+      );
     }
 
     // Must return "OK" exactly, as per MontyPay documentation
@@ -258,7 +412,8 @@ router.post("/status", async (req, res) => {
   try {
     const { orderNumber } = req.body; // full order.number used in session
 
-    if (!orderNumber) return res.status(400).json({ error: "Missing orderNumber" });
+    if (!orderNumber)
+      return res.status(400).json({ error: "Missing orderNumber" });
 
     const rawString = `${orderNumber}${MERCHANT_PASSWORD}`.toUpperCase();
     const md5Hash = crypto.createHash("md5").update(rawString).digest("hex");
@@ -267,13 +422,15 @@ router.post("/status", async (req, res) => {
     const response = await axios.post(
       `${MONTY_BASE}/payment/status`,
       { merchant_key: MERCHANT_KEY, order_id: orderNumber, hash },
-      { headers: { "Content-Type": "application/json" } }
+      { headers: { "Content-Type": "application/json" } },
     );
 
     res.json(response.data);
   } catch (err) {
     console.error("Status check error:", err.response?.data || err);
-    res.status(500).json({ error: "Status Check Failed", details: err.response?.data });
+    res
+      .status(500)
+      .json({ error: "Status Check Failed", details: err.response?.data });
   }
 });
 
@@ -289,7 +446,8 @@ router.post("/verify", async (req, res) => {
 
     // Check if order is already confirmed (callback may have already fired)
     const existingOrder = await Order.findById(dbOrderId);
-    if (!existingOrder) return res.status(404).json({ error: "Order not found" });
+    if (!existingOrder)
+      return res.status(404).json({ error: "Order not found" });
 
     if (existingOrder.payment?.status === "paid") {
       // Already confirmed — nothing to do
@@ -304,27 +462,22 @@ router.post("/verify", async (req, res) => {
     const montyRes = await axios.post(
       `${MONTY_BASE}/payment/status`,
       { merchant_key: MERCHANT_KEY, order_id: orderRef, hash },
-      { headers: { "Content-Type": "application/json" } }
+      { headers: { "Content-Type": "application/json" } },
     );
 
     const montyData = montyRes.data;
-    const rawStatus = montyData.status?.toLowerCase() || "";
+    const rawStatus = getUpperString(
+      montyData.status || montyData.payment_status || montyData.result,
+    );
     console.log("MontyPay /verify status received:", rawStatus);
-
-    const PAID_STATUSES = [
-      "settled", "success", "completed", "paid", "sale", "accepted",
-      // Apple Pay & other wallet statuses:
-      "captured", "authorized", "approved", "purchase", "charged",
-    ];
-    
-    // Some endpoints or payment methods return a top-level result="SUCCESS" or success=true
-    const isPaid = PAID_STATUSES.includes(rawStatus) || 
-                   montyData.result === "SUCCESS" || 
-                   montyData.success === true || 
-                   montyData.result === true;
+    const isPaid = isSuccessfulMontyPayment(montyData);
 
     if (!isPaid) {
-      return res.json({ success: false, status: montyData.status, reason: montyData.reason });
+      return res.json({
+        success: false,
+        status: montyData.status,
+        reason: montyData.reason,
+      });
     }
 
     // MontyPay confirms payment — update the order
@@ -332,11 +485,12 @@ router.post("/verify", async (req, res) => {
       dbOrderId,
       {
         "payment.status": "paid",
-        "payment.transactionId": montyData.payment_id || montyData.session_id || null,
+        "payment.transactionId":
+          montyData.payment_id || montyData.session_id || null,
         "payment.paidAt": new Date(),
         status: "Processing", // stays Processing — staff must confirm manually
       },
-      { new: true }
+      { new: true },
     )
       .populate("products.productId")
       .populate("userId")
@@ -351,7 +505,12 @@ router.post("/verify", async (req, res) => {
     return res.json({ success: true, alreadyConfirmed: false });
   } catch (err) {
     console.error("Verify error:", err.response?.data || err.message || err);
-    res.status(500).json({ error: "Verification failed", details: err.response?.data || err.message });
+    res
+      .status(500)
+      .json({
+        error: "Verification failed",
+        details: err.response?.data || err.message,
+      });
   }
 });
 
