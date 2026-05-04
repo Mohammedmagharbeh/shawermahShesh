@@ -34,18 +34,19 @@ const getUpperString = (value) =>
   value == null ? "" : String(value).toUpperCase().trim();
 
 const isSuccessfulMontyPayment = (payload = {}) => {
-  const candidates = [
+  // We only check fields that represent the ACTUAL payment status.
+  // We explicitly EXCLUDE generic fields like 'result', 'response_status', or 'success' 
+  // because they often indicate the API request succeeded (e.g. 3DS challenge initiated), 
+  // rather than the money being captured.
+  const paymentStatusFields = [
     payload.status,
     payload.payment_status,
     payload.order?.status,
     payload.transaction?.status,
     payload.payment?.status,
-    payload.result,
-    payload.response_status,
   ];
 
   // If any of the status fields explicitly state it's pending/failed, we reject immediately
-  // This prevents falsely assuming a "result: SUCCESS" means the payment is done when it's just "status: PENDING"
   const UNPAID_STATUSES = new Set([
     "PENDING",
     "CREATED",
@@ -61,15 +62,29 @@ const isSuccessfulMontyPayment = (payload = {}) => {
     "ABORTED",
     "TIMEOUT",
     "EXPIRED",
+    "3DS_PENDING",
+    "PENDING_3DS",
+    "AWAITING_3DS",
+    "3D_SECURE",
+    "AUTHENTICATING",
+    "AUTHENTICATION_PENDING",
+    "PENDING_AUTHENTICATION",
+    "ENROLLED",
+    "CHALLENGE_REQUIRED",
+    "REDIRECTED",
+    "REQUIRE_ACTION",
+    "INCOMPLETE",
+    "3DS_CHALLENGE",
+    "VERIFYING",
   ]);
 
-  for (const value of candidates) {
+  for (const value of paymentStatusFields) {
     if (UNPAID_STATUSES.has(getUpperString(value))) {
       return false;
     }
   }
 
-  const hasPaidStatus = candidates.some((value) =>
+  const hasPaidStatus = paymentStatusFields.some((value) =>
     PAID_STATUSES.has(getUpperString(value)),
   );
 
