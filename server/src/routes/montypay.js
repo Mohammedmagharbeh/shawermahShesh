@@ -44,14 +44,36 @@ const isSuccessfulMontyPayment = (payload = {}) => {
     payload.response_status,
   ];
 
+  // If any of the status fields explicitly state it's pending/failed, we reject immediately
+  // This prevents falsely assuming a "result: SUCCESS" means the payment is done when it's just "status: PENDING"
+  const UNPAID_STATUSES = new Set([
+    "PENDING",
+    "CREATED",
+    "INITIATED",
+    "NEW",
+    "IN_PROGRESS",
+    "FAILED",
+    "DECLINED",
+    "REJECTED",
+    "CANCELED",
+    "CANCELLED",
+    "ERROR",
+    "ABORTED",
+    "TIMEOUT",
+    "EXPIRED",
+  ]);
+
+  for (const value of candidates) {
+    if (UNPAID_STATUSES.has(getUpperString(value))) {
+      return false;
+    }
+  }
+
   const hasPaidStatus = candidates.some((value) =>
     PAID_STATUSES.has(getUpperString(value)),
   );
-  const hasSuccessFlag =
-    payload.success === true ||
-    String(payload.success).toLowerCase() === "true";
 
-  return hasPaidStatus || hasSuccessFlag;
+  return hasPaidStatus;
 };
 
 const extractDbOrderId = (...possibleRefs) => {
