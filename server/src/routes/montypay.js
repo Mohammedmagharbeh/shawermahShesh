@@ -14,81 +14,61 @@ const MONTY_BASE = process.env.MONTY_BASE;
 const MERCHANT_KEY = process.env.MERCHANT_KEY;
 const MERCHANT_PASSWORD = process.env.MERCHANT_PASSWORD;
 
-const PAID_STATUSES = new Set([
-  "COMPLETED",
-  "PAID",
-  "SUCCESS",
-  "SETTLED",
-  "SALE",
-  "ACCEPTED",
-  "SUCCESSFUL",
-  "CAPTURED",
-  "AUTHORIZED",
-  "AUTHORISED",
-  "APPROVED",
-  "PURCHASE",
-  "CHARGED",
-]);
-
 const getUpperString = (value) =>
   value == null ? "" : String(value).toUpperCase().trim();
 
+/** MontyPay checkout callback: money captured only when order is settled and txn is a charge type. */
+const MONTY_CALLBACK_PAID_TYPES = new Set([
+  "SALE",
+  "CAPTURE",
+  "DEBIT",
+  "TRANSFER",
+]);
+
+/**
+ * MontyPay semantics (see checkout_integration docs):
+ * - Callback: `status` = transaction result (success even for redirect/3ds steps).
+ *   Payment is NOT complete until `order_status` = settled AND `type` is sale/capture/debit/transfer.
+ * - GET /payment/status JSON: top-level `status` is payment lifecycle; only `settled` means paid.
+ */
 const isSuccessfulMontyPayment = (payload = {}) => {
-  // We only check fields that represent the ACTUAL payment status.
-  // We explicitly EXCLUDE generic fields like 'result', 'response_status', or 'success' 
-  // because they often indicate the API request succeeded (e.g. 3DS challenge initiated), 
-  // rather than the money being captured.
-  const paymentStatusFields = [
-    payload.status,
-    payload.payment_status,
-    payload.order?.status,
-    payload.transaction?.status,
-    payload.payment?.status,
-  ];
+  const orderStatus = getUpperString(
+    payload.order_status ?? payload.orderStatus,
+  );
+  const txnStatus = getUpperString(payload.status);
+  const txnType = getUpperString(payload.type);
 
-  // If any of the status fields explicitly state it's pending/failed, we reject immediately
-  const UNPAID_STATUSES = new Set([
-    "PENDING",
-    "CREATED",
-    "INITIATED",
-    "NEW",
-    "IN_PROGRESS",
-    "FAILED",
-    "DECLINED",
-    "REJECTED",
-    "CANCELED",
-    "CANCELLED",
-    "ERROR",
-    "ABORTED",
-    "TIMEOUT",
-    "EXPIRED",
-    "3DS_PENDING",
-    "PENDING_3DS",
-    "AWAITING_3DS",
-    "3D_SECURE",
-    "AUTHENTICATING",
-    "AUTHENTICATION_PENDING",
-    "PENDING_AUTHENTICATION",
-    "ENROLLED",
-    "CHALLENGE_REQUIRED",
-    "REDIRECTED",
-    "REQUIRE_ACTION",
-    "INCOMPLETE",
-    "3DS_CHALLENGE",
-    "VERIFYING",
-  ]);
+  const hasCallbackShape =
+    orderStatus.length > 0 ||
+    txnType.length > 0 ||
+    (payload.order_number != null && payload.order_number !== "");
 
-  for (const value of paymentStatusFields) {
-    if (UNPAID_STATUSES.has(getUpperString(value))) {
-      return false;
-    }
+  if (hasCallbackShape) {
+    if (txnStatus !== "SUCCESS") return false;
+    if (orderStatus !== "SETTLED") return false;
+    if (!MONTY_CALLBACK_PAID_TYPES.has(txnType)) return false;
+    return true;
   }
 
-  const hasPaidStatus = paymentStatusFields.some((value) =>
-    PAID_STATUSES.has(getUpperString(value)),
-  );
+  // /api/v1/payment/status (by order_id): JSON uses top-level `status` for payment phase
+  if (
+    payload.payment_id != null &&
+    payload.order != null &&
+    typeof payload.order === "object"
+  ) {
+    return getUpperString(payload.status) === "SETTLED";
+  }
 
-  return hasPaidStatus;
+  return false;
+};
+
+/** When status API returns an array (size param), use the latest settled row if any. */
+const normalizeMontyStatusPayload = (data) => {
+  if (!Array.isArray(data) || data.length === 0) return data;
+  for (let i = data.length - 1; i >= 0; i -= 1) {
+    if (getUpperString(data[i]?.status) === "SETTLED") return data[i];
+  }
+  return data[data.length - 1];
 };
 
 const extractDbOrderId = (...possibleRefs) => {
@@ -374,7 +354,15 @@ router.post("/callback", async (req, res) => {
     const rawStatus = getUpperString(
       data.status || data.payment_status || data.result,
     );
-    console.log("MontyPay Callback status received:", rawStatus);
+    console.log(
+      "MontyPay Callback:",
+      "txn status=",
+      rawStatus,
+      "order_status=",
+      getUpperString(data.order_status),
+      "type=",
+      getUpperString(data.type),
+    );
     const isPaid = isSuccessfulMontyPayment(data);
 
     if (isPaid) {
@@ -403,7 +391,11 @@ router.post("/callback", async (req, res) => {
           {
             "payment.status": "paid",
             "payment.transactionId":
-              data.payment_id || data.session_id || data.trans_id || null,
+              data.id ||
+              data.payment_id ||
+              data.session_id ||
+              data.trans_id ||
+              null,
             "payment.paidAt": new Date(),
             status: "Processing", // stays Processing — staff must confirm manually
           },
@@ -502,11 +494,11 @@ router.post("/verify", async (req, res) => {
       { headers: { "Content-Type": "application/json" } },
     );
 
-    const montyData = montyRes.data;
+    const montyData = normalizeMontyStatusPayload(montyRes.data);
     const rawStatus = getUpperString(
       montyData.status || montyData.payment_status || montyData.result,
     );
-    console.log("MontyPay /verify status received:", rawStatus);
+    console.log("MontyPay /verify payment status:", rawStatus);
     const isPaid = isSuccessfulMontyPayment(montyData);
 
     if (!isPaid) {
@@ -523,7 +515,10 @@ router.post("/verify", async (req, res) => {
       {
         "payment.status": "paid",
         "payment.transactionId":
-          montyData.payment_id || montyData.session_id || null,
+          montyData.id ||
+          montyData.payment_id ||
+          montyData.session_id ||
+          null,
         "payment.paidAt": new Date(),
         status: "Processing", // stays Processing — staff must confirm manually
       },
