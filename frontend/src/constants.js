@@ -1,3 +1,136 @@
+// import {
+//   ChartNoAxesCombined,
+//   FileUser,
+//   Image,
+//   LayoutDashboard,
+//   Package,
+//   Plus,
+//   Users2,
+// } from "lucide-react";
+
+// export const CATEGORIES = [
+//   { en: "Shawarma", ar: "شاورما" },
+//   { en: "Burgers", ar: "برجر" },
+//   { en: "Snacks", ar: "سناكات " },
+//   { en: "Drinks", ar: "مشروبات" },
+//   { en: "Box", ar: "بوكس" },
+//   { en: " Sheesh Dishes", ar: "أطباق شيش" },
+//   { en: "Kids", ar: "أطفال" },
+//   { en: "Sides", ar: "جانبية" },
+// ];
+
+// export const ADMIN_LINKS = [
+//   {
+//     to: "/admin/dashboard",
+//     label: "dashboard",
+//     icon: LayoutDashboard,
+//     roles: ["admin", "employee"],
+//   },
+//   {
+//     to: "/orders",
+//     label: "orders",
+//     icon: Package,
+//     roles: ["admin"],
+//   },
+//   {
+//     to: "/admin/add-product",
+//     label: "products",
+//     icon: Plus,
+//     roles: ["admin"],
+//   },
+//   {
+//     to: "/admin/statistics",
+//     label: "statistics",
+//     icon: ChartNoAxesCombined,
+//     roles: ["admin"],
+//   },
+//   {
+//     to: "/admin/users-control",
+//     label: "users_management",
+//     icon: Users2,
+//     roles: ["admin"],
+//   },
+//   {
+//     to: "/slides",
+//     label: "images_upload",
+//     icon: Image,
+//     roles: ["admin"],
+//   },
+//   {
+//     to: "/adminjobs",
+//     label: "jobs",
+//     icon: FileUser,
+//     roles: ["admin","hr"],
+//   },
+// ];
+
+// export const PUBLIC_LINKS = [
+//   { label: "home" },
+//   { label: "our_story" },
+//   { label: "jobs" },
+//   { label: "contact_us" },
+// ];
+
+// export const INITIAL_FORM_DATA = {
+//   arName: "",
+//   enName: "",
+//   basePrice: "",
+//   discount: "",
+//   arDescription: "",
+//   enDescription: "",
+//   image: "",
+//   category: "",
+//   isSpicy: false,
+//   inStock: false,
+//   hasTypeChoices: false,
+//   hasProteinChoices: false,
+//   additions: [],
+//   additionsSelectionType: null,
+//   prices: {
+//     sandwich: "",
+//     meal: "",
+//     chicken: "",
+//     meat: "",
+//     chicken_sandwich: "",
+//     chicken_meal: "",
+//     meat_sandwich: "",
+//     meat_meal: "",
+//   },
+// };
+
+// export const getProductPrice = (product) => {
+//   if (!product.productId) return 0;
+
+//   let basePrice = Number(product.productId.basePrice || 0);
+
+//   const pId = product.productId;
+
+//   if (pId.hasProteinChoices && pId.hasTypeChoices) {
+//     basePrice = Number(
+//       pId.prices?.[product.selectedProtein]?.[product.selectedType] ?? basePrice
+//     );
+//   } else if (pId.hasProteinChoices) {
+//     basePrice = Number(pId.prices?.[product.selectedProtein] ?? basePrice);
+//   } else if (pId.hasTypeChoices) {
+//     basePrice = Number(pId.prices?.[product.selectedType] ?? basePrice);
+//   }
+
+//   // apply discount if any
+//   if (pId.discount && pId.discount > 0) {
+//     basePrice = basePrice - (basePrice * pId.discount) / 100;
+//   }
+
+//   return basePrice;
+// };
+
+// export const getAdditionsPrice = (additions) => {
+//   if (!additions || additions.length === 0) return 0;
+
+//   const additionsTotal = additions.reduce((acc, item) => acc + item.price, 0);
+
+//   return additionsTotal;
+// };
+
 import {
   ChartNoAxesCombined,
   FileUser,
@@ -18,6 +151,10 @@ export const CATEGORIES = [
   { en: "Kids", ar: "أطفال" },
   { en: "Sides", ar: "جانبية" },
 ];
+
+// 🔥 دالة توحيد الرول (مهم جدًا)
+export const normalizeRole = (role) =>
+  role?.toLowerCase().trim();
 
 export const ADMIN_LINKS = [
   {
@@ -56,11 +193,13 @@ export const ADMIN_LINKS = [
     icon: Image,
     roles: ["admin"],
   },
+
+  // ✅ jobs (معدلة)
   {
-    to: "/adminjobs",
+    to: "/adminjobs", // 🔥 عدلناها
     label: "jobs",
     icon: FileUser,
-    roles: ["admin","hr"],
+    roles: ["admin", "hr"],
   },
 ];
 
@@ -115,7 +254,6 @@ export const getProductPrice = (product) => {
     basePrice = Number(pId.prices?.[product.selectedType] ?? basePrice);
   }
 
-  // apply discount if any
   if (pId.discount && pId.discount > 0) {
     basePrice = basePrice - (basePrice * pId.discount) / 100;
   }
@@ -126,7 +264,5 @@ export const getProductPrice = (product) => {
 export const getAdditionsPrice = (additions) => {
   if (!additions || additions.length === 0) return 0;
 
-  const additionsTotal = additions.reduce((acc, item) => acc + item.price, 0);
-
-  return additionsTotal;
+  return additions.reduce((acc, item) => acc + item.price, 0);
 };
