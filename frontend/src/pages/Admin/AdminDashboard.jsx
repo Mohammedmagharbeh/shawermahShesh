@@ -127,6 +127,20 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
+    if (incomingOrder?.length > 0 && soundAllowed && sound) {
+      if (sound.paused) {
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+      }
+    } else if (incomingOrder?.length === 0 && sound) {
+      if (!sound.paused) {
+        sound.pause();
+        sound.currentTime = 0;
+      }
+    }
+  }, [incomingOrder, soundAllowed, sound]);
+
+  useEffect(() => {
     socket.on("newOrder", (order) => {
       getAllOrders();
       setIncomingOrder((prev) => {
@@ -134,24 +148,12 @@ function AdminDashboard() {
         if (exists) return prev;
         return [...(prev || []), order];
       });
-
-      if (soundAllowed && sound) {
-        sound.currentTime = 0;
-        sound.play().catch(() => {});
-      }
     });
 
     socket.on("updatedOrder", (updatedOrder) => {
       getAllOrders();
       setIncomingOrder((prev) => {
         if (!prev) return [];
-        const wasIncoming = prev.some(
-          (order) => order._id === updatedOrder._id,
-        );
-        if (wasIncoming && sound) {
-          sound.pause();
-          sound.currentTime = 0;
-        }
         return prev.filter((order) => order._id !== updatedOrder._id);
       });
     });
@@ -160,7 +162,7 @@ function AdminDashboard() {
       socket.off("newOrder");
       socket.off("updatedOrder");
     };
-  }, [soundAllowed, sound, getAllOrders]);
+  }, [getAllOrders]);
 
   const stopSound = () => {
     if (sound) {
