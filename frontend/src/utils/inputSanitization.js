@@ -12,7 +12,7 @@ export const sanitizeText = (input) => {
   return DOMPurify.sanitize(input, {
     ALLOWED_TAGS: [],
     ALLOWED_ATTR: [],
-  }).trim();
+  });
 };
 
 /**
@@ -24,7 +24,7 @@ export const sanitizePhone = (phone) => {
   if (!phone || typeof phone !== "string") return "";
 
   // Allow only digits, +, -, (, ), and spaces
-  return phone.replace(/[^\d+\-() ]/g, "").trim();
+  return phone.replace(/[^\d+\-() ]/g, "");
 };
 
 /**
