@@ -1113,10 +1113,11 @@ export default function JobsPage() {
                           </span>
                         </p> */}
                         {/* عرض الجنس المطلوب للمستخدم */}
+{/* عرض الجنس المطلوب للمستخدم - التعديل الصحيح */}
 <p className="flex items-center gap-1">
   <span className="font-bold text-gray-900">{t("required_gender")}:</span>{" "}
   <span className="px-3 py-0.5 bg-red-100 text-[#DA0103] rounded-full font-bold text-xs sm:text-sm border border-[#DA0103]/20">
-    {currentLang === "ar" ? job.genderAr : job.genderEn}
+    {job.gender ? (currentLang === "ar" ? job.gender.ar : job.gender.en) : "---"}
   </span>
 </p>
                       </div>
