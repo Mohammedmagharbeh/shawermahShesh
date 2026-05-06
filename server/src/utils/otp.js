@@ -210,8 +210,6 @@ async function sendOTP(phone, otp, employeeName = null) {
 
   const encodedMsg = encodeURIComponent(msg);
   const encodedPass = encodeURIComponent(accpass);
-  const url = `https://www.josms.net/SMSServices/Clients/Prof/RestSingleSMS/SendSMS?senderid=${senderid}&numbers=${phone}&accname=${accname}&AccPass=${encodedPass}&msg=${encodedMsg}`;
-
   // منع الطلب من التعليق لأكثر من 8 ثوانٍ
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);

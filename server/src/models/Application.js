@@ -51,6 +51,7 @@
 // });
 
 // module.exports = mongoose.model("Application", applicationSchema);غ
+
 const mongoose = require("mongoose");
 
 const applicationSchema = new mongoose.Schema({

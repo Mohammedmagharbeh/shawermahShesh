@@ -26,6 +26,11 @@ const JobSchema = new mongoose.Schema({
     ar: { type: String, required: true },
     en: { type: String, required: true }
   },
+
+  gender: {
+  ar: { type: String },
+  en: { type: String }
+},
   isActive: { type: Boolean, default: true }, // حقل جديد لإخفاء/إظهار الوظيفة
   createdAt: { type: Date, default: Date.now }
 });

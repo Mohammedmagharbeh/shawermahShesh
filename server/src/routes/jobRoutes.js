@@ -414,7 +414,7 @@ const upload = multer({ storage });
 
 // --- روابط الوظائف (Jobs) ---
 router.get("/", jobController.getJobs);
-router.post("/", jobController.createJob);
+router.post("/", jobController.createJob);  
 router.patch("/toggle-status/:id", jobController.toggleJobStatus);
 router.delete("/:id", jobController.deleteJob);
 

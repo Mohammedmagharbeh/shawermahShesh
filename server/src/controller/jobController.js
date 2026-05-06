@@ -464,20 +464,61 @@
   };
 
   // 3. إضافة وظيفة جديدة
-  exports.createJob = async (req, res) => {
-      try {
-          const { titleAr, titleEn, typeAr, typeEn } = req.body;
-          const newJob = new Job({
-              title: { ar: titleAr, en: titleEn },
-              type: { ar: typeAr, en: typeEn },
-              isActive: true
-          });
-          await newJob.save();
-          res.status(201).json(newJob);
-      } catch (err) {
-          res.status(500).json({ error: err.message });
-      }
-  };
+  // exports.createJob = async (req, res) => {
+  //     try {
+  //         const { titleAr, titleEn, typeAr, typeEn } = req.body;
+  //         const newJob = new Job({
+  //             title: { ar: titleAr, en: titleEn },
+  //             type: { ar: typeAr, en: typeEn },
+              
+  //             isActive: true
+  //         });
+  //         await newJob.save();
+  //         res.status(201).json(newJob);
+  //     } catch (err) {
+  //         res.status(500).json({ error: err.message });
+  //     }
+  // };
+
+
+
+
+  // mm
+  // 3. إضافة وظيفة جديدة
+exports.createJob = async (req, res) => {
+    // 👇 سطر الطباعة هاد رح يفرجينا شو واصل من الفرونت بالملي
+    console.log("==========================================");
+    console.log("🚀 DATA RECEIVED FROM FRONTEND:", JSON.stringify(req.body, null, 2));
+    console.log("==========================================");
+
+    try {
+        const { titleAr, titleEn, typeAr, typeEn, genderAr, genderEn } = req.body;
+
+        // التحقق من وصول البيانات قبل الحفظ (إجباري للتيست)
+        if (!genderAr || !genderEn) {
+            console.log("⚠️ WARNING: Gender data is missing in req.body!");
+        }
+
+        const newJob = new Job({
+            title: { ar: titleAr, en: titleEn },
+            type: { ar: typeAr, en: typeEn },
+            gender: { 
+                ar: genderAr || "غير محدد", 
+                en: genderEn || "Not Specified" 
+            },
+            isActive: true
+        });
+
+        await newJob.save();
+        
+        console.log("✅ JOB SAVED SUCCESSFULLY:", newJob);
+        res.status(201).json(newJob);
+
+    } catch (err) {
+        console.error("❌ ERROR IN CREATE JOB:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+};
 
   // 4. إخفاء / إظهار الوظيفة
   exports.toggleJobStatus = async (req, res) => {
