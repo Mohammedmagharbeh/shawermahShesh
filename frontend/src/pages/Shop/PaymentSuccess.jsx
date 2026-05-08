@@ -23,7 +23,6 @@ function PaymentSuccess() {
   const selectedLanguage = localStorage.getItem("i18nextLng");
 
   const [dbOrderId, setDbOrderId] = useState("");
-  const [loading, setLoading] = useState(true);
   const hasVerified = useRef(false);
   const hasCleared = useRef(false);
 
@@ -40,7 +39,8 @@ function PaymentSuccess() {
       clearCart();
     }
 
-    // Call /verify as fallback in case the MontyPay callback was delayed
+    // Call /verify as fallback in case the MontyPay callback was delayed.
+    // Keep this non-blocking so the success page appears immediately.
     if (!hasVerified.current && id && orderRef) {
       hasVerified.current = true;
 
@@ -61,25 +61,9 @@ function PaymentSuccess() {
         .catch((err) => {
           console.error("[PaymentSuccess] Verify call failed:", err.message);
           // Non-fatal — the callback may still confirm it
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+        });
     }
   }, [location.search, clearCart]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="text-center">
-          <div className="mx-auto mb-4 w-12 h-12 rounded-full border-4 border-emerald-200 border-t-emerald-500 animate-spin" />
-          <h2 className="text-xl font-semibold text-gray-800">
-            {t("verifying_payment")}...
-          </h2>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#DA1030] px-4">
