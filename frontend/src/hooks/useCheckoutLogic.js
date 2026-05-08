@@ -55,6 +55,7 @@ export const useCheckoutLogic = (t) => {
   const orderSummary = useMemo(() => {
     let originalSubtotal = 0;
     let finalSubtotal = 0;
+    let totalAdditions = 0;
 
     cart.products.forEach((item) => {
       const {
@@ -87,6 +88,7 @@ export const useCheckoutLogic = (t) => {
 
       originalSubtotal += (basePrice + additionsCost) * quantity;
       finalSubtotal += (basePrice - discountAmount + additionsCost) * quantity;
+      totalAdditions += additionsCost * quantity;
     });
 
     const deliveryCost =
@@ -99,6 +101,7 @@ export const useCheckoutLogic = (t) => {
       originalSubtotal,
       savings: originalSubtotal - finalSubtotal,
       deliveryCost,
+      totalAdditions,
       total: isTestMode
         ? TEST_MODE_DEFAULTS.TOTAL_AMOUNT
         : finalSubtotal + deliveryCost,

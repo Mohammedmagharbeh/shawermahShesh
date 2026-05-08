@@ -642,6 +642,7 @@ function AdminDashboard() {
                                 {item.additions.map((a) => (
                                   <Badge key={a._id}>
                                     {a.name[selectedLanguage]}
+                                    {a.price > 0 && ` (+${a.price.toFixed(2)})`}
                                   </Badge>
                                 ))}
                               </div>
@@ -677,11 +678,45 @@ function AdminDashboard() {
                       <span className="font-medium">
                         {(
                           order.totalPrice -
-                          (order.shippingAddress?.deliveryCost || 0)
+                          (order.shippingAddress?.deliveryCost || 0) -
+                          order.products.reduce((total, item) => {
+                            const itemAdditionsTotal = item.additions.reduce(
+                              (sum, add) => sum + (add.price || 0),
+                              0,
+                            );
+                            return total + itemAdditionsTotal * item.quantity;
+                          }, 0)
                         ).toFixed(2)}{" "}
                         JOD
                       </span>
                     </div>
+
+                    {order.products.reduce((total, item) => {
+                      const itemAdditionsTotal = item.additions.reduce(
+                        (sum, add) => sum + (add.price || 0),
+                        0,
+                      );
+                      return total + itemAdditionsTotal * item.quantity;
+                    }, 0) > 0 && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          {t("additions")}:
+                        </span>
+                        <span className="font-medium text-blue-600">
+                          +
+                          {order.products
+                            .reduce((total, item) => {
+                              const itemAdditionsTotal = item.additions.reduce(
+                                (sum, add) => sum + (add.price || 0),
+                                0,
+                              );
+                              return total + itemAdditionsTotal * item.quantity;
+                            }, 0)
+                            .toFixed(2)}{" "}
+                          JOD
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">
                         {t("delivery_cost")}:

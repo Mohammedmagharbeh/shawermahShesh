@@ -9,8 +9,16 @@ import PriceRow from "./PriceRow";
 const OrderTotals = React.memo(({ summary, t }) => {
   return (
     <div className="space-y-3 pt-4 border-t border-gray-200 mt-4">
-      {/* Subtotal */}
-      <PriceRow label={t("subtotal")} value={summary.subtotal} />
+      {/* Subtotal (Base Price) */}
+      <PriceRow
+        label={t("subtotal")}
+        value={summary.subtotal - summary.totalAdditions}
+      />
+
+      {/* Additions Cost */}
+      {summary.totalAdditions > 0 && (
+        <PriceRow label={t("additions")} value={summary.totalAdditions} />
+      )}
 
       {/* Savings - Only show if there are savings */}
       {summary.savings > 0 && (

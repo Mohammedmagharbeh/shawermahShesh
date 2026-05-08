@@ -73,9 +73,10 @@ const Cart = () => {
           originalTotal: acc.originalTotal + itemOriginalPrice,
           finalTotal: acc.finalTotal + itemFinalPrice,
           totalSavings: acc.totalSavings + discountAmount * quantity,
+          totalAdditions: acc.totalAdditions + additionsCost * quantity,
         };
       },
-      { originalTotal: 0, finalTotal: 0, totalSavings: 0 },
+      { originalTotal: 0, finalTotal: 0, totalSavings: 0, totalAdditions: 0 },
     );
   }, [cart]);
 
@@ -162,8 +163,20 @@ const Cart = () => {
               <div className="space-y-3 mb-6 text-sm">
                 <div className="flex justify-between text-gray-600">
                   <span>{t("subtotal")}</span>
-                  <span>{orderSummary.originalTotal.toFixed(2)} JOD</span>
+                  <span>
+                    {(
+                      orderSummary.originalTotal - orderSummary.totalAdditions
+                    ).toFixed(2)}{" "}
+                    JOD
+                  </span>
                 </div>
+
+                {orderSummary.totalAdditions > 0 && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>{t("additions")}</span>
+                    <span>+{orderSummary.totalAdditions.toFixed(2)} JOD</span>
+                  </div>
+                )}
 
                 {orderSummary.totalSavings > 0 && (
                   <div className="flex justify-between text-green-600 font-medium bg-green-50 p-2 rounded-lg">
