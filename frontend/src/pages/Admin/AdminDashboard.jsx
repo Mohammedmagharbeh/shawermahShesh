@@ -205,8 +205,7 @@ function AdminDashboard() {
         order.createdAt &&
         new Date(order.createdAt).toLocaleDateString("en-CA");
       const matchesDate = orderDate === filterDate;
-      const matchesStatus =
-        order.status === "Processing" || order.status === "Confirmed";
+      const matchesStatus = true;
 
       // Hide unpaid card orders — they haven't been confirmed by MontyPay yet.
       // Cash orders are always visible; card orders must have payment.status === "paid".
