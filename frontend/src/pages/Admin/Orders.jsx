@@ -411,6 +411,8 @@ const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
   Confirmed: "bg-purple-500 text-primary-foreground",
   Shipped: "bg-blue-500 text-white",
+  OutForDelivery: "bg-orange-500 text-white",
+  ReadyForPickup: "bg-yellow-500 text-black",
   Delivered: "bg-green-600 text-white",
   Cancelled: "bg-destructive text-destructive-foreground",
 };
@@ -534,6 +536,8 @@ function Orders() {
                                 <SelectItem value="Processing">{t("processing")}</SelectItem>
                                 <SelectItem value="Confirmed">{t("confirmed")}</SelectItem>
                                 <SelectItem value="Shipped">{t("shipped")}</SelectItem>
+                                <SelectItem value="OutForDelivery">{t("outfordelivery")}</SelectItem>
+                                <SelectItem value="ReadyForPickup">{t("readyforpickup")}</SelectItem>
                                 <SelectItem value="Delivered">{t("delivered")}</SelectItem>
                                 <SelectItem value="Cancelled">{t("cancelled")}</SelectItem>
                             </SelectContent>

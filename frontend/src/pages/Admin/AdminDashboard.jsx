@@ -32,6 +32,8 @@ const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
   Confirmed: "bg-purple-500 text-primary-foreground",
   Shipped: "bg-blue-500 text-white",
+  OutForDelivery: "bg-orange-500 text-white",
+  ReadyForPickup: "bg-yellow-500 text-black",
   Delivered: "bg-green-600 text-white",
   Cancelled: "bg-destructive text-destructive-foreground",
 };
@@ -561,6 +563,12 @@ function AdminDashboard() {
                           <SelectItem value="Shipped">
                             {t("shipped")}
                           </SelectItem>
+                          <SelectItem value="OutForDelivery">
+                            {t("outfordelivery")}
+                          </SelectItem>
+                          <SelectItem value="ReadyForPickup">
+                            {t("readyforpickup")}
+                          </SelectItem>
                           <SelectItem value="Delivered">
                             {t("delivered")}
                           </SelectItem>
@@ -603,9 +611,12 @@ function AdminDashboard() {
                               {item.productId?.name[selectedLanguage] ||
                                 t("deleted_product")}
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                              {t("quantity")}: {item.quantity || 0}
-                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-sm font-semibold text-muted-foreground">{t("quantity")}:</span>
+                              <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded-md text-sm font-bold">
+                                {item.quantity || 0}
+                              </span>
+                            </div>
                             {item.isSpicy && (
                               <Badge className="w-fit">{t("spicy")}</Badge>
                             )}
