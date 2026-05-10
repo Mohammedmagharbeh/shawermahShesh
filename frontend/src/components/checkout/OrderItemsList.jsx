@@ -80,6 +80,7 @@ const OrderItemsList = React.memo(({ cart, t, lang }) => {
                     className="text-[10px] px-1.5 py-0 h-5 border-blue-100 bg-blue-50 text-blue-700"
                   >
                     {add.name[lang]}
+                    {add.price > 0 && ` (+${add.price.toFixed(2)})`}
                   </Badge>
                 ))}
               </div>

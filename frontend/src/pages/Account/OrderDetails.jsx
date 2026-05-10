@@ -197,6 +197,7 @@ function OrderDetails() {
                               className="text-[10px] px-1"
                             >
                               +{add.name[selectedLanguage]}
+                              {add.price > 0 && ` (+${add.price.toFixed(2)})`}
                             </Badge>
                           ))}
                         </div>
@@ -226,14 +227,47 @@ function OrderDetails() {
           {/* Totals */}
           <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{t("subtotal")}</span>
+              <span className="text-muted-foreground">{t("order_subtotal")}</span>
               <span className="font-medium">
                 {(
-                  order.totalPrice - (order.shippingAddress?.deliveryCost || 0)
+                  order.totalPrice -
+                  (order.shippingAddress?.deliveryCost || 0) -
+                  order.products.reduce((total, item) => {
+                    const itemAdditionsTotal = item.additions.reduce(
+                      (sum, add) => sum + (add.price || 0),
+                      0,
+                    );
+                    return total + itemAdditionsTotal * item.quantity;
+                  }, 0)
                 ).toFixed(2)}{" "}
                 JOD
               </span>
             </div>
+
+            {order.products.reduce((total, item) => {
+              const itemAdditionsTotal = item.additions.reduce(
+                (sum, add) => sum + (add.price || 0),
+                0,
+              );
+              return total + itemAdditionsTotal * item.quantity;
+            }, 0) > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{t("additions")}</span>
+                <span className="font-medium text-blue-600">
+                  +
+                  {order.products
+                    .reduce((total, item) => {
+                      const itemAdditionsTotal = item.additions.reduce(
+                        (sum, add) => sum + (add.price || 0),
+                        0,
+                      );
+                      return total + itemAdditionsTotal * item.quantity;
+                    }, 0)
+                    .toFixed(2)}{" "}
+                  JOD
+                </span>
+              </div>
+            )}
             {order.shippingAddress?.deliveryCost > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground flex items-center gap-1">

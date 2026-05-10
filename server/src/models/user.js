@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: USER_ROLES, default: "user", required: true },
     otp: String,
     otpExpires: Date,
+    otpLastSentAt: Date,
   },
   { timestamps: true }
 );

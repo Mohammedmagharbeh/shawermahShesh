@@ -458,24 +458,29 @@ exports.getCurrentUser = async (req, res) => {
 // --- نظام المستخدمين العاديين (OTP) ---
 
 exports.sendLoginOTP = async (req, res) => {
-  const { phone } = req.body;
+  const normalizedPhone = String(req.body?.phone || "").trim();
   try {
-    let user = await userModel.findOne({ phone });
-    
-    // Rate limit: Prevent sending more than 1 OTP per 60 seconds
-    if (user && user.otpExpires) {
-      const timeSinceLastOTP = Date.now() - (user.otpExpires.getTime() - 5 * 60 * 1000);
-      if (timeSinceLastOTP < 60000) { // 60 seconds
+    if (!normalizedPhone) {
+      return res.status(400).json({ msg: "Phone number is required" });
+    }
+
+    let user = await userModel.findOne({ phone: normalizedPhone });
+
+    // Rate limit per user/phone: Prevent sending more than 1 OTP per 60 seconds
+    if (user?.otpLastSentAt) {
+      const timeSinceLastOTP = Date.now() - new Date(user.otpLastSentAt).getTime();
+      if (timeSinceLastOTP < 60000) {
         return res.status(429).json({ msg: "Please wait 60 seconds before requesting a new OTP." });
       }
     }
 
     if (!user) {
-      user = new userModel({ phone, role: "user" });
+      user = new userModel({ phone: normalizedPhone, role: "user" });
     }
     const otp = generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 5 * 60 * 1000;
+    user.otpLastSentAt = Date.now();
     await user.save();
     await sendOTP(user.phone, otp);
     return res.status(200).json({ msg: "OTP sent to your phone" });
@@ -592,11 +597,15 @@ exports.updatePhone = async (req, res) => {
     const { newPhone } = req.body;
     const user = await userModel.findById(req.user.id || req.user._id);
     if (!user) return res.status(404).json({ msg: "User not found" });
+    const normalizedNewPhone = String(newPhone || "").trim();
+    if (!normalizedNewPhone) {
+      return res.status(400).json({ msg: "newPhone is required" });
+    }
 
-    // Rate limit: Prevent sending more than 1 OTP per 60 seconds
-    if (user && user.otpExpires) {
-      const timeSinceLastOTP = Date.now() - (user.otpExpires.getTime() - 5 * 60 * 1000);
-      if (timeSinceLastOTP < 60000) { // 60 seconds
+    // Rate limit per user: Prevent sending more than 1 OTP per 60 seconds
+    if (user?.otpLastSentAt) {
+      const timeSinceLastOTP = Date.now() - new Date(user.otpLastSentAt).getTime();
+      if (timeSinceLastOTP < 60000) {
         return res.status(429).json({ msg: "Please wait 60 seconds before requesting a new OTP." });
       }
     }
@@ -604,8 +613,9 @@ exports.updatePhone = async (req, res) => {
     const otp = generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 5 * 60 * 1000;
+    user.otpLastSentAt = Date.now();
     await user.save();
-    await sendOTP(newPhone, otp);
+    await sendOTP(normalizedNewPhone, otp);
     res.json({ msg: "OTP sent to your phone" });
   } catch (error) {
     res.status(500).json({ msg: "Failed to send OTP" });

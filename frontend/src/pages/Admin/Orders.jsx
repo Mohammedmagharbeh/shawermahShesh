@@ -411,6 +411,8 @@ const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
   Confirmed: "bg-purple-500 text-primary-foreground",
   Shipped: "bg-blue-500 text-white",
+  OutForDelivery: "bg-orange-500 text-white",
+  ReadyForPickup: "bg-yellow-500 text-black",
   Delivered: "bg-green-600 text-white",
   Cancelled: "bg-destructive text-destructive-foreground",
 };
@@ -534,6 +536,8 @@ function Orders() {
                                 <SelectItem value="Processing">{t("processing")}</SelectItem>
                                 <SelectItem value="Confirmed">{t("confirmed")}</SelectItem>
                                 <SelectItem value="Shipped">{t("shipped")}</SelectItem>
+                                <SelectItem value="OutForDelivery">{t("outfordelivery")}</SelectItem>
+                                <SelectItem value="ReadyForPickup">{t("readyforpickup")}</SelectItem>
                                 <SelectItem value="Delivered">{t("delivered")}</SelectItem>
                                 <SelectItem value="Cancelled">{t("cancelled")}</SelectItem>
                             </SelectContent>
@@ -568,11 +572,12 @@ function Orders() {
                             {/* الإضافات */}
                             {item.additions?.length > 0 && (
                               <div className="flex gap-1 flex-wrap mt-1">
-                                {item.additions.map((a) => (
-                                  <Badge key={a._id} variant="secondary" className="text-[10px]">
-                                    {a.name[selectedLanguage]}
-                                  </Badge>
-                                ))}
+                                  {item.additions.map((a) => (
+                                    <Badge key={a._id} variant="secondary" className="text-[10px]">
+                                      {a.name[selectedLanguage]}
+                                      {a.price > 0 && ` (+${a.price.toFixed(2)})`}
+                                    </Badge>
+                                  ))}
                               </div>
                             )}
 
@@ -598,8 +603,45 @@ function Orders() {
                   <div className="mt-6 border-t pt-4 space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">{t("order_subtotal")}:</span>
-                      <span>{(order.totalPrice - (order.shippingAddress?.deliveryCost || 0)).toFixed(2)} JOD</span>
+                      <span>
+                        {(
+                          order.totalPrice -
+                          (order.shippingAddress?.deliveryCost || 0) -
+                          order.products.reduce((total, item) => {
+                            const itemAdditionsTotal = item.additions.reduce(
+                              (sum, add) => sum + (add.price || 0),
+                              0,
+                            );
+                            return total + itemAdditionsTotal * item.quantity;
+                          }, 0)
+                        ).toFixed(2)}{" "}
+                        JOD
+                      </span>
                     </div>
+                    {order.products.reduce((total, item) => {
+                      const itemAdditionsTotal = item.additions.reduce(
+                        (sum, add) => sum + (add.price || 0),
+                        0,
+                      );
+                      return total + itemAdditionsTotal * item.quantity;
+                    }, 0) > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{t("additions")}:</span>
+                        <span className="text-blue-600">
+                          +
+                          {order.products
+                            .reduce((total, item) => {
+                              const itemAdditionsTotal = item.additions.reduce(
+                                (sum, add) => sum + (add.price || 0),
+                                0,
+                              );
+                              return total + itemAdditionsTotal * item.quantity;
+                            }, 0)
+                            .toFixed(2)}{" "}
+                          JOD
+                        </span>
+                      </div>
+                    )}
                     {order.orderType === "delivery" && (
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">{t("delivery_cost")}:</span>

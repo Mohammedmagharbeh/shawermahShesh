@@ -359,7 +359,7 @@
   "invoice_id": "رقم الفاتورة",
   "view_orders": "عرض طلباتي",
   "continue_shopping": "طلب آخر؟",
-"add_new_account": "إنشاء حساب جديد",
+  "add_new_account": "إنشاء حساب جديد",
   "create_account": "إنشاء الحساب",
   "show_list": "إظهار قائمة المستخدمين",
   "hide_list": "إخفاء قائمة المستخدمين",
@@ -376,14 +376,14 @@
   "edit_permissions": "تعديل الصلاحيات",
   "save": "حفظ",
   "cancel": "إلغاء",
-"enter_otp_title": "أدخل رمز التحقق",
+  "enter_otp_title": "أدخل رمز التحقق",
   "otp_sent_to": "تم إرسال رمز التحقق إلى",
   "verifying": "جاري التحقق...",
   "verify_otp": "تحقق",
   "didnt_receive_otp": "لم تستلم الرمز؟ إعادة الإرسال",
   "resend_after": "يمكنك إعادة الإرسال بعد ثانية",
   "back_to_login": "العودة إلى تسجيل الدخول",
-  
+
   "story": {
     "title": "قصتنا",
     "subtitle": "رحلة شاورما شيش من الحلم إلى الواقع",
@@ -435,12 +435,12 @@
   "job_description": "وصف الوظيفة",
   "apply_for_job": "تقديم على الوظيفة",
   "choose_login_type": "اختر نوع تسجيل الدخول",
-"customer_login": "دخول الزبائن",
-"employee_login": "دخول الموظفين / الإدارة",
-"we_are_open": "نحن متاحون الآن",
-"restaurant_closed_status": "المطعم مغلق حالياً",
-"logging_in": "جاري الدخول",
-"or": "أو",
+  "customer_login": "دخول الزبائن",
+  "employee_login": "دخول الموظفين / الإدارة",
+  "we_are_open": "نحن متاحون الآن",
+  "restaurant_closed_status": "المطعم مغلق حالياً",
+  "logging_in": "جاري الدخول",
+  "or": "أو",
   "your_name": "اسمك",
   "your_email": "إيميلك",
   "phone": "رقم الهاتف",
@@ -606,5 +606,7 @@
   "phone_required": "رقم هاتف غير صحيح",
   "add_notes": "أضف ملاحظات",
   "starts_from": "يبدأ من",
-  "calculated_at_checkout": "يتم الحساب عند الدفع"
+  "calculated_at_checkout": "يتم الحساب عند الدفع",
+  "outfordelivery": "طلبك في الطريق",
+  "readyforpickup": "طلبك جاهز للاستلام"
 }
