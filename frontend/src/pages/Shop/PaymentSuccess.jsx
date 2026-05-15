@@ -17,14 +17,14 @@ import { useUser } from "@/contexts/UserContext";
 function PaymentSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { clearCart } = useCart();
+  const { refreshCart } = useCart();
   const { t } = useTranslation();
   const { user } = useUser();
   const selectedLanguage = localStorage.getItem("i18nextLng");
 
   const [dbOrderId, setDbOrderId] = useState("");
   const hasVerified = useRef(false);
-  const hasCleared = useRef(false);
+  const hasRefreshed = useRef(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -33,10 +33,10 @@ function PaymentSuccess() {
 
     if (id) setDbOrderId(id);
 
-    // Clear the cart exactly once — order is already in DB regardless of payment status
-    if (!hasCleared.current) {
-      hasCleared.current = true;
-      clearCart();
+    // Refresh the cart exactly once — it was cleared by the server during order finalization
+    if (!hasRefreshed.current) {
+      hasRefreshed.current = true;
+      refreshCart();
     }
 
     // Call /verify as fallback in case the MontyPay callback was delayed.
@@ -63,7 +63,7 @@ function PaymentSuccess() {
           // Non-fatal — the callback may still confirm it
         });
     }
-  }, [location.search, clearCart]);
+  }, [location.search, refreshCart]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#DA1030] px-4">

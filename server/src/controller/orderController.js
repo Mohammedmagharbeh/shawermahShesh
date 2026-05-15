@@ -3,6 +3,7 @@ const User = require("../models/user");
 const Product = require("../models/products");
 const Location = require("../models/locations");
 const counterModel = require("../models/counter");
+const Cart = require("../models/cart");
 const mongoose = require("mongoose");
 
 // Validate ObjectId
@@ -334,6 +335,9 @@ exports.createOrder = async (req, res) => {
     // socket notify
     const io = req.app.get("io");
     if (io) io.emit("newOrder", populatedOrder);
+
+    // Clear the cart after successful order creation
+    await Cart.findOneAndUpdate({ userId }, { products: [] });
 
     return res.status(201).json({ success: true, data: populatedOrder });
   } catch (error) {

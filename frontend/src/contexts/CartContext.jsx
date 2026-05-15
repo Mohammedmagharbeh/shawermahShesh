@@ -16,37 +16,38 @@ export const CartProvider = ({ children }) => {
   const { t } = useTranslation();
   const { user, isAuthenticated } = useUser();
 
-  // Fetch cart on mount
-  useEffect(() => {
-    const fetchCart = async () => {
-      if (!isAuthenticated) return;
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/cart/${user._id}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              authorization: `Bearer ${user.token}`,
-            },
+  const refreshCart = async () => {
+    if (!isAuthenticated || !user?._id) return;
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/cart/${user._id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
           },
-        );
-        if (!res.ok) throw new Error("Failed to fetch cart");
-        const data = await res.json();
-        setCart(data);
-      } catch (error) {
-        console.error(error);
-        setCart({
-          _id: "",
-          userId: user._id,
-          products: [],
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCart();
-  }, [user]);
+        },
+      );
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      const data = await res.json();
+      setCart(data);
+    } catch (error) {
+      console.error(error);
+      setCart({
+        _id: "",
+        userId: user?._id || "",
+        products: [],
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch cart on mount or user change
+  useEffect(() => {
+    refreshCart();
+  }, [user, isAuthenticated]);
 
   // calculate total
   useEffect(() => {
@@ -235,6 +236,7 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         removeFromCart,
         clearCart,
+        refreshCart,
       }}
     >
       {children}

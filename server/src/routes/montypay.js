@@ -6,6 +6,7 @@ const Order = require("../models/orders");
 const User = require("../models/user");
 const Product = require("../models/products");
 const Location = require("../models/locations");
+const Cart = require("../models/cart");
 require("dotenv").config();
 
 const router = express.Router();
@@ -408,11 +409,16 @@ router.post("/callback", async (req, res) => {
         if (updatedOrder) {
           console.log(`✅ Order ${dbOrderId} confirmed via MontyPay callback.`);
           const io = req.app.get("io");
-          if (io) {
-            // Emit "newOrder" so the dashboard popup + sound triggers for paid orders
-            io.emit("newOrder", updatedOrder);
-          }
-        } else {
+            if (io) {
+              // Emit "newOrder" so the dashboard popup + sound triggers for paid orders
+              io.emit("newOrder", updatedOrder);
+            }
+            // Clear the cart on successful payment
+            await Cart.findOneAndUpdate(
+              { userId: updatedOrder.userId._id || updatedOrder.userId },
+              { products: [] },
+            );
+          } else {
           console.warn(`⚠️  Callback: order ${dbOrderId} not found in DB.`);
         }
       } else
@@ -528,11 +534,17 @@ router.post("/verify", async (req, res) => {
       .populate("userId")
       .populate("shippingAddress");
 
-    if (updatedOrder) {
-      console.log(`✅ Order ${dbOrderId} confirmed via /verify fallback.`);
-      const io = req.app.get("io");
-      if (io) io.emit("newOrder", updatedOrder);
-    }
+      if (updatedOrder) {
+        console.log(`✅ Order ${dbOrderId} confirmed via /verify fallback.`);
+        const io = req.app.get("io");
+        if (io) io.emit("newOrder", updatedOrder);
+
+        // Clear the cart on successful payment
+        await Cart.findOneAndUpdate(
+          { userId: updatedOrder.userId._id || updatedOrder.userId },
+          { products: [] },
+        );
+      }
 
     return res.json({ success: true, alreadyConfirmed: false });
   } catch (err) {
