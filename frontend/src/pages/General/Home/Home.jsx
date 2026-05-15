@@ -236,7 +236,7 @@ export default function Home() {
             </Card>
 
             {/* بطاقة الهاتف */}
-            <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition flex flex-col items-center gap-4">
+            {/* <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition flex flex-col items-center gap-4">
               <a href="tel:+96332019099" className="block w-full">
                 <div className="rounded-full w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 mx-auto flex items-center justify-center overflow-hidden">
                   <img
@@ -262,8 +262,51 @@ export default function Home() {
               >
                 {t("contact.title")}
               </button>
-            </Card>
+            </Card> */}
+<Card className="relative overflow-hidden text-center p-6 sm:p-8 border-0 shadow-lg bg-white group transition-all duration-500 hover:shadow-2xl">
+  {/* خلفية جمالية خفيفة تظهر عند الحوم */}
+  <div className="absolute top-0 left-0 w-full h-1 bg-red-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
 
+  <div className="flex flex-col items-center gap-4">
+    {/* الدائرة مع تأثير النبض الهادئ */}
+    <a href="tel:+96332019099" className="relative inline-block">
+      <div className="relative z-10 rounded-full w-32 h-32 sm:w-36 sm:h-36 mx-auto flex items-center justify-center overflow-hidden ring-4 ring-red-50 ring-offset-4 transition-all duration-500 transform group-hover:rotate-6 group-hover:scale-110">
+        <img
+          src={telephone}
+          alt="الهاتف"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+      </div>
+      
+      {/* حلقة النبض الخلفية - Pulse Effect */}
+      <span className="absolute inset-0 rounded-full bg-red-400 opacity-20 animate-ping group-hover:hidden"></span>
+    </a>
+
+    <div className="space-y-1">
+      <h3 className="text-xl font-black mt-2 group-hover:text-red-600 transition-colors duration-300">
+        {t("call_us")}
+      </h3>
+      <p className="text-lg font-semibold text-gray-700 tracking-wider" dir="ltr">
+        (03) 201 9099
+      </p>
+      <p className="text-sm text-gray-500 italic">
+        {t("contact_info")}
+      </p>
+    </div>
+
+    {/* الزر بتصميم أنيق وبرمجة منفصلة */}
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        setOpenForm(true);
+      }}
+      className="mt-2 overflow-hidden relative group/btn bg-gray-900 text-white font-bold px-8 py-3 rounded-full transition-all duration-300 hover:bg-red-600 hover:ring-4 hover:ring-red-100 w-full sm:w-auto"
+    >
+      <span className="relative z-10">{t("contact.title")}</span>
+      <div className="absolute inset-0 bg-red-600 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+    </button>
+  </div>
+</Card>
             {/* بطاقة ساعات العمل */}
             <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white flex flex-col items-center gap-4">
               <div className="rounded-full w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 flex items-center justify-center overflow-hidden">
