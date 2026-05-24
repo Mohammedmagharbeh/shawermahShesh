@@ -314,7 +314,7 @@ router.post("/session", async (req, res) => {
         currency: currency,
         description: safeDescription,
       },
-      customer: { name: customerName, email: customerEmail },
+      customer: { name: /^[A-Za-z]+(?: [A-Za-z]+)+$/.test(customerName) ? customerName : "John Doe", email: customerEmail },
       success_url: `${process.env.FRONT_BASE}/success?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`,
       cancel_url: `${process.env.FRONT_BASE}/cancel?dbOrderId=${dbOrderId}`,
       // Tell MontyPay where to send the server-to-server payment confirmation
@@ -335,12 +335,10 @@ router.post("/session", async (req, res) => {
     res.json({ ...response.data, dbOrderId });
   } catch (err) {
     console.error("Session error:", err.response?.data || err.message || err);
-    res
-      .status(500)
-      .json({
-        error: "Payment Session Failed",
-        details: err.response?.data || err.message,
-      });
+    res.status(500).json({
+      error: "Payment Session Failed",
+      details: err.response?.data || err.message,
+    });
   }
 });
 
@@ -409,16 +407,16 @@ router.post("/callback", async (req, res) => {
         if (updatedOrder) {
           console.log(`✅ Order ${dbOrderId} confirmed via MontyPay callback.`);
           const io = req.app.get("io");
-            if (io) {
-              // Emit "newOrder" so the dashboard popup + sound triggers for paid orders
-              io.emit("newOrder", updatedOrder);
-            }
-            // Clear the cart on successful payment
-            await Cart.findOneAndUpdate(
-              { userId: updatedOrder.userId._id || updatedOrder.userId },
-              { products: [] },
-            );
-          } else {
+          if (io) {
+            // Emit "newOrder" so the dashboard popup + sound triggers for paid orders
+            io.emit("newOrder", updatedOrder);
+          }
+          // Clear the cart on successful payment
+          await Cart.findOneAndUpdate(
+            { userId: updatedOrder.userId._id || updatedOrder.userId },
+            { products: [] },
+          );
+        } else {
           console.warn(`⚠️  Callback: order ${dbOrderId} not found in DB.`);
         }
       } else
@@ -521,10 +519,7 @@ router.post("/verify", async (req, res) => {
       {
         "payment.status": "paid",
         "payment.transactionId":
-          montyData.id ||
-          montyData.payment_id ||
-          montyData.session_id ||
-          null,
+          montyData.id || montyData.payment_id || montyData.session_id || null,
         "payment.paidAt": new Date(),
         status: "Processing", // stays Processing — staff must confirm manually
       },
@@ -534,27 +529,25 @@ router.post("/verify", async (req, res) => {
       .populate("userId")
       .populate("shippingAddress");
 
-      if (updatedOrder) {
-        console.log(`✅ Order ${dbOrderId} confirmed via /verify fallback.`);
-        const io = req.app.get("io");
-        if (io) io.emit("newOrder", updatedOrder);
+    if (updatedOrder) {
+      console.log(`✅ Order ${dbOrderId} confirmed via /verify fallback.`);
+      const io = req.app.get("io");
+      if (io) io.emit("newOrder", updatedOrder);
 
-        // Clear the cart on successful payment
-        await Cart.findOneAndUpdate(
-          { userId: updatedOrder.userId._id || updatedOrder.userId },
-          { products: [] },
-        );
-      }
+      // Clear the cart on successful payment
+      await Cart.findOneAndUpdate(
+        { userId: updatedOrder.userId._id || updatedOrder.userId },
+        { products: [] },
+      );
+    }
 
     return res.json({ success: true, alreadyConfirmed: false });
   } catch (err) {
     console.error("Verify error:", err.response?.data || err.message || err);
-    res
-      .status(500)
-      .json({
-        error: "Verification failed",
-        details: err.response?.data || err.message,
-      });
+    res.status(500).json({
+      error: "Verification failed",
+      details: err.response?.data || err.message,
+    });
   }
 });
 
