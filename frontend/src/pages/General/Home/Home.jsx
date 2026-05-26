@@ -1,8 +1,10 @@
+// //  اضافة المنيو
+
 // import { useState, useEffect } from "react";
 // import { useLocation } from "react-router-dom";
 // import { Card } from "@/components/ui/card";
 // import { Badge } from "@/components/ui/badge";
-// import { Clock, MapPin, Phone, Award, Users, Heart } from "lucide-react";
+// import { Clock, Phone, Award, Users, Heart, FileText } from "lucide-react";
 // import home_logo2 from "@/assets/home_logo2.jpeg";
 // import { useTranslation } from "react-i18next";
 // import Footer from "@/components/Footer";
@@ -38,10 +40,8 @@
 
 //     try {
 //       await emailjs.send(
-//         "service_hzo8gfa", // Service ID
-//         "template_xkze6cd", // Template ID
-//         // "service_jamxkjk",
-//         // "template_ff2olxu",
+//         "service_hzo8gfa",
+//         "template_xkze6cd",
 //         {
 //           from_name: name,
 //           from_email: email,
@@ -49,8 +49,7 @@
 //           message: message,
 //           project_name: "Shawarma Sheesh",
 //         },
-//         "KrFWkCOJyFAwx__yC", // Public Key
-//         // "qL3p4xBbLP-C6fqzq"
+//         "KrFWkCOJyFAwx__yC",
 //       );
 
 //       toast.success("✅ تم الإرسال بنجاح!");
@@ -94,24 +93,10 @@
 //   }, [location.hash]);
 
 //   return (
-//     // <div
-//     //   className="min-h-screen bg-background arabic-font pt-14 xs2:pt-4"
-//     //   dir="rtl"
-//     // >
-
-//     //     <div
-//     //   className="min-h-screen bg-background arabic-font -mt-[64px] pt-0 m-0 overflow-x-hidden"
-//     //   dir="rtl"
-//     // >
 //     <div
 //       className="min-h-screen bg-background arabic-font mt-[1px] lg:-mt-[60px] p-0 m-0 overflow-x-hidden"
 //       dir="rtl"
 //     >
-//       {/* <div
-//   className="min-h-screen bg-background arabic-font pt-[2px] lg:pt-0 lg:-mt-[60px] m-0 overflow-x-hidden"
-//   dir="rtl"
-// > */}
-
 //       <ImageCarousel />
 
 //       {/* قسم قصتنا */}
@@ -136,7 +121,7 @@
 
 //               <h2
 //                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-gray-900 leading-tight"
-//                 style={{ textAlign: "inherit" }} // يعتمد على اتجاه النص المكتوب فوق
+//                 style={{ textAlign: "inherit" }}
 //               >
 //                 {section2?.title[selectedLanguage]}
 //               </h2>
@@ -145,8 +130,8 @@
 //                 className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed"
 //                 style={{
 //                   textAlign: "justify",
-//                   textAlignLast: selectedLanguage === "ar" ? "right" : "left", // يضمن أن آخر سطر لا يتمدد بشكل غريب
-//                   hyphens: "auto", // للمساعدة في تنسيق الكلمات الإنجليزية الطويلة
+//                   textAlignLast: selectedLanguage === "ar" ? "right" : "left",
+//                   hyphens: "auto",
 //                 }}
 //               >
 //                 {section2?.subtitle[selectedLanguage]}
@@ -189,8 +174,8 @@
 //         </div>
 //       </section>
 
-//       {/* قسم الاتصال */}
-//       <section id="contact_us" className="py-12 sm:py-16 md:py-20 bg-gray-50">
+//       {/* قسم الاتصال والموقع والمنيو */}
+//       <section id="contact_us" className="py-12 sm:py-16 md:py-20 bg-white">
 //         <div className="container mx-auto px-4 sm:px-6">
 //           {/* عنوان القسم */}
 //           <div className="text-center mb-10 sm:mb-12 md:mb-16">
@@ -209,10 +194,43 @@
 //             </p>
 //           </div>
 
-//           {/* البطاقات */}
-//           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-//             {/* بطاقة الموقع */}
-//             <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white flex flex-col items-center gap-4">
+//           {/* شبكة الكروت الأربعة المتطابقة بالكامل مع الحفاظ التام على أصل كود التلفون */}
+//           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+//             {/* 1. بطاقة قائمة الطعام (المنيو) - تمت إعادة الأيقونة وتطبيق الترجمة */}
+//             <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white flex flex-col items-center justify-between gap-4">
+//               <div className="rounded-full w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 flex items-center justify-center bg-red-50 text-red-600">
+//                 <a
+//                   href="https://linktr.ee/shawermasheesh?utm_source=qr_code"
+//                   target="_blank"
+//                   rel="noopener noreferrer"
+//                   className="flex items-center justify-center w-full h-full"
+//                 >
+//                   <FileText
+//                     className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain"
+//                     style={{ color: "#dc0606" }}
+//                   />
+//                 </a>
+//               </div>
+//               <div className="space-y-2 flex-grow flex flex-col justify-center">
+//                 <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+//                   {t("digital_menu")}
+//                 </h3>
+//                 <p className="text-xs sm:text-sm text-gray-600 text-center">
+//                   {t("digital_menu_desc")}
+//                 </p>
+//               </div>
+//               <a
+//                 href="https://linktr.ee/shawermasheesh?utm_source=qr_code"
+//                 target="_blank"
+//                 rel="noopener noreferrer"
+//                 className="w-full bg-red-600 text-white font-bold text-sm py-2.5 rounded-xl hover:bg-red-700 transition-colors text-center inline-block"
+//               >
+//                 {t("view_menu_btn")}
+//               </a>
+//             </Card>
+
+//             {/* 2. بطاقة الموقع */}
+//             <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white flex flex-col items-center justify-between gap-4">
 //               <div className="rounded-full w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 flex items-center justify-center overflow-hidden">
 //                 <a
 //                   href="https://maps.app.goo.gl/krQ9B5eYkjgVz9es6?g_st=iw"
@@ -220,56 +238,30 @@
 //                   rel="noopener noreferrer"
 //                 >
 //                   <img
-//                     src={lololo} // استبدل بـمسار صورتك
+//                     src={lololo}
 //                     alt="Location"
 //                     className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain cursor-pointer hover:scale-110 transition"
 //                   />
 //                 </a>
 //               </div>
-//               <h3 className="text-lg sm:text-xl font-bold">
-//                 {t("our_location")}
-//               </h3>
-//               <p className="text-sm sm:text-base text-gray-600 text-center">
-//                 {t("location_line1")} <br />
-//                 {t("location_line2")}
-//               </p>
+//               <div className="space-y-2 flex-grow flex flex-col justify-center">
+//                 <h3 className="text-lg sm:text-xl font-bold">
+//                   {t("our_location")}
+//                 </h3>
+//                 <p className="text-xs sm:text-sm text-gray-600 text-center">
+//                   {t("location_line1")} <br />
+//                   {t("location_line2")}
+//                 </p>
+//               </div>
+//               <div className="w-full h-[40px] hidden sm:block" />
 //             </Card>
 
-//             {/* بطاقة الهاتف */}
-//             {/* <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white cursor-pointer hover:shadow-xl transition flex flex-col items-center gap-4">
-//               <a href="tel:+96332019099" className="block w-full">
-//                 <div className="rounded-full w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 mx-auto flex items-center justify-center overflow-hidden">
-//                   <img
-//                     src={telephone}
-//                     alt="الهاتف"
-//                     className="w-full h-full object-cover rounded-full"
-//                   />
-//                 </div>
-//                 <h3 className="text-lg sm:text-xl font-bold">{t("call_us")}</h3>
-//                 <p className="text-sm sm:text-base text-gray-600" dir="ltr">
-//                   (03) 201 9099
-//                 </p>
-//                 <p className="text-sm sm:text-base text-gray-600">
-//                   {t("contact_info")}
-//                 </p>
-//               </a>
-//               <button
-//                 onClick={(e) => {
-//                   e.stopPropagation();
-//                   setOpenForm(true);
-//                 }}
-//                 className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg transition w-full sm:w-auto"
-//               >
-//                 {t("contact.title")}
-//               </button>
-//             </Card> */}
+//             {/* 3. بطاقة الهاتف (تمت إعادتها تماماً كما كانت مع الحفاظ على الأنميشن الأصلي 100%) */}
 //             <Card className="relative overflow-hidden text-center p-6 sm:p-8 border-0 shadow-lg bg-white group transition-all duration-500 hover:shadow-2xl">
-//               {/* خلفية جمالية خفيفة تظهر عند الحوم */}
 //               <div className="absolute top-0 left-0 w-full h-1 bg-red-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
 
 //               <div className="flex flex-col items-center gap-4">
-//                 {/* الدائرة مع تأثير النبض الهادئ */}
-//                 <a href="tel:+96332019099" className="relative inline-block">
+//                 <a href="tel:+96232019099" className="relative inline-block">
 //                   <div className="relative z-10 rounded-full w-32 h-32 sm:w-36 sm:h-36 mx-auto flex items-center justify-center overflow-hidden ring-4 ring-red-50 ring-offset-4 transition-all duration-500 transform group-hover:rotate-6 group-hover:scale-110">
 //                     <img
 //                       src={telephone}
@@ -277,8 +269,6 @@
 //                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
 //                     />
 //                   </div>
-
-//                   {/* حلقة النبض الخلفية - Pulse Effect */}
 //                   <span className="absolute inset-0 rounded-full bg-red-400 opacity-20 animate-ping group-hover:hidden"></span>
 //                 </a>
 
@@ -297,7 +287,6 @@
 //                   </p>
 //                 </div>
 
-//                 {/* الزر بتصميم أنيق وبرمجة منفصلة */}
 //                 <button
 //                   onClick={(e) => {
 //                     e.preventDefault();
@@ -310,26 +299,30 @@
 //                 </button>
 //               </div>
 //             </Card>
-//             {/* بطاقة ساعات العمل */}
-//             <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white flex flex-col items-center gap-4">
-//               <div className="rounded-full w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 flex items-center justify-center overflow-hidden">
+
+//             {/* 4. بطاقة ساعات العمل */}
+//             <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white flex flex-col items-center justify-between gap-4">
+//               <div className="rounded-full w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 flex items-center justify-center overflow-hidden">
 //                 <img
 //                   src={workings}
 //                   alt="Working"
 //                   className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 object-contain"
 //                 />
 //               </div>
-//               <h3 className="text-lg sm:text-xl font-bold">
-//                 {t("working_hours")}
-//               </h3>
-//               <p className="text-sm sm:text-base text-gray-600 text-center">
-//                 {t("working_hours_start")} <br />
-//                 {t("working_hours_end")}
-//               </p>
+//               <div className="space-y-2 flex-grow flex flex-col justify-center">
+//                 <h3 className="text-lg sm:text-xl font-bold">
+//                   {t("working_hours")}
+//                 </h3>
+//                 <p className="text-xs sm:text-sm text-gray-600 text-center">
+//                   {t("working_hours_start")} <br />
+//                   {t("working_hours_end")}
+//                 </p>
+//               </div>
+//               <div className="w-full h-[40px] hidden sm:block" />
 //             </Card>
 //           </div>
 
-//           {/* الفورم */}
+//           {/* مودال الفورم */}
 //           {openForm && (
 //             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
 //               <div className="bg-white p-6 rounded-2xl w-[90%] max-w-md border-2 border-red-600 shadow-xl">
@@ -397,13 +390,12 @@
 //   );
 // }
 
-//  اضافة المنيو
-
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Phone, Award, Users, Heart, FileText } from "lucide-react";
+import { Smartphone, Share, X } from "lucide-react"; 
 import home_logo2 from "@/assets/home_logo2.jpeg";
 import { useTranslation } from "react-i18next";
 import Footer from "@/components/Footer";
@@ -430,6 +422,16 @@ export default function Home() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+
+  // حالة النافذة الترحيبية لتثبيت التطبيق PWA
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowInstallGuide(true);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const sendEmail = async () => {
     if (!name || !email || !message) {
@@ -593,9 +595,9 @@ export default function Home() {
             </p>
           </div>
 
-          {/* شبكة الكروت الأربعة المتطابقة بالكامل مع الحفاظ التام على أصل كود التلفون */}
+          {/* شبكة الكروت الأربعة */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {/* 1. بطاقة قائمة الطعام (المنيو) - تمت إعادة الأيقونة وتطبيق الترجمة */}
+            {/* 1. بطاقة قائمة الطعام (المنيو) */}
             <Card className="text-center p-6 sm:p-8 border-0 shadow-lg bg-white flex flex-col items-center justify-between gap-4">
               <div className="rounded-full w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 flex items-center justify-center bg-red-50 text-red-600">
                 <a
@@ -655,7 +657,7 @@ export default function Home() {
               <div className="w-full h-[40px] hidden sm:block" />
             </Card>
 
-            {/* 3. بطاقة الهاتف (تمت إعادتها تماماً كما كانت مع الحفاظ على الأنميشن الأصلي 100%) */}
+            {/* 3. بطاقة الهاتف */}
             <Card className="relative overflow-hidden text-center p-6 sm:p-8 border-0 shadow-lg bg-white group transition-all duration-500 hover:shadow-2xl">
               <div className="absolute top-0 left-0 w-full h-1 bg-red-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
 
@@ -783,6 +785,84 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* النافذة الترحيبية المترجمة بالكامل بشكل ديناميكي */}
+      {showInstallGuide && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowInstallGuide(false)}
+          />
+          <div className="relative w-full max-w-sm bg-white rounded-[2rem] shadow-2xl p-8 border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setShowInstallGuide(false)}
+              className="absolute top-4 left-4 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-black text-gray-900 mb-2">{t("install_guide.title")}</h2>
+              <p className="text-gray-500 text-sm">{t("install_guide.subtitle")}</p>
+            </div>
+            
+            <div className="space-y-4">
+              {/* بطاقة الأندرويد */}
+              <details
+                className="group bg-red-50/60 rounded-2xl p-4 border transition-all"
+                style={{ borderColor: "#da0103" }}
+              >
+                <summary
+                  className="font-bold text-sm cursor-pointer flex justify-between items-center outline-none select-none"
+                  style={{ color: "#da0103" }}
+                >
+                  <span className="flex items-center gap-2">
+                    <Smartphone className="w-5 h-5" /> {t("install_guide.android_title")}
+                  </span>
+                  <span className="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <ol className="mt-3 text-[12px] text-gray-700 space-y-2 list-decimal pr-4">
+                  <li>{t("install_guide.android_step1")}</li>
+                  <li>{t("install_guide.android_step2")}</li>
+                  <li>{t("install_guide.android_step3")}</li>
+                  <li>{t("install_guide.android_step4")}</li>
+                  <li>{t("install_guide.android_step5")}</li>
+                </ol>
+              </details>
+
+              {/* بطاقة الآيفون */}
+              <details
+                className="group bg-yellow-50/60 rounded-2xl p-4 border transition-all"
+                style={{ borderColor: "#d9a400" }}
+              >
+                <summary
+                  className="font-bold text-sm cursor-pointer flex justify-between items-center outline-none select-none"
+                  style={{ color: "#d9a400" }}
+                >
+                  <span className="flex items-center gap-2">
+                    <Share className="w-5 h-5" /> {t("install_guide.ios_title")}
+                  </span>
+                  <span className="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <ol className="mt-3 text-[12px] text-gray-700 space-y-2 list-decimal pr-4">
+                  <li>{t("install_guide.ios_step1")}</li>
+                  <li>{t("install_guide.ios_step2")}</li>
+                  <li>{t("install_guide.ios_step3")}</li>
+                  <li>{t("install_guide.ios_step4")}</li>
+                  <li>{t("install_guide.ios_step5")}</li>
+                </ol>
+              </details>
+            </div>
+
+            <button
+              onClick={() => setShowInstallGuide(false)}
+              className="w-full mt-6 py-3 text-white font-bold rounded-2xl transition-all shadow-md hover:opacity-90"
+              style={{ backgroundColor: "#da0103" }}
+            >
+              {t("install_guide.close")}
+            </button>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
