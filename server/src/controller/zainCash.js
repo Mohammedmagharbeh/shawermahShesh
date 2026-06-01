@@ -99,7 +99,7 @@ exports.initiatePayment = async ({ amount, mobile }) => {
     },
     AuthData: {
       Password: process.env.ZAIN_API_PASSWORD, // القيمة في الـ .env: Hjdkoi#8986%
-      ServiceID: process.env.ZC_SERVICE_ID_INITIATE,
+      ServiceID: "ZCInitiateMerchDebitPayByMerch",
       UserName: process.env.ZAIN_API_USERNAME, // القيمة في الـ .env: 80206
     },
   };
@@ -147,7 +147,7 @@ exports.confirmPayment = async ({ amount, mobile, otp, note }) => {
     },
     AuthData: {
       Password: process.env.ZAIN_API_PASSWORD,
-      ServiceID: process.env.ZC_SERVICE_ID_CONFIRM,
+      ServiceID: "ZCMerchDebitTrigerPayment",
       UserName: process.env.ZAIN_API_USERNAME,
     },
   };
