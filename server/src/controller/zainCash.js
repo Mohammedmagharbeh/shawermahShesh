@@ -43,26 +43,35 @@ async function getClient() {
       connectionTimeout: 10000,
       timeout: 10000,
     });
-      // Apply WS‑Security UsernameToken if credentials are provided
-      if (process.env.ZAIN_API_USERNAME && process.env.ZAIN_API_PASSWORD) {
-        try {
-          if (soap.WSSecurity) {
-            const wsSecurity = new soap.WSSecurity(
-              process.env.ZAIN_API_USERNAME,
-              process.env.ZAIN_API_PASSWORD,
-              { passwordType: "PasswordText" },
-            );
-            _client.setSecurity(wsSecurity);
-            console.log("[ZainCash] WSSecurity (UsernameToken) applied using env credentials.");
-          } else {
-            console.warn("[ZainCash] SOAP library does not expose WSSecurity; cannot set authentication.");
-          }
-        } catch (secError) {
-          console.error("[ZainCash] Failed to set SOAP security:", secError.message);
+    // Apply WS‑Security UsernameToken if credentials are provided
+    if (process.env.ZAIN_API_USERNAME && process.env.ZAIN_API_PASSWORD) {
+      try {
+        if (soap.WSSecurity) {
+          const wsSecurity = new soap.WSSecurity(
+            process.env.ZAIN_API_USERNAME,
+            process.env.ZAIN_API_PASSWORD,
+            { passwordType: "PasswordText" },
+          );
+          _client.setSecurity(wsSecurity);
+          console.log(
+            "[ZainCash] WSSecurity (UsernameToken) applied using env credentials.",
+          );
+        } else {
+          console.warn(
+            "[ZainCash] SOAP library does not expose WSSecurity; cannot set authentication.",
+          );
         }
-      } else {
-        console.warn("[ZainCash] ZAIN_API_USERNAME or ZAIN_API_PASSWORD not set; proceeding without SOAP auth.");
+      } catch (secError) {
+        console.error(
+          "[ZainCash] Failed to set SOAP security:",
+          secError.message,
+        );
       }
+    } else {
+      console.warn(
+        "[ZainCash] ZAIN_API_USERNAME or ZAIN_API_PASSWORD not set; proceeding without SOAP auth.",
+      );
+    }
     return _client;
   } catch (error) {
     console.error(
@@ -90,7 +99,7 @@ exports.initiatePayment = async ({ amount, mobile }) => {
     },
     AuthData: {
       Password: process.env.ZAIN_API_PASSWORD, // القيمة في الـ .env: Hjdkoi#8986%
-      ServiceID: "ZCInitiateMerchDebitPayByMerch",
+      ServiceID: process.env.ZC_SERVICE_ID_INITIATE,
       UserName: process.env.ZAIN_API_USERNAME, // القيمة في الـ .env: 80206
     },
   };
@@ -138,7 +147,7 @@ exports.confirmPayment = async ({ amount, mobile, otp, note }) => {
     },
     AuthData: {
       Password: process.env.ZAIN_API_PASSWORD,
-      ServiceID: "ZCMerchDebitTrigerPayment",
+      ServiceID: process.env.ZC_SERVICE_ID_CONFIRM,
       UserName: process.env.ZAIN_API_USERNAME,
     },
   };
