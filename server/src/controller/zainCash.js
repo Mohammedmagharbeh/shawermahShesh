@@ -6,7 +6,7 @@ const ZAIN_WSDL_URL = process.env.ZAIN_BASE_URL
   ? process.env.ZAIN_BASE_URL.includes("?")
     ? process.env.ZAIN_BASE_URL
     : `${process.env.ZAIN_BASE_URL}?wsdl`
-  : "https://176.29.197.98:5001/ZCPublicVPNAPI.svc?wsdl";
+  : "https://zcstgpublic.jo.zain.com:5001/ZCPublicVPNAPI.svc?wsdl";
 
 // لتخطي فحص شهادة الأمان لأن الـ IP داخلي (ضروري جداً في الربط مع زين)
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -98,9 +98,9 @@ exports.initiatePayment = async ({ amount, mobile }) => {
       TerminalUserID: process.env.ZC_TERMINAL_USER_ID || "1",
     },
     AuthData: {
-      Password: process.env.ZAIN_API_PASSWORD, // القيمة في الـ .env: Hjdkoi#8986%
+      Password: process.env.ZAIN_API_PASSWORD,
       ServiceID: "ZCInitiateMerchDebitPayByMerch",
-      UserName: process.env.ZAIN_API_USERNAME, // القيمة في الـ .env: 80206
+      UserName: process.env.ZAIN_API_USERNAME,
     },
   };
 
