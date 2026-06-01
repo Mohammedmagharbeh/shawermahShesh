@@ -43,22 +43,26 @@ async function getClient() {
       connectionTimeout: 10000,
       timeout: 10000,
     });
-    // Apply Basic Auth if credentials are provided
-    if (process.env.ZAIN_API_USERNAME && process.env.ZAIN_API_PASSWORD) {
-      try {
-        const BasicAuthSecurity = soap.BasicAuthSecurity || soap.WSSecurity;
-        if (BasicAuthSecurity) {
-          _client.setSecurity(new BasicAuthSecurity(process.env.ZAIN_API_USERNAME, process.env.ZAIN_API_PASSWORD));
-          console.log("[ZainCash] BasicAuthSecurity applied using env credentials.");
-        } else {
-          console.warn("[ZainCash] SOAP library does not expose BasicAuthSecurity.");
+      // Apply WS‑Security UsernameToken if credentials are provided
+      if (process.env.ZAIN_API_USERNAME && process.env.ZAIN_API_PASSWORD) {
+        try {
+          if (soap.WSSecurity) {
+            const wsSecurity = new soap.WSSecurity(
+              process.env.ZAIN_API_USERNAME,
+              process.env.ZAIN_API_PASSWORD,
+              { passwordType: "PasswordText" },
+            );
+            _client.setSecurity(wsSecurity);
+            console.log("[ZainCash] WSSecurity (UsernameToken) applied using env credentials.");
+          } else {
+            console.warn("[ZainCash] SOAP library does not expose WSSecurity; cannot set authentication.");
+          }
+        } catch (secError) {
+          console.error("[ZainCash] Failed to set SOAP security:", secError.message);
         }
-      } catch (secError) {
-        console.error("[ZainCash] Failed to set SOAP security:", secError.message);
+      } else {
+        console.warn("[ZainCash] ZAIN_API_USERNAME or ZAIN_API_PASSWORD not set; proceeding without SOAP auth.");
       }
-    } else {
-      console.warn("[ZainCash] ZAIN_API_USERNAME or ZAIN_API_PASSWORD not set; proceeding without SOAP auth.");
-    }
     return _client;
   } catch (error) {
     console.error(
