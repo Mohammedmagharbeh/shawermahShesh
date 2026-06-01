@@ -207,8 +207,8 @@ exports.confirmPayment = async ({ amount, mobile, otp, note }) => {
       Amount: formatAmount(amount),
       CUSTMSISDN962: formatMobile(mobile),
       CustOTP: otp,
-      MerchPIN: process.env.ZC_WALLET_PIN, // الـ PIN الذي وصل بالإيميل المنفصل
-      MerchServiceName: process.env.ZC_WALLET_ID, // القيمة: YASSINCO
+      MerchPIN: process.env.ZAIN_SERVICE_PIN, // الـ PIN الذي وصل بالإيميل المنفصل
+      MerchServiceName: process.env.ZAIN_SERVICE_NAME, // القيمة: YASSINCO
       Note: note || "ShawarmaSheesh Order",
     },
     generalData: {

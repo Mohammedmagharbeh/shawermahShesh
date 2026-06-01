@@ -155,7 +155,7 @@ export const initiateZainCashPayment = async ({ orderSummary, phone }) => {
  * @param {Object} params - Confirmation parameters
  * @returns {Promise<Object>} - API response
  */
-export const confirmZainCashPayment = async ({ orderSummary, phone, otp, orderId }) => {
+export const confirmZainCashPayment = async ({ orderSummary, phone, otp, orderId, orderData }) => {
   try {
     if (!otp || otp.length < 4) {
       throw new Error("Valid OTP is required");
@@ -166,6 +166,8 @@ export const confirmZainCashPayment = async ({ orderSummary, phone, otp, orderId
       mobile: phone,
       otp: otp,
       orderId: orderId || null,
+      // Full order data so the server can create the order after payment confirmation
+      orderData: orderData || null,
     };
 
     const { data } = await apiClient.post(
