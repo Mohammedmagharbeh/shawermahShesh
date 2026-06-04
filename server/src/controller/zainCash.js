@@ -308,6 +308,7 @@ const ZAIN_WSDL_URL = process.env.ZAIN_BASE_URL
     : `${process.env.ZAIN_BASE_URL}?wsdl`
   : "https://zcstgpublic.jo.zain.com:5001/ZCPublicVPNAPI.svc?wsdl";
 
+// تجاوز فحص الشهادات للاتصال بالـ VPN
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 function formatMobile(mobile) {
@@ -333,7 +334,7 @@ async function getClient() {
       timeout: 10000,
     });
 
-    // هذه الأسطر ستطبع الـ XML الفعلي في الـ Logs
+    // مراقبة الطلبات والردود الخام لتصحيح الأخطاء
     _client.on('request', (xml) => { console.log("--- REQUEST XML --- \n", xml); });
     _client.on('response', (xml) => { console.log("--- RESPONSE XML --- \n", xml); });
 
@@ -369,11 +370,13 @@ exports.initiatePayment = async ({ amount, mobile }) => {
 
 exports.confirmPayment = async ({ amount, mobile, otp, note }) => {
   const client = await getClient();
+  
+  // تم تعديل المسميات هنا لتطابق ما يقبله سيرفر الـ Production
   const requestData = {
     req: {
       Amount: formatAmount(amount),
-      CUSTMSISDN962: formatMobile(mobile),
-      CustOTP: otp,
+      MSISDN962: formatMobile(mobile), // تم توحيد الاسم مع الـ Initiate
+      OTP: otp,                        // تم تغيير CustOTP إلى OTP
       MerchPIN: process.env.ZAIN_SERVICE_PIN,
       MerchServiceName: process.env.ZAIN_SERVICE_NAME,
       Note: note || "ShawarmaSheesh Order",
