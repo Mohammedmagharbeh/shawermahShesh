@@ -243,11 +243,30 @@ export const useCheckoutLogic = (t) => {
     setIsSubmitting(true);
 
     try {
+      // Build order data payload (same structure as MontyPay's orderData)
+      const orderData = {
+        products: cart.products.map((p) => ({
+          productId: p.productId._id,
+          quantity: p.quantity,
+          isSpicy: p.isSpicy || false,
+          additions: p.additions || [],
+          notes: p.notes || "",
+          selectedProtein: p.selectedProtein || null,
+          selectedType: p.selectedType || null,
+        })),
+        userId: user?._id,
+        shippingAddress: formState.selectedArea?._id || null,
+        orderType: formState.orderType,
+        userDetails: formState.details,
+        paymentMethod: "cliq",
+      };
+
       const result = await PaymentService.zainCash.confirm({
         orderSummary,
         phone: formState.details.phone,
         otp: formState.otp,
         orderId: formState.orderId || null,
+        orderData,
       });
 
       const refId = result?.refId || result?.data?.RefID;
@@ -256,14 +275,14 @@ export const useCheckoutLogic = (t) => {
       }
 
       toast.success("Payment successful!");
-      navigate("/order-success");
+      navigate("/success");
     } catch (error) {
       console.error("CliQ confirmation error:", error);
       toast.error(error.message || "Verification failed");
     } finally {
       setIsSubmitting(false);
     }
-  }, [orderSummary, formState.details.phone, formState.otp, formState.orderId, navigate]);
+  }, [cart, user, orderSummary, formState, navigate]);
 
   // --- Return Hook API ---
   return {
