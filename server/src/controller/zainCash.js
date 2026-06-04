@@ -308,7 +308,6 @@ const ZAIN_WSDL_URL = process.env.ZAIN_BASE_URL
     : `${process.env.ZAIN_BASE_URL}?wsdl`
   : "https://zcstgpublic.jo.zain.com:5001/ZCPublicVPNAPI.svc?wsdl";
 
-// تجاوز فحص الشهادات للاتصال بالـ VPN
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 function formatMobile(mobile) {
@@ -326,21 +325,18 @@ let _client = null;
 
 async function getClient() {
   if (_client) return _client;
-  console.log("[ZainCash] Creating SOAP client from:", ZAIN_WSDL_URL);
-
   try {
     _client = await soap.createClientAsync(ZAIN_WSDL_URL, {
       connectionTimeout: 10000,
       timeout: 10000,
     });
-
-    // مراقبة الطلبات والردود الخام لتصحيح الأخطاء
+    
+    // مراقبة الطلب (لأغراض التصحيح فقط)
     _client.on('request', (xml) => { console.log("--- REQUEST XML --- \n", xml); });
     _client.on('response', (xml) => { console.log("--- RESPONSE XML --- \n", xml); });
 
     return _client;
   } catch (error) {
-    console.error("[ZainCash] Client creation error:", error);
     throw new Error("Could not connect to ZainCash Server");
   }
 }
@@ -371,12 +367,12 @@ exports.initiatePayment = async ({ amount, mobile }) => {
 exports.confirmPayment = async ({ amount, mobile, otp, note }) => {
   const client = await getClient();
   
-  // تم تعديل المسميات هنا لتطابق ما يقبله سيرفر الـ Production
+  // هذه الهيكلية مصممة خصيصاً لتتجاوز خطأ الـ DeserializationFailed
   const requestData = {
     req: {
       Amount: formatAmount(amount),
-      MSISDN962: formatMobile(mobile), // تم توحيد الاسم مع الـ Initiate
-      OTP: otp,                        // تم تغيير CustOTP إلى OTP
+      CUSTMSISDN962: formatMobile(mobile),
+      CustOTP: otp,
       MerchPIN: process.env.ZAIN_SERVICE_PIN,
       MerchServiceName: process.env.ZAIN_SERVICE_NAME,
       Note: note || "ShawarmaSheesh Order",
