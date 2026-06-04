@@ -325,21 +325,27 @@ let _client = null;
 
 async function getClient() {
   if (_client) return _client;
+  console.log("[ZainCash] Creating SOAP client from:", ZAIN_WSDL_URL);
+
   try {
     _client = await soap.createClientAsync(ZAIN_WSDL_URL, {
       connectionTimeout: 10000,
       timeout: 10000,
     });
+
+    // هذه الأسطر ستطبع الـ XML الفعلي في الـ Logs
+    _client.on('request', (xml) => { console.log("--- REQUEST XML --- \n", xml); });
+    _client.on('response', (xml) => { console.log("--- RESPONSE XML --- \n", xml); });
+
     return _client;
   } catch (error) {
-    throw new Error("Could not connect to ZainCash Server (VPN required)");
+    console.error("[ZainCash] Client creation error:", error);
+    throw new Error("Could not connect to ZainCash Server");
   }
 }
 
 exports.initiatePayment = async ({ amount, mobile }) => {
   const client = await getClient();
-
-  // تعديل الهيكلية: رفع AuthData و generalData لتكون بمستوى req
   const requestData = {
     req: {
       Amount: formatAmount(amount),
@@ -357,18 +363,12 @@ exports.initiatePayment = async ({ amount, mobile }) => {
     },
   };
 
-  try {
-    const [result] = await client.ZCInitiateMerchDebitPayByMerchAsync(requestData);
-    return result;
-  } catch (error) {
-    throw error.Fault ? new Error(error.Fault.faultstring) : error;
-  }
+  const [result] = await client.ZCInitiateMerchDebitPayByMerchAsync(requestData);
+  return result;
 };
 
 exports.confirmPayment = async ({ amount, mobile, otp, note }) => {
   const client = await getClient();
-
-  // تعديل الهيكلية: بعض إصدارات زين كاش تتطلب المسميات بدقة
   const requestData = {
     req: {
       Amount: formatAmount(amount),
@@ -390,10 +390,6 @@ exports.confirmPayment = async ({ amount, mobile, otp, note }) => {
     },
   };
 
-  try {
-    const [result] = await client.ZCMerchDebitTrigerPaymentAsync(requestData);
-    return result;
-  } catch (error) {
-    throw error.Fault ? new Error(error.Fault.faultstring) : error;
-  }
+  const [result] = await client.ZCMerchDebitTrigerPaymentAsync(requestData);
+  return result;
 };
