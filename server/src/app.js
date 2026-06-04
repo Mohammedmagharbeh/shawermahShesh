@@ -1,23 +1,21 @@
 const dotenv = require("dotenv");
 dotenv.config(); // MUST be first — before any module that reads process.env
-
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const connectDB = require("./config/db");
-const http = require("http");
-const { Server } = require("socket.io");
+const cors = require('cors'); // أضف هذا السطر
+const express = require('express'); // هذا السطر هو الذي يحل المشكلة
 const orderRoutes = require("./routes/orderRoutes");
 const userroutes = require("./routes/userroutes");
 const adminroutes = require("./routes/adminroutes");
 const cartRoutes = require("./routes/cartRoutes");
 const locationsRoute = require("./routes/locationsRoute");
 const montypay = require("./routes/montypay");
-
+const bodyParser = require('body-parser'); // أضف هذا السطر
 const additions = require("./routes/additions");
 const slideRoutes = require("./routes/slideRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
-
+ const db = require("./config/db");
+const connectDB = require("./config/db");
+const http = require("http");
+const { Server } = require("socket.io");
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const zainCash = require("./routes/zainCash");
