@@ -374,7 +374,7 @@ exports.confirmPayment = async ({ amount, mobile, otp, note }) => {
   const requestData = {
     req: {
       Amount: formatAmount(amount),
-      MSISDN962: formatMobile(mobile), 
+      CUSTMSISDN962: formatMobile(mobile),  // ✅ اسم صح + ترتيب أول
       OTP: otp,
       MerchPIN: process.env.ZAIN_SERVICE_PIN,
       MerchServiceName: process.env.ZAIN_SERVICE_NAME,
