@@ -374,8 +374,10 @@ exports.confirmPayment = async ({ amount, mobile, otp, note }) => {
   const requestData = {
     req: {
       Amount: formatAmount(amount),
-      CUSTMSISDN962: formatMobile(mobile),  // ✅ اسم صح + ترتيب أول
-      OTP: otp,
+      CUSTMSISDN962: formatMobile(mobile), 
+      CustOTP: otp,
+      // السيرفر يشتكي لأن MerchPIN يأتي هنا مباشرة
+      // ولكن ربما يتوقع حقولاً أخرى (مثل RefID) قبلها، أو أن ترتيب هذه الحقول هو السبب
       MerchPIN: process.env.ZAIN_SERVICE_PIN,
       MerchServiceName: process.env.ZAIN_SERVICE_NAME,
       Note: note || "ShawarmaSheesh Order",
