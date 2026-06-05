@@ -28,6 +28,7 @@ export const ORDER_TYPES = {
 // CliQ payment steps
 export const CLIQ_STEPS = {
   INIT: "INIT",
+  PHONE_INPUT: "PHONE_INPUT",
   OTP_SENT: "OTP_SENT",
   PAID: "PAID",
 };
@@ -63,6 +64,7 @@ export const DEFAULT_FORM_STATE = {
   paymentMethod: PAYMENT_METHODS.CARD,
   selectedArea: null,
   otp: "",
+  cliqPhone: "",
   cliqStep: CLIQ_STEPS.INIT,
   details: {
     name: "",
