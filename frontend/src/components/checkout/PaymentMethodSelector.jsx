@@ -282,7 +282,7 @@ PaymentMethodSelector.displayName = "PaymentMethodSelector";
 PaymentMethodSelector.propTypes = {
   /** Currently selected payment method */
   method: PropTypes.oneOf([PAYMENT_METHODS.CARD, PAYMENT_METHODS.CLIQ])
-    .isRequired,
+    .isRequired,  
   /** Payment method change handler */
   setMethod: PropTypes.func.isRequired,
   /** Translation function */
