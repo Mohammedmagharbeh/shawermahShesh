@@ -74,7 +74,7 @@ const CliqOtpModal = React.memo(
         onClick={onCancel}
       >
         <div
-          className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl animate-fade-in"
+          className="bg-white p-6 rounded-2xl w-full max-w-md shadow-2xl animate-fade-in border-t-4 border-red-600"
           onClick={(e) => e.stopPropagation()}
         >
           {isPhoneStep ? (
@@ -94,7 +94,7 @@ const CliqOtpModal = React.memo(
                 inputMode="numeric"
                 pattern="[0-9]*"
                 placeholder="07xxxxxxxxx"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-2 text-lg tracking-wide font-mono focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl mb-2 text-lg tracking-wide font-mono focus:ring-4 focus:ring-red-100 focus:border-red-600 transition-all outline-none shadow-sm"
                 value={cliqPhone}
                 onChange={handlePhoneChange}
                 onKeyDown={handlePhoneKeyDown}
@@ -117,7 +117,7 @@ const CliqOtpModal = React.memo(
                   type="button"
                   onClick={onCancel}
                   disabled={isSubmitting}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 py-3 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 py-4 rounded-xl font-bold shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -125,7 +125,7 @@ const CliqOtpModal = React.memo(
                   type="button"
                   onClick={onSendOtp}
                   disabled={isSubmitting || !isPhoneValid}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`flex-1 bg-gradient-to-r ${isSubmitting ? "from-red-400 to-red-500" : "from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"} text-white py-4 rounded-xl font-bold shadow-lg shadow-red-600/30 active:scale-95 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed`}
                 >
                   {isSubmitting ? "Sending..." : "Send OTP"}
                 </button>
@@ -147,12 +147,12 @@ const CliqOtpModal = React.memo(
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder="Enter 6-digit OTP"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 text-center text-2xl tracking-widest font-mono focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="Enter 4-digit OTP"
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl mb-4 text-center text-3xl tracking-[0.5em] font-mono focus:ring-4 focus:ring-red-100 focus:border-red-600 transition-all outline-none shadow-sm"
                 value={otp}
                 onChange={handleOtpChange}
                 onKeyDown={handleOtpKeyDown}
-                maxLength={6}
+                maxLength={4}
                 autoFocus
                 disabled={isSubmitting}
               />
@@ -162,7 +162,7 @@ const CliqOtpModal = React.memo(
                   type="button"
                   onClick={onCancel}
                   disabled={isSubmitting}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 py-3 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 py-4 rounded-xl font-bold shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -170,7 +170,7 @@ const CliqOtpModal = React.memo(
                   type="button"
                   onClick={onConfirm}
                   disabled={isSubmitting || otp.length < 4}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`flex-1 bg-gradient-to-r ${isSubmitting ? "from-red-400 to-red-500" : "from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"} text-white py-4 rounded-xl font-bold shadow-lg shadow-red-600/30 active:scale-95 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed`}
                 >
                   {isSubmitting ? "Verifying..." : "Confirm"}
                 </button>
