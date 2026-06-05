@@ -302,6 +302,8 @@
 // });
 
 // module.exports = router;
+
+
 "use strict";
 
 const express = require("express");
@@ -469,7 +471,7 @@ async function createZainOrder({
     shippingAddress: orderType === "delivery" ? shippingAddress : null,
     payment: {
       status: "paid",
-      method: paymentMethod || "zaincash",
+      method: paymentMethod || "cliq",
       transactionId: transactionId || null,
       paidAt: new Date(),
     },
