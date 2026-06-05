@@ -176,23 +176,11 @@ export const confirmZainCashPayment = async ({ orderSummary, phone, otp, orderId
     );
 
     // Zain returns ErrorCode "0" on success; any other code is a failure
-    // if (data?.ErrorObj && data.ErrorObj.ErrorCode !== "0") {
-    //   throw new Error(
-    //     data?.ErrorObj?.ErrorMessage || "Payment verification failed",
-    //   );
-    // }
-    // ✅ جديد
-const errorCode = data?.ErrorObj?.ErrorCode;
-const isSuccess =
-  !errorCode ||
-  errorCode === "0" ||
-  errorCode?.toLowerCase() === "success";
-
-if (!isSuccess) {
-  throw new Error(
-    data?.ErrorObj?.ErrorMessage || "Payment verification failed",
-  );
-}
+    if (data?.ErrorObj && data.ErrorObj.ErrorCode !== "0") {
+      throw new Error(
+        data?.ErrorObj?.ErrorMessage || "Payment verification failed",
+      );
+    }
 
     return data;
   } catch (error) {
