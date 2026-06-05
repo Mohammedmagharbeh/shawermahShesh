@@ -276,14 +276,7 @@ export const useCheckoutLogic = (t) => {
 
       toast.success("Payment successful!");
       // navigate("/success");
-      // ✅ جديد
-navigate("/success", {
-  state: {
-    orderId: result?.orderId,
-    refId: result?.RefID,
-    paymentMethod: "cliq",
-  },
-});
+      navigate(`/success?dbOrderId=${result?.orderId}`);
     } catch (error) {
       console.error("CliQ confirmation error:", error);
       toast.error(error.message || "Verification failed");
