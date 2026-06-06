@@ -40,6 +40,7 @@ function Checkout() {
     formState,
     updateForm,
     updateDetails,
+    sendCliqOtp,
     confirmCliqPayment,
     orderSummary,
     handlePayment,
@@ -57,7 +58,15 @@ function Checkout() {
   const handleOtpCancel = useCallback(() => {
     updateForm("cliqStep", CLIQ_STEPS.INIT);
     updateForm("otp", "");
+    updateForm("cliqPhone", "");
   }, [updateForm]);
+
+  const handleCliqPhoneChange = useCallback(
+    (value) => {
+      updateForm("cliqPhone", value);
+    },
+    [updateForm],
+  );
 
   const handlePaymentMethodChange = useCallback(
     (method) => {
@@ -111,8 +120,13 @@ function Checkout() {
       <CliqOtpModal
         isOpen={
           formState.paymentMethod === PAYMENT_METHODS.CLIQ &&
-          formState.cliqStep === CLIQ_STEPS.OTP_SENT
+          (formState.cliqStep === CLIQ_STEPS.PHONE_INPUT ||
+            formState.cliqStep === CLIQ_STEPS.OTP_SENT)
         }
+        step={formState.cliqStep}
+        cliqPhone={formState.cliqPhone}
+        onCliqPhoneChange={handleCliqPhoneChange}
+        onSendOtp={sendCliqOtp}
         otp={formState.otp}
         onOtpChange={handleOtpChange}
         onCancel={handleOtpCancel}

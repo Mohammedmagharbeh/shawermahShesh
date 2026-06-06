@@ -223,18 +223,31 @@ export const useCheckoutLogic = (t) => {
    * Handles ZainCash (CliQ) payment initiation
    */
   const handleZainCashFlow = useCallback(async () => {
+    // Transition to phone input step – OTP is not sent until user submits a phone number
+    setFormState((prev) => ({ ...prev, cliqStep: CLIQ_STEPS.PHONE_INPUT, cliqPhone: "" }));
+    // We don't setIsSubmitting(false) here because handlePayment's finally block handles it
+  }, []);
+
+  /**
+   * Sends OTP to the user-entered CliQ phone number
+   */
+  const sendCliqOtp = useCallback(async () => {
+    setIsSubmitting(true);
     try {
       await PaymentService.zainCash.initiate({
         orderSummary,
-        phone: formState.details.phone,
+        phone: formState.cliqPhone,
       });
 
       setFormState((prev) => ({ ...prev, cliqStep: CLIQ_STEPS.OTP_SENT }));
-      toast.success("OTP sent to your mobile number");
+      toast.success("OTP sent to " + formState.cliqPhone);
     } catch (error) {
-      throw error;
+      console.error("CliQ OTP send error:", error);
+      toast.error(error.message || "Failed to send OTP");
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [orderSummary, formState.details.phone]);
+  }, [orderSummary, formState.cliqPhone]);
 
   /**
    * Confirms ZainCash payment with OTP
@@ -263,7 +276,7 @@ export const useCheckoutLogic = (t) => {
 
       const result = await PaymentService.zainCash.confirm({
         orderSummary,
-        phone: formState.details.phone,
+        phone: formState.cliqPhone,
         otp: formState.otp,
         orderId: formState.orderId || null,
         orderData,
@@ -302,6 +315,7 @@ export const useCheckoutLogic = (t) => {
     updateForm,
     updateDetails,
     handlePayment,
+    sendCliqOtp,
     confirmCliqPayment,
   };
 };
