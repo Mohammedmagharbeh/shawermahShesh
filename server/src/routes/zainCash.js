@@ -292,6 +292,8 @@ router.post("/zain/confirm", async (req, res) => {
           paymentMethod: "cliq",
           transactionId,
           io,
+
+
         });
 
         console.log(
