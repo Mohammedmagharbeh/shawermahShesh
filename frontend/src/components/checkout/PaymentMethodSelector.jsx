@@ -150,6 +150,7 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import cliq from "@/assets/cliq.png";
+import download from "@/assets/download.jpg";
 import { PAYMENT_METHODS, PAYMENT_LOGOS } from "./constants";
 import { isValidImageUrl } from "@/utils/inputSanitization";
 
@@ -270,7 +271,7 @@ const PaymentMethodSelector = React.memo(({ method, setMethod, t }) => {
           </span>
 
           {/* CliQ Logo — تمت إزالة الـ grayscale */}
-          <img src={cliq} className="w-8" alt="CliQ" loading="lazy" />
+          <img src={download} className="w-8" alt="CliQ" loading="lazy" />
         </div>
       </div>
     </div>

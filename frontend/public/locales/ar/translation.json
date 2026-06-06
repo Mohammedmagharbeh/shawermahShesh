@@ -136,7 +136,7 @@
     "btn_confirm": "تأكيد",
     "btn_verifying": "جاري التحقق..."
   },
-  
+
   "delivered": "تم التسليم",
   "cancelled": "ملغى",
   "edit_order": "تعديل الطلب",
@@ -219,7 +219,7 @@
   "qty": "الكمية",
   "checkout_payment_method": "طريقة الدفع",
   "checkout_card_payment": "للدفع الالكتروني(فيزا, ماستر كارد,ابل باي)",
-  "checkout_click_payment": " الدفع بواسطة كليك و المحافظ الالكترونية",
+  "checkout_click_payment": "   الدفع بواسطة زين كاش اون لاين   ",
   "checkout_click_coming_soon": "هذه الخدمة ستكون متاحة قريباً",
   "checkout_place_order": "تقديم الطلب",
   "no_permission": "ليس لديك إذن للوصول إلى هذه الصفحة",
