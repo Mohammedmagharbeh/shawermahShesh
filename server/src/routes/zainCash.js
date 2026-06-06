@@ -289,7 +289,7 @@ router.post("/zain/confirm", async (req, res) => {
 
         order = await createZainOrder({
           ...orderData,
-          paymentMethod: "zaincash",
+          paymentMethod: "cliq",
           transactionId,
           io,
         });
