@@ -40,7 +40,6 @@ export const useCheckoutLogic = (t) => {
       ...DEFAULT_FORM_STATE.details,
       name: user?.name || "",
       phone: user?.phone || "",
-      
     },
   }));
 
