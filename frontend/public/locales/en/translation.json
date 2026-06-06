@@ -36,6 +36,21 @@
   "ios_step5": "The application will appear on your home screen",
   "close": "Close"
 },
+
+  "cliq_modal": {
+    "title_phone_input": "Enter Mobile Number",
+    "desc_phone_input": "Please enter the mobile number to receive the OTP verification code",
+    "placeholder_phone": "07xxxxxxxxx",
+    "error_invalid_phone": "Enter a valid Jordanian mobile number (07xxxxxxxx)",
+    "btn_cancel": "Cancel",
+    "btn_send_otp": "Send OTP",
+    "btn_sending": "Sending...",
+    "title_otp_input": "Enter Verification Code",
+    "desc_otp_input": "Please enter the OTP code sent to {{phone}}",
+    "placeholder_otp": "Enter 4-digit OTP",
+    "btn_confirm": "Confirm",
+    "btn_verifying": "Verifying..."
+  },
   "female": "Female",
   "digital_menu": "Menu Sheesh",
   "digital_menu_desc": "Browse our full menu and current prices directly via the interactive link",

@@ -120,6 +120,23 @@
   "ios_step5": "سيظهر التطبيق على شاشتك الرئيسية",
   "close": "إغلاق"
 },
+
+
+  "cliq_modal": {
+    "title_phone_input": "أدخل رقم الهاتف المحمول",
+    "desc_phone_input": "يرجى إدخال رقم الهاتف المحمول لتلقي رمز التحقق (OTP)",
+    "placeholder_phone": "07xxxxxxxxx",
+    "error_invalid_phone": "أدخل رقم هاتف أردني صحيح (07xxxxxxxx)",
+    "btn_cancel": "إلغاء",
+    "btn_send_otp": "إرسال رمز التحقق",
+    "btn_sending": "جاري الإرسال...",
+    "title_otp_input": "أدخل رمز التحقق",
+    "desc_otp_input": "يرجى إدخال رمز التحقق المرسل إلى {{phone}}",
+    "placeholder_otp": "أدخل رمز التحقق المكون من 4 أرقام",
+    "btn_confirm": "تأكيد",
+    "btn_verifying": "جاري التحقق..."
+  },
+  
   "delivered": "تم التسليم",
   "cancelled": "ملغى",
   "edit_order": "تعديل الطلب",
