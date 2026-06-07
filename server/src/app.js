@@ -19,6 +19,8 @@ const { Server } = require("socket.io");
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const zainCash = require("./routes/zainCash");
+const orangeMoneyRoutes = require("./routes/orangeMoney");
+
 
 // const emailRoutes = require("./routes/emailRoutes");
 
@@ -42,6 +44,7 @@ io.on("connection", (socket) => {
 app.set("io", io);
 
 // Register routes
+
 app.use("/api", userroutes);
 app.use("/api/admin", adminroutes);
 app.use("/api/order", orderRoutes);
@@ -56,5 +59,6 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/apply", applicationRoutes);
 app.use("/api/zaincash", zainCash);
+app.use("/api/orange", orangeMoneyRoutes);
 
 module.exports = server;

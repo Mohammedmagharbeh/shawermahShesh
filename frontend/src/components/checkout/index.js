@@ -7,6 +7,6 @@ export { default as DeliverySection } from "./DeliverySection";
 export { default as OrderItemsList } from "./OrderItemsList";
 export { default as OrderTotals } from "./OrderTotals";
 export { default as PaymentMethodSelector } from "./PaymentMethodSelector";
-
+export { default as OrangeMoneyModal } from "./OrangeMoneyModal";
 // Export constants
 export * from "./constants";
