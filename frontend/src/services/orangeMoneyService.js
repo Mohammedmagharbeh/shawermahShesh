@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export async function getServicers() {
-  const response = await axios.get("/api/orange/servicers");
+  const response = await axios.get(`${BASE_URL}/orange/servicers`);
   if (!response.data.success) {
     throw new Error(response.data.error || "فشل في جلب قائمة الخدمات");
   }
@@ -9,7 +11,7 @@ export async function getServicers() {
 }
 
 export async function rtpOtpValidate({ phone, amount, servicerCode }) {
-  const response = await axios.post("/api/orange/initiate", {
+  const response = await axios.post(`${BASE_URL}/orange/initiate`, {
     phone,
     amount,
     servicerCode,
@@ -17,11 +19,11 @@ export async function rtpOtpValidate({ phone, amount, servicerCode }) {
   if (!response.data.success) {
     throw new Error(response.data.error || "فشل إرسال الـ OTP");
   }
-  return response.data; // { success, merchantReference, message }
+  return response.data;
 }
 
 export async function rtpOtpConfirm({ phone, amount, servicerCode, merchantReference, otp, orderData }) {
-  const response = await axios.post("/api/orange/confirm", {
+  const response = await axios.post(`${BASE_URL}/orange/confirm`, {
     phone,
     amount,
     servicerCode,
