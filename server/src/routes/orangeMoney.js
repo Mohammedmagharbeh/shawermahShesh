@@ -18,6 +18,7 @@ router.get("/servicers", async (req, res) => {
 router.post("/initiate", async (req, res) => {
   try {
     const { phone, amount, servicerCode } = req.body;
+    console.log("=== INITIATE REQUEST ===", { phone, amount, servicerCode }); // ✅ أضف هذا
 
     if (!phone || !amount || !servicerCode) {
       return res.status(400).json({
