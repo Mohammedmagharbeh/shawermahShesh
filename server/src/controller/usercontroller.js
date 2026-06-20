@@ -48,6 +48,21 @@ exports.getuser = async (req, res) => {
   }
 };
 
+// ✅ جلب كل المستخدمين كمصفوفة كاملة — تستخدمها Statistics.jsx فقط
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await userModel
+      .find()
+      .select("_id phone username role createdAt") // never send otp / password
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 // ✅ جلب بيانات المستخدم الحالي (تعديل: يجلب الرتبة من قاعدة البيانات مباشرة)
 exports.getCurrentUser = async (req, res) => {
   try {

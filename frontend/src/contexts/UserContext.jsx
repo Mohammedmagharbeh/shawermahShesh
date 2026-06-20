@@ -415,9 +415,10 @@ export const UserProvider = ({ children }) => {
 
   const getAllUsers = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users`, {
-        headers: { authorization: `Bearer ${user?.token}` }
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users/all`, {
+        headers: { authorization: `Bearer ${user?.token}` },
       });
+      // /users/all returns a flat array directly
       setAllUsers(res.data);
       return res.data;
     } catch (error) {
