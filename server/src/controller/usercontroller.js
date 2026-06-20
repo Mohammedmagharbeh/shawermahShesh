@@ -6,11 +6,43 @@ const Category = require("../models/Category");
 const { generateOTP, sendOTP } = require("../utils/otp");
 require("dotenv").config();
 
-// ✅ جلب كل المستخدمين
+// ✅ جلب المستخدمين مع pagination + search + role filter
 exports.getuser = async (req, res) => {
   try {
-    const users = await userModel.find().sort({ createdAt: -1 });
-    res.status(200).json(users);
+    const page   = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit  = Math.min(50, parseInt(req.query.limit) || 20);
+    const search = (req.query.search || "").trim();
+    const role   = (req.query.role   || "").trim();
+
+    const filter = {};
+
+    if (search) {
+      filter.$or = [
+        { phone:    { $regex: search, $options: "i" } },
+        { username: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (role) filter.role = role;
+
+    // Run the query and count in parallel for speed
+    const [users, total] = await Promise.all([
+      userModel
+        .find(filter)
+        .select("_id phone username role createdAt") // never send otp / password
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      userModel.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+      users,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
