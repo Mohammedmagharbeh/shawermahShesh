@@ -5,6 +5,7 @@
     createOrder,
     deleteOrder,
     getAllOrders,
+    getTodayOrders,
     getOrderById,
     getOrdersByUserId,
     updateOrder,
@@ -13,6 +14,7 @@
   const router = express.Router();
 
   router.get("/get", validateJWT, getAllOrders);
+  router.get("/today", validateJWT, getTodayOrders); // date-scoped — AdminDashboard only
   router.get("/user/:userId", validateJWT, getOrdersByUserId); // must come BEFORE /:id
   router.get("/:id", validateJWT, getOrderById);
   router.post("/post", validateJWT, createOrder);

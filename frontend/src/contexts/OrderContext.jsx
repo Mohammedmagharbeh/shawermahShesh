@@ -39,6 +39,40 @@ export const OrderProvider = ({ children }) => {
     }
   };
 
+  // 🔹 Get only today's orders (AdminDashboard)
+  const getTodayOrders = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API_URL}/today`, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+      });
+      setOrders(res.data.data);
+      setError(null);
+      return res.data.data;
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to fetch today's orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Helpers for socket-driven local updates (no API call)
+  const appendOrder = (order) => {
+    setOrders((prev) => {
+      const exists = prev?.some((o) => o._id === order._id);
+      return exists ? prev : [order, ...(prev || [])];
+    });
+  };
+
+  const patchOrder = (updatedOrder) => {
+    setOrders((prev) =>
+      (prev || []).map((o) => (o._id === updatedOrder._id ? updatedOrder : o))
+    );
+  };
+
   // 🔹 Get orders by userId
   const getOrdersByUserId = async (id = user._id) => {
     if (!user || !id) {
@@ -163,6 +197,9 @@ export const OrderProvider = ({ children }) => {
         loading,
         error,
         getAllOrders,
+        getTodayOrders,
+        appendOrder,
+        patchOrder,
         getOrdersByUserId,
         getOrderById,
         createOrder,

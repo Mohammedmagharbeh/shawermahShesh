@@ -43,7 +43,7 @@ const socket = io(import.meta.env.VITE_SOCKET_URL);
 function AdminDashboard() {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
-  const { orders, getAllOrders, updateOrder, deleteOrder, loading } =
+  const { orders, getTodayOrders, updateOrder, deleteOrder, loading, appendOrder, patchOrder } =
     useOrder();
 
   const [filterDate, setFilterDate] = useState(
@@ -56,7 +56,7 @@ function AdminDashboard() {
   const { user } = useUser();
 
   useEffect(() => {
-    getAllOrders();
+    getTodayOrders();
   }, []);
 
   useEffect(() => {
@@ -107,11 +107,9 @@ function AdminDashboard() {
 
   useEffect(() => {
     if (!user?.token) return;
-
+    // Single fetch on mount to populate the "new order" notification alerts
     fetchPendingOrders();
-    const intervalId = setInterval(fetchPendingOrders, 15000);
-
-    return () => clearInterval(intervalId);
+    // No interval — socket events keep incomingOrder in sync in real time
   }, [user?.token]);
 
   const enableSound = () => {
@@ -144,27 +142,27 @@ function AdminDashboard() {
 
   useEffect(() => {
     socket.on("newOrder", (order) => {
-      getAllOrders();
+      // Append to today's list without a full re-fetch
+      appendOrder(order);
       setIncomingOrder((prev) => {
         const exists = prev?.some((o) => o._id === order._id);
-        if (exists) return prev;
-        return [...(prev || []), order];
+        return exists ? prev : [...(prev || []), order];
       });
     });
 
     socket.on("updatedOrder", (updatedOrder) => {
-      getAllOrders();
-      setIncomingOrder((prev) => {
-        if (!prev) return [];
-        return prev.filter((order) => order._id !== updatedOrder._id);
-      });
+      // Update the card in-place without a full re-fetch
+      patchOrder(updatedOrder);
+      setIncomingOrder((prev) =>
+        (prev || []).filter((order) => order._id !== updatedOrder._id)
+      );
     });
 
     return () => {
       socket.off("newOrder");
       socket.off("updatedOrder");
     };
-  }, [getAllOrders]);
+  }, []);
 
   const stopSound = () => {
     if (sound) {

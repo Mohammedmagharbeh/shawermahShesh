@@ -70,6 +70,31 @@ exports.getAllOrders = async (req, res) => {
   }
 };
 
+// GET today's orders only — used exclusively by AdminDashboard
+exports.getTodayOrders = async (req, res) => {
+  try {
+    const now   = new Date();
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    const end   = new Date(now);
+    end.setHours(23, 59, 59, 999);
+
+    const orders = await Order.find({ createdAt: { $gte: start, $lte: end } })
+      .select("-__v")
+      // Only fetch the sub-fields the dashboard UI renders
+      .populate("products.productId", "name image additions basePrice prices discount")
+      .populate("userId", "phone")
+      .populate("shippingAddress", "name deliveryCost")
+      .lean()
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, count: orders.length, data: orders });
+  } catch (err) {
+    console.error("getTodayOrders error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 // GET orders by user ID
 exports.getOrdersByUserId = async (req, res) => {
   try {

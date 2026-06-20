@@ -146,7 +146,6 @@
 // //   t: PropTypes.func.isRequired,
 // // };
 
-
 // import React, { useCallback } from "react";
 // import PropTypes from "prop-types";
 // import cliq from "@/assets/cliq.png";
@@ -292,7 +291,6 @@
 
 // export default PaymentMethodSelector;
 
-
 // // import React, { useCallback } from "react";
 // // import PropTypes from "prop-types";
 // // import cliq from "@/assets/cliq.png";
@@ -407,11 +405,11 @@
 // //           </span>
 
 // //           {/* CliQ Logo */}
-// //           <img 
-// //             src={cliq} 
-// //             className="w-8 grayscale object-contain" 
-// //             alt="CliQ" 
-// //             loading="lazy" 
+// //           <img
+// //             src={cliq}
+// //             className="w-8 grayscale object-contain"
+// //             alt="CliQ"
+// //             loading="lazy"
 // //           />
 // //         </div>
 // //       </div>
@@ -429,8 +427,6 @@
 
 // // export default PaymentMethodSelector;
 
-
-
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import cliq from "@/assets/cliq.png";
@@ -439,9 +435,18 @@ import { PAYMENT_METHODS, PAYMENT_LOGOS } from "./constants";
 import { isValidImageUrl } from "@/utils/inputSanitization";
 
 const PaymentMethodSelector = React.memo(({ method, setMethod, t }) => {
-  const handleCardClick = useCallback(() => setMethod(PAYMENT_METHODS.CARD), [setMethod]);
-  const handleCliqClick = useCallback(() => setMethod(PAYMENT_METHODS.CLIQ), [setMethod]);
-  const handleOrangeClick = useCallback(() => setMethod(PAYMENT_METHODS.ORANGE_MONEY), [setMethod]);
+  const handleCardClick = useCallback(
+    () => setMethod(PAYMENT_METHODS.CARD),
+    [setMethod],
+  );
+  const handleCliqClick = useCallback(
+    () => setMethod(PAYMENT_METHODS.CLIQ),
+    [setMethod],
+  );
+  const handleOrangeClick = useCallback(
+    () => setMethod(PAYMENT_METHODS.ORANGE_MONEY),
+    [setMethod],
+  );
 
   const optionClass = (active) =>
     `flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition-all ${
@@ -481,17 +486,32 @@ const PaymentMethodSelector = React.memo(({ method, setMethod, t }) => {
           <div className="flex items-center gap-1.5">
             {isValidImageUrl(PAYMENT_LOGOS.VISA) && (
               <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm h-7 w-12">
-                <img src={PAYMENT_LOGOS.VISA} className="h-3.5 w-auto object-contain" alt="Visa" loading="lazy" />
+                <img
+                  src={PAYMENT_LOGOS.VISA}
+                  className="h-3.5 w-auto object-contain"
+                  alt="Visa"
+                  loading="lazy"
+                />
               </span>
             )}
             {isValidImageUrl(PAYMENT_LOGOS.MASTERCARD) && (
               <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-1 shadow-sm h-7 w-12">
-                <img src={PAYMENT_LOGOS.MASTERCARD} className="h-5 w-auto object-contain" alt="Mastercard" loading="lazy" />
+                <img
+                  src={PAYMENT_LOGOS.MASTERCARD}
+                  className="h-5 w-auto object-contain"
+                  alt="Mastercard"
+                  loading="lazy"
+                />
               </span>
             )}
             {isValidImageUrl(PAYMENT_LOGOS.ApplePay) && (
               <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-1.5 py-1 shadow-sm h-7 w-12">
-                <img src={PAYMENT_LOGOS.ApplePay} className="h-5 w-auto object-contain" alt="Apple Pay" loading="lazy" />
+                <img
+                  src={PAYMENT_LOGOS.ApplePay}
+                  className="h-5 w-auto object-contain"
+                  alt="Apple Pay"
+                  loading="lazy"
+                />
               </span>
             )}
           </div>
@@ -516,24 +536,17 @@ const PaymentMethodSelector = React.memo(({ method, setMethod, t }) => {
           <img src={download} className="w-8" alt="CliQ" loading="lazy" />
         </div>
 
-        {/* Orange Money */}
+        {/* Orange Money — temporarily disabled */}
         <div
-          onClick={handleOrangeClick}
-          className={optionClass(method === PAYMENT_METHODS.ORANGE_MONEY)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && handleOrangeClick()}
+          className="flex items-center gap-2 p-3 border rounded-xl border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed select-none"
+          aria-disabled="true"
         >
-          <div className={radioClass(method === PAYMENT_METHODS.ORANGE_MONEY)}>
-            {method === PAYMENT_METHODS.ORANGE_MONEY && (
-              <div className="w-2 h-2 bg-red-500 rounded-full" />
-            )}
-          </div>
-          <span className="flex-1 font-medium text-sm">
+          <div className="w-4 h-4 rounded-full border border-gray-300 flex items-center justify-center" />
+          <span className="flex-1 font-medium text-sm text-gray-400">
             Orange Money / CliQ
           </span>
-          <div className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm h-7">
-            <span className="text-orange-500 font-bold text-xs">🟠 Orange</span>
+          <div className="inline-flex items-center justify-center bg-gray-100 border border-gray-200 rounded-md px-2 py-1 h-7">
+            <span className="text-gray-400 font-bold text-xs">غير متاح</span>
           </div>
         </div>
       </div>
