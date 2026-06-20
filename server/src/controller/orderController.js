@@ -50,22 +50,115 @@ exports.getOrderById = async (req, res) => {
   }
 };
 
-// GET all orders (optional status filter)
+// GET all orders — paginated, with optional status + search filters
 exports.getAllOrders = async (req, res) => {
   try {
-    const { status } = req.query;
-    const filter = status ? { status } : {};
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(100, parseInt(req.query.limit) || 30);
+    const { status, search } = req.query;
 
-    const orders = await Order.find(filter)
-      .populate("products.productId")
-      .populate("userId", "phone name")
-      .populate("shippingAddress")
-      .lean()
-      .sort({ createdAt: -1 });
+    const filter = {};
+    if (status) filter.status = status;
 
-    res.status(200).json({ success: true, count: orders.length, data: orders });
+    if (search) {
+      const s    = search.trim();
+      const asInt = parseInt(s);
+
+      if (!isNaN(asInt) && String(asInt) === s) {
+        // Pure integer → match sequenceNumber exactly
+        filter.sequenceNumber = asInt;
+      } else if (/^[\d+]{6,}$/.test(s)) {
+        // Looks like a phone number → find matching users first, then filter orders
+        const userModel = require("../models/user");
+        const userIds = await userModel
+          .find({ phone: { $regex: s, $options: "i" } })
+          .select("_id")
+          .lean()
+          .then((us) => us.map((u) => u._id));
+        filter.userId = { $in: userIds };
+      } else {
+        // Free text → match stored userDetails.name on the order
+        filter["userDetails.name"] = { $regex: s, $options: "i" };
+      }
+    }
+
+    const [orders, total] = await Promise.all([
+      Order.find(filter)
+        .select("-__v")
+        .populate("userId", "phone")
+        .populate("products.productId", "name image")
+        .populate("shippingAddress", "name deliveryCost")
+        .lean()
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit),
+      Order.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data:  orders,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+    });
   } catch (err) {
     console.error("getAllOrders error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// GET aggregated order stats — used exclusively by Statistics.jsx
+// Returns pre-computed totals + per-user breakdown so the frontend
+// never has to download 2000+ raw order documents.
+exports.getOrdersStats = async (req, res) => {
+  try {
+    const { period } = req.query; // 'all' | 'today' | 'week' | 'month'
+    const now = new Date();
+    let dateMatch = {};
+
+    if (period === "today") {
+      const start = new Date(now); start.setHours(0, 0, 0, 0);
+      const end   = new Date(now); end.setHours(23, 59, 59, 999);
+      dateMatch = { createdAt: { $gte: start, $lte: end } };
+    } else if (period === "week") {
+      // Saturday-anchored week to match date-fns weekStartsOn:6
+      const dow   = now.getDay();            // 0=Sun … 6=Sat
+      const diff  = dow >= 6 ? 0 : dow + 1; // days back to Saturday
+      const start = new Date(now);
+      start.setDate(now.getDate() - diff);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      end.setHours(23, 59, 59, 999);
+      dateMatch = { createdAt: { $gte: start, $lte: end } };
+    } else if (period === "month") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      dateMatch = { createdAt: { $gte: start, $lte: end } };
+    }
+
+    // Two aggregations in parallel:
+    // 1. Overall totals  2. Per-user breakdown (for cross-referencing with users list)
+    const [totals, userStats] = await Promise.all([
+      Order.aggregate([
+        { $match: dateMatch },
+        { $group: { _id: null, totalRevenue: { $sum: "$totalPrice" }, totalOrders: { $sum: 1 } } },
+      ]),
+      Order.aggregate([
+        { $match: dateMatch },
+        { $group: { _id: "$userId", totalOrders: { $sum: 1 }, totalSpent: { $sum: "$totalPrice" } } },
+      ]),
+    ]);
+
+    res.status(200).json({
+      success:      true,
+      totalRevenue: totals[0]?.totalRevenue || 0,
+      totalOrders:  totals[0]?.totalOrders  || 0,
+      userStats,    // [{ _id: userId, totalOrders, totalSpent }]
+    });
+  } catch (err) {
+    console.error("getOrdersStats error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

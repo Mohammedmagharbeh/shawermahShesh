@@ -42,7 +42,10 @@ import Loading from "@/components/common/Loading";
 
 export default function StatisticsPage() {
   const { getAllUsers } = useUser();
-  const { orders, getAllOrders } = useOrder();
+  const { getOrdersStats } = useOrder();
+  const [statsData, setStatsData] = useState({ totalRevenue: 0, totalOrders: 0, userStats: [] });
+  // Map of userId → { totalOrders, totalSpent } for O(1) per-user lookups
+  const [userStatsMap, setUserStatsMap] = useState(new Map());
   const [orderedUsers, setOrderedUsers] = useState([]);
   const [notOrderedUsers, setNotOrderedUsers] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
@@ -57,26 +60,24 @@ export default function StatisticsPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const users = await getAllUsers();
-        const allOrders = await getAllOrders();
+        const [users, stats] = await Promise.all([
+          getAllUsers(),
+          getOrdersStats(dateFilter),
+        ]);
 
-        const filteredOrders = applyDateFilter(allOrders, dateFilter);
-        const orderedUserIds = new Set(
-          filteredOrders.map((o) => o.userId?._id || o.userDetails?._id),
+        // Build a fast-lookup Map: userId (string) → { totalOrders, totalSpent }
+        const map = new Map(
+          (stats.userStats || []).map((s) => [String(s._id), s])
         );
+        setUserStatsMap(map);
+        setStatsData(stats);
 
-        const visitors = applyDateFilterToUsers(users, dateFilter);
-        const ordered = visitors.filter((u) => orderedUserIds.has(u._id));
-        const notOrdered = visitors.filter((u) => !orderedUserIds.has(u._id));
-
-        const revenue = filteredOrders.reduce(
-          (sum, o) => sum + o.totalPrice,
-          0,
-        );
-
-        setOrderedUsers(ordered);
-        setNotOrderedUsers(notOrdered);
-        setTotalRevenue(revenue);
+        // Cross-reference users with the ordered-userId set
+        const orderedIdSet = new Set(map.keys());
+        const visitors = applyDateFilterToUsers(users || [], dateFilter);
+        setOrderedUsers(visitors.filter((u) => orderedIdSet.has(String(u._id))));
+        setNotOrderedUsers(visitors.filter((u) => !orderedIdSet.has(String(u._id))));
+        setTotalRevenue(stats.totalRevenue || 0);
         setTotalVisitors(visitors);
       } catch (error) {
         console.error("Error fetching statistics:", error);
@@ -90,31 +91,7 @@ export default function StatisticsPage() {
 
   useEffect(() => setSearchTerm(""), [filterStatus]);
 
-  const applyDateFilter = (orders, filter) => {
-    const now = new Date();
-    return orders.filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      switch (filter) {
-        case "today":
-          return isWithinInterval(orderDate, {
-            start: startOfDay(now),
-            end: endOfDay(now),
-          });
-        case "week":
-          return isWithinInterval(orderDate, {
-            start: startOfWeek(now, { weekStartsOn: 6 }),
-            end: endOfWeek(now, { weekStartsOn: 6 }),
-          });
-        case "month":
-          return isWithinInterval(orderDate, {
-            start: startOfMonth(now),
-            end: endOfMonth(now),
-          });
-        default:
-          return true;
-      }
-    });
-  };
+  // NOTE: order date filtering is now done server-side in getOrdersStats({ period })
 
   const applyDateFilterToUsers = (users, filter) => {
     const now = new Date();
@@ -143,17 +120,11 @@ export default function StatisticsPage() {
   };
 
   const getTotalOrdersByUser = (userId) => {
-    return orders.filter(
-      (order) => (order.userId?._id || order.userDetails?._id) === userId,
-    ).length;
+    return userStatsMap.get(String(userId))?.totalOrders || 0;
   };
 
   const getTotalSpentByUser = (userId) => {
-    return orders
-      .filter(
-        (order) => (order.userId?._id || order.userDetails?._id) === userId,
-      )
-      .reduce((sum, order) => sum + order.totalPrice, 0);
+    return userStatsMap.get(String(userId))?.totalSpent || 0;
   };
 
   // ✅ تحديث البحث ليشمل الـ username
@@ -176,10 +147,8 @@ export default function StatisticsPage() {
     );
   }, [filterStatus, orderedUsers, notOrderedUsers, totalVisitors, searchTerm]);
 
-  const filteredOrders = useMemo(
-    () => applyDateFilter(orders, dateFilter),
-    [orders, dateFilter],
-  );
+  // filteredOrders count comes from the server aggregation, no raw order array needed
+  const filteredOrders = { length: statsData.totalOrders };
 
   // ✅ تحديث الاكسل ليشمل الـ username
   const exportToExcel = () => {

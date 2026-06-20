@@ -10,6 +10,7 @@ export const useOrder = () => useContext(OrderContext);
 
 export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
+  const [ordersPagination, setOrdersPagination] = useState({ total: 0, page: 1, pages: 1 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user } = useUser();
@@ -17,25 +18,48 @@ export const OrderProvider = ({ children }) => {
 
   const API_URL = `${import.meta.env.VITE_BASE_URL}/order`; // change to your backend URL
 
-  // 🔹 Get all orders (admin use)
-  const getAllOrders = async () => {
+  // 🔹 Get all orders — paginated (used by Orders.jsx)
+  const getAllOrders = async ({ page = 1, limit = 30, status, search } = {}) => {
     setLoading(true);
     try {
+      const params = { page, limit };
+      if (status) params.status = status;
+      if (search)  params.search  = search;
+
       const res = await axios.get(`${API_URL}/get`, {
         headers: {
           "Content-Type": "application/json",
           authorization: `Bearer ${user.token}`,
         },
+        params,
       });
       setOrders(res.data.data);
+      setOrdersPagination({ total: res.data.total, page: res.data.page, pages: res.data.pages });
       setError(null);
-      return res.data.data; // return directly without overwriting state
+      return res.data;
     } catch (err) {
-      const msg = err.response?.data?.message || t("failed_fetch_orders");
-
-      setError(err.response?.data?.message || "Failed to fetch orders");
+      setError(err.response?.data?.message || t("failed_fetch_orders"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 🔹 Get aggregated stats — used exclusively by Statistics.jsx
+  // Returns pre-computed { totalRevenue, totalOrders, userStats[] } via MongoDB aggregation.
+  // No raw order documents are transferred, scales to any order count.
+  const getOrdersStats = async (period = "all") => {
+    try {
+      const res = await axios.get(`${API_URL}/stats`, {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.token}`,
+        },
+        params: { period },
+      });
+      return res.data; // { success, totalRevenue, totalOrders, userStats }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to fetch order stats");
+      return { totalRevenue: 0, totalOrders: 0, userStats: [] };
     }
   };
 
@@ -194,9 +218,11 @@ export const OrderProvider = ({ children }) => {
     <OrderContext.Provider
       value={{
         orders,
+        ordersPagination,
         loading,
         error,
         getAllOrders,
+        getOrdersStats,
         getTodayOrders,
         appendOrder,
         patchOrder,
