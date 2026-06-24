@@ -200,8 +200,8 @@ function generateOTP() {
 
 async function sendOTP(phone, otp, employeeName = null) {
   const senderid = "Sh.Sheesh";
-  const accname = "highfit";
-  const accpass = "RwQ$$8P_m@RA!Dsd88";
+  const accname = "highfitgym";
+  const accpass = "mE5jT3oB3pK8cG1r";
 
   let msg = `Your OTP is ${otp}`;
   if (employeeName) {
@@ -234,7 +234,7 @@ async function sendOTP(phone, otp, employeeName = null) {
 async function sendOrderConfirm(phone) {
   const senderid = "Sh.Sheesh";
   const accname = "highfit";
-  const accpass = "RwQ$$8P_m@RA!Dsd88";
+  const accpass = "mE5jT3oB3pK8cG1r";
   const msg = `تم التأكيد - طلبك قيد التحضير .`;
   
   const encodedMsg = encodeURIComponent(msg);

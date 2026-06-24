@@ -530,7 +530,7 @@ const PaymentMethodSelector = React.memo(({ method, setMethod, t }) => {
             )}
           </div>
           <span className="flex-1 font-medium text-sm">
-            Orange Money / CliQ
+            Orange Money
           </span>
           <div className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm h-7">
             <span className="text-orange-500 font-bold text-xs">🟠 Orange</span>

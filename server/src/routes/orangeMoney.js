@@ -1,10 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { getServicers, rtpOtpValidate, rtpOtpConfirm } = require("../controller/orangeMoneyService");
+const {
+  getServicers,
+  rtpOtpValidate,
+  rtpOtpConfirm,
+} = require("../controller/orangeMoneyService");
 const Order = require("../models/orders");
+const Cart = require("../models/cart");
 const { v4: uuidv4 } = require("uuid");
 
-// GET /orange/servicers — جيب قائمة البنوك
+// GET /orange/servicers
 router.get("/servicers", async (req, res) => {
   try {
     const servicers = await getServicers();
@@ -14,20 +19,18 @@ router.get("/servicers", async (req, res) => {
   }
 });
 
-// POST /orange/initiate — ابعت OTP
+// POST /orange/initiate
 router.post("/initiate", async (req, res) => {
   try {
     const { phone, amount, servicerCode } = req.body;
-    console.log("=== INITIATE REQUEST ===", { phone, amount, servicerCode }); // ✅ أضف هذا
+    console.log("=== INITIATE REQUEST ===", { phone, amount, servicerCode });
 
     if (!phone || !amount || !servicerCode) {
-      return res.status(400).json({
-        success: false,
-        error: "phone, amount, servicerCode مطلوبين",
-      });
+      return res
+        .status(400)
+        .json({ success: false, error: "phone, amount, servicerCode مطلوبين" });
     }
 
-    // format الرقم: 0096207XXXXXXXX
     const alias = `00962${phone.replace(/^0/, "")}`;
     const merchantReference = uuidv4();
 
@@ -39,41 +42,61 @@ router.post("/initiate", async (req, res) => {
       merchantReference,
     });
 
+    console.log("=== INITIATE RESULT ===", result);
+
     if (!result.isSuccess) {
-      return res.status(400).json({
-        success: false,
-        error: result.errors?.[0]?.description || "فشل إرسال OTP",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: result.errors?.[0]?.description || "فشل إرسال OTP",
+        });
     }
 
-    // احفظ merchantReference مؤقتاً علشان نستخدمه في الـ confirm
     res.json({
       success: true,
       merchantReference,
       message: "تم إرسال OTP على رقمك",
     });
   } catch (err) {
+    console.error("initiate error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// POST /orange/confirm — تأكيد الدفع
+// POST /orange/confirm
 router.post("/confirm", async (req, res) => {
   try {
-    const {
+    const { phone, amount, servicerCode, merchantReference, otp, orderData } =
+      req.body;
+    console.log("=== CONFIRM REQUEST ===", {
       phone,
       amount,
       servicerCode,
       merchantReference,
       otp,
-      orderData,
-    } = req.body;
+    });
 
     if (!phone || !amount || !servicerCode || !merchantReference || !otp) {
-      return res.status(400).json({
-        success: false,
-        error: "بيانات ناقصة",
-      });
+      return res.status(400).json({ success: false, error: "بيانات ناقصة" });
+    }
+
+    if (!orderData?.totalPrice) {
+      return res
+        .status(400)
+        .json({ success: false, error: "orderData.totalPrice مطلوب" });
+    }
+
+    if (!Array.isArray(orderData.products) || orderData.products.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, error: "orderData.products مطلوب" });
+    }
+
+    if (!orderData.products.every((p) => p.priceAtPurchase != null)) {
+      return res
+        .status(400)
+        .json({ success: false, error: "كل منتج لازم يحتوي priceAtPurchase" });
     }
 
     const alias = `00962${phone.replace(/^0/, "")}`;
@@ -87,29 +110,42 @@ router.post("/confirm", async (req, res) => {
       otp,
     });
 
+    console.log("=== CONFIRM RESULT ===", result);
+
     if (!result.isSuccess) {
-      return res.status(400).json({
-        success: false,
-        error: result.errors?.[0]?.description || "فشل التحقق",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: result.errors?.[0]?.description || "فشل التحقق من OTP",
+        });
     }
 
-    // احفظ الطلب
     const order = await Order.create({
       ...orderData,
+      status: "Processing",
       payment: {
         method: "orange_money",
-        transactionReference: result.TransactionReference || merchantReference,
+        transactionId: result.TransactionReference || merchantReference,
         status: "paid",
+        paidAt: new Date(),
       },
     });
 
-    res.json({
+    await Cart.findOneAndUpdate({ userId: orderData.userId }, { products: [] });
+
+    const io = req.app.get("io");
+    if (io) io.emit("newOrder", order);
+
+    console.log("=== ORDER CREATED ===", order._id);
+
+    return res.json({
       success: true,
       orderId: order._id,
-      transactionReference: result.TransactionReference,
+      transactionReference: result.TransactionReference || merchantReference,
     });
   } catch (err) {
+    console.error("confirm error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
