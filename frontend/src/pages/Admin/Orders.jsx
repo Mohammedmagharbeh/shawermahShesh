@@ -420,13 +420,33 @@ const statusColors = {
 function Orders() {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
-  const { orders, getAllOrders, updateOrder, deleteOrder, loading } = useOrder();
+  const {
+    orders,
+    getAllOrders,
+    updateOrder,
+    deleteOrder,
+    loading,
+    ordersPagination,
+  } = useOrder();
   const { user } = useUser();
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  // Debounce search to avoid hammering the server on every keystroke
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
-    getAllOrders();
-  }, []);
+    const id = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+    return () => clearTimeout(id);
+  }, [searchTerm]);
+
+  // Reset to page 1 whenever the search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    getAllOrders({ page: currentPage, search: debouncedSearch || undefined });
+  }, [currentPage, debouncedSearch]);
 
   const handleStatusChange = (orderId, newStatus) => {
     updateOrder(orderId, { status: newStatus });
@@ -435,28 +455,22 @@ function Orders() {
   const handlePaymentStatusChange = (orderId, newPaymentStatus) => {
     const orderToUpdate = orders.find((o) => o._id === orderId);
     if (!orderToUpdate) return;
-    
-    updateOrder(orderId, { 
-      payment: { 
-        ...orderToUpdate.payment, 
+
+    updateOrder(orderId, {
+      payment: {
+        ...orderToUpdate.payment,
         status: newPaymentStatus,
-        paidAt: newPaymentStatus === "paid" ? new Date() : orderToUpdate.payment?.paidAt
-      } 
+        paidAt:
+          newPaymentStatus === "paid"
+            ? new Date()
+            : orderToUpdate.payment?.paidAt,
+      },
     });
   };
 
-  // الفلترة هنا للبحث فقط، وتعرض كل الطلبات بدون استثناء تاريخ
-  const filteredOrders = orders
-    .filter((order) => {
-      const sTerm = searchTerm.toLowerCase();
-      return (
-        searchTerm === "" ||
-        order.sequenceNumber?.toString().includes(sTerm) ||
-        order.userId?.phone?.includes(sTerm) ||
-        order.userDetails?.name?.toLowerCase().includes(sTerm)
-      );
-    })
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  // Orders come pre-sorted from the server; no client-side sort needed.
+  // Client-side filtering is removed — search is now server-driven.
+  const filteredOrders = orders;
 
   if (loading) return <Loading />;
 
@@ -465,12 +479,17 @@ function Orders() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t("all_orders")}</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {t("all_orders")}
+            </h1>
             <p className="mt-1 text-muted-foreground">
-              {t("total_orders")}: <span className="font-semibold text-primary">{filteredOrders.length}</span>
+              {t("total_orders")}:{" "}
+              <span className="font-semibold text-primary">
+                {ordersPagination.total}
+              </span>
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3 w-full md:w-auto">
             <input
               type="text"
@@ -484,64 +503,121 @@ function Orders() {
 
         <div className="space-y-4">
           {filteredOrders.length === 0 ? (
-            <Card className="p-12 text-center text-muted-foreground">{t("no_orders_found")}</Card>
+            <Card className="p-12 text-center text-muted-foreground">
+              {t("no_orders_found")}
+            </Card>
           ) : (
             filteredOrders.map((order) => (
-              <Card key={order._id} className="overflow-hidden border-2 transition-shadow hover:shadow-lg">
+              <Card
+                key={order._id}
+                className="overflow-hidden border-2 transition-shadow hover:shadow-lg"
+              >
                 <CardHeader className="border-b bg-muted/20 pb-4">
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-muted-foreground">{t("order_id")}:</span>
-                        <span className="font-mono font-bold">#{order.sequenceNumber}</span>
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {t("order_id")}:
+                        </span>
+                        <span className="font-mono font-bold">
+                          #{order.sequenceNumber}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-muted-foreground">{t("customer")}:</span>
-                        <span className="text-sm font-semibold">{order.userDetails?.name} ({order.userId?.phone})</span>
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {t("customer")}:
+                        </span>
+                        <span className="text-sm font-semibold">
+                          {order.userDetails?.name} ({order.userId?.phone})
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-muted-foreground">{t("date")}:</span>
-                        <span className="text-sm">{new Date(order.createdAt).toLocaleString(`${selectedLanguage}-GB`)}</span>
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {t("date")}:
+                        </span>
+                        <span className="text-sm">
+                          {new Date(order.createdAt).toLocaleString(
+                            `${selectedLanguage}-GB`,
+                          )}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-muted-foreground">{t("order_type")}:</span>
-                        <span className="text-sm">{order.orderType === "delivery" ? t("delivery") : t("pickup")}</span>
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {t("order_type")}:
+                        </span>
+                        <span className="text-sm">
+                          {order.orderType === "delivery"
+                            ? t("delivery")
+                            : t("pickup")}
+                        </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Select
-                          value={order.payment?.status || "unpaid"}
-                          onValueChange={(value) => handlePaymentStatusChange(order._id, value)}
-                        >
-                          <SelectTrigger className="w-[160px]">
-                            <SelectValue>
-                              <Badge className={order.payment?.status === "paid" ? "bg-green-600 text-white" : "bg-secondary text-secondary-foreground"}>
-                                {order.payment?.status ? t(order.payment.status) : t("unpaid")} ({order.payment?.method || "N/A"})
-                              </Badge>
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="unpaid">{t("unpaid")}</SelectItem>
-                            <SelectItem value="paid">{t("paid")}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Select value={order.status} onValueChange={(val) => handleStatusChange(order._id, val)}>
-                            <SelectTrigger className="w-[160px]">
-                                <SelectValue>
-                                    <Badge className={statusColors[order.status]}>{t(order.status?.toLowerCase())}</Badge>
-                                </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Processing">{t("processing")}</SelectItem>
-                                <SelectItem value="Confirmed">{t("confirmed")}</SelectItem>
-                                <SelectItem value="Shipped">{t("shipped")}</SelectItem>
-                                <SelectItem value="OutForDelivery">{t("outfordelivery")}</SelectItem>
-                                <SelectItem value="ReadyForPickup">{t("readyforpickup")}</SelectItem>
-                                <SelectItem value="Delivered">{t("delivered")}</SelectItem>
-                                <SelectItem value="Cancelled">{t("cancelled")}</SelectItem>
-                            </SelectContent>
-                        </Select>
+                      <Select
+                        value={order.payment?.status || "unpaid"}
+                        onValueChange={(value) =>
+                          handlePaymentStatusChange(order._id, value)
+                        }
+                      >
+                        <SelectTrigger className="w-[160px]">
+                          <SelectValue>
+                            <Badge
+                              className={
+                                order.payment?.status === "paid"
+                                  ? "bg-green-600 text-white"
+                                  : "bg-secondary text-secondary-foreground"
+                              }
+                            >
+                              {order.payment?.status
+                                ? t(order.payment.status)
+                                : t("unpaid")}{" "}
+                              ({order.payment?.method || "N/A"})
+                            </Badge>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unpaid">{t("unpaid")}</SelectItem>
+                          <SelectItem value="paid">{t("paid")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select
+                        value={order.status}
+                        onValueChange={(val) =>
+                          handleStatusChange(order._id, val)
+                        }
+                      >
+                        <SelectTrigger className="w-[160px]">
+                          <SelectValue>
+                            <Badge className={statusColors[order.status]}>
+                              {t(order.status?.toLowerCase())}
+                            </Badge>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Processing">
+                            {t("processing")}
+                          </SelectItem>
+                          <SelectItem value="Confirmed">
+                            {t("confirmed")}
+                          </SelectItem>
+                          <SelectItem value="Shipped">
+                            {t("shipped")}
+                          </SelectItem>
+                          <SelectItem value="OutForDelivery">
+                            {t("outfordelivery")}
+                          </SelectItem>
+                          <SelectItem value="ReadyForPickup">
+                            {t("readyforpickup")}
+                          </SelectItem>
+                          <SelectItem value="Delivered">
+                            {t("delivered")}
+                          </SelectItem>
+                          <SelectItem value="Cancelled">
+                            {t("cancelled")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </CardHeader>
@@ -549,17 +625,27 @@ function Orders() {
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     {order.products?.map((item) => (
-                      <div key={item._id} className="flex items-center justify-between gap-4 rounded-lg border p-4 bg-muted/30">
+                      <div
+                        key={item._id}
+                        className="flex items-center justify-between gap-4 rounded-lg border p-4 bg-muted/30"
+                      >
                         <div className="flex items-center gap-4">
                           <img
                             src={item.productId?.image || product_placeholder}
                             className="h-16 w-16 rounded-md object-cover border"
-                            onError={(e) => { e.target.src = product_placeholder; }}
+                            onError={(e) => {
+                              e.target.src = product_placeholder;
+                            }}
                           />
                           <div className="flex flex-col gap-1">
-                            <p className="font-semibold">{item.productId?.name[selectedLanguage] || t("deleted_product")}</p>
-                            <p className="text-sm text-muted-foreground">{t("quantity")}: {item.quantity}</p>
-                            
+                            <p className="font-semibold">
+                              {item.productId?.name[selectedLanguage] ||
+                                t("deleted_product")}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {t("quantity")}: {item.quantity}
+                            </p>
+
                             {/* عرض البروتين */}
                             {item.selectedProtein && (
                               <div className="mt-1">
@@ -572,18 +658,29 @@ function Orders() {
                             {/* الإضافات */}
                             {item.additions?.length > 0 && (
                               <div className="flex gap-1 flex-wrap mt-1">
-                                  {item.additions.map((a) => (
-                                    <Badge key={a._id} variant="secondary" className="text-[10px]">
-                                      {a.name[selectedLanguage]}
-                                      {a.price > 0 && ` (+${a.price.toFixed(2)})`}
-                                    </Badge>
-                                  ))}
+                                {item.additions.map((a) => (
+                                  <Badge
+                                    key={a._id}
+                                    variant="secondary"
+                                    className="text-[10px]"
+                                  >
+                                    {a.name[selectedLanguage]}
+                                    {a.price > 0 && ` (+${a.price.toFixed(2)})`}
+                                  </Badge>
+                                ))}
                               </div>
                             )}
 
                             {/* الملاحظات و Spicy */}
                             <div className="flex gap-2 items-center mt-1">
-                              {item.isSpicy && <Badge variant="destructive" className="text-[10px]">{t("spicy")}</Badge>}
+                              {item.isSpicy && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-[10px]"
+                                >
+                                  {t("spicy")}
+                                </Badge>
+                              )}
                               {item.notes && (
                                 <Badge className="bg-[#FFC400] text-black font-bold text-[10px] hover:bg-[#FFC400]">
                                   {t("notes")}: {item.notes}
@@ -593,7 +690,9 @@ function Orders() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-primary">{item.priceAtPurchase} JOD</p>
+                          <p className="font-bold text-primary">
+                            {item.priceAtPurchase} JOD
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -602,7 +701,9 @@ function Orders() {
                   {/* ملخص السعر */}
                   <div className="mt-6 border-t pt-4 space-y-1">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t("order_subtotal")}:</span>
+                      <span className="text-muted-foreground">
+                        {t("order_subtotal")}:
+                      </span>
                       <span>
                         {(
                           order.totalPrice -
@@ -626,7 +727,9 @@ function Orders() {
                       return total + itemAdditionsTotal * item.quantity;
                     }, 0) > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">{t("additions")}:</span>
+                        <span className="text-muted-foreground">
+                          {t("additions")}:
+                        </span>
                         <span className="text-blue-600">
                           +
                           {order.products
@@ -644,13 +747,19 @@ function Orders() {
                     )}
                     {order.orderType === "delivery" && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">{t("delivery_cost")}:</span>
-                        <span>{order.shippingAddress?.deliveryCost || 0} JOD</span>
+                        <span className="text-muted-foreground">
+                          {t("delivery_cost")}:
+                        </span>
+                        <span>
+                          {order.shippingAddress?.deliveryCost || 0} JOD
+                        </span>
                       </div>
                     )}
                     <div className="flex justify-between items-center border-t pt-2">
                       <span className="font-bold">{t("order_total")}:</span>
-                      <span className="text-xl font-bold text-primary">{order.totalPrice.toFixed(2)} JOD</span>
+                      <span className="text-xl font-bold text-primary">
+                        {order.totalPrice.toFixed(2)} JOD
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -658,6 +767,34 @@ function Orders() {
             ))
           )}
         </div>
+
+        {/* Pagination controls */}
+        {ordersPagination.pages > 1 && (
+          <div className="flex items-center justify-center gap-3 mt-8 pb-4">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-lg border text-sm font-medium disabled:opacity-40 hover:bg-muted transition-colors"
+            >
+              {t("prev") || "السابق"}
+            </button>
+            <span className="text-sm text-muted-foreground">
+              {currentPage} / {ordersPagination.pages}
+              <span className="ml-2 text-xs">
+                ({ordersPagination.total} {t("total_orders") || "طلب"})
+              </span>
+            </span>
+            <button
+              onClick={() =>
+                setCurrentPage((p) => Math.min(ordersPagination.pages, p + 1))
+              }
+              disabled={currentPage === ordersPagination.pages}
+              className="px-4 py-2 rounded-lg border text-sm font-medium disabled:opacity-40 hover:bg-muted transition-colors"
+            >
+              {t("next") || "التالي"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

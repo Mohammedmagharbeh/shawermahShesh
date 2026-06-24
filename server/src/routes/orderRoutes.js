@@ -5,6 +5,8 @@
     createOrder,
     deleteOrder,
     getAllOrders,
+    getOrdersStats,
+    getTodayOrders,
     getOrderById,
     getOrdersByUserId,
     updateOrder,
@@ -12,8 +14,10 @@
 
   const router = express.Router();
 
-  router.get("/get", validateJWT, getAllOrders);
-  router.get("/user/:userId", validateJWT, getOrdersByUserId); // must come BEFORE /:id
+  router.get("/get",   validateJWT, getAllOrders);              // paginated — Orders.jsx
+  router.get("/stats", validateJWT, getOrdersStats);            // aggregated — Statistics.jsx
+  router.get("/today", validateJWT, getTodayOrders);            // date-scoped — AdminDashboard
+  router.get("/user/:userId", validateJWT, getOrdersByUserId);  // must come BEFORE /:id
   router.get("/:id", validateJWT, getOrderById);
   router.post("/post", validateJWT, createOrder);
   // router.put("/:id", validateJWT, updateOrder);

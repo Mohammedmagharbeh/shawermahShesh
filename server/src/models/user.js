@@ -28,5 +28,9 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Compound index: supports role-filter + createdAt sort used by GET /users
+userSchema.index({ role: 1, createdAt: -1 });
+
 const User = mongoose.model("users", userSchema);
 module.exports = User;

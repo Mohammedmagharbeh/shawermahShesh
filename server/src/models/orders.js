@@ -98,4 +98,11 @@ ordersSchema.pre("save", async function (next) {
 });
 
 const Order = mongoose.model("orders", ordersSchema);
+
+// { createdAt } — supports getTodayOrders date-range query + sort
+ordersSchema.index({ createdAt: -1 });
+
+// Compound — covers fetchPendingOrders (status filter) + createdAt sort in one scan
+ordersSchema.index({ status: 1, createdAt: -1 });
+
 module.exports = Order;

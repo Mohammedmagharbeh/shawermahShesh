@@ -71,6 +71,7 @@ const express = require("express");
 const routes = express.Router();
 const {
   getuser,
+  getAllUsers,
   getAllProducts,
   getSingleProduct,
   getCurrentUser,
@@ -101,7 +102,8 @@ routes.post("/auth/create-employee", validateJWT, createEmployee);
 // 2. مسارات المستخدمين (User Management)
 // ==========================================
 
-routes.get("/users", validateJWT, getuser);
+routes.get("/users", validateJWT, getuser);           // paginated — AdminUsers.jsx
+routes.get("/users/all", validateJWT, getAllUsers);    // flat array — Statistics.jsx
 routes.get("/me", validateJWT, getCurrentUser);
 routes.put("/update-phone", validateJWT, updatePhone);
 
