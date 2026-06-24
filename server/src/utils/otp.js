@@ -44,7 +44,6 @@ async function sendOTP(phone, otp, employeeName = null) {
 
 async function sendOrderConfirm(phone) {
   const senderid = "Sh.Sheesh";
-  const accname = "highfit";
   const accname = "highfitgym";
   const accpass = "mE5jT3oB3pK8cG1r";
   const msg = `تم التأكيد - طلبك قيد التحضير .`;
