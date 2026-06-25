@@ -285,8 +285,33 @@ async function getAccessToken() {
   }
 }
 
+// async function getServicers() {
+//   const token = await getAccessToken();
+//   const response = await axios.get(
+//     `${CONFIG.BASE_URL}/api/Lookup/GetServicersV2`,
+//     {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/json",
+//       },
+//       timeout: 30000,
+//       httpsAgent: new (require("https").Agent)({ rejectUnauthorized: false }),
+//     },
+//   );
+
+//   if (!response.data.isSuccess) {
+//     throw new Error("Failed to fetch servicers");
+//   }
+
+//   return response.data.Response.filter(
+//     (s) => s.RTPMethod === "1" || s.RTPMethod === "3",
+//   );
+// }
+
+
 async function getServicers() {
   const token = await getAccessToken();
+
   const response = await axios.get(
     `${CONFIG.BASE_URL}/api/Lookup/GetServicersV2`,
     {
@@ -294,18 +319,26 @@ async function getServicers() {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      timeout: 30000,
-      httpsAgent: new (require("https").Agent)({ rejectUnauthorized: false }),
-    },
+      httpsAgent: new (require("https").Agent)({
+        rejectUnauthorized: false,
+      }),
+    }
   );
 
-  if (!response.data.isSuccess) {
-    throw new Error("Failed to fetch servicers");
-  }
+  console.log("=== FULL ORANGE RESPONSE ===");
+  console.log(JSON.stringify(response.data, null, 2));
 
-  return response.data.Response.filter(
-    (s) => s.RTPMethod === "1" || s.RTPMethod === "3",
-  );
+  const data = response.data;
+
+  const servicers =
+    data?.Response ||
+    data?.response ||
+    data?.Result ||
+    [];
+
+  console.log("=== EXTRACTED SERVICERS ===", servicers);
+
+  return servicers;
 }
 
 async function rtpOtpValidate({
