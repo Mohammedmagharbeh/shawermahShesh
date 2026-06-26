@@ -152,14 +152,12 @@
 
 // module.exports = router;
 
-// ==================== orangeMoney.js (Router) ====================
 const express = require("express");
 const router = express.Router();
 const {
   getServicers,
   rtpOtpValidate,
   rtpOtpConfirm,
-  inquiryRequestToPayStatus,
 } = require("../controller/orangeMoneyService");
 const Order = require("../models/orders");
 const Cart = require("../models/cart");
@@ -182,9 +180,10 @@ router.post("/initiate", async (req, res) => {
     console.log("=== INITIATE REQUEST ===", { phone, amount, servicerCode });
 
     if (!phone || !amount || !servicerCode) {
-      return res
-        .status(400)
-        .json({ success: false, error: "phone, amount, servicerCode مطلوبين" });
+      return res.status(400).json({
+        success: false,
+        error: "phone, amount, servicerCode مطلوبين",
+      });
     }
 
     const alias = `00962${phone.replace(/^0/, "")}`;
@@ -236,21 +235,24 @@ router.post("/confirm", async (req, res) => {
     }
 
     if (!orderData?.totalPrice) {
-      return res
-        .status(400)
-        .json({ success: false, error: "orderData.totalPrice مطلوب" });
+      return res.status(400).json({
+        success: false,
+        error: "orderData.totalPrice مطلوب",
+      });
     }
 
     if (!Array.isArray(orderData.products) || orderData.products.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, error: "orderData.products مطلوب" });
+      return res.status(400).json({
+        success: false,
+        error: "orderData.products مطلوب",
+      });
     }
 
     if (!orderData.products.every((p) => p.priceAtPurchase != null)) {
-      return res
-        .status(400)
-        .json({ success: false, error: "كل منتج لازم يحتوي priceAtPurchase" });
+      return res.status(400).json({
+        success: false,
+        error: "كل منتج لازم يحتوي priceAtPurchase",
+      });
     }
 
     const alias = `00962${phone.replace(/^0/, "")}`;
@@ -273,25 +275,12 @@ router.post("/confirm", async (req, res) => {
       });
     }
 
-    // ✅ تحقق فعلي من حالة الدفع قبل إنشاء الطلب
-    const statusCheck = await inquiryRequestToPayStatus({ merchantReference });
-
-    if (statusCheck.StatusCode !== 2) {
-      return res.status(400).json({
-        success: false,
-        error:
-          statusCheck.StatusMessageEn ||
-          statusCheck.StatusMessageAr ||
-          "المعاملة لم تكتمل فعلياً، لم يتم الخصم",
-      });
-    }
-
     const order = await Order.create({
       ...orderData,
       status: "Processing",
       payment: {
         method: "orange_money",
-        transactionId: statusCheck.TransactionReference || merchantReference,
+        transactionId: result.TransactionReference || merchantReference,
         status: "paid",
         paidAt: new Date(),
       },
@@ -307,7 +296,7 @@ router.post("/confirm", async (req, res) => {
     return res.json({
       success: true,
       orderId: order._id,
-      transactionReference: statusCheck.TransactionReference || merchantReference,
+      transactionReference: result.TransactionReference || merchantReference,
     });
   } catch (err) {
     console.error("confirm error:", err);
