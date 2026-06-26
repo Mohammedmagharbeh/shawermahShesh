@@ -533,6 +533,7 @@ async function getAccessToken() {
   }
 }
 
+// ✅ مؤقتاً: قبول RTPMethod = 1, 2, أو 3 (production عندك بس "2" مفعّل حالياً)
 async function getServicers() {
   const token = await getAccessToken();
 
@@ -556,8 +557,8 @@ async function getServicers() {
 
   console.log("=== EXTRACTED SERVICERS ===", servicers);
 
-  return servicers.filter(
-    (s) => s.RTPMethod === "1" || s.RTPMethod === "3",
+  return servicers.filter((s) =>
+    ["1", "2", "3"].includes(s.RTPMethod),
   );
 }
 
@@ -662,7 +663,7 @@ async function rtpOtpConfirm({
   return response.data;
 }
 
-// ✅ NEW — Inquiry Request To Pay Status (يأكد هل تم الدفع فعلياً)
+// ✅ Inquiry Request To Pay Status (يأكد هل تم الدفع فعلياً)
 async function inquiryRequestToPayStatus({ merchantReference }) {
   const token = await getAccessToken();
   const AES = CONFIG.INQUIRY_AES_KEY;
