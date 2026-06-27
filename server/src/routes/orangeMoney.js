@@ -306,14 +306,12 @@
 
 // module.exports = router;
 
-// orangeMoney.js (Routes)
 const express = require("express");
 const router = express.Router();
 const {
   getServicers,
   rtpOtpValidate,
   rtpOtpConfirm,
-  inquiryRequestToPayStatus,
 } = require("../controller/orangeMoneyService");
 const Order = require("../models/orders");
 const Cart = require("../models/cart");
@@ -421,35 +419,14 @@ router.post("/confirm", async (req, res) => {
       });
     }
 
-    // ✅ انتظر ثانيتين وبعدين اعمل inquiry
-    console.log("=== WAITING 2 SECONDS BEFORE INQUIRY ===");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    const statusCheck = await inquiryRequestToPayStatus({ merchantReference });
-    console.log("=== INQUIRY RESULT ===", JSON.stringify(statusCheck, null, 2));
-    console.log("=== INQUIRY STATUS CODE ===", statusCheck.StatusCode);
-    console.log("=== INQUIRY STATUS MESSAGE ===", statusCheck.StatusMessageEn);
-
-    if (statusCheck.StatusCode !== 2) {
-      console.error("=== PAYMENT NOT COMPLETED ===", {
-        StatusCode: statusCheck.StatusCode,
-        StatusMessageEn: statusCheck.StatusMessageEn,
-        StatusMessageAr: statusCheck.StatusMessageAr,
-      });
-      return res.status(400).json({
-        success: false,
-        error: statusCheck.StatusMessageEn || statusCheck.StatusMessageAr || "Payment not completed",
-      });
-    }
-
-    console.log("=== PAYMENT CONFIRMED - CREATING ORDER ===");
+    console.log("=== CONFIRM SUCCESS - CREATING ORDER ===");
 
     const order = await Order.create({
       ...orderData,
       status: "Processing",
       payment: {
         method: "orange_money",
-        transactionId: statusCheck.TransactionReference || merchantReference,
+        transactionId: result.TransactionReference || merchantReference,
         status: "paid",
         paidAt: new Date(),
       },
@@ -465,7 +442,7 @@ router.post("/confirm", async (req, res) => {
     return res.json({
       success: true,
       orderId: order._id,
-      transactionReference: statusCheck.TransactionReference || merchantReference,
+      transactionReference: result.TransactionReference || merchantReference,
     });
   } catch (err) {
     console.error("=== CONFIRM ERROR ===", err.message);
