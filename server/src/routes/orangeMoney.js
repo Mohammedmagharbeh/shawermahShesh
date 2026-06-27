@@ -312,6 +312,7 @@ const {
   getServicers,
   rtpOtpValidate,
   rtpOtpConfirm,
+  inquiryRequestToPayStatus,
 } = require("../controller/orangeMoneyService");
 const Order = require("../models/orders");
 const Cart = require("../models/cart");
@@ -419,14 +420,25 @@ router.post("/confirm", async (req, res) => {
       });
     }
 
-    console.log("=== CONFIRM SUCCESS - CREATING ORDER ===");
+    // انتظر 3 ثواني وبعدين اعمل inquiry
+    console.log("=== WAITING 3 SECONDS FOR INQUIRY ===");
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    const statusCheck = await inquiryRequestToPayStatus({ merchantReference });
+    console.log("=== INQUIRY RESULT ===", JSON.stringify(statusCheck, null, 2));
+    console.log("=== INQUIRY STATUS CODE ===", statusCheck.StatusCode);
+    console.log("=== INQUIRY STATUS MESSAGE ===", statusCheck.StatusMessageEn);
+    console.log("=== INQUIRY TRANSACTION REF ===", statusCheck.TransactionReference);
+
+    // عمل الأوردر بغض النظر عن الـ inquiry عشان نشوف شو بيرجع
+    console.log("=== CREATING ORDER ===");
 
     const order = await Order.create({
       ...orderData,
       status: "Processing",
       payment: {
         method: "orange_money",
-        transactionId: result.TransactionReference || merchantReference,
+        transactionId: statusCheck.TransactionReference || result.TransactionReference || merchantReference,
         status: "paid",
         paidAt: new Date(),
       },
@@ -442,7 +454,8 @@ router.post("/confirm", async (req, res) => {
     return res.json({
       success: true,
       orderId: order._id,
-      transactionReference: result.TransactionReference || merchantReference,
+      transactionReference: statusCheck.TransactionReference || merchantReference,
+      inquiryStatus: statusCheck.StatusMessageEn,
     });
   } catch (err) {
     console.error("=== CONFIRM ERROR ===", err.message);
