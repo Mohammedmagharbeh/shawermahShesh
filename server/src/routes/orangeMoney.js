@@ -343,7 +343,8 @@ router.post("/initiate", async (req, res) => {
     }
 
     const alias = `00962${phone.replace(/^0/, "")}`;
-    const merchantReference = uuidv4();
+    // const merchantReference = uuidv4();
+    const merchantReference = uuidv4().replace(/-/g, "").slice(0, 32);
 
     console.log("=== INITIATE ALIAS ===", alias);
     console.log("=== INITIATE MERCHANT REF ===", merchantReference);
