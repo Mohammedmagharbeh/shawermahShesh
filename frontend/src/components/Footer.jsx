@@ -1,6 +1,7 @@
 import { Facebook, Instagram } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import newlogo from "../assets/newlogo.png";
 
 function Footer() {
   const { t } = useTranslation();
@@ -58,14 +59,22 @@ function Footer() {
             </p>
           </div>
 
-          <div className="flex justify-center md:justify-end mb-8 md:mb-0">
+          {/* <div className="flex justify-center md:justify-end mb-8 md:mb-0">
             <img
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo%20Sheesh%202025-cBMQInheJu59v7DqexALEnU0AaaWZq.png"
               alt="Restaurant Logo"
               className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 object-contain"
               loading="lazy"
             />
-          </div>
+          </div> */}
+          <div className="flex justify-center md:justify-end mb-8 md:mb-0">
+  <img
+    src={newlogo}
+    alt="Restaurant Logo"
+    className="h-60 w-60 sm:h-36 sm:w-36 md:h-65 md:w-65 object-contain"
+    loading="lazy"
+  />
+</div>
         </div>
       </div>
     </footer>
