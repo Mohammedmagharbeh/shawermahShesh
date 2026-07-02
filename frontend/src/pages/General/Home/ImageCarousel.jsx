@@ -107,7 +107,7 @@ const ImageCarousel = () => {
               </div> */}
               <div className="absolute bottom-10 sm:bottom-14 w-full flex justify-center z-20 px-4">
   <Link to={"/login"}>
-    <Button
+    {/* <Button
       size="lg"
       className="text-sm sm:text-base md:text-lg px-8 sm:px-12 
                  py-8 sm:py-10 
@@ -115,7 +115,17 @@ const ImageCarousel = () => {
       style={{ backgroundColor: "#dc0606" }}
     >
       {t("products_and_shopping")}
-    </Button>
+    </Button> */}
+
+    <Button
+  size="lg"
+  className="text-sm sm:text-base md:text-lg px-8 sm:px-12 
+             py-8 sm:py-10 
+             text-white font-bold shadow-xl hover:scale-105 transition-transform"
+  style={{ backgroundColor: "#0044bb" }}
+>
+  {t("products_and_shopping")}
+</Button>
   </Link>
 </div>
             </div>

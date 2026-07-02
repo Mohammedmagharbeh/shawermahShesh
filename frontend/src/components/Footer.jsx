@@ -2,6 +2,8 @@ import { Facebook, Instagram } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import newlogo from "../assets/newlogo.png";
+import zift from "../assets/zift.png";
+
 
 function Footer() {
   const { t } = useTranslation();
@@ -69,7 +71,8 @@ function Footer() {
           </div> */}
           <div className="flex justify-center md:justify-end mb-8 md:mb-0">
   <img
-    src={newlogo}
+    // src={newlogo}
+    src={zift}
     alt="Restaurant Logo"
     className="h-60 w-60 sm:h-36 sm:w-36 md:h-65 md:w-65 object-contain"
     loading="lazy"

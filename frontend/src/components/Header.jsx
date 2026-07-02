@@ -329,6 +329,8 @@ import newlogo from "../assets/newlogo.png";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import shashi from "../assets/shashi.png";
+import zift from "../assets/zift.png";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -390,7 +392,7 @@ function Header() {
                 <img
 
                   // src={logo || "/placeholder.svg"}
-                  src={newlogo}
+                  src={zift}
                   alt="شاورما شيش"
                   className="w-full h-full object-contain"
                 />

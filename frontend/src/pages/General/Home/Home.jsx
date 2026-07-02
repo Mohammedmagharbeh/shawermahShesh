@@ -624,7 +624,8 @@ export default function Home() {
                 href="https://linktr.ee/shawermasheesh?utm_source=qr_code"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full bg-red-600 text-white font-bold text-sm py-2.5 rounded-xl hover:bg-red-700 transition-colors text-center inline-block"
+             className="w-full bg-[#0044bb] text-white font-bold text-sm py-2.5 rounded-xl hover:bg-[#003eb3] transition-colors text-center inline-block"
+                // className="w-full bg-red-600 text-white font-bold text-sm py-2.5 rounded-xl hover:bg-red-700 transition-colors text-center inline-block"
               >
                 {t("view_menu_btn")}
               </a>
