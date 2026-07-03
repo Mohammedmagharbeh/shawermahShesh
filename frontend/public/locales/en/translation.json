@@ -426,6 +426,26 @@
   "save": "Save",
   "cancel": "Cancel",
 
+
+"orange_modal": {
+    "title_select_bank": "Orange Money ",
+    "desc_select_bank": "Enter your wallet number",
+    "label_phone": "Wallet Number",
+    "label_bank": "Bank / Wallet",
+    "loading_banks": "Loading banks list...",
+    "title_otp_input": "OTP Verification",
+    "desc_otp_input": "Verification code has been sent to",
+    "btn_cancel": "Cancel",
+    "btn_send_otp": "Send Code",
+    "btn_sending": "Sending...",
+    "btn_resend_otp": "Didn't receive the code? Resend",
+    "btn_confirm": "Confirm Payment",
+    "btn_verifying": "Verifying..."
+  },
+  "payment_methods": {
+  "orange_money": "Orange Money",
+  "orange_min_error": "The minimum amount for Orange Money is {{amount}} JOD"
+},
   "system_closed": "System Closed Now",
   "error_enter_name": "Please enter employee name",
   "error_enter_otp": "Please enter the code",

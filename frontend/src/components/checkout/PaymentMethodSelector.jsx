@@ -664,15 +664,17 @@ const PaymentMethodSelector = React.memo(({ method, setMethod, t, totalAmount })
               <div className="w-2 h-2 bg-red-500 rounded-full" />
             )}
           </div>
-          <div className="flex-1">
-            <span className="font-medium text-sm">Orange Money</span>
-            {/* رسالة توضيحية لما المبلغ أقل من الحد الأدنى */}
-            {!isOrangeAvailable && (
-              <p className="text-xs text-gray-400 mt-0.5">
-                الحد الأدنى للدفع عبر Orange Money هو {ORANGE_MIN_AMOUNT} دينار
-              </p>
-            )}
-          </div>
+         <div className="flex-1">
+  <span className="font-medium text-sm">
+    {t("payment_methods.orange_money", "Orange Money")}
+  </span>
+  {/* رسالة توضيحية لما المبلغ أقل من الحد الأدنى */}
+  {!isOrangeAvailable && (
+    <p className="text-xs text-gray-400 mt-0.5">
+      {t("payment_methods.orange_min_error", { amount: ORANGE_MIN_AMOUNT })}
+    </p>
+  )}
+</div>
           <div className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm h-7">
             <span className="text-orange-500 font-bold text-xs">🟠 Orange</span>
           </div>

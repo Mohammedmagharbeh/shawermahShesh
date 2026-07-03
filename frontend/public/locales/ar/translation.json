@@ -504,6 +504,10 @@
   "experience_certificate": "شهادة الخبرة (PDF أو Word)",
   "worked_before": "هل سبق لك العمل في مكان قبل؟",
 
+  "payment_methods": {
+    "orange_money": "أورانج موني",
+    "orange_min_error": "الحد الأدنى للدفع عبر أورانج موني هو {{amount}} دينار"
+  },
   "previous_workplace": "مكان العمل السابق",
   "previous_title": "المسمى الوظيفي السابق",
   "fill_required_fields": "يرجى ملء الحقول الأساسية!",
@@ -550,6 +554,24 @@
   "error_invalid_otp": "الرمز غير صحيح",
   "success_verified": "تم التحقق بنجاح",
   "restaurant_closed_msg": "النظام مغلق حالياً، يرجى المحاولة لاحقاً 🌙",
+
+"orange_modal": {
+  "title_select_bank": "Orange Money ",
+  "desc_select_bank": "أدخل رقم المحفظة  ",
+  "label_phone": "رقم المحفظة",
+  "label_bank": "البنك / المحفظة",
+  "loading_banks": "جاري تحميل البنوك...",
+  "title_otp_input": "رمز التحقق",
+  "desc_otp_input": "تم إرسال الكود على الرقم",
+  "btn_cancel": "إلغاء",
+  "btn_send_otp": "أرسل الكود",
+  "btn_sending": "جاري الإرسال...",
+  "btn_resend_otp": "لم يصلك الكود؟ أعد الإرسال",
+  "btn_confirm": "تأكيد الدفع",
+  "btn_verifying": "جاري التحقق..."
+},
+
+
 
   "we_are_open": "نستقبل طلباتكم الآن",
   "restaurant_closed_status": "المطعم مغلق - يفتح 10:00 صباحاً",

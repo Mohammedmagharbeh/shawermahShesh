@@ -410,6 +410,8 @@ import { useTranslation } from "react-i18next";
 import newlogo from "@/assets/newlogo.png";
 import zift from "@/assets/zift.png";
 import zofat from "@/assets/zofat.png";
+import zoft from "@/assets/zoft.png";
+
 
 
 // رابط صورة كرة كأس العالم الرسمية عالية الجودة
@@ -507,7 +509,7 @@ function Login() {
       >
         {/* أنيميشن الكأس المضاف في الزاوية العلوية اليمنى للكارت */}
         <motion.div
-          className="absolute -top-3 -right-3 bg-yellow-400 rounded-full p-2 shadow-xl z-20 text-xl"
+          className="absolute -top-3 -right-3 rounded-full "
           animate={{
             y: [0, -8, 0],
             rotate: [-10, 10, -10],
@@ -517,7 +519,7 @@ function Login() {
             repeat: Infinity,
           }}
         >
-          🏆
+          <img src={zoft} alt="Logo" className="h-16 w-16 object-contain" />
         </motion.div>
 
         {/* مؤشر حالة المطعم التفاعلي */}
