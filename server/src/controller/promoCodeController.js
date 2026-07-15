@@ -253,11 +253,39 @@ exports.validatePromoCode = async (req, res) => {
  *     await recordPromoUsage(orderData.promoCode, userId, savedOrder._id);
  *   }
  */
-exports.recordPromoUsage = async (code, userId, orderId = null) => {
-  if (!code || !userId) return null;
+// exports.recordPromoUsage = async (code, userId, orderId = null) => {
+//   if (!code || !userId) return null;
 
-  const promoCode = await PromoCode.findOne({ code: code.toUpperCase() });
-  if (!promoCode) return null;
+//   const promoCode = await PromoCode.findOne({ code: code.toUpperCase() });
+//   if (!promoCode) return null;
+
+//   const usage = await PromoCodeUsage.create({
+//     promoCode: promoCode._id,
+//     code: promoCode.code,
+//     userId,
+//     orderId,
+//   });
+
+//   return usage;
+// };
+
+
+exports.recordPromoUsage = async (codeOrId, userId, orderId = null) => {
+  if (!codeOrId || !userId) return null;
+
+  let promoCode = null;
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(codeOrId.toString());
+
+  if (isObjectId) {
+    promoCode = await PromoCode.findById(codeOrId);
+  } else {
+    promoCode = await PromoCode.findOne({ code: codeOrId.toUpperCase() });
+  }
+
+  if (!promoCode) {
+    console.warn(`⚠️ [recordPromoUsage] No promo code found for value: ${codeOrId}`);
+    return null;
+  }
 
   const usage = await PromoCodeUsage.create({
     promoCode: promoCode._id,
@@ -266,5 +294,6 @@ exports.recordPromoUsage = async (code, userId, orderId = null) => {
     orderId,
   });
 
+  console.log(`✅ [recordPromoUsage] Recorded usage for code: ${promoCode.code} | User: ${userId}`);
   return usage;
 };
