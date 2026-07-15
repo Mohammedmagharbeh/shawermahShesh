@@ -266,6 +266,13 @@ async function createPendingOrder({
   return populatedOrder;
 }
 
+// ─── 0) Redirect Proxy (Deep Links) ──────────────────────────────────────────
+router.get("/redirect", (req, res) => {
+  const { to } = req.query;
+  if (!to) return res.status(400).send("Missing redirect destination");
+  res.redirect(to);
+});
+
 // ─── 1) Create Payment Session + Pre-create Order ────────────────────────────
 router.post("/session", async (req, res) => {
   try {
@@ -277,6 +284,8 @@ router.post("/session", async (req, res) => {
       customerPhone,
       description,
       orderData, // { products, userId, shippingAddress, orderType, userDetails, paymentMethod }
+      successUrl, // Optional overrides for mobile apps
+      cancelUrl,
     } = req.body;
 
     if (!amount || !customerName || !customerEmail || !orderData) {
@@ -305,6 +314,26 @@ router.post("/session", async (req, res) => {
       ? `${customerPhone}-${dbOrderId}`
       : dbOrderId;
 
+    const finalSuccessUrl = successUrl
+      ? `${successUrl}?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`
+      : `${process.env.FRONT_BASE}/success?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`;
+
+    const finalCancelUrl = cancelUrl
+      ? `${cancelUrl}?dbOrderId=${dbOrderId}`
+      : `${process.env.FRONT_BASE}/cancel?dbOrderId=${dbOrderId}`;
+
+    // Use the actual request host so mobile devices don't get routed to localhost loopback
+    const reqHost = req.get("host");
+    const protocol = req.protocol || "http";
+    const actualBackendUrl = `${protocol}://${reqHost}`;
+
+    const proxyUrlIfNeeded = (url) => {
+      if (typeof url === "string" && !url.startsWith("http")) {
+        return `${actualBackendUrl}/api/montypay/redirect?to=${encodeURIComponent(url)}`;
+      }
+      return url;
+    };
+
     const payload = {
       merchant_key: MERCHANT_KEY,
       operation: "purchase",
@@ -314,9 +343,14 @@ router.post("/session", async (req, res) => {
         currency: currency,
         description: safeDescription,
       },
-      customer: { name: /^[A-Za-z]+(?: [A-Za-z]+)+$/.test(customerName) ? customerName : "John Doe", email: customerEmail },
-      success_url: `${process.env.FRONT_BASE}/success?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`,
-      cancel_url: `${process.env.FRONT_BASE}/cancel?dbOrderId=${dbOrderId}`,
+      customer: {
+        name: /^[A-Za-z]+(?: [A-Za-z]+)+$/.test(customerName)
+          ? customerName
+          : "John Doe",
+        email: customerEmail,
+      },
+      success_url: proxyUrlIfNeeded(finalSuccessUrl),
+      cancel_url: proxyUrlIfNeeded(finalCancelUrl),
       // Tell MontyPay where to send the server-to-server payment confirmation
       callback_url: `${process.env.BACK_BASE}/api/montypay/callback`,
     };
