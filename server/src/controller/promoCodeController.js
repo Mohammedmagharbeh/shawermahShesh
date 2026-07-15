@@ -107,7 +107,7 @@
 
 const PromoCode = require("../models/PromoCode");
 // const PromoCodeUsage = require("../models/Promocodeusage");
-const PromoCodeUsage = require("../models/temp");
+const PromoCodeUsage = require("../models/PromoCodeUsage");
 // GET /api/promo-codes  (Admin)
 exports.getAllPromoCodes = async (req, res) => {
   try {
