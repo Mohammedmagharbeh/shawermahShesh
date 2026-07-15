@@ -10,18 +10,14 @@
 // //   OrderTotals,
 // //   PaymentMethodSelector,
 // //   CLIQ_STEPS,
+// //   ORANGE_STEPS,
 // //   PAYMENT_METHODS,
 // //   STORAGE_KEYS,
 // //   DEFAULT_LANGUAGE,
 // //   CURRENCY,
 // // } from "@/components/checkout";
+// // import OrangeMoneyModal from "@/components/checkout/OrangeMoneyModal";
 
-// // /**
-// //  * Checkout Page Component
-// //  * Handles the complete checkout flow including delivery details, order summary, and payment
-// //  * Refactored for mobile-first responsiveness
-// //  * @component
-// //  */
 // // function Checkout() {
 // //   const { t } = useTranslation();
 // //   const { cart } = useCart();
@@ -33,6 +29,7 @@
 
 // //   const {
 // //     areas,
+// //     orangeServicers,
 // //     isLoading,
 // //     error,
 // //     isSubmitting,
@@ -40,18 +37,24 @@
 // //     formState,
 // //     updateForm,
 // //     updateDetails,
-// //     sendCliqOtp,
-// //     confirmCliqPayment,
 // //     orderSummary,
 // //     handlePayment,
+// //     // CliQ
+// //     sendCliqOtp,
+// //     confirmCliqPayment,
+// //     // Orange Money
+// //     sendOrangeOtp,
+// //     confirmOrangePayment,
 // //   } = useCheckoutLogic(t);
 
-// //   // --- Memoized Handlers ---
-
+// //   // --- CliQ Handlers ---
 // //   const handleOtpChange = useCallback(
-// //     (value) => {
-// //       updateForm("otp", value);
-// //     },
+// //     (value) => updateForm("otp", value),
+// //     [updateForm],
+// //   );
+
+// //   const handleCliqPhoneChange = useCallback(
+// //     (value) => updateForm("cliqPhone", value),
 // //     [updateForm],
 // //   );
 
@@ -61,22 +64,31 @@
 // //     updateForm("cliqPhone", "");
 // //   }, [updateForm]);
 
-// //   const handleCliqPhoneChange = useCallback(
-// //     (value) => {
-// //       updateForm("cliqPhone", value);
-// //     },
+// //   // --- Orange Money Handlers ---
+// //   const handleOrangePhoneChange = useCallback(
+// //     (value) => updateForm("orangePhone", value),
 // //     [updateForm],
 // //   );
 
+// //   const handleOrangeServicerChange = useCallback(
+// //     (value) => updateForm("orangeServicerCode", value),
+// //     [updateForm],
+// //   );
+
+// //   const handleOrangeCancel = useCallback(() => {
+// //     updateForm("orangeStep", ORANGE_STEPS.INIT);
+// //     updateForm("orangePhone", "");
+// //     updateForm("orangeServicerCode", "");
+// //     updateForm("orangeMerchantReference", "");
+// //     updateForm("otp", "");
+// //   }, [updateForm]);
+
 // //   const handlePaymentMethodChange = useCallback(
-// //     (method) => {
-// //       updateForm("paymentMethod", method);
-// //     },
+// //     (method) => updateForm("paymentMethod", method),
 // //     [updateForm],
 // //   );
 
 // //   // --- Memoized Values ---
-
 // //   const submitButtonText = useMemo(() => {
 // //     if (isSubmitting) return t("processing");
 // //     return `${t("checkout_place_order")} • ${orderSummary.total.toFixed(2)} ${CURRENCY}`;
@@ -88,12 +100,8 @@
 // //     } text-white py-4 px-6 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed`;
 // //   }, [isSubmitting]);
 
-// //   // --- Render Loading State ---
-// //   if (isLoading) {
-// //     return <Loading />;
-// //   }
+// //   if (isLoading) return <Loading />;
 
-// //   // --- Render Error State ---
 // //   if (error) {
 // //     return (
 // //       <div className="min-h-screen flex items-center justify-center text-red-600 px-4 bg-gray-50">
@@ -110,7 +118,6 @@
 // //     );
 // //   }
 
-// //   // --- Main Render ---
 // //   return (
 // //     <form
 // //       className="min-h-screen bg-gray-50 pb-32 lg:pb-12"
@@ -134,9 +141,29 @@
 // //         isSubmitting={isSubmitting}
 // //       />
 
+// //       {/* Orange Money Modal */}
+// //       <OrangeMoneyModal
+// //         isOpen={
+// //           formState.paymentMethod === PAYMENT_METHODS.ORANGE_MONEY &&
+// //           (formState.orangeStep === ORANGE_STEPS.SELECT_BANK ||
+// //             formState.orangeStep === ORANGE_STEPS.OTP_SENT)
+// //         }
+// //         step={formState.orangeStep}
+// //         phone={formState.orangePhone}
+// //         onPhoneChange={handleOrangePhoneChange}
+// //         servicerCode={formState.orangeServicerCode}
+// //         onServicerCodeChange={handleOrangeServicerChange}
+// //         servicers={orangeServicers}
+// //         otp={formState.otp}
+// //         onOtpChange={handleOtpChange}
+// //         onSendOtp={sendOrangeOtp}
+// //         onConfirm={confirmOrangePayment}
+// //         onCancel={handleOrangeCancel}
+// //         isSubmitting={isSubmitting}
+// //       />
+
 // //       {/* Main Content */}
 // //       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
-// //         {/* Page Header */}
 // //         <div className="text-center mb-8 lg:mb-12">
 // //           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
 // //             {t("complete_order")}
@@ -148,9 +175,7 @@
 // //           )}
 // //         </div>
 
-// //         {/* Two Column Layout */}
 // //         <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-start">
-// //           {/* LEFT COLUMN: Delivery Details */}
 // //           <DeliverySection
 // //             t={t}
 // //             areas={areas}
@@ -160,7 +185,6 @@
 // //             isTestMode={isTestMode}
 // //           />
 
-// //           {/* RIGHT COLUMN: Order Summary & Payment */}
 // //           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-8 h-fit">
 // //             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
 // //               <span className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 shadow-sm">
@@ -169,27 +193,25 @@
 // //               {t("checkout_order_summary")}
 // //             </h2>
 
-// //             {/* Order Items */}
 // //             <OrderItemsList cart={cart} t={t} lang={selectedLanguage} />
 
-// //             {/* Order Totals */}
 // //             <div className="my-6 pt-6 border-t border-gray-100">
 // //               <OrderTotals summary={orderSummary} t={t} />
 // //             </div>
 
-// //             {/* Payment Method Selector */}
 // //             <div className="mb-8">
 // //               <h3 className="text-base font-semibold text-gray-800 mb-3 block">
 // //                 {t("payment_method")}
 // //               </h3>
+// //               {/* ✅ تمرير totalAmount عشان PaymentMethodSelector يتحقق من الحد الأدنى */}
 // //               <PaymentMethodSelector
 // //                 method={formState.paymentMethod}
 // //                 setMethod={handlePaymentMethodChange}
 // //                 t={t}
+// //                 totalAmount={orderSummary.total}
 // //               />
 // //             </div>
 
-// //             {/* Desktop Submit Button (Hidden on Mobile) */}
 // //             <div className="hidden lg:block">
 // //               <button
 // //                 className={submitButtonClass}
@@ -220,6 +242,7 @@
 // // }
 
 // // export default Checkout;
+
 // import React, { useCallback, useMemo } from "react";
 // import { useTranslation } from "react-i18next";
 // import Loading from "@/components/common/Loading";
@@ -239,6 +262,7 @@
 //   CURRENCY,
 // } from "@/components/checkout";
 // import OrangeMoneyModal from "@/components/checkout/OrangeMoneyModal";
+// import PromoCodeInput from "@/components/checkout/PromoCodeInput";
 
 // function Checkout() {
 //   const { t } = useTranslation();
@@ -267,13 +291,21 @@
 //     // Orange Money
 //     sendOrangeOtp,
 //     confirmOrangePayment,
+//     // ✅ Promo Code
+//     appliedPromo,
+//     applyPromoCode,
+//     removePromoCode,
 //   } = useCheckoutLogic(t);
 
 //   // --- CliQ Handlers ---
-//   const handleOtpChange = useCallback((value) => updateForm("otp", value), [updateForm]);
+//   const handleOtpChange = useCallback(
+//     (value) => updateForm("otp", value),
+//     [updateForm],
+//   );
 
 //   const handleCliqPhoneChange = useCallback(
-//     (value) => updateForm("cliqPhone", value), [updateForm]
+//     (value) => updateForm("cliqPhone", value),
+//     [updateForm],
 //   );
 
 //   const handleOtpCancel = useCallback(() => {
@@ -284,11 +316,13 @@
 
 //   // --- Orange Money Handlers ---
 //   const handleOrangePhoneChange = useCallback(
-//     (value) => updateForm("orangePhone", value), [updateForm]
+//     (value) => updateForm("orangePhone", value),
+//     [updateForm],
 //   );
 
 //   const handleOrangeServicerChange = useCallback(
-//     (value) => updateForm("orangeServicerCode", value), [updateForm]
+//     (value) => updateForm("orangeServicerCode", value),
+//     [updateForm],
 //   );
 
 //   const handleOrangeCancel = useCallback(() => {
@@ -300,7 +334,8 @@
 //   }, [updateForm]);
 
 //   const handlePaymentMethodChange = useCallback(
-//     (method) => updateForm("paymentMethod", method), [updateForm]
+//     (method) => updateForm("paymentMethod", method),
+//     [updateForm],
 //   );
 
 //   // --- Memoized Values ---
@@ -410,6 +445,19 @@
 
 //             <OrderItemsList cart={cart} t={t} lang={selectedLanguage} />
 
+//             {/* ✅ Promo Code Input (مخفي بوضع التجربة) */}
+//             {!isTestMode && (
+//               <div className="mt-6 pt-6 border-t border-gray-100">
+//                 <PromoCodeInput
+//                   appliedPromo={appliedPromo}
+//                   onApply={applyPromoCode}
+//                   onRemove={removePromoCode}
+//                   isSubmitting={isSubmitting}
+//                   t={t}
+//                 />
+//               </div>
+//             )}
+
 //             <div className="my-6 pt-6 border-t border-gray-100">
 //               <OrderTotals summary={orderSummary} t={t} />
 //             </div>
@@ -422,6 +470,7 @@
 //                 method={formState.paymentMethod}
 //                 setMethod={handlePaymentMethodChange}
 //                 t={t}
+//                 totalAmount={orderSummary.total}
 //               />
 //             </div>
 
@@ -439,6 +488,7 @@
 //         </div>
 //       </div>
 
+//       {/* Mobile Sticky Submit Bar */}
 //       <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40 safe-pb">
 //         <button
 //           className={submitButtonClass}
@@ -454,6 +504,8 @@
 // }
 
 // export default Checkout;
+
+
 import React, { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import Loading from "@/components/common/Loading";
@@ -473,6 +525,7 @@ import {
   CURRENCY,
 } from "@/components/checkout";
 import OrangeMoneyModal from "@/components/checkout/OrangeMoneyModal";
+import PromoCodeInput from "@/components/checkout/PromoCodeInput";
 
 function Checkout() {
   const { t } = useTranslation();
@@ -501,6 +554,10 @@ function Checkout() {
     // Orange Money
     sendOrangeOtp,
     confirmOrangePayment,
+    // Promo Code
+    appliedPromo,
+    applyPromoCode,
+    removePromoCode,
   } = useCheckoutLogic(t);
 
   // --- CliQ Handlers ---
@@ -651,6 +708,19 @@ function Checkout() {
 
             <OrderItemsList cart={cart} t={t} lang={selectedLanguage} />
 
+            {/* Promo Code Input (hidden in test mode) */}
+            {!isTestMode && (
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <PromoCodeInput
+                  appliedPromo={appliedPromo}
+                  onApply={applyPromoCode}
+                  onRemove={removePromoCode}
+                  isSubmitting={isSubmitting}
+                  t={t}
+                />
+              </div>
+            )}
+
             <div className="my-6 pt-6 border-t border-gray-100">
               <OrderTotals summary={orderSummary} t={t} />
             </div>
@@ -659,7 +729,6 @@ function Checkout() {
               <h3 className="text-base font-semibold text-gray-800 mb-3 block">
                 {t("payment_method")}
               </h3>
-              {/* ✅ تمرير totalAmount عشان PaymentMethodSelector يتحقق من الحد الأدنى */}
               <PaymentMethodSelector
                 method={formState.paymentMethod}
                 setMethod={handlePaymentMethodChange}
