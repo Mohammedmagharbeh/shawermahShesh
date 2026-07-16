@@ -29,7 +29,6 @@
 
 // module.exports = mongoose.model("PromoCode", promoCodeSchema);
 
-
 const mongoose = require("mongoose");
 
 const promoCodeSchema = new mongoose.Schema(

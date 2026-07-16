@@ -1,3 +1,27 @@
+// // const express = require("express");
+// // const router = express.Router();
+// // const {
+// //   getAllPromoCodes,
+// //   createPromoCode,
+// //   updatePromoCode,
+// //   deletePromoCode,
+// //   validatePromoCode,
+// // } = require("../controller/promoCodeController");
+
+// // // عدّل middleware الحماية حسب يلي عندك بمشروعك (مثلاً verifyAdmin أو protectAdmin)
+// // // const { verifyAdmin } = require("../middleware/authMiddleware");
+
+// // // Public - للزبون
+// // router.get("/validate", validatePromoCode);
+
+// // // Admin routes
+// // router.get("/", getAllPromoCodes);
+// // router.post("/", createPromoCode);
+// // router.patch("/:id", updatePromoCode);
+// // router.delete("/:id", deletePromoCode);
+
+// // module.exports = router;
+
 // const express = require("express");
 // const router = express.Router();
 // const {
@@ -7,14 +31,15 @@
 //   deletePromoCode,
 //   validatePromoCode,
 // } = require("../controller/promoCodeController");
+// const verifyUser = require("../middlewares/userverify");
 
-// // عدّل middleware الحماية حسب يلي عندك بمشروعك (مثلاً verifyAdmin أو protectAdmin)
-// // const { verifyAdmin } = require("../middleware/authMiddleware");
+// // عدّل middleware حماية الأدمن حسب يلي عندك بمشروعك (verifyAdmin مثلاً)
+// // const verifyAdmin = require("../middleware/verifyAdmin");
 
-// // Public - للزبون
-// router.get("/validate", validatePromoCode);
+// // ✅ Customer — لازم يكون مسجل دخول عشان نعرف مين هو ونحسب استخدامه
+// router.get("/validate", verifyUser, validatePromoCode);
 
-// // Admin routes
+// // Admin routes (ضيف verifyAdmin قبل كل وحدة منهم لو عندك)
 // router.get("/", getAllPromoCodes);
 // router.post("/", createPromoCode);
 // router.patch("/:id", updatePromoCode);
@@ -31,7 +56,7 @@ const {
   deletePromoCode,
   validatePromoCode,
 } = require("../controller/promoCodeController");
-const verifyUser = require("../middlewares/userverify");
+const verifyUser = require("../middlewares/userverify"); // ✅ معدّل ليطابق اسم ملفك الجديد
 
 // عدّل middleware حماية الأدمن حسب يلي عندك بمشروعك (verifyAdmin مثلاً)
 // const verifyAdmin = require("../middleware/verifyAdmin");
