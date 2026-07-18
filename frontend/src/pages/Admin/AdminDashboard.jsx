@@ -1,3 +1,856 @@
+// import { useEffect, useState } from "react";
+// import { Badge } from "@/components/ui/badge";
+// import { Button } from "@/components/ui/button";
+// import { Card, CardContent, CardHeader } from "@/components/ui/card";
+// import { useTranslation } from "react-i18next";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import { useOrder } from "@/contexts/OrderContext";
+// import Loading from "@/components/common/Loading";
+// import { io } from "socket.io-client";
+// import newOrderSound from "@/assets/newOrder.mp3";
+// import * as XLSX from "xlsx";
+// import { saveAs } from "file-saver";
+// import { toast } from "react-hot-toast";
+// import product_placeholder from "@/assets/product_placeholder.jpeg";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogHeader,
+//   DialogTitle,
+// } from "@/components/ui/dialog";
+// import { useUser } from "@/contexts/UserContext";
+// import { Label } from "@/components/ui/label";
+
+// const statusColors = {
+//   Processing: "bg-secondary text-secondary-foreground",
+//   Confirmed: "bg-purple-500 text-primary-foreground",
+//   Shipped: "bg-blue-500 text-white",
+//   OutForDelivery: "bg-orange-500 text-white",
+//   ReadyForPickup: "bg-yellow-500 text-black",
+//   Delivered: "bg-green-600 text-white",
+//   Cancelled: "bg-destructive text-destructive-foreground",
+// };
+
+// const socket = io(import.meta.env.VITE_SOCKET_URL);
+
+// function AdminDashboard() {
+//   const { t } = useTranslation();
+//   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
+//   const { orders, getTodayOrders, updateOrder, deleteOrder, loading, appendOrder, patchOrder } =
+//     useOrder();
+
+//   const [filterDate, setFilterDate] = useState(
+//     new Date().toLocaleDateString("en-CA"),
+//   );
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [soundAllowed, setSoundAllowed] = useState(false);
+//   const [sound, setSound] = useState(null);
+//   const [incomingOrder, setIncomingOrder] = useState([]);
+//   const { user } = useUser();
+
+//   useEffect(() => {
+//     getTodayOrders();
+//   }, []);
+
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       const newDate = new Date().toLocaleDateString("en-CA");
+//       if (newDate !== filterDate) {
+//         setFilterDate(newDate);
+//       }
+//     }, 60000);
+//     return () => clearInterval(interval);
+//   }, [filterDate]);
+
+//   const fetchPendingOrders = async () => {
+//     try {
+//       const res = await fetch(
+//         `${import.meta.env.VITE_BASE_URL}/order/get?status=Processing`,
+//         {
+//           headers: {
+//             "Content-Type": "application/json",
+//             authorization: `Bearer ${user.token}`,
+//           },
+//         },
+//       );
+//       const data = await res.json();
+
+//       // Exclude unpaid card orders — they're awaiting MontyPay callback.
+//       // Only show: cash orders (always visible) or already-paid card orders.
+//       const readyOrders = (data.data || []).filter(
+//         (o) => o.payment?.method === "cash" || o.payment?.status === "paid",
+//       );
+//       setIncomingOrder(readyOrders);
+//     } catch (error) {
+//       console.error("Error fetching pending orders:", error);
+//     }
+//   };
+
+//   useEffect(() => {
+//     const audio = new Audio(newOrderSound);
+//     audio.loop = true;
+//     setSound(audio);
+//   }, []);
+
+//   useEffect(() => {
+//     if (orders.length > 0) {
+//       fetchPendingOrders();
+//     }
+//   }, [orders]);
+
+//   useEffect(() => {
+//     if (!user?.token) return;
+//     // Single fetch on mount to populate the "new order" notification alerts
+//     fetchPendingOrders();
+//     // No interval — socket events keep incomingOrder in sync in real time
+//   }, [user?.token]);
+
+//   const enableSound = () => {
+//     if (sound) {
+//       sound
+//         .play()
+//         .then(() => {
+//           sound.pause();
+//           sound.currentTime = 0;
+//           setSoundAllowed(true);
+//           toast.success(t("sound_notifications_enabled"));
+//         })
+//         .catch(() => toast.error("Sound activation failed"));
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (incomingOrder?.length > 0 && soundAllowed && sound) {
+//       if (sound.paused) {
+//         sound.currentTime = 0;
+//         sound.play().catch(() => {});
+//       }
+//     } else if (incomingOrder?.length === 0 && sound) {
+//       if (!sound.paused) {
+//         sound.pause();
+//         sound.currentTime = 0;
+//       }
+//     }
+//   }, [incomingOrder, soundAllowed, sound]);
+
+//   useEffect(() => {
+//     socket.on("newOrder", (order) => {
+//       // Append to today's list without a full re-fetch
+//       appendOrder(order);
+//       setIncomingOrder((prev) => {
+//         const exists = prev?.some((o) => o._id === order._id);
+//         return exists ? prev : [...(prev || []), order];
+//       });
+//     });
+
+//     socket.on("updatedOrder", (updatedOrder) => {
+//       // Update the card in-place without a full re-fetch
+//       patchOrder(updatedOrder);
+//       setIncomingOrder((prev) =>
+//         (prev || []).filter((order) => order._id !== updatedOrder._id)
+//       );
+//     });
+
+//     return () => {
+//       socket.off("newOrder");
+//       socket.off("updatedOrder");
+//     };
+//   }, []);
+
+//   const stopSound = () => {
+//     if (sound) {
+//       sound.pause();
+//       sound.currentTime = 0;
+//     }
+//   };
+
+//   const handleStatusChange = (orderId, newStatus) => {
+//     updateOrder(orderId, { status: newStatus });
+//   };
+
+//   const handlePaymentStatusChange = (orderId, newPaymentStatus) => {
+//     const orderToUpdate = orders.find((o) => o._id === orderId);
+//     if (!orderToUpdate) return;
+
+//     updateOrder(orderId, {
+//       payment: {
+//         ...orderToUpdate.payment,
+//         status: newPaymentStatus,
+//         paidAt:
+//           newPaymentStatus === "paid"
+//             ? new Date()
+//             : orderToUpdate.payment?.paidAt,
+//       },
+//     });
+//   };
+
+//   const handleDeleteOrder = (orderId) => {
+//     if (window.confirm(t("confirm_delete_order"))) {
+//       deleteOrder(orderId);
+//       toast.success(t("order_deleted"));
+//     }
+//   };
+
+//   // تعديل منطق الفلترة ليشمل البحث
+//   const filteredOrders = orders
+//     .filter((order) => {
+//       const orderDate =
+//         order.createdAt &&
+//         new Date(order.createdAt).toLocaleDateString("en-CA");
+//       const matchesDate = orderDate === filterDate;
+//       const matchesStatus = true;
+
+//       // Hide unpaid card orders — they haven't been confirmed by MontyPay yet.
+//       // Cash orders are always visible; card orders must have payment.status === "paid".
+//       const matchesPayment =
+//         order.payment?.method === "cash" || order.payment?.status === "paid";
+
+//       const sTerm = searchTerm.toLowerCase();
+//       const matchesSearch =
+//         searchTerm === "" ||
+//         order.sequenceNumber?.toString().includes(sTerm) ||
+//         order.userId?.phone?.includes(sTerm) ||
+//         order.userDetails?.name?.toLowerCase().includes(sTerm);
+
+//       return matchesDate && matchesStatus && matchesPayment && matchesSearch;
+//     })
+//     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+//   const exportToExcel = () => {
+//     const data = [];
+
+//     filteredOrders.forEach((order) => {
+//       // تحويل المنتجات إلى نص مقروء
+//       const productsDetails = order.products
+//         ?.map((item) => {
+//           const productName =
+//             item.productId?.name[selectedLanguage] || t("deleted_product");
+//           const additions =
+//             item.additions?.length > 0
+//               ? ` (${item.additions.map((a) => a.name[selectedLanguage]).join(", ")})`
+//               : "";
+//           const spicy = item.isSpicy ? ` [${t("spicy")}]` : "";
+//           const note = item.notes ? ` - ملاحظة: ${item.notes}` : "";
+
+//           return `${productName} x ${item.quantity}${additions}${spicy}${note}`;
+//         })
+//         .join(" | ");
+
+//       data.push({
+//         [t("order_id")]: order.sequenceNumber || "N/A",
+//         [t("customer_name")]: order.userDetails?.name || "N/A",
+//         [t("phone")]: order.userId?.phone || "N/A",
+//         [t("order_type")]:
+//           order.orderType === "delivery" ? t("delivery") : t("pickup"),
+//         [t("address")]:
+//           order.shippingAddress?.name || order.userDetails?.apartment || "N/A",
+//         [t("status")]: t(order.status?.toLowerCase()) || "N/A",
+//         [t("payment_status")]: order.payment?.status
+//           ? t(order.payment.status)
+//           : "N/A",
+//         [t("payment_method")]: order.payment?.method || "N/A",
+//         "تفاصيل المنتجات": productsDetails, // سرد كامل للمنتجات مع إضافاتها
+//         [t("order_subtotal")]: (
+//           order.totalPrice - (order.shippingAddress?.deliveryCost || 0)
+//         ).toFixed(2),
+//         [t("delivery_cost")]: order.shippingAddress?.deliveryCost || 0,
+//         [t("order_total")]: order.totalPrice.toFixed(2),
+//         [t("date")]: new Date(order.createdAt).toLocaleString(
+//           selectedLanguage === "ar" ? "ar-JO" : "en-GB",
+//         ),
+//       });
+//     });
+
+//     const worksheet = XLSX.utils.json_to_sheet(data);
+
+//     // تحديد اتجاه النص للعربية إذا كانت اللغة مختارة
+//     if (selectedLanguage === "ar") {
+//       worksheet["!dir"] = "rtl";
+//     }
+
+//     const workbook = XLSX.utils.book_new();
+//     XLSX.utils.book_append_sheet(workbook, worksheet, "Orders Detail");
+
+//     const excelBuffer = XLSX.write(workbook, {
+//       bookType: "xlsx",
+//       type: "array",
+//     });
+//     saveAs(
+//       new Blob([excelBuffer], { type: "application/octet-stream" }),
+//       `Orders_Detailed_${filterDate}.xlsx`,
+//     );
+//   };
+
+//   if (loading) return <Loading />;
+
+//   return (
+//     <div className="min-h-screen bg-background">
+//       <div className="mx-auto max-w-7xl">
+//         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
+//           <div className="flex flex-col gap-2 w-full md:w-auto">
+//             <h1 className="text-3xl font-bold text-foreground">
+//               {t("order_management")}
+//             </h1>
+//             <p className="mt-1 text-muted-foreground">
+//               {t("total_orders")}
+//               <span className="font-semibold text-primary mx-1">
+//                 {filteredOrders.length}
+//               </span>
+//             </p>
+
+//             {/* قسم أدوات البحث والتصفية */}
+//             <div className="flex flex-wrap gap-3 items-center mt-4">
+//               <input
+//                 type="text"
+//                 placeholder={t("search_order_placeholder")}
+//                 value={searchTerm}
+//                 onChange={(e) => setSearchTerm(e.target.value)}
+//                 className="border px-4 py-2 rounded-lg text-sm w-full md:w-80 focus:ring-2 focus:ring-primary outline-none shadow-sm"
+//               />
+
+//               <div className="flex items-center gap-2">
+//                 <input
+//                   type="date"
+//                   value={filterDate}
+//                   onChange={(e) => setFilterDate(e.target.value)}
+//                   className="border px-3 py-2 rounded-lg text-sm shadow-sm"
+//                 />
+//                 <Button
+//                   size="sm"
+//                   variant="outline"
+//                   onClick={() => {
+//                     setFilterDate(new Date().toLocaleDateString("en-CA"));
+//                     setSearchTerm("");
+//                   }}
+//                 >
+//                   {t("Today")}
+//                 </Button>
+//               </div>
+//             </div>
+
+//             <Dialog open={!soundAllowed}>
+//               <DialogContent aria-describedby={undefined}>
+//                 <DialogHeader>
+//                   <DialogTitle>{t("allow_notifications")}</DialogTitle>
+//                 </DialogHeader>
+//                 <div className="flex gap-2 mt-4 justify-end">
+//                   <Button
+//                     onClick={enableSound}
+//                     className="bg-green-500 text-white"
+//                   >
+//                     {t("enable_sound")}
+//                   </Button>
+//                 </div>
+//               </DialogContent>
+//             </Dialog>
+
+//             {incomingOrder?.length > 0 &&
+//               incomingOrder.map((o) => (
+//                 <Dialog
+//                   open={incomingOrder.length > 0}
+//                   key={o._id}
+//                   onOpenChange={(open) => {
+//                     if (!open) {
+//                       stopSound();
+//                       setIncomingOrder((prev) =>
+//                         prev.filter((ord) => ord._id !== o._id),
+//                       );
+//                     }
+//                   }}
+//                 >
+//                   <DialogContent>
+//                     <DialogHeader>
+//                       <DialogTitle>
+//                         {t("new_order_title")} #{o.sequenceNumber}
+//                       </DialogTitle>
+//                       <DialogDescription
+//                         className={`flex flex-col gap-4 ${selectedLanguage === "ar" ? "rtl" : "ltr"}`}
+//                       >
+//                         <div className="flex gap-2 items-center">
+//                           <Label>{t("phone")}:</Label>
+//                           {o?.userId?.phone}
+//                         </div>
+//                         <div className="flex gap-2 items-center">
+//                           <Label>{t("name")}:</Label>
+//                           {o.userDetails?.name}
+//                         </div>
+//                         <div className="flex gap-2 items-center">
+//                           <Label>{t("total")}:</Label>
+//                           {o?.totalPrice} JOD
+//                         </div>
+//                       </DialogDescription>
+//                     </DialogHeader>
+//                     <div className="flex gap-2 mt-4 justify-end">
+//                       <Button
+//                         onClick={() => {
+//                           stopSound();
+//                           updateOrder(o._id, { status: "Confirmed" });
+//                           setIncomingOrder((prev) =>
+//                             prev.filter((ord) => ord._id !== o._id),
+//                           );
+//                         }}
+//                       >
+//                         {t("accept")}
+//                       </Button>
+//                     </div>
+//                   </DialogContent>
+//                 </Dialog>
+//               ))}
+//           </div>
+
+//           <div className="flex gap-3 self-end">
+//             <Button
+//               variant="outline"
+//               onClick={exportToExcel}
+//               className="border-primary text-primary hover:bg-primary hover:text-primary-foreground bg-transparent"
+//             >
+//               {t("export_orders")}
+//             </Button>
+//           </div>
+//         </div>
+
+//         <div className="space-y-4">
+//           {filteredOrders.length === 0 && (
+//             <Card className="border-2 border-dashed">
+//               <CardContent className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-12">
+//                 <h3 className="text-xl font-semibold text-foreground">
+//                   {t("no_orders_found")}
+//                 </h3>
+//                 <p className="text-center text-muted-foreground">
+//                   {t("try_other_search")}
+//                 </p>
+//               </CardContent>
+//             </Card>
+//           )}
+
+//           {filteredOrders.map((order) => (
+//             <Card
+//               key={order._id}
+//               className="overflow-hidden border-2 transition-shadow hover:shadow-lg"
+//             >
+//               <CardHeader className="border-b bg-card pb-4">
+//                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+//                   <div className="flex flex-col gap-2">
+//                     <div className="flex items-center gap-3">
+//                       <span className="text-sm font-medium text-muted-foreground">
+//                         {t("order_id")}
+//                       </span>
+//                       <span className="font-mono text-sm font-semibold text-foreground">
+//                         #{order.sequenceNumber || "N/A"}
+//                       </span>
+//                     </div>
+//                     <div className="flex items-center gap-3">
+//                       <span className="text-sm font-medium text-muted-foreground">
+//                         {t("customer_name")}:
+//                       </span>
+//                       <span className="text-sm font-semibold text-foreground">
+//                         {order.userDetails?.name || "Unknown"}
+//                       </span>
+//                     </div>
+//                     <div className="flex items-center gap-3">
+//                       <span className="text-sm font-medium text-muted-foreground">
+//                         {t("detailed_address")}:
+//                       </span>
+//                       <span className="text-sm font-semibold text-foreground">
+//                         {order.userDetails?.apartment || "Unknown"}
+//                       </span>
+//                     </div>
+//                     <div className="flex items-center gap-3">
+//                       <span className="text-sm font-medium text-muted-foreground">
+//                         {t("customer")}
+//                       </span>
+//                       <span className="text-sm font-semibold text-foreground">
+//                         {order.userId?.phone || "N/A"}
+//                       </span>
+//                     </div>
+//                     <div className="flex items-center gap-3">
+//                       <span className="text-sm font-medium text-muted-foreground">
+//                         {t("date")}
+//                       </span>
+//                       <span className="text-sm text-foreground">
+//                         {order.createdAt
+//                           ? new Date(order.createdAt).toLocaleString(
+//                               `${selectedLanguage}-GB`,
+//                             )
+//                           : "N/A"}
+//                       </span>
+//                     </div>
+//                     <div className="flex items-center gap-3">
+//                       <span className="text-sm font-medium text-muted-foreground">
+//                         {t("order_type")}:
+//                       </span>
+//                       <span className="text-sm text-foreground">
+//                         {order.orderType === "delivery"
+//                           ? t("delivery")
+//                           : t("pickup")}
+//                       </span>
+//                     </div>
+//                     {order.orderType === "delivery" && (
+//                       <div className="flex items-center gap-3">
+//                         <span className="text-sm font-medium text-muted-foreground">
+//                           {t("address")}
+//                         </span>
+//                         <span className="text-sm text-foreground">
+//                           {order.shippingAddress?.name || "N/A"}
+//                         </span>
+//                       </div>
+//                     )}
+//                   </div>
+
+//                   <div className="flex flex-col gap-3">
+//                     <Select
+//                       value={order.payment?.status || "unpaid"}
+//                       onValueChange={(value) =>
+//                         handlePaymentStatusChange(order._id, value)
+//                       }
+//                     >
+//                       <SelectTrigger className="w-[160px]">
+//                         <SelectValue>
+//                           <Badge
+//                             className={
+//                               order.payment?.status === "paid"
+//                                 ? "bg-green-600 text-white"
+//                                 : "bg-secondary text-secondary-foreground"
+//                             }
+//                           >
+//                             {order.payment?.status
+//                               ? t(order.payment.status)
+//                               : t("unpaid")}{" "}
+//                             ({order.payment?.method || "N/A"})
+//                           </Badge>
+//                         </SelectValue>
+//                       </SelectTrigger>
+//                       <SelectContent>
+//                         <SelectItem value="unpaid">{t("unpaid")}</SelectItem>
+//                         <SelectItem value="paid">{t("paid")}</SelectItem>
+//                       </SelectContent>
+//                     </Select>
+//                     <div className="flex items-center gap-3">
+//                       <span className="text-sm font-medium text-muted-foreground">
+//                         {t("status")}
+//                       </span>
+//                       <Select
+//                         value={order.status || "N/A"}
+//                         onValueChange={(value) =>
+//                           handleStatusChange(order._id, value)
+//                         }
+//                       >
+//                         <SelectTrigger className="w-[160px]">
+//                           <SelectValue>
+//                             <Badge className={statusColors[order.status]}>
+//                               {order.status
+//                                 ? t(order.status.toLowerCase())
+//                                 : "N/A"}
+//                             </Badge>
+//                           </SelectValue>
+//                         </SelectTrigger>
+//                         <SelectContent>
+//                           <SelectItem value="Processing">
+//                             {t("processing")}
+//                           </SelectItem>
+//                           <SelectItem value="Confirmed">
+//                             {t("confirmed")}
+//                           </SelectItem>
+//                           <SelectItem value="Shipped">
+//                             {t("shipped")}
+//                           </SelectItem>
+//                           <SelectItem value="OutForDelivery">
+//                             {t("outfordelivery")}
+//                           </SelectItem>
+//                           <SelectItem value="ReadyForPickup">
+//                             {t("readyforpickup")}
+//                           </SelectItem>
+//                           <SelectItem value="Delivered">
+//                             {t("delivered")}
+//                           </SelectItem>
+//                           <SelectItem value="Cancelled">
+//                             {t("cancelled")}
+//                           </SelectItem>
+//                         </SelectContent>
+//                       </Select>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </CardHeader>
+
+//               <CardContent className="p-6">
+//                 <div id={`invoice-${order._id}`}>
+//                   <div className="space-y-4">
+//                     {order.products?.map((item) => (
+//                       <div
+//                         key={item._id}
+//                         className="flex items-center justify-between gap-4 rounded-lg border p-4 bg-muted/30"
+//                       >
+//                         <div className="flex items-center gap-4">
+//                           {/* <img
+//                             src={product_placeholder}
+//                             className="h-16 w-16 rounded-md object-cover"
+//                           /> */}
+
+//                           <img
+//                             // نتحقق إذا كانت الصورة موجودة في بيانات المنتج، وإلا نستخدم الـ placeholder
+//                             src={item.productId?.image || product_placeholder}
+//                             alt={item.productId?.name[selectedLanguage]}
+//                             className="h-16 w-16 rounded-md object-cover"
+//                             // في حال فشل تحميل الرابط من السيرفر، يتم عرض الـ placeholder
+//                             onError={(e) => {
+//                               e.target.src = product_placeholder;
+//                             }}
+//                           />
+//                           <div className="flex flex-col gap-1">
+//                             <p className="font-semibold">
+//                               {item.productId?.name[selectedLanguage] ||
+//                                 t("deleted_product")}
+//                             </p>
+//                             <div className="flex items-center gap-2 mt-1">
+//                               <span className="text-sm font-semibold text-muted-foreground">{t("quantity")}:</span>
+//                               <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded-md text-sm font-bold">
+//                                 {item.quantity || 0}
+//                               </span>
+//                             </div>
+//                             {item.isSpicy && (
+//                               <Badge className="w-fit">{t("spicy")}</Badge>
+//                             )}
+//                             {/* ملاحظة بحجم صغير ومختصر */}
+//                             {/* {item.notes && (
+//   <div className="mt-1 flex items-center gap-1.5 text-[12px] bg-[#FFD700] px-2 py-0.5 rounded-md w-fit border border-[#E6C200] text-amber-950">
+//     <span className="font-bold shrink-0">{t("notes")}:</span>
+//     <span className="truncate max-w-[200px]">{item.notes}</span>/
+//   </div>
+// )} */}
+//                             {/* إظهار نوع البروتين باستخدام ملفات الترجمة t() */}
+//                             {item.selectedProtein && (
+//                               <div className="mt-2 mb-2">
+//                                 <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-md shadow-sm inline-block">
+//                                   {/* نحول النص لـ lowercase ليتطابق مع المفاتيح في ملف الترجمة */}
+//                                   {t(item.selectedProtein.toLowerCase())}
+//                                 </span>
+//                               </div>
+//                             )}
+//                             {item.additions?.length > 0 && (
+//                               <div className="flex gap-1 flex-wrap">
+//                                 {t("additions")}:{" "}
+//                                 {item.additions.map((a) => (
+//                                   <Badge key={a._id}>
+//                                     {a.name[selectedLanguage]}
+//                                     {a.price > 0 && ` (+${a.price.toFixed(2)})`}
+//                                   </Badge>
+//                                 ))}
+//                               </div>
+//                             )}
+//                             {item.notes && (
+//                               <div className="flex gap-1 flex-wrap">
+//                                 {t("notes")}:{" "}
+//                                 <Badge
+//                                   className={
+//                                     "bg-[#FFC400] text-black font-bold"
+//                                   }
+//                                 >
+//                                   {item.notes}
+//                                 </Badge>
+//                               </div>
+//                             )}
+//                           </div>
+//                         </div>
+//                         <div className="text-right">
+//                           <p className="text-lg font-bold text-primary">
+//                             {item.priceAtPurchase} JOD
+//                           </p>
+//                         </div>
+//                       </div>
+//                     ))}
+//                   </div>
+
+//                   <div className="mt-6 space-y-2 border-t pt-4">
+//                     <div className="flex items-center justify-between text-sm">
+//                       <span className="text-muted-foreground">
+//                         {t("order_subtotal")}:
+//                       </span>
+//                       <span className="font-medium">
+//                         {(
+//                           order.totalPrice -
+//                           (order.shippingAddress?.deliveryCost || 0) -
+//                           order.products.reduce((total, item) => {
+//                             const itemAdditionsTotal = item.additions.reduce(
+//                               (sum, add) => sum + (add.price || 0),
+//                               0,
+//                             );
+//                             return total + itemAdditionsTotal * item.quantity;
+//                           }, 0)
+//                         ).toFixed(2)}{" "}
+//                         JOD
+//                       </span>
+//                     </div>
+
+//                     {order.products.reduce((total, item) => {
+//                       const itemAdditionsTotal = item.additions.reduce(
+//                         (sum, add) => sum + (add.price || 0),
+//                         0,
+//                       );
+//                       return total + itemAdditionsTotal * item.quantity;
+//                     }, 0) > 0 && (
+//                       <div className="flex items-center justify-between text-sm">
+//                         <span className="text-muted-foreground">
+//                           {t("additions")}:
+//                         </span>
+//                         <span className="font-medium text-blue-600">
+//                           +
+//                           {order.products
+//                             .reduce((total, item) => {
+//                               const itemAdditionsTotal = item.additions.reduce(
+//                                 (sum, add) => sum + (add.price || 0),
+//                                 0,
+//                               );
+//                               return total + itemAdditionsTotal * item.quantity;
+//                             }, 0)
+//                             .toFixed(2)}{" "}
+//                           JOD
+//                         </span>
+//                       </div>
+//                     )}
+//                     <div className="flex items-center justify-between text-sm">
+//                       <span className="text-muted-foreground">
+//                         {t("delivery_cost")}:
+//                       </span>
+//                       <span className="font-medium">
+//                         {order.shippingAddress?.deliveryCost || 0} JOD
+//                       </span>
+//                     </div>
+//                     <div className="flex items-center justify-between border-t pt-2">
+//                       <span className="text-sm font-medium">
+//                         {t("order_total")}:
+//                       </span>
+//                       <span className="text-2xl font-bold text-primary">
+//                         {order.totalPrice.toFixed(2)} JOD
+//                       </span>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 <div className="mt-6 flex flex-col gap-3 border-t pt-4 md:flex-row md:items-center md:justify-end">
+//                   {user.role === "admin" && (
+//                     <Button
+//                       variant="destructive"
+//                       onClick={() => handleDeleteOrder(order._id)}
+//                     >
+//                       {t("delete_order")}
+//                     </Button>
+//                   )}
+
+//                   <Button
+//                     variant="outline"
+//                     className="border-primary text-primary"
+//                     onClick={() => {
+//                       const customerPhone = order.userId?.phone || "N/A";
+//                       const customerName = order.userDetails?.name || "N/A";
+//                       const deliveryType =
+//                         order.orderType === "delivery"
+//                           ? t("delivery")
+//                           : t("pickup");
+//                       const area = order.shippingAddress?.name || "N/A";
+
+//                       const invoiceHtml = `
+//                         <div style="direction: rtl; font-family: Tahoma, sans-serif; width:100%; max-width:480px; margin:auto; padding:16px; border:1px solid #ccc; background:#fff;">
+//                           <h2 style="text-align:center; margin-bottom:8px;">${t("invoice_title")} #${order.sequenceNumber}</h2>
+//                           <p style="text-align:center; font-size:14px;"><strong>${t("invoice_customer")}</strong> ${customerName}</p>
+//                           <p style="text-align:center; font-size:14px;"><strong>${t("invoice_phone")}</strong> ${customerPhone}</p>
+//                           <p style="text-align:center; font-size:14px;"><strong>${t("order_type")}</strong> ${deliveryType}</p>
+// ${
+//   order.orderType === "delivery" && area
+//     ? `<p style="text-align:center; font-size:14px; background:#f9f9f9; padding:4px;">
+//     <strong>${t("area")}:</strong> ${area}
+//    </p>`
+//     : ""
+// }                          <hr/>
+//                           <table style="width:100%; border-collapse: collapse; font-size:14px;">
+//                             <thead>
+//                               <tr style="background:#f0f0f0;">
+//                                 <th style="padding:6px; border-bottom:1px solid #000; text-align:right;">${t("product")}</th>
+//                                 <th style="padding:6px; border-bottom:1px solid #000; text-align:center;">${t("quantity")}</th>
+//                                 <th style="padding:6px; border-bottom:1px solid #000; text-align:left;">${t("price")}</th>
+//                               </tr>
+//                             </thead>
+//                             <tbody>
+//                               ${order.products
+//                                 .map((item) => {
+//                                   const additions =
+//                                     item.additions?.length > 0
+//                                       ? `<div style="font-size:12px; color:#555;">+ ${item.additions.map((a) => a.name[selectedLanguage]).join(", ")}</div>`
+//                                       : "";
+//                                   const protein = item.selectedProtein
+//                                     ? `<div style="font-size: 13px; color: #000; font-weight: bold; margin-top: 2px;">
+//       ${t("protein")}: ${t(item.selectedProtein.toLowerCase())}
+//      </div>`
+//                                     : "";
+//                                   const spicy = item.isSpicy
+//                                     ? `<div style="color:red; font-size:12px;">${t("spicy")}</div>`
+//                                     : "";
+//                                   const notes = item.notes
+//                                     ? `<div style="font-size:12px; color:#777;">${t("notes")}: ${item.notes}</div>`
+//                                     : "";
+
+//                                   return `
+//                                   <tr>
+//                                     <td style="padding:6px; border-bottom:1px solid #eee;">
+//                                       ${item.productId?.name[selectedLanguage] || "Unknown"}
+//                                       ${additions}
+//                                       ${protein}
+//                                       ${spicy}
+//                                       ${notes}
+//                                     </td>
+//                                     <td style="text-align:center; padding:6px; border-bottom:1px solid #eee;">${item.quantity}</td>
+//                                     <td style="text-align:left; padding:6px; border-bottom:1px solid #eee;">${(item.priceAtPurchase * item.quantity).toFixed(2)} JOD</td>
+//                                   </tr>
+//                                 `;
+//                                 })
+//                                 .join("")}
+//                             </tbody>
+//                           </table>
+//                           <div style="margin-top:10px; font-size:14px;">
+//                             <p style="display:flex; justify-content:space-between;"><strong>${t("subtotal")}:</strong> <span>${(order.totalPrice - (order.shippingAddress?.deliveryCost || 0)).toFixed(2)} JOD</span></p>
+//                             <p style="display:flex; justify-content:space-between;"><strong>${t("delivery")}:</strong> <span>${order.shippingAddress?.deliveryCost || 0} JOD</span></p>
+//                             <p style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px;"><strong>${t("total")}:</strong> <span>${order.totalPrice.toFixed(2)} JOD</span></p>
+//                           </div>
+//                           <hr />
+//                           <p style="text-align:center; font-weight:bold;"> ${t("invoice_thank_you")} </p>
+//                         </div>
+//                       `;
+
+//                       const printWindow = window.open(
+//                         "",
+//                         "",
+//                         "width=400,height=600",
+//                       );
+//                       printWindow.document.write(
+//                         `<html><head><title>فاتورة</title><meta charset="UTF-8" /></head><body>${invoiceHtml}</body></html>`,
+//                       );
+//                       printWindow.document.close();
+//                       printWindow.focus();
+//                       printWindow.print();
+//                       printWindow.close();
+//                     }}
+//                   >
+//                     {t("print_invoice")}
+//                   </Button>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default AdminDashboard;
+
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -258,8 +1111,15 @@ function AdminDashboard() {
         [t("payment_method")]: order.payment?.method || "N/A",
         "تفاصيل المنتجات": productsDetails, // سرد كامل للمنتجات مع إضافاتها
         [t("order_subtotal")]: (
-          order.totalPrice - (order.shippingAddress?.deliveryCost || 0)
+          order.totalPrice -
+          (order.shippingAddress?.deliveryCost || 0) +
+          (order.discountAmount || 0)
         ).toFixed(2),
+        // كود الخصم ومقداره (فاضي لو ما في كود مطبق)
+        "كود الخصم": order.promoCode || "-",
+        "قيمة الخصم": order.discountAmount
+          ? Number(order.discountAmount).toFixed(2)
+          : "0.00",
         [t("delivery_cost")]: order.shippingAddress?.deliveryCost || 0,
         [t("order_total")]: order.totalPrice.toFixed(2),
         [t("date")]: new Date(order.createdAt).toLocaleString(
@@ -502,6 +1362,18 @@ function AdminDashboard() {
                         </span>
                       </div>
                     )}
+                    {/* شارة كود الخصم إذا كان مطبق على الطلب */}
+                    {order.promoCode && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {t("promo_code") || "كود الخصم"}:
+                        </span>
+                        <Badge className="bg-amber-100 text-amber-800 font-mono">
+                          {order.promoCode} (-
+                          {Number(order.discountAmount || 0).toFixed(2)} JOD)
+                        </Badge>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-3">
@@ -618,18 +1490,11 @@ function AdminDashboard() {
                             {item.isSpicy && (
                               <Badge className="w-fit">{t("spicy")}</Badge>
                             )}
-                            {/* ملاحظة بحجم صغير ومختصر */}
-                            {/* {item.notes && (
-  <div className="mt-1 flex items-center gap-1.5 text-[12px] bg-[#FFD700] px-2 py-0.5 rounded-md w-fit border border-[#E6C200] text-amber-950">
-    <span className="font-bold shrink-0">{t("notes")}:</span>
-    <span className="truncate max-w-[200px]">{item.notes}</span>/
-  </div>
-)} */}
                             {/* إظهار نوع البروتين باستخدام ملفات الترجمة t() */}
                             {item.selectedProtein && (
                               <div className="mt-2 mb-2">
                                 <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-md shadow-sm inline-block">
-                                  {/* نحول النص لـ lowercase ليتطابق مع المفاتيح في ملف الترجمة */}
+                                  {/* نحول النص لـ lowercase ليتطابق مع المفاتيح بملف الترجمة */}
                                   {t(item.selectedProtein.toLowerCase())}
                                 </span>
                               </div>
@@ -683,7 +1548,8 @@ function AdminDashboard() {
                               0,
                             );
                             return total + itemAdditionsTotal * item.quantity;
-                          }, 0)
+                          }, 0) +
+                          (order.discountAmount || 0)
                         ).toFixed(2)}{" "}
                         JOD
                       </span>
@@ -715,6 +1581,20 @@ function AdminDashboard() {
                         </span>
                       </div>
                     )}
+
+                    {/* سطر الخصم إذا كان في كود مطبق على الطلب */}
+                    {order.discountAmount > 0 && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          {t("promo_discount") || "خصم الكود"}
+                          {order.promoCode ? ` (${order.promoCode})` : ""}:
+                        </span>
+                        <span className="font-medium text-green-600">
+                          - {Number(order.discountAmount).toFixed(2)} JOD
+                        </span>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">
                         {t("delivery_cost")}:
@@ -755,6 +1635,12 @@ function AdminDashboard() {
                           ? t("delivery")
                           : t("pickup");
                       const area = order.shippingAddress?.name || "N/A";
+
+                      // سطر الخصم بالفاتورة المطبوعة (فاضي لو ما في كود)
+                      const discountRow =
+                        order.discountAmount > 0
+                          ? `<p style="display:flex; justify-content:space-between; color:#15803d;"><strong>${t("promo_discount") || "خصم الكود"}${order.promoCode ? ` (${order.promoCode})` : ""}:</strong> <span>- ${Number(order.discountAmount).toFixed(2)} JOD</span></p>`
+                          : "";
 
                       const invoiceHtml = `
                         <div style="direction: rtl; font-family: Tahoma, sans-serif; width:100%; max-width:480px; margin:auto; padding:16px; border:1px solid #ccc; background:#fff;">
@@ -814,7 +1700,8 @@ ${
                             </tbody>
                           </table>
                           <div style="margin-top:10px; font-size:14px;">
-                            <p style="display:flex; justify-content:space-between;"><strong>${t("subtotal")}:</strong> <span>${(order.totalPrice - (order.shippingAddress?.deliveryCost || 0)).toFixed(2)} JOD</span></p>
+                            <p style="display:flex; justify-content:space-between;"><strong>${t("subtotal")}:</strong> <span>${(order.totalPrice - (order.shippingAddress?.deliveryCost || 0) + (order.discountAmount || 0)).toFixed(2)} JOD</span></p>
+                            ${discountRow}
                             <p style="display:flex; justify-content:space-between;"><strong>${t("delivery")}:</strong> <span>${order.shippingAddress?.deliveryCost || 0} JOD</span></p>
                             <p style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px;"><strong>${t("total")}:</strong> <span>${order.totalPrice.toFixed(2)} JOD</span></p>
                           </div>

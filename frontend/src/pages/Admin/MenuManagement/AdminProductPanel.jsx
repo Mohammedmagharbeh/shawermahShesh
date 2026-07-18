@@ -228,7 +228,9 @@ import ProductsList from "./ProductsList";
 import Header from "./Header";
 import { INITIAL_FORM_DATA } from "@/constants";
 import CategoryManagement from "./CategoryManagement";
-import PromoCodeManagement from "./PromoCodeManagement";
+// import PromoCodeManagement from "./PromoCodeManagement";
+import PromoCodeManagement from "@/pages/Admin/PromoCodeManagement";
+
 import { useProducts } from "@/hooks/useProducts";
 import { useCategoryContext } from "@/contexts/CategoryContext";
 import { useTranslation } from "react-i18next";
