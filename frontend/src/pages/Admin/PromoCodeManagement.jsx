@@ -530,7 +530,7 @@ export default function PromoCodeManagement() {
             type="number"
             min="1"
             placeholder={
-              t("max_uses_per_user") ||
+              t("max_uses_per_users") ||
               "الحد الأقصى للاستخدام لكل زبون (اختياري)"
             }
             value={maxUses}

@@ -32,7 +32,7 @@
   "promo_update_error": "Update failed",
   "promo_deleted": "Deleted successfully",
   "promo_delete_error": "Delete failed",
-
+"max_uses_per_users":"Number of code uses",
   "checkout_delivery": "Delivery",
   "order_summary": "Order Summary",
   "area": "Area",

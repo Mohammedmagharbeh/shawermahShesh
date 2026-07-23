@@ -96,7 +96,7 @@
   "working_hours_start": "يومياً من 10 صباحاً",
   "working_hours_end": "حتى 3 بعد منتصف الليل",
   "all": "الكل",
-
+"max_uses_per_users":"مرات استخدام الكود ",
   "order_management": "إدارة الطلبات",
   "total_orders": "إجمالي الطلبات:",
   "filter_by_date": "تصفية حسب التاريخ:",

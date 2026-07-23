@@ -392,7 +392,7 @@ function Header() {
                 <img
 
                   // src={logo || "/placeholder.svg"}
-                  src={zift}
+                  src={newlogo}
                   alt="شاورما شيش"
                   className="w-full h-full object-contain"
                 />
