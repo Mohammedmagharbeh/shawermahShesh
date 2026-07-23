@@ -23,6 +23,13 @@
   "promo_invalid_percentage": "Percentage must be between 1 and 100",
   "discount_percentage": "Discount %",
   "add": "Add",
+
+   "top_product": "Top Product",
+  "top_payment_method": "Top Payment Method",
+  "payment_methods_breakdown": "Payment Methods Breakdown",
+  "of_total_orders": "of total orders",
+  "unknown_product": "Unknown Product",
+  "unspecified_payment": "Unspecified",
   "loading": "Loading...",
   "no_promo_codes": "No promo codes yet",
   "active": "Active",

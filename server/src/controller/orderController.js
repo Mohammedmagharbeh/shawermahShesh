@@ -1,3 +1,531 @@
+// // const Order = require("../models/orders");
+// // const User = require("../models/user");
+// // const Product = require("../models/products");
+// // const Location = require("../models/locations");
+// // const counterModel = require("../models/counter");
+// // const Cart = require("../models/cart");
+// // const mongoose = require("mongoose");
+
+// // // Validate ObjectId
+// // const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// // // Fetch user
+// // const findUser = async (userId) => User.findById(userId);
+
+// // // Generate daily sequence
+// // async function getNextDailySequence() {
+// //   const todayStr = new Date().toISOString().split("T")[0];
+// //   const counter = await counterModel.findOneAndUpdate(
+// //     { date: todayStr },
+// //     { $inc: { sequence: 1 } },
+// //     { new: true, upsert: true },
+// //   );
+// //   return counter.sequence;
+// // }
+
+// // // GET order by ID
+// // exports.getOrderById = async (req, res) => {
+// //   try {
+// //     const { id } = req.params;
+// //     if (!id || !isValidId(id))
+// //       return res
+// //         .status(400)
+// //         .json({ success: false, message: "Valid Order ID is required" });
+
+// //     const order = await Order.findById(id)
+// //       .populate("products.productId")
+// //       .populate("userId")
+// //       .populate("shippingAddress")
+// //       .lean();
+
+// //     if (!order)
+// //       return res
+// //         .status(404)
+// //         .json({ success: false, message: "Order not found" });
+
+// //     res.status(200).json({ success: true, data: order });
+// //   } catch (err) {
+// //     console.error("getOrderById error:", err);
+// //     res.status(500).json({ success: false, message: "Server error" });
+// //   }
+// // };
+
+// // // GET all orders — paginated, with optional status + search filters
+// // exports.getAllOrders = async (req, res) => {
+// //   try {
+// //     const page  = Math.max(1, parseInt(req.query.page)  || 1);
+// //     const limit = Math.min(100, parseInt(req.query.limit) || 30);
+// //     const { status, search } = req.query;
+
+// //     const filter = {};
+// //     if (status) filter.status = status;
+
+// //     if (search) {
+// //       const s    = search.trim();
+// //       const asInt = parseInt(s);
+
+// //       if (!isNaN(asInt) && String(asInt) === s) {
+// //         // Pure integer → match sequenceNumber exactly
+// //         filter.sequenceNumber = asInt;
+// //       } else if (/^[\d+]{6,}$/.test(s)) {
+// //         // Looks like a phone number → find matching users first, then filter orders
+// //         const userModel = require("../models/user");
+// //         const userIds = await userModel
+// //           .find({ phone: { $regex: s, $options: "i" } })
+// //           .select("_id")
+// //           .lean()
+// //           .then((us) => us.map((u) => u._id));
+// //         filter.userId = { $in: userIds };
+// //       } else {
+// //         // Free text → match stored userDetails.name on the order
+// //         filter["userDetails.name"] = { $regex: s, $options: "i" };
+// //       }
+// //     }
+
+// //     const [orders, total] = await Promise.all([
+// //       Order.find(filter)
+// //         .select("-__v")
+// //         .populate("userId", "phone")
+// //         .populate("products.productId", "name image")
+// //         .populate("shippingAddress", "name deliveryCost")
+// //         .lean()
+// //         .sort({ createdAt: -1 })
+// //         .skip((page - 1) * limit)
+// //         .limit(limit),
+// //       Order.countDocuments(filter),
+// //     ]);
+
+// //     res.status(200).json({
+// //       success: true,
+// //       data:  orders,
+// //       total,
+// //       page,
+// //       pages: Math.ceil(total / limit),
+// //     });
+// //   } catch (err) {
+// //     console.error("getAllOrders error:", err);
+// //     res.status(500).json({ success: false, message: "Server error" });
+// //   }
+// // };
+
+// // // GET aggregated order stats — used exclusively by Statistics.jsx
+// // // Returns pre-computed totals + per-user breakdown so the frontend
+// // // never has to download 2000+ raw order documents.
+// // exports.getOrdersStats = async (req, res) => {
+// //   try {
+// //     const { period } = req.query; // 'all' | 'today' | 'week' | 'month'
+// //     const now = new Date();
+// //     let dateMatch = {};
+
+// //     if (period === "today") {
+// //       const start = new Date(now); start.setHours(0, 0, 0, 0);
+// //       const end   = new Date(now); end.setHours(23, 59, 59, 999);
+// //       dateMatch = { createdAt: { $gte: start, $lte: end } };
+// //     } else if (period === "week") {
+// //       // Saturday-anchored week to match date-fns weekStartsOn:6
+// //       const dow   = now.getDay();            // 0=Sun … 6=Sat
+// //       const diff  = dow >= 6 ? 0 : dow + 1; // days back to Saturday
+// //       const start = new Date(now);
+// //       start.setDate(now.getDate() - diff);
+// //       start.setHours(0, 0, 0, 0);
+// //       const end = new Date(start);
+// //       end.setDate(start.getDate() + 6);
+// //       end.setHours(23, 59, 59, 999);
+// //       dateMatch = { createdAt: { $gte: start, $lte: end } };
+// //     } else if (period === "month") {
+// //       const start = new Date(now.getFullYear(), now.getMonth(), 1);
+// //       const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+// //       dateMatch = { createdAt: { $gte: start, $lte: end } };
+// //     }
+
+// //     // Two aggregations in parallel:
+// //     // 1. Overall totals  2. Per-user breakdown (for cross-referencing with users list)
+// //     const [totals, userStats] = await Promise.all([
+// //       Order.aggregate([
+// //         { $match: dateMatch },
+// //         { $group: { _id: null, totalRevenue: { $sum: "$totalPrice" }, totalOrders: { $sum: 1 } } },
+// //       ]),
+// //       Order.aggregate([
+// //         { $match: dateMatch },
+// //         { $group: { _id: "$userId", totalOrders: { $sum: 1 }, totalSpent: { $sum: "$totalPrice" } } },
+// //       ]),
+// //     ]);
+
+// //     res.status(200).json({
+// //       success:      true,
+// //       totalRevenue: totals[0]?.totalRevenue || 0,
+// //       totalOrders:  totals[0]?.totalOrders  || 0,
+// //       userStats,    // [{ _id: userId, totalOrders, totalSpent }]
+// //     });
+// //   } catch (err) {
+// //     console.error("getOrdersStats error:", err);
+// //     res.status(500).json({ success: false, message: "Server error" });
+// //   }
+// // };
+
+// // // GET today's orders only — used exclusively by AdminDashboard
+// // exports.getTodayOrders = async (req, res) => {
+// //   try {
+// //     const now   = new Date();
+// //     const start = new Date(now);
+// //     start.setHours(0, 0, 0, 0);
+// //     const end   = new Date(now);
+// //     end.setHours(23, 59, 59, 999);
+
+// //     const orders = await Order.find({ createdAt: { $gte: start, $lte: end } })
+// //       .select("-__v")
+// //       // Only fetch the sub-fields the dashboard UI renders
+// //       .populate("products.productId", "name image additions basePrice prices discount")
+// //       .populate("userId", "phone")
+// //       .populate("shippingAddress", "name deliveryCost")
+// //       .lean()
+// //       .sort({ createdAt: -1 });
+
+// //     res.status(200).json({ success: true, count: orders.length, data: orders });
+// //   } catch (err) {
+// //     console.error("getTodayOrders error:", err);
+// //     res.status(500).json({ success: false, message: "Server error" });
+// //   }
+// // };
+
+// // // GET orders by user ID
+// // exports.getOrdersByUserId = async (req, res) => {
+// //   try {
+// //     const { userId } = req.params;
+// //     if (!userId || !isValidId(userId))
+// //       return res
+// //         .status(400)
+// //         .json({ success: false, message: "Valid User ID is required" });
+
+// //     const user = await findUser(userId);
+// //     if (!user)
+// //       return res
+// //         .status(404)
+// //         .json({ success: false, message: "User not found" });
+
+// //     const orders = await Order.find({ userId })
+// //       .populate("products.productId")
+// //       .populate("shippingAddress")
+// //       .sort({ createdAt: -1 })
+// //       .lean();
+
+// //     res.status(200).json({ success: true, data: orders });
+// //   } catch (err) {
+// //     console.error("getOrdersByUserId error:", err);
+// //     res.status(500).json({ success: false, message: "Server error" });
+// //   }
+// // };
+
+// // // CREATE order
+// // exports.createOrder = async (req, res) => {
+// //   try {
+// //     const {
+// //       userId,
+// //       products,
+// //       status,
+// //       shippingAddress,
+// //       paymentStatus,
+// //       paymentMethod,
+// //       transactionId,
+// //       paidAt,
+// //       orderType,
+// //       userDetails,
+// //     } = req.body;
+
+// //     // basic validation
+// //     if (
+// //       !userId ||
+// //       !Array.isArray(products) ||
+// //       products.length === 0 ||
+// //       !orderType ||
+// //       (orderType === "delivery" && !shippingAddress) ||
+// //       !userDetails?.name
+// //     ) {
+// //       return res
+// //         .status(400)
+// //         .json({ success: false, message: "Missing required fields" });
+// //     }
+
+// //     // validate user & location
+// //     const foundUser = await User.findById(userId);
+// //     if (!foundUser)
+// //       return res
+// //         .status(404)
+// //         .json({ success: false, message: "User not found" });
+
+// //     let location = null;
+// //     if (orderType === "delivery") {
+// //       location = await Location.findById(shippingAddress);
+// //       if (!location)
+// //         return res
+// //           .status(400)
+// //           .json({ success: false, message: "Invalid shipping address" });
+// //     }
+
+// //     // collect product ids and fetch DB products
+// //     const productIds = products.map((p) =>
+// //       p.productId && p.productId._id ? p.productId._id : p.productId,
+// //     );
+// //     const uniqueProductIds = [
+// //       ...new Set(productIds.map((id) => id.toString())),
+// //     ];
+// //     const dbProducts = await Product.find({ _id: { $in: uniqueProductIds } });
+
+// //     // check missing products
+// //     const dbProductIds = dbProducts.map((p) => p._id.toString());
+// //     const missing = uniqueProductIds.filter((id) => !dbProductIds.includes(id));
+// //     if (missing.length) {
+// //       return res.status(400).json({
+// //         success: false,
+// //         message: `Products not found: ${missing.join(", ")}`,
+// //       });
+// //     }
+
+// //     // helper: get addition price from product by _id or by name if needed
+// //     const getAdditionFromProduct = (matchedProduct, addRef) => {
+// //       if (!matchedProduct || !Array.isArray(matchedProduct.additions))
+// //         return null;
+
+// //       // addRef might be {_id: "..."} or { _id: ObjectId } or { name: {en/ar}, price }
+// //       if (addRef?._id) {
+// //         const found = matchedProduct.additions.find(
+// //           (a) => a._id.toString() === addRef._id.toString(),
+// //         );
+// //         if (found)
+// //           return {
+// //             _id: found._id,
+// //             name: found.name,
+// //             price: Number(found.price || 0),
+// //           };
+// //       }
+
+// //       // try matching by name (fallback)
+// //       if (addRef?.name?.en) {
+// //         const found = matchedProduct.additions.find(
+// //           (a) => a.name?.en === addRef.name.en,
+// //         );
+// //         if (found)
+// //           return {
+// //             _id: found._id,
+// //             name: found.name,
+// //             price: Number(found.price || 0),
+// //           };
+// //       }
+
+// //       return null;
+// //     };
+
+// //     // normalize a single price lookup from product.prices supporting both formats
+// //     const getVariationPrice = (
+// //       matchedProduct,
+// //       selectedProtein,
+// //       selectedType,
+// //     ) => {
+// //       if (!matchedProduct) return 0;
+// //       // if nested (chicken.meal etc)
+// //       if (
+// //         selectedProtein &&
+// //         selectedType &&
+// //         matchedProduct.prices?.[selectedProtein]?.[selectedType] != null
+// //       ) {
+// //         return Number(matchedProduct.prices[selectedProtein][selectedType]);
+// //       }
+// //       // if flat (sandwich: x, meal: y)
+// //       if (selectedType && matchedProduct.prices?.[selectedType] != null) {
+// //         return Number(matchedProduct.prices[selectedType]);
+// //       } else if (selectedProtein) {
+// //         return Number(matchedProduct.prices[selectedProtein]);
+// //       }
+// //       // fallback to basePrice
+// //       return Number(matchedProduct.basePrice || 0);
+// //     };
+
+// //     // Enrich products (normalize additions and compute priceAtPurchase)
+// //     const enrichedProducts = products.map((p) => {
+// //       const productId =
+// //         p.productId && p.productId._id
+// //           ? p.productId._id.toString()
+// //           : p.productId.toString();
+// //       const matchedProduct = dbProducts.find(
+// //         (dp) => dp._id.toString() === productId,
+// //       );
+
+// //       const quantity = Number(p.quantity || 1);
+
+// //       // determine base price (supports nested or flat prices)
+// //       const basePriceRaw = getVariationPrice(
+// //         matchedProduct,
+// //         p.selectedProtein,
+// //         p.selectedType,
+// //       );
+
+// //       // apply discount (only to base product price)
+// //       const discountPct = Number(matchedProduct.discount || 0);
+// //       const priceAtPurchase =
+// //         discountPct > 0
+// //           ? basePriceRaw - (basePriceRaw * discountPct) / 100
+// //           : basePriceRaw;
+
+// //       // normalize additions: each item should be { _id?, name?, price: Number, quantity: Number (optional) }
+// //       const normalizedAdditions = (p.additions || []).map((add) => {
+// //         // if frontend already sent full object with price -> use it
+// //         if (
+// //           add &&
+// //           (add.price !== undefined || add.price !== null) &&
+// //           (add.name || add._id)
+// //         ) {
+// //           return {
+// //             _id: add._id ? add._id : undefined,
+// //             name: add.name ? add.name : undefined,
+// //             price: Number(add.price || 0),
+// //             quantity: Number(add.quantity || 1),
+// //           };
+// //         }
+// //         // else try to resolve from product additions by _id or name
+// //         const resolved = getAdditionFromProduct(matchedProduct, add);
+// //         if (resolved) {
+// //           return {
+// //             _id: resolved._id,
+// //             name: resolved.name,
+// //             price: Number(resolved.price || 0),
+// //             quantity: 1,
+// //           };
+// //         }
+// //         // fallback: ignore unknown addition (price 0)
+// //         return {
+// //           _id: add?._id,
+// //           name: add?.name,
+// //           price: 0,
+// //           quantity: Number(add?.quantity || 1),
+// //         };
+// //       });
+
+// //       return {
+// //         productId,
+// //         quantity,
+// //         additions: normalizedAdditions,
+// //         priceAtPurchase: Number(priceAtPurchase || 0),
+// //         isSpicy: Boolean(p.isSpicy || false),
+// //         notes: p.notes || "",
+// //         selectedProtein: p.selectedProtein || null,
+// //         selectedType: p.selectedType || null,
+// //       };
+// //     });
+
+// //     // Calculate total price (additions accounted per item and multiplied by product quantity)
+// //     const productsTotal = enrichedProducts.reduce((sum, item) => {
+// //       const additionsSumPerUnit = (item.additions || []).reduce(
+// //         (aSum, a) => aSum + Number(a.price || 0) * Number(a.quantity || 1),
+// //         0,
+// //       );
+// //       const unitTotal = Number(item.priceAtPurchase || 0) + additionsSumPerUnit;
+// //       return sum + unitTotal * Number(item.quantity || 1);
+// //     }, 0);
+
+// //     const totalPrice =
+// //       Number(productsTotal) + Number(location?.deliveryCost || 0);
+
+// //     // create order
+// //     const newOrder = await Order.create({
+// //       userId,
+// //       products: enrichedProducts,
+// //       totalPrice,
+// //       status: status || "Processing",
+// //       shippingAddress: orderType === "delivery" ? shippingAddress : null,
+// //       payment: {
+// //         status: paymentStatus || "unpaid",
+// //         method: paymentMethod || null,
+// //         transactionId: transactionId || null,
+// //         paidAt: paidAt || null,
+// //       },
+// //       orderType,
+// //       userDetails,
+// //       sequenceNumber: await getNextDailySequence(),
+// //     });
+
+// //     // populate for response
+// //     const populatedOrder = await newOrder.populate([
+// //       { path: "products.productId" },
+// //       { path: "userId" },
+// //       { path: "shippingAddress" },
+// //     ]);
+
+// //     // socket notify
+// //     const io = req.app.get("io");
+// //     if (io) io.emit("newOrder", populatedOrder);
+
+// //     // Clear the cart after successful order creation
+// //     await Cart.findOneAndUpdate({ userId }, { products: [] });
+
+// //     return res.status(201).json({ success: true, data: populatedOrder });
+// //   } catch (error) {
+// //     console.error("Error in createOrder:", error);
+// //     return res
+// //       .status(500)
+// //       .json({ success: false, message: error.message || "Server error" });
+// //   }
+// // };
+
+// // // DELETE order
+// // exports.deleteOrder = async (req, res) => {
+// //   try {
+// //     const { id } = req.params;
+// //     const deletedOrder = await Order.findByIdAndDelete(id);
+// //     if (!deletedOrder)
+// //       return res.status(404).json({ message: "Order not found" });
+// //     res.status(200).json(deletedOrder);
+// //   } catch (err) {
+// //     console.error("deleteOrder error:", err);
+// //     res.status(500).json({ message: err.message });
+// //   }
+// // };
+
+// // // UPDATE order
+// // exports.updateOrder = async (req, res) => {
+// //   try {
+// //     const { id } = req.params;
+// //     const body = req.body;
+// //     const allowedUpdates = [
+// //       "status",
+// //       "shippingAddress",
+// //       "payment",
+// //       "products",
+// //       "totalPrice",
+// //     ];
+// //     const updates = {};
+
+// //     allowedUpdates.forEach(
+// //       (f) => body[f] !== undefined && (updates[f] = body[f]),
+// //     );
+// //     if (!Object.keys(updates).length)
+// //       return res.status(400).json({ message: "No valid fields to update" });
+
+// //     const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
+// //       new: true,
+// //     })
+// //       .populate("products.productId")
+// //       .populate("userId")
+// //       .populate("shippingAddress");
+
+// //     if (!updatedOrder)
+// //       return res.status(404).json({ message: "Order not found" });
+
+// //     // Send OTP if status confirmed
+// //     if (updates.status === "Confirmed") {
+// //       const { sendOrderConfirm } = require("../utils/otp");
+// //       await sendOrderConfirm(updatedOrder.userId.phone);
+// //     }
+
+// //     const io = req.app.get("io");
+// //     if (io) io.emit("updatedOrder", updatedOrder);
+
+// //     res.status(200).json(updatedOrder);
+// //   } catch (err) {
+// //     console.error("updateOrder error:", err);
+// //     res.status(500).json({ message: err.message });
+// //   }
+// // };
+
 // const Order = require("../models/orders");
 // const User = require("../models/user");
 // const Product = require("../models/products");
@@ -5,6 +533,7 @@
 // const counterModel = require("../models/counter");
 // const Cart = require("../models/cart");
 // const mongoose = require("mongoose");
+// const { recordPromoUsage } = require("../controller/promoCodeController"); // ✅ جديد
 
 // // Validate ObjectId
 // const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
@@ -230,6 +759,8 @@
 //       paidAt,
 //       orderType,
 //       userDetails,
+//       promoCode, // ✅ جديد
+//       discountAmount, // ✅ جديد
 //     } = req.body;
 
 //     // basic validation
@@ -422,8 +953,12 @@
 //       return sum + unitTotal * Number(item.quantity || 1);
 //     }, 0);
 
-//     const totalPrice =
-//       Number(productsTotal) + Number(location?.deliveryCost || 0);
+//     // ✅ تطبيق خصم البرومو كود (إن وجد) قبل إضافة تكلفة التوصيل
+//     const promoDiscount = Number(discountAmount || 0);
+//     const totalPrice = Math.max(
+//       Number(productsTotal) - promoDiscount + Number(location?.deliveryCost || 0),
+//       0,
+//     );
 
 //     // create order
 //     const newOrder = await Order.create({
@@ -440,6 +975,8 @@
 //       },
 //       orderType,
 //       userDetails,
+//       promoCode: promoCode || null, // ✅ جديد
+//       discountAmount: promoDiscount, // ✅ جديد
 //       sequenceNumber: await getNextDailySequence(),
 //     });
 
@@ -456,6 +993,16 @@
 
 //     // Clear the cart after successful order creation
 //     await Cart.findOneAndUpdate({ userId }, { products: [] });
+
+//     // ✅ تسجيل استخدام كود الخصم — الطلب هون بينحفظ مباشرة (كاش مثلاً) فمافي
+//     // خطوة "تأكيد دفع" منفصلة زي بوابات الدفع الإلكترونية، فنسجل هون مباشرة
+//     if (promoCode) {
+//       try {
+//         await recordPromoUsage(promoCode, userId, newOrder._id);
+//       } catch (e) {
+//         console.error("Failed to record promo usage:", e.message);
+//       }
+//     }
 
 //     return res.status(201).json({ success: true, data: populatedOrder });
 //   } catch (error) {
@@ -525,6 +1072,8 @@
 //     res.status(500).json({ message: err.message });
 //   }
 // };
+
+
 const Order = require("../models/orders");
 const User = require("../models/user");
 const Product = require("../models/products");
@@ -637,8 +1186,8 @@ exports.getAllOrders = async (req, res) => {
 };
 
 // GET aggregated order stats — used exclusively by Statistics.jsx
-// Returns pre-computed totals + per-user breakdown so the frontend
-// never has to download 2000+ raw order documents.
+// Returns pre-computed totals + per-user breakdown + top products + top
+// payment methods, so the frontend never has to download raw order documents.
 exports.getOrdersStats = async (req, res) => {
   try {
     const { period } = req.query; // 'all' | 'today' | 'week' | 'month'
@@ -666,9 +1215,12 @@ exports.getOrdersStats = async (req, res) => {
       dateMatch = { createdAt: { $gte: start, $lte: end } };
     }
 
-    // Two aggregations in parallel:
-    // 1. Overall totals  2. Per-user breakdown (for cross-referencing with users list)
-    const [totals, userStats] = await Promise.all([
+    // Four aggregations in parallel:
+    // 1. Overall totals
+    // 2. Per-user breakdown (for cross-referencing with users list)
+    // 3. Per-product breakdown (top-selling products by quantity)
+    // 4. Per-payment-method breakdown (most used payment method)
+    const [totals, userStats, productStats, paymentStats] = await Promise.all([
       Order.aggregate([
         { $match: dateMatch },
         { $group: { _id: null, totalRevenue: { $sum: "$totalPrice" }, totalOrders: { $sum: 1 } } },
@@ -677,6 +1229,44 @@ exports.getOrdersStats = async (req, res) => {
         { $match: dateMatch },
         { $group: { _id: "$userId", totalOrders: { $sum: 1 }, totalSpent: { $sum: "$totalPrice" } } },
       ]),
+      Order.aggregate([
+        { $match: dateMatch },
+        { $unwind: "$products" },
+        {
+          $group: {
+            _id: "$products.productId",
+            totalQuantity: { $sum: "$products.quantity" },
+          },
+        },
+        { $sort: { totalQuantity: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "products", // Mongo collection name for the Product model
+            localField: "_id",
+            foreignField: "_id",
+            as: "productInfo",
+          },
+        },
+        { $unwind: { path: "$productInfo", preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            _id: 1,
+            totalQuantity: 1,
+            name: "$productInfo.name", // may be a string or { en, ar } depending on schema
+          },
+        },
+      ]),
+      Order.aggregate([
+        { $match: dateMatch },
+        {
+          $group: {
+            _id: { $ifNull: ["$payment.method", "unspecified"] },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1 } },
+      ]),
     ]);
 
     res.status(200).json({
@@ -684,6 +1274,8 @@ exports.getOrdersStats = async (req, res) => {
       totalRevenue: totals[0]?.totalRevenue || 0,
       totalOrders:  totals[0]?.totalOrders  || 0,
       userStats,    // [{ _id: userId, totalOrders, totalSpent }]
+      productStats, // [{ _id: productId, totalQuantity, name }] sorted desc, top 10
+      paymentStats, // [{ _id: method, count }] sorted desc
     });
   } catch (err) {
     console.error("getOrdersStats error:", err);
