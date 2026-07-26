@@ -22,6 +22,7 @@ import {
   Calendar,
   Package,
   CreditCard,
+  Star,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -69,6 +70,7 @@ export default function StatisticsPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
   const [totalVisitors, setTotalVisitors] = useState([]);
+  const [allUsers, setAllUsers] = useState([]); // ✅ القائمة الكاملة غير المفلترة (لأي بحث عن اسم زبون بغض النظر عن فلتر التاريخ)
   const [loading, setLoading] = useState(true);
   const { t, i18n } = useTranslation();
 
@@ -87,6 +89,7 @@ export default function StatisticsPage() {
         );
         setUserStatsMap(map);
         setStatsData(stats);
+        setAllUsers(users || []); // ✅ نحتفظ بالقائمة الكاملة قبل فلترة التاريخ
 
         // Cross-reference users with the ordered-userId set
         const orderedIdSet = new Set(map.keys());
@@ -198,6 +201,34 @@ export default function StatisticsPage() {
     }));
   }, [statsData.paymentStats, i18n.language]);
 
+  // ✅ أكثر زبون طلب (بناءً على عدد الطلبات المدفوعة لكل مستخدم)
+  // مبني بالكامل على statsData.userStats الموجودة أصلاً + قائمة الزوار لجلب الاسم/الهاتف
+  const topCustomer = useMemo(() => {
+    const list = statsData.userStats || [];
+    if (!list.length) return null;
+
+    const top = list.reduce(
+      (max, u) => ((u.totalOrders || 0) > (max.totalOrders || 0) ? u : max),
+      list[0],
+    );
+
+    // ✅ نبحث بالقائمة الكاملة (allUsers) مش القائمة المفلترة (totalVisitors)
+    // لأن فلتر التاريخ بيطبق عالتسجيل، وممكن الزبون الأكثر طلباً يكون سجل
+    // من فترة برة الفلتر الحالي — بس لسا لازم يظهر اسمه بشكل صحيح
+    const userInfo = allUsers.find((v) => String(v._id) === String(top._id));
+
+    return {
+      _id: top._id,
+      totalOrders: top.totalOrders,
+      totalSpent: top.totalSpent,
+      displayName:
+        userInfo?.username ||
+        userInfo?.name ||
+        userInfo?.phone ||
+        t("unknown_customer"),
+    };
+  }, [statsData.userStats, allUsers]);
+
   // ✅ تحديث البحث ليشمل الـ username
   const filteredUsers = useMemo(() => {
     const users =
@@ -239,6 +270,12 @@ export default function StatisticsPage() {
         Metric: t("top_payment_method"),
         Value: topPaymentMethod
           ? `${getPaymentMethodLabel(topPaymentMethod._id)} (${topPaymentMethod.count})`
+          : "-",
+      },
+      {
+        Metric: t("top_customer"),
+        Value: topCustomer
+          ? `${topCustomer.displayName} (${topCustomer.totalOrders})`
           : "-",
       },
     ];
@@ -349,8 +386,8 @@ export default function StatisticsPage() {
           />
         </div>
 
-        {/* Top Product & Top Payment Method */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Top Product & Top Payment Method & Top Customer */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
             title={t("top_product")}
             value={
@@ -372,6 +409,17 @@ export default function StatisticsPage() {
             icon={<CreditCard />}
             color="text-teal-600"
             bg="bg-teal-50"
+          />
+          <StatCard
+            title={t("top_customer")}
+            value={
+              topCustomer
+                ? `${topCustomer.displayName} (${topCustomer.totalOrders})`
+                : "-"
+            }
+            icon={<Star />}
+            color="text-yellow-600"
+            bg="bg-yellow-50"
           />
         </div>
 
