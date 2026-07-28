@@ -9,16 +9,16 @@ require("dotenv").config();
 // ✅ جلب المستخدمين مع pagination + search + role filter
 exports.getuser = async (req, res) => {
   try {
-    const page   = Math.max(1, parseInt(req.query.page)  || 1);
-    const limit  = Math.min(50, parseInt(req.query.limit) || 20);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, parseInt(req.query.limit) || 20);
     const search = (req.query.search || "").trim();
-    const role   = (req.query.role   || "").trim();
+    const role = (req.query.role || "").trim();
 
     const filter = {};
 
     if (search) {
       filter.$or = [
-        { phone:    { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } },
         { username: { $regex: search, $options: "i" } },
       ];
     }
@@ -106,12 +106,19 @@ exports.sendLoginOTP = async (req, res) => {
     if (!user) {
       user = new userModel({ phone: normalizedPhone, role: "user" });
     }
-    const otp = generateOTP();
+    const isTestAccount = normalizedPhone
+      .replace(/\s+/g, "")
+      .includes("790000000");
+    const otp = isTestAccount ? "1234" : generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 5 * 60 * 1000;
     user.otpLastSentAt = Date.now();
     await user.save();
-    await sendOTP(user.phone, otp);
+
+    // Bypass actual SMS delivery for App Store / Google Play review accounts
+    if (!isTestAccount) {
+      await sendOTP(user.phone, otp);
+    }
     return res.status(200).json({ msg: "OTP sent to your phone" });
   } catch (error) {
     res.status(500).json({ msg: error.message });
