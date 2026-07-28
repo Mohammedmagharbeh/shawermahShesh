@@ -27,6 +27,7 @@ import Story from "./pages/General/Story";
 import NotFound from "./components/NotFound";
 import JobsPage from "./pages/General/JobsPage";
 import AdminJobs from "./pages/Admin/AdminJobs";
+import PrivacyPolicy from "./pages/General/PrivacyPolicy";
 import { useBusinessHours } from "./hooks/useBusinessHours";
 // import AuthChoice from "./pages/AuthChoice";
 
@@ -59,8 +60,9 @@ function App() {
             <Route path="/slides" element={<AdminSlides />} />
             <Route path="/story" element={<Story />} />
             <Route path="/otp-verification" element={<OtpVerification />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             {/* <Route path="/auth-choice" element={<AuthChoice />} /> */}
-          
+
             <Route
               path="/products"
               element={
@@ -78,14 +80,16 @@ function App() {
                 </ProtectedRoute>
               }
             />
-<Route
-  path="/AdminJobs"
-  element={
-    <ProtectedRoute allowedRoles={[ "admin","hr"]}> {/* أضفنا hr هنا */}
-      <AdminJobs />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/AdminJobs"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "hr"]}>
+                  {" "}
+                  {/* أضفنا hr هنا */}
+                  <AdminJobs />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/checkout"
               element={
