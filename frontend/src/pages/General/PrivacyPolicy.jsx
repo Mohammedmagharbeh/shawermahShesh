@@ -83,10 +83,23 @@ const PrivacyPolicy = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-3">5. Contact Us</h2>
+          <h2 className="text-2xl font-semibold mb-3">
+            5. Data Deletion & Account Erasure
+          </h2>
           <p>
-            If you have any questions about this privacy policy or our privacy
-            practices, please contact us.
+            You have the right to request the deletion of your personal data and
+            account at any time. To request data deletion, please contact us at
+            our provided support channels or email us, and we will securely
+            erase your identity and transaction data from our active databases
+            within 30 days.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold mb-3">6. Contact Us</h2>
+          <p>
+            If you have any questions about this privacy policy, our privacy
+            practices, or wish to request data deletion, please contact us.
           </p>
         </section>
       </div>
