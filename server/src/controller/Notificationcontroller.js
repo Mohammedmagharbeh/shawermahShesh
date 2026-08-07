@@ -40,6 +40,33 @@ async function removePushToken(req, res) {
 }
 
 // POST /admin/notifications/broadcast
+// async function broadcastNotification(req, res) {
+//   try {
+//     const { title, body, productId } = req.body;
+//     if (!title || !body) {
+//       return res.status(400).json({ message: "title and body are required" });
+//     }
+
+//     const users = await User.find({
+//       pushTokens: { $exists: true, $ne: [] },
+//     }).select("pushTokens");
+
+//     const allTokens = users.flatMap((u) => u.pushTokens);
+
+//     const result = await sendPushNotifications(allTokens, {
+//       title,
+//       body,
+//       data: productId ? { productId } : {},
+//     });
+
+//     res.json({ message: "Notification broadcast sent", recipients: result.sent });
+//   } catch (err) {
+//     console.error("broadcastNotification error:", err);
+//     res.status(500).json({ message: "Failed to send notifications" });
+//   }
+// }
+
+// POST /admin/notifications/broadcast
 async function broadcastNotification(req, res) {
   try {
     const { title, body, productId } = req.body;
@@ -53,9 +80,13 @@ async function broadcastNotification(req, res) {
 
     const allTokens = users.flatMap((u) => u.pushTokens);
 
+    // ✅ إضافة sound, priority, و channelId هنا
     const result = await sendPushNotifications(allTokens, {
       title,
       body,
+      sound: "default",       // 👈 صوت التنبيه
+      priority: "high",       // 👈 أولوية قصوى لأندرويد
+      channelId: "default",   // 👈 القناة المعرفة بـ _layout.jsx
       data: productId ? { productId } : {},
     });
 
