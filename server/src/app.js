@@ -21,6 +21,7 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const zainCash = require("./routes/zainCash");
 const orangeMoneyRoutes = require("./routes/orangeMoney");
 const promoCodeRoutes = require("./routes/promoCodeRoutes");
+const notifications = require("./routes/notifications");
 
 // const emailRoutes = require("./routes/emailRoutes");
 
@@ -61,4 +62,6 @@ app.use("/api/apply", applicationRoutes);
 app.use("/api/zaincash", zainCash);
 app.use("/api/orange", orangeMoneyRoutes);
 app.use("/api/promo-codes", promoCodeRoutes);
+app.use("/api", notifications);
+
 module.exports = server;

@@ -29,6 +29,7 @@
     "devtools-detector": "^2.0.25",
     "dompurify": "^3.3.2",
     "emailjs-com": "^3.2.0",
+    "expo-server-sdk": "^7.0.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.23.22",
     "gsap": "^3.13.0",
