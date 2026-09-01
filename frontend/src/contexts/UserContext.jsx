@@ -28,9 +28,9 @@ export const UserProvider = ({ children }) => {
         Cookies.remove(COOKIE_KEY);
         return;
       }
-
+// تعديل التوكن
       Cookies.set(COOKIE_KEY, JSON.stringify(value), {
-        expires: 30,
+        expires: 365,
         sameSite: "Strict",
         secure: isHttps,
       });
