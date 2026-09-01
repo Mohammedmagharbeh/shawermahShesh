@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const User = require("../models/user");
 const { sendPushNotifications } = require("../../../frontend/src/services/pushService");
 
 // POST /users/push-token
