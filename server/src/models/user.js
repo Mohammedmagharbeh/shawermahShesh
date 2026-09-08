@@ -13,31 +13,6 @@
 
 
 
-// const { USER_ROLES } = require("../constants");
-// const mongoose = require("mongoose");
-
-// const userSchema = new mongoose.Schema(
-//   {
-//     phone: { type: String, sparse: true, unique: true },
-//     username: { type: String, sparse: true, unique: true }, // سيستخدم لاسم الموظف
-//     password: { type: String }, // أضف هذا الحقل للموظفين
-//     role: { type: String, enum: USER_ROLES, default: "user", required: true },
-//     otp: String,
-//     otpExpires: Date,
-//     otpLastSentAt: Date,
-//   },
-//   { timestamps: true }
-// );
-
-// // Compound index: supports role-filter + createdAt sort used by GET /users
-// userSchema.index({ role: 1, createdAt: -1 });
-
-// const User = mongoose.model("users", userSchema);
-// module.exports = User;
-
-
-// للرسائل
-
 const { USER_ROLES } = require("../constants");
 const mongoose = require("mongoose");
 
@@ -50,9 +25,6 @@ const userSchema = new mongoose.Schema(
     otp: String,
     otpExpires: Date,
     otpLastSentAt: Date,
-
-    // ✅ جديد: توكنات إشعارات الجهاز (Expo Push Tokens)
-    pushTokens: { type: [String], default: [] },
   },
   { timestamps: true }
 );
@@ -60,5 +32,6 @@ const userSchema = new mongoose.Schema(
 // Compound index: supports role-filter + createdAt sort used by GET /users
 userSchema.index({ role: 1, createdAt: -1 });
 
-const User = mongoose.models.users || mongoose.model("users", userSchema);
+const User = mongoose.model("users", userSchema);
 module.exports = User;
+
