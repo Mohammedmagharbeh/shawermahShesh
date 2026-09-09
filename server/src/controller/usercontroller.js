@@ -108,7 +108,7 @@ exports.sendLoginOTP = async (req, res) => {
     }
     const isTestAccount = normalizedPhone
       .replace(/\s+/g, "")
-      .includes("790000000");
+      .includes("0790000000");
     const otp = isTestAccount ? "1234" : generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 5 * 60 * 1000;
