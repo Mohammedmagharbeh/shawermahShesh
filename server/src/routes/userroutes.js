@@ -79,7 +79,8 @@ const {
   verifyLoginOTP,
   updatePhone,
   createEmployee,
-  employeeLogin
+  employeeLogin,
+  deleteAccount
 } = require("../controller/usercontroller");
 const validateJWT = require("../middlewares/validateJWT");
 
@@ -105,6 +106,7 @@ routes.post("/auth/create-employee", validateJWT, createEmployee);
 routes.get("/users", validateJWT, getuser);           // paginated — AdminUsers.jsx
 routes.get("/users/all", validateJWT, getAllUsers);    // flat array — Statistics.jsx
 routes.get("/me", validateJWT, getCurrentUser);
+routes.delete("/me", validateJWT, deleteAccount);
 routes.put("/update-phone", validateJWT, updatePhone);
 
 // مسار إضافي لإضافة مستخدم عادي (Role: user) من لوحة التحكم إذا لزم الأمر
@@ -116,8 +118,8 @@ routes.post("/admin/user/add", validateJWT, createEmployee);
 // 3. مسارات المنتجات (Products)
 // ==========================================
 
-routes.get("/products", validateJWT, getAllProducts);
-routes.get("/products/:id", validateJWT, getSingleProduct);
+routes.get("/products", getAllProducts);
+routes.get("/products/:id", getSingleProduct);
 
 
 module.exports = routes;
