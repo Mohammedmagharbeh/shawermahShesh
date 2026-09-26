@@ -8,8 +8,10 @@ const Product = require("../models/products");
 const Location = require("../models/locations");
 const Cart = require("../models/cart");
 const CheckoutSession = require("../models/checkoutSession");
+const SavedCard = require("../models/savedCard");
 const { createOrderLogic } = require("../controller/orderController");
 const { recordPromoUsage } = require("../controller/promoCodeController"); // ✅ جديد
+const validateJWT = require("../middlewares/validateJWT");
 require("dotenv").config();
 
 const router = express.Router();
@@ -115,6 +117,7 @@ router.post("/session", async (req, res) => {
       orderData, // { products, userId, shippingAddress, orderType, userDetails, paymentMethod, promoCode, discountAmount }
       successUrl, // Optional overrides for mobile apps
       cancelUrl,
+      saveCard,
     } = req.body;
 
     if (!amount || !customerName || !customerEmail || !orderData) {
@@ -185,6 +188,10 @@ router.post("/session", async (req, res) => {
       // Tell MontyPay where to send the server-to-server payment confirmation
       callback_url: `${process.env.BACK_BASE}/api/montypay/callback`,
     };
+
+    if (saveCard) {
+      payload.recurring_init = "Y";
+    }
 
     // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
     const rawString =
@@ -338,6 +345,33 @@ router.post("/callback", async (req, res) => {
           console.warn(
             `⚠️ Callback: neither order nor session found for ID ${dbOrderId}`,
           );
+        }
+
+        // Save card if recurring data is present
+        const recurringInitTransId = data.recurring_init_trans_id;
+        const recurringToken = data.recurring_token;
+        const actualUserId = updatedOrder ? (updatedOrder.userId._id || updatedOrder.userId) : null;
+
+        if (recurringInitTransId && recurringToken && actualUserId) {
+          try {
+            const existingCard = await SavedCard.findOne({ userId: actualUserId, recurring_token: recurringToken });
+            if (!existingCard) {
+              const cardStr = typeof data.card === 'string' ? data.card : "****";
+              const last4 = cardStr.slice(-4);
+              await SavedCard.create({
+                userId: actualUserId,
+                recurring_init_trans_id: recurringInitTransId,
+                recurring_token: recurringToken,
+                card_token: data.card_token || null,
+                card_brand: data.payment_method || "Unknown",
+                card_last_4: last4,
+                isDefault: false
+              });
+              console.log(`✅ Saved card for user ${actualUserId}`);
+            }
+          } catch (cardErr) {
+            console.error("Failed to save card info:", cardErr);
+          }
         }
       } else
         console.warn(
@@ -504,6 +538,92 @@ router.post("/verify", async (req, res) => {
     console.error("Verify error:", err.response?.data || err.message || err);
     res.status(500).json({
       error: "Verification failed",
+      details: err.response?.data || err.message,
+    });
+  }
+});
+
+// ─── 5) Get user's saved cards ───────────────────────────────────────────────
+router.get("/saved-cards", validateJWT, async (req, res) => {
+  try {
+    const cards = await SavedCard.find({ userId: req.user._id });
+    res.json({ success: true, cards });
+  } catch (err) {
+    console.error("Fetch cards error:", err);
+    res.status(500).json({ error: "Failed to fetch saved cards" });
+  }
+});
+
+// ─── 6) Pay with saved card (Recurring) ──────────────────────────────────────
+router.post("/recurring", validateJWT, async (req, res) => {
+  try {
+    const { amount, currency = "JOD", orderData, savedCardId } = req.body;
+
+    if (!amount || !orderData || !savedCardId) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const savedCard = await SavedCard.findOne({ _id: savedCardId, userId: req.user._id });
+    if (!savedCard) {
+      return res.status(404).json({ error: "Saved card not found" });
+    }
+
+    const sessionDoc = await CheckoutSession.create({
+      orderData,
+      paymentGateway: "montypay",
+    });
+    const dbOrderId = sessionDoc._id.toString();
+
+    const threeDecimalCurrencies = ["JOD", "KWD", "OMR", "BHD", "TND"];
+    const decimals = threeDecimalCurrencies.includes(currency.toUpperCase()) ? 3 : 2;
+    const formattedAmount = Number(amount).toFixed(decimals);
+
+    const safeDescription = "Recurring Order";
+
+    const payload = {
+      merchant_key: MERCHANT_KEY,
+      recurring_init_trans_id: savedCard.recurring_init_trans_id,
+      recurring_token: savedCard.recurring_token,
+      order: {
+        number: dbOrderId,
+        amount: formattedAmount,
+        currency: currency,
+        description: safeDescription,
+      }
+    };
+
+    // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
+    const rawString = `${dbOrderId}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase();
+    const md5Hash = crypto.createHash("md5").update(rawString).digest("hex");
+    payload.hash = crypto.createHash("sha1").update(md5Hash).digest("hex");
+
+    const response = await axios.post(`${MONTY_BASE}/payment/recurring`, payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const data = response.data;
+    if (data.status === "settled" || data.status === "SUCCESS" || data.result === "accepted") {
+      const io = req.app.get("io");
+      const transactionId = data.payment_id || data.id || null;
+      
+      const finalOrder = await createOrderLogic({
+        ...sessionDoc.orderData,
+        paymentMethod: sessionDoc.orderData.paymentMethod || "card",
+        transactionId,
+        paidAt: new Date(),
+        status: "Processing",
+        paymentStatus: "paid",
+        io,
+      });
+      await CheckoutSession.findByIdAndDelete(dbOrderId);
+      return res.json({ success: true, dbOrderId: finalOrder._id });
+    } else {
+      return res.status(400).json({ success: false, status: data.status, reason: data.reason || data.result });
+    }
+  } catch (err) {
+    console.error("Recurring error:", err.response?.data || err.message || err);
+    res.status(500).json({
+      error: "Recurring payment failed",
       details: err.response?.data || err.message,
     });
   }

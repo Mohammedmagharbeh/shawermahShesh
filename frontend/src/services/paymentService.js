@@ -71,6 +71,7 @@ export const initiateMontyPayPayment = async ({
   user,
   orderSummary,
   isTestMode,
+  saveCard,
 }) => {
   try {
     const amountValidation = validatePaymentAmount(orderSummary.total);
@@ -101,6 +102,7 @@ export const initiateMontyPayPayment = async ({
         userDetails: formState.details,
         paymentMethod: "card",
       }),
+      saveCard: saveCard !== false, // Default to true unless explicitly false
     };
 
     const { data } = await apiClient.post(API_ENDPOINTS.MONTYPAY_SESSION, payload);
@@ -230,11 +232,83 @@ export const fetchDeliveryAreas = async (token) => {
 };
 
 /**
+ * Fetch user's saved cards for MontyPay
+ * @param {string} token - User authentication token
+ * @returns {Promise<Array>} - List of saved cards
+ */
+export const fetchSavedCards = async (token) => {
+  try {
+    if (!token) throw new Error("Authentication token is required");
+    const { data } = await apiClient.get('/api/montypay/saved-cards', {
+      headers: { authorization: `Bearer ${token}` }
+    });
+    return data.cards || [];
+  } catch (error) {
+    console.error("Fetch saved cards error:", error);
+    throw new Error(error.response?.data?.error || "Failed to fetch saved cards");
+  }
+};
+
+/**
+ * Initiate recurring payment with a saved card
+ * @param {Object} params - Payment parameters
+ * @returns {Promise<string>} - Order ID on success
+ */
+export const initiateRecurringPayment = async ({
+  cart,
+  formState,
+  user,
+  orderSummary,
+  savedCardId,
+  token,
+}) => {
+  try {
+    if (!token) throw new Error("Authentication token is required");
+    const amountValidation = validatePaymentAmount(orderSummary.total);
+    if (!amountValidation.isValid) throw new Error(amountValidation.error);
+
+    const payload = {
+      amount: orderSummary.total,
+      savedCardId,
+      orderData: sanitizeObject({
+        products: cart.products.map((p) => ({
+          productId: p.productId._id,
+          quantity: p.quantity,
+          isSpicy: p.isSpicy || false,
+          additions: p.additions || [],
+          notes: p.notes || "",
+          selectedProtein: p.selectedProtein || null,
+          selectedType: p.selectedType || null,
+        })),
+        userId: user?._id,
+        shippingAddress: formState.selectedArea?._id || null,
+        orderType: formState.orderType,
+        userDetails: formState.details,
+        paymentMethod: "card",
+      }),
+    };
+
+    const { data } = await apiClient.post('/api/montypay/recurring', payload, {
+      headers: { authorization: `Bearer ${token}` }
+    });
+
+    if (!data.success) throw new Error(data.reason || "Recurring payment failed");
+
+    return data.dbOrderId;
+  } catch (error) {
+    console.error("Recurring payment error:", error);
+    throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || "Recurring payment failed");
+  }
+};
+
+/**
  * Payment service factory
  * Creates appropriate payment handler based on method
  */
 export const PaymentService = {
   montyPay: initiateMontyPayPayment,
+  montyPayRecurring: initiateRecurringPayment,
+  fetchSavedCards,
   zainCash: {
     initiate: initiateZainCashPayment,
     confirm: confirmZainCashPayment,
