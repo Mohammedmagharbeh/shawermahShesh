@@ -190,6 +190,7 @@ router.post("/session", async (req, res) => {
     };
 
     if (saveCard) {
+      payload.req_token = "Y";
       payload.recurring_init = "Y";
     }
 
@@ -348,21 +349,28 @@ router.post("/callback", async (req, res) => {
         }
 
         // Save card if recurring data is present
-        const recurringInitTransId = data.recurring_init_trans_id;
+        const recurringInitTransId = data.recurring_init_trans_id || data.id;
         const recurringToken = data.recurring_token;
+        const cardToken = data.card_token;
         const actualUserId = updatedOrder ? (updatedOrder.userId._id || updatedOrder.userId) : null;
 
-        if (recurringInitTransId && recurringToken && actualUserId) {
+        if ((recurringToken || cardToken) && actualUserId) {
           try {
-            const existingCard = await SavedCard.findOne({ userId: actualUserId, recurring_token: recurringToken });
+            // Find existing by either recurring_token or card_token
+            const query = { userId: actualUserId };
+            if (recurringToken) query.recurring_token = recurringToken;
+            else query.card_token = cardToken;
+            
+            const existingCard = await SavedCard.findOne(query);
+            
             if (!existingCard) {
               const cardStr = typeof data.card === 'string' ? data.card : "****";
               const last4 = cardStr.slice(-4);
               await SavedCard.create({
                 userId: actualUserId,
                 recurring_init_trans_id: recurringInitTransId,
-                recurring_token: recurringToken,
-                card_token: data.card_token || null,
+                recurring_token: recurringToken || null,
+                card_token: cardToken || null,
                 card_brand: data.payment_method || "Unknown",
                 card_last_4: last4,
                 isDefault: false
