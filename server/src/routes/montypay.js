@@ -186,7 +186,7 @@ router.post("/session", async (req, res) => {
       success_url: proxyUrlIfNeeded(finalSuccessUrl),
       cancel_url: proxyUrlIfNeeded(finalCancelUrl),
       // Tell MontyPay where to send the server-to-server payment confirmation
-      callback_url: `${process.env.BACK_BASE}/api/montypay/callback`,
+      callback_url: `${process.env.BACK_BASE || "https://shawermahshesh.onrender.com"}/api/montypay/callback`,
     };
 
     if (saveCard) {
