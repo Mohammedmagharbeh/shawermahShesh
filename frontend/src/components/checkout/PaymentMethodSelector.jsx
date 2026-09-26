@@ -563,8 +563,11 @@ import { isValidImageUrl } from "@/utils/inputSanitization";
 
 const ORANGE_MIN_AMOUNT = 15; // الحد الأدنى للدفع عبر Orange Money
 
-const PaymentMethodSelector = React.memo(({ method, setMethod, t, totalAmount }) => {
-  const handleCardClick = useCallback(() => setMethod(PAYMENT_METHODS.CARD), [setMethod]);
+const PaymentMethodSelector = React.memo(({ method, setMethod, t, totalAmount, savedCards = [], selectedSavedCardId, onSelectSavedCard }) => {
+  const handleCardClick = useCallback(() => {
+    setMethod(PAYMENT_METHODS.CARD);
+    if (onSelectSavedCard) onSelectSavedCard(null); // Clear selected saved card when selecting new card
+  }, [setMethod, onSelectSavedCard]);
   const handleCliqClick = useCallback(() => setMethod(PAYMENT_METHODS.CLIQ), [setMethod]);
 
   // ✅ الأورنج يتفعل فقط لما المبلغ 15 دينار فأكثر
@@ -585,7 +588,7 @@ const PaymentMethodSelector = React.memo(({ method, setMethod, t, totalAmount })
     }`;
 
   const radioClass = (active) =>
-    `w-4 h-4 rounded-full border flex items-center justify-center ${
+    `w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 ${
       active ? "border-red-500" : "border-gray-400"
     }`;
 
@@ -596,21 +599,64 @@ const PaymentMethodSelector = React.memo(({ method, setMethod, t, totalAmount })
       </h3>
 
       <div className="space-y-2">
-        {/* Card Payment */}
+        {/* Saved Cards Section */}
+        {savedCards.length > 0 && (
+          <div className="mb-4">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block px-1">
+              {t("checkout_saved_cards", "البطاقات المحفوظة")}
+            </span>
+            <div className="space-y-2">
+              {savedCards.map(card => {
+                const isSelected = method === PAYMENT_METHODS.CARD && selectedSavedCardId === card._id;
+                return (
+                  <div
+                    key={card._id}
+                    onClick={() => {
+                      setMethod(PAYMENT_METHODS.CARD);
+                      onSelectSavedCard(card._id);
+                    }}
+                    className={optionClass(isSelected)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === "Enter" && (() => { setMethod(PAYMENT_METHODS.CARD); onSelectSavedCard(card._id); })()}
+                  >
+                    <div className={radioClass(isSelected)}>
+                      {isSelected && <div className="w-2 h-2 bg-red-500 rounded-full" />}
+                    </div>
+                    <span className="flex-1 font-medium text-sm">
+                      •••• {card.card_last_4}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm h-7 text-xs font-bold text-gray-600">
+                        {card.card_brand.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 mb-2 border-t border-gray-100"></div>
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block px-1">
+              {t("checkout_other_methods", "طرق دفع أخرى")}
+            </span>
+          </div>
+        )}
+
+        {/* New Card Payment */}
         <div
           onClick={handleCardClick}
-          className={optionClass(method === PAYMENT_METHODS.CARD)}
+          className={optionClass(method === PAYMENT_METHODS.CARD && !selectedSavedCardId)}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === "Enter" && handleCardClick()}
         >
-          <div className={radioClass(method === PAYMENT_METHODS.CARD)}>
-            {method === PAYMENT_METHODS.CARD && (
+          <div className={radioClass(method === PAYMENT_METHODS.CARD && !selectedSavedCardId)}>
+            {method === PAYMENT_METHODS.CARD && !selectedSavedCardId && (
               <div className="w-2 h-2 bg-red-500 rounded-full" />
             )}
           </div>
           <span className="flex-1 font-medium text-sm">
-            {t("checkout_card_payment")}
+            {savedCards.length > 0 ? t("checkout_new_card_payment", "Pay with new card") : t("checkout_card_payment")}
           </span>
           <div className="flex items-center gap-1.5">
             {isValidImageUrl(PAYMENT_LOGOS.VISA) && (
@@ -695,6 +741,9 @@ PaymentMethodSelector.propTypes = {
   setMethod: PropTypes.func.isRequired,
   t: PropTypes.func.isRequired,
   totalAmount: PropTypes.number.isRequired,
+  savedCards: PropTypes.array,
+  selectedSavedCardId: PropTypes.string,
+  onSelectSavedCard: PropTypes.func,
 };
 
 export default PaymentMethodSelector;

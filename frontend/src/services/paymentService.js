@@ -239,7 +239,7 @@ export const fetchDeliveryAreas = async (token) => {
 export const fetchSavedCards = async (token) => {
   try {
     if (!token) throw new Error("Authentication token is required");
-    const { data } = await apiClient.get('/api/montypay/saved-cards', {
+    const { data } = await apiClient.get('/montypay/saved-cards', {
       headers: { authorization: `Bearer ${token}` }
     });
     return data.cards || [];
@@ -288,7 +288,7 @@ export const initiateRecurringPayment = async ({
       }),
     };
 
-    const { data } = await apiClient.post('/api/montypay/recurring', payload, {
+    const { data } = await apiClient.post('/montypay/recurring', payload, {
       headers: { authorization: `Bearer ${token}` }
     });
 

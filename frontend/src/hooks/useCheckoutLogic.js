@@ -961,6 +961,23 @@ export const useCheckoutLogic = (t) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Saved Cards state
+  const [savedCards, setSavedCards] = useState([]);
+  
+  useEffect(() => {
+    const loadCards = async () => {
+      if (user?.token) {
+        try {
+          const cards = await PaymentService.fetchSavedCards(user.token);
+          setSavedCards(cards);
+        } catch (err) {
+          console.error("Failed to fetch saved cards:", err);
+        }
+      }
+    };
+    loadCards();
+  }, [user?.token]);
+
   // ✅ Promo Code State
   const [appliedPromo, setAppliedPromo] = useState(null); // { code, discountPercentage }
   const [isPromoChecking, setIsPromoChecking] = useState(false);
@@ -1122,8 +1139,7 @@ export const useCheckoutLogic = (t) => {
     async (code) => {
       if (isTestMode) {
         const message =
-          t("promo_not_allowed_test") ||
-          "لا يمكن استخدام كود خصم بوضع التجربة";
+          t("promo_not_allowed_test") || "لا يمكن استخدام كود خصم بوضع التجربة";
         toast.error(message);
         return;
       }
@@ -1166,16 +1182,31 @@ export const useCheckoutLogic = (t) => {
   }, []);
 
   const handleMontyPayFlow = useCallback(async () => {
-    const redirectUrl = await PaymentService.montyPay({
-      cart,
-      formState,
-      user,
-      orderSummary,
-      isTestMode,
-      promoCode: appliedPromo?.code || null,
-    });
-    window.location.href = redirectUrl;
-  }, [cart, formState, user, orderSummary, isTestMode, appliedPromo]);
+    if (formState.savedCardId) {
+      // Use recurring payment flow
+      const orderId = await PaymentService.montyPayRecurring({
+        cart,
+        formState,
+        user,
+        orderSummary,
+        savedCardId: formState.savedCardId,
+        token: user?.token,
+      });
+      // Direct redirect to success page since it's processed server-side immediately
+      navigate(`/success?dbOrderId=${orderId}`);
+    } else {
+      // Use standard checkout session flow
+      const redirectUrl = await PaymentService.montyPay({
+        cart,
+        formState,
+        user,
+        orderSummary,
+        isTestMode,
+        promoCode: appliedPromo?.code || null,
+      });
+      window.location.href = redirectUrl;
+    }
+  }, [cart, formState, user, orderSummary, isTestMode, appliedPromo, navigate]);
 
   // CliQ handlers
   const handleZainCashFlow = useCallback(async () => {
@@ -1302,9 +1333,7 @@ export const useCheckoutLogic = (t) => {
 
           const discount = Number(product.discount || 0);
           const priceAtPurchase =
-            discount > 0
-              ? basePrice - (basePrice * discount) / 100
-              : basePrice;
+            discount > 0 ? basePrice - (basePrice * discount) / 100 : basePrice;
 
           return {
             productId: product._id,
@@ -1409,5 +1438,6 @@ export const useCheckoutLogic = (t) => {
     isPromoChecking,
     applyPromoCode,
     removePromoCode,
+    savedCards,
   };
 };

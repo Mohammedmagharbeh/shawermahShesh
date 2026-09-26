@@ -821,6 +821,7 @@ function Checkout() {
     appliedPromo,
     applyPromoCode,
     removePromoCode,
+    savedCards,
   } = useCheckoutLogic(t);
 
   // --- CliQ Handlers ---
@@ -997,6 +998,9 @@ function Checkout() {
                 setMethod={handlePaymentMethodChange}
                 t={t}
                 totalAmount={orderSummary.total}
+                savedCards={savedCards}
+                selectedSavedCardId={formState.savedCardId}
+                onSelectSavedCard={(id) => updateForm("savedCardId", id)}
               />
             </div>
 
