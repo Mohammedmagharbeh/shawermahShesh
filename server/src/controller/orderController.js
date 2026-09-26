@@ -301,6 +301,7 @@ exports.createOrderLogic = async ({
   promoCode,
   discountAmount,
   io,
+  _id,
 }) => {
   // basic validation
   if (
@@ -483,7 +484,7 @@ exports.createOrderLogic = async ({
   );
 
   // create order
-  const newOrder = await Order.create({
+  const orderPayload = {
     userId,
     products: enrichedProducts,
     totalPrice,
@@ -500,7 +501,13 @@ exports.createOrderLogic = async ({
     promoCode: promoCode || null, // ✅ جديد
     discountAmount: promoDiscount, // ✅ جديد
     sequenceNumber: await getNextDailySequence(),
-  });
+  };
+
+  if (_id) {
+    orderPayload._id = _id;
+  }
+
+  const newOrder = await Order.create(orderPayload);
 
   // populate for response
   const populatedOrder = await newOrder.populate([

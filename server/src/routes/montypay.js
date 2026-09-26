@@ -268,6 +268,7 @@ router.post("/callback", async (req, res) => {
             try {
               updatedOrder = await createOrderLogic({
                 ...session.orderData,
+                _id: session._id,
                 paymentMethod: session.orderData.paymentMethod || "card",
                 transactionId:
                   data.id ||
