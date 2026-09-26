@@ -349,18 +349,20 @@ router.post("/callback", async (req, res) => {
           );
         }
 
-        // Save card if recurring data is present
+        // Save card if recurring data is present, or fallback to transaction id if allowed
         const recurringInitTransId = data.recurring_init_trans_id || data.id;
-        const recurringToken = data.recurring_token;
-        const cardToken = data.card_token;
+        // Use data.id as a fallback token if MontyPay didn't generate one
+        const recurringToken = data.recurring_token || data.id;
+        const cardToken = data.card_token || data.id;
         const actualUserId = updatedOrder ? (updatedOrder.userId._id || updatedOrder.userId) : null;
 
         if ((recurringToken || cardToken) && actualUserId) {
           try {
             // Find existing by either recurring_token or card_token
             const query = { userId: actualUserId };
-            if (recurringToken) query.recurring_token = recurringToken;
-            else query.card_token = cardToken;
+            if (data.recurring_token) query.recurring_token = data.recurring_token;
+            else if (data.card_token) query.card_token = data.card_token;
+            else query.recurring_token = recurringToken; // Fallback match
             
             const existingCard = await SavedCard.findOne(query);
             
