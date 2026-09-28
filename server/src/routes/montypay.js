@@ -1248,6 +1248,23 @@ const md5sha1 = (raw) =>
     .update(crypto.createHash("md5").update(raw).digest("hex"))
     .digest("hex");
 
+/**
+ * فحص hash الـ callback (للتسجيل والتحذير فقط، ما بيوقف العملية).
+ * الصيغة المتوقعة: SHA1(MD5(UPPER(id + order_number + order_amount + order_currency + order_description + password)))
+ * تأكد من توثيق MontyPay، وإذا طلعت "OK" بكل الطلبات بتقدر تخليه إجباري.
+ */
+const verifyCallbackHash = (d = {}) => {
+  try {
+    if (!d.hash || !d.id) return false;
+    const expected = md5sha1(
+      `${d.id}${d.order_number}${d.order_amount}${d.order_currency}${d.order_description}${MERCHANT_PASSWORD}`.toUpperCase(),
+    );
+    return expected === d.hash;
+  } catch {
+    return false;
+  }
+};
+
 /** MontyPay checkout callback: money captured only when order is settled and txn is a charge type. */
 const MONTY_CALLBACK_PAID_TYPES = new Set([
   "SALE",
@@ -1320,109 +1337,6 @@ router.get("/redirect", (req, res) => {
 });
 
 // ─── 1) Create Payment Session ───────────────────────────────────────────────
-// router.post("/session", async (req, res) => {
-//   try {
-//     const {
-//       amount,
-//       currency = "JOD",
-//       customerName,
-//       customerEmail,
-//       customerPhone,
-//       description,
-//       orderData,
-//       successUrl,
-//       cancelUrl,
-//       saveCard, // لازم يجي boolean true من الفرونت
-//     } = req.body;
-
-//     if (!amount || !customerName || !customerEmail || !orderData) {
-//       return res.status(400).json({ error: "Missing required fields" });
-//     }
-
-//     const sessionDoc = await CheckoutSession.create({
-//       orderData,
-//       paymentGateway: "montypay",
-//     });
-//     const dbOrderId = sessionDoc._id.toString();
-
-//     const threeDecimalCurrencies = ["JOD", "KWD", "OMR", "BHD", "TND"];
-//     const decimals = threeDecimalCurrencies.includes(currency.toUpperCase())
-//       ? 3
-//       : 2;
-//     const formattedAmount = Number(amount).toFixed(decimals);
-
-//     // ASCII-safe description — MUST be identical in payload and hash
-//     const safeDescription = description
-//       ? description.replace(/[^\x00-\x7F]/g, "").trim() || "ORDER"
-//       : "ORDER";
-
-//     const orderNumber = customerPhone
-//       ? `${customerPhone}-${dbOrderId}`
-//       : dbOrderId;
-
-//     const finalSuccessUrl = successUrl
-//       ? `${successUrl}?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`
-//       : `${process.env.FRONT_BASE}/success?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`;
-
-//     const finalCancelUrl = cancelUrl
-//       ? `${cancelUrl}?dbOrderId=${dbOrderId}`
-//       : `${process.env.FRONT_BASE}/cancel?dbOrderId=${dbOrderId}`;
-
-//     const reqHost = req.get("host");
-//     const protocol = req.protocol || "http";
-//     const actualBackendUrl = `${protocol}://${reqHost}`;
-
-//     const proxyUrlIfNeeded = (url) => {
-//       if (typeof url === "string" && !url.startsWith("http")) {
-//         return `${actualBackendUrl}/api/montypay/redirect?to=${encodeURIComponent(url)}`;
-//       }
-//       return url;
-//     };
-
-//     const payload = {
-//       merchant_key: MERCHANT_KEY,
-//       operation: "purchase",
-//       order: {
-//         number: orderNumber,
-//         amount: formattedAmount,
-//         currency: currency,
-//         description: safeDescription,
-//       },
-//       customer: {
-//         name: /^[A-Za-z]+(?: [A-Za-z]+)+$/.test(customerName)
-//           ? customerName
-//           : "John Doe",
-//         email: customerEmail,
-//       },
-//       success_url: proxyUrlIfNeeded(finalSuccessUrl),
-//       cancel_url: proxyUrlIfNeeded(finalCancelUrl),
-//       callback_url: `${process.env.BACK_BASE || "https://shawermahshesh.onrender.com"}/api/montypay/callback`,
-//     };
-
-//     // ✅ حفظ الكرت: boolean (مش string) حسب MontyPay
-//     if (saveCard === true) {
-//       payload.recurring_init = true;
-//     }
-
-//     // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
-//     payload.hash = md5sha1(
-//       `${orderNumber}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase(),
-//     );
-
-//     const response = await axios.post(`${MONTY_BASE}/session`, payload, {
-//       headers: { "Content-Type": "application/json" },
-//     });
-
-//     res.json({ ...response.data, dbOrderId });
-//   } catch (err) {
-//     console.error("Session error:", err.response?.data || err.message || err);
-//     res.status(500).json({
-//       error: "Payment Session Failed",
-//       details: err.response?.data || err.message,
-//     });
-//   }
-// });
-// ─── 1) Create Payment Session ───────────────────────────────────────────────
 router.post("/session", async (req, res) => {
   try {
     const {
@@ -1435,7 +1349,7 @@ router.post("/session", async (req, res) => {
       orderData,
       successUrl,
       cancelUrl,
-      saveCard,
+      saveCard, // لازم يجي boolean true من الفرونت
     } = req.body;
 
     if (!amount || !customerName || !customerEmail || !orderData) {
@@ -1454,6 +1368,7 @@ router.post("/session", async (req, res) => {
       : 2;
     const formattedAmount = Number(amount).toFixed(decimals);
 
+    // ASCII-safe description — MUST be identical in payload and hash
     const safeDescription = description
       ? description.replace(/[^\x00-\x7F]/g, "").trim() || "ORDER"
       : "ORDER";
@@ -1503,15 +1418,12 @@ router.post("/session", async (req, res) => {
 
     console.log("saveCard received:", saveCard);
 
-    // ⚠️ TEMP للتجربة على Render فقط (جرّب الاثنين مع بعض).
-    // قبل الرفع على السيرفر الحي، شيل هاد البلوك ورجّع:
-    //   if (saveCard === true) { payload.recurring_init = true; }
-    if (true) {
+    // ✅ حسب رد MontyPay: recurring_init كـ boolean فقط (بدون req_token)
+    if (saveCard === true) {
       payload.recurring_init = true;
-      payload.req_token = true;
     }
 
-    console.log("recurring_init sent:", payload.recurring_init, "| req_token sent:", payload.req_token);
+    console.log("recurring_init sent:", payload.recurring_init);
 
     // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
     payload.hash = md5sha1(
@@ -1550,6 +1462,21 @@ router.post("/callback", async (req, res) => {
       "type=",
       getUpperString(data.type),
     );
+
+    // فحص الـ hash (تحذير فقط حالياً)
+    console.log(
+      "Callback hash check:",
+      verifyCallbackHash(data) ? "OK" : "MISMATCH/UNVERIFIED",
+    );
+
+    // لوق واضح لحقول الـ recurring كلها
+    console.log("Recurring-related fields in callback:", {
+      recurring_token: data.recurring_token,
+      recurring_init_trans_id: data.recurring_init_trans_id,
+      card_token: data.card_token,
+      allKeys: Object.keys(data),
+    });
+
     const isPaid = isSuccessfulMontyPayment(data);
 
     if (isPaid) {
@@ -1660,7 +1587,7 @@ router.post("/callback", async (req, res) => {
           );
         }
 
-        // ✅ حفظ الكرت — فقط لو MontyPay رجّعت الحقلين الحقيقيين (بدون fallback على data.id)
+        // ✅ حفظ الكرت — فقط لو MontyPay رجّعت الحقلين الحقيقيين
         const recurringToken = data.recurring_token || null;
         const recurringInitTransId = data.recurring_init_trans_id || null;
         const actualUserId = updatedOrder
@@ -1685,12 +1612,18 @@ router.post("/callback", async (req, res) => {
           } catch (cardErr) {
             console.error("Failed to save card info (non-critical):", cardErr);
           }
-        } else if (data.recurring_init_trans_id || data.recurring_token) {
+        } else if (
+          data.recurring_init_trans_id ||
+          data.recurring_token ||
+          data.card_token
+        ) {
+          // ملاحظة: card_token مش بديل عن recurring_token، لا نحفظه كـ recurring
           console.warn(
-            "⚠️ Callback has partial recurring data, card not saved:",
+            "⚠️ Callback has partial/other token data, card NOT saved:",
             {
-              hasToken: !!recurringToken,
+              hasRecurringToken: !!recurringToken,
               hasInitTransId: !!recurringInitTransId,
+              hasCardToken: !!data.card_token,
               hasUser: !!actualUserId,
             },
           );
@@ -1911,7 +1844,7 @@ router.post("/recurring", validateJWT, async (req, res) => {
       },
     };
 
-    // ✅ Hash حسب توثيق Recurring Sale (بدون currency):
+    // Hash حسب توثيق Recurring Sale (بدون currency):
     // SHA1(MD5(UPPER(recurring_init_trans_id + recurring_token + order.number + order.amount + order.description + password)))
     payload.hash = md5sha1(
       `${savedCard.recurring_init_trans_id}${savedCard.recurring_token}${dbOrderId}${formattedAmount}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase(),
