@@ -199,10 +199,9 @@ router.post("/session", async (req, res) => {
 
     console.log("saveCard received:", saveCard);
 
-    // ✅ Adjusted Tokenization Flags
+    // ✅ Adjusted Tokenization Flags (MontyPay expects "Y")
     if (saveCard === true) {
-      payload.recurring_init = "true";
-      payload.req_token = "Y"; // Commonly required by MEA gateways
+      payload.recurring_init = "Y";
     }
 
     console.log("recurring_init sent:", payload.recurring_init);
