@@ -199,9 +199,10 @@ router.post("/session", async (req, res) => {
 
     console.log("saveCard received:", saveCard);
 
-    // ✅ حسب رد MontyPay: recurring_init كـ boolean فقط (بدون req_token)
+    // ✅ Adjusted Tokenization Flags
     if (saveCard === true) {
-      payload.recurring_init = true;
+      payload.recurring_init = "true";
+      payload.req_token = "Y"; // Commonly required by MEA gateways
     }
 
     console.log("recurring_init sent:", payload.recurring_init);
