@@ -1320,6 +1320,109 @@ router.get("/redirect", (req, res) => {
 });
 
 // ─── 1) Create Payment Session ───────────────────────────────────────────────
+// router.post("/session", async (req, res) => {
+//   try {
+//     const {
+//       amount,
+//       currency = "JOD",
+//       customerName,
+//       customerEmail,
+//       customerPhone,
+//       description,
+//       orderData,
+//       successUrl,
+//       cancelUrl,
+//       saveCard, // لازم يجي boolean true من الفرونت
+//     } = req.body;
+
+//     if (!amount || !customerName || !customerEmail || !orderData) {
+//       return res.status(400).json({ error: "Missing required fields" });
+//     }
+
+//     const sessionDoc = await CheckoutSession.create({
+//       orderData,
+//       paymentGateway: "montypay",
+//     });
+//     const dbOrderId = sessionDoc._id.toString();
+
+//     const threeDecimalCurrencies = ["JOD", "KWD", "OMR", "BHD", "TND"];
+//     const decimals = threeDecimalCurrencies.includes(currency.toUpperCase())
+//       ? 3
+//       : 2;
+//     const formattedAmount = Number(amount).toFixed(decimals);
+
+//     // ASCII-safe description — MUST be identical in payload and hash
+//     const safeDescription = description
+//       ? description.replace(/[^\x00-\x7F]/g, "").trim() || "ORDER"
+//       : "ORDER";
+
+//     const orderNumber = customerPhone
+//       ? `${customerPhone}-${dbOrderId}`
+//       : dbOrderId;
+
+//     const finalSuccessUrl = successUrl
+//       ? `${successUrl}?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`
+//       : `${process.env.FRONT_BASE}/success?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`;
+
+//     const finalCancelUrl = cancelUrl
+//       ? `${cancelUrl}?dbOrderId=${dbOrderId}`
+//       : `${process.env.FRONT_BASE}/cancel?dbOrderId=${dbOrderId}`;
+
+//     const reqHost = req.get("host");
+//     const protocol = req.protocol || "http";
+//     const actualBackendUrl = `${protocol}://${reqHost}`;
+
+//     const proxyUrlIfNeeded = (url) => {
+//       if (typeof url === "string" && !url.startsWith("http")) {
+//         return `${actualBackendUrl}/api/montypay/redirect?to=${encodeURIComponent(url)}`;
+//       }
+//       return url;
+//     };
+
+//     const payload = {
+//       merchant_key: MERCHANT_KEY,
+//       operation: "purchase",
+//       order: {
+//         number: orderNumber,
+//         amount: formattedAmount,
+//         currency: currency,
+//         description: safeDescription,
+//       },
+//       customer: {
+//         name: /^[A-Za-z]+(?: [A-Za-z]+)+$/.test(customerName)
+//           ? customerName
+//           : "John Doe",
+//         email: customerEmail,
+//       },
+//       success_url: proxyUrlIfNeeded(finalSuccessUrl),
+//       cancel_url: proxyUrlIfNeeded(finalCancelUrl),
+//       callback_url: `${process.env.BACK_BASE || "https://shawermahshesh.onrender.com"}/api/montypay/callback`,
+//     };
+
+//     // ✅ حفظ الكرت: boolean (مش string) حسب MontyPay
+//     if (saveCard === true) {
+//       payload.recurring_init = true;
+//     }
+
+//     // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
+//     payload.hash = md5sha1(
+//       `${orderNumber}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase(),
+//     );
+
+//     const response = await axios.post(`${MONTY_BASE}/session`, payload, {
+//       headers: { "Content-Type": "application/json" },
+//     });
+
+//     res.json({ ...response.data, dbOrderId });
+//   } catch (err) {
+//     console.error("Session error:", err.response?.data || err.message || err);
+//     res.status(500).json({
+//       error: "Payment Session Failed",
+//       details: err.response?.data || err.message,
+//     });
+//   }
+// });
+// ─── 1) Create Payment Session ───────────────────────────────────────────────
 router.post("/session", async (req, res) => {
   try {
     const {
@@ -1332,7 +1435,7 @@ router.post("/session", async (req, res) => {
       orderData,
       successUrl,
       cancelUrl,
-      saveCard, // لازم يجي boolean true من الفرونت
+      saveCard,
     } = req.body;
 
     if (!amount || !customerName || !customerEmail || !orderData) {
@@ -1351,7 +1454,6 @@ router.post("/session", async (req, res) => {
       : 2;
     const formattedAmount = Number(amount).toFixed(decimals);
 
-    // ASCII-safe description — MUST be identical in payload and hash
     const safeDescription = description
       ? description.replace(/[^\x00-\x7F]/g, "").trim() || "ORDER"
       : "ORDER";
@@ -1399,12 +1501,16 @@ router.post("/session", async (req, res) => {
       callback_url: `${process.env.BACK_BASE || "https://shawermahshesh.onrender.com"}/api/montypay/callback`,
     };
 
-    // ✅ حفظ الكرت: boolean (مش string) حسب MontyPay
-    if (saveCard === true) {
+    console.log("saveCard received:", saveCard);
+
+    // ⚠️ TEMP للتجربة على Render فقط.
+    // قبل الرفع على سيرفر المطعم الحي رجّعها: if (saveCard === true)
+    if (true) {
       payload.recurring_init = true;
     }
 
-    // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
+    console.log("recurring_init sent:", payload.recurring_init);
+
     payload.hash = md5sha1(
       `${orderNumber}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase(),
     );
