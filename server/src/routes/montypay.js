@@ -1503,14 +1503,17 @@ router.post("/session", async (req, res) => {
 
     console.log("saveCard received:", saveCard);
 
-    // ⚠️ TEMP للتجربة على Render فقط.
-    // قبل الرفع على سيرفر المطعم الحي رجّعها: if (saveCard === true)
+    // ⚠️ TEMP للتجربة على Render فقط (جرّب الاثنين مع بعض).
+    // قبل الرفع على السيرفر الحي، شيل هاد البلوك ورجّع:
+    //   if (saveCard === true) { payload.recurring_init = true; }
     if (true) {
       payload.recurring_init = true;
+      payload.req_token = true;
     }
 
-    console.log("recurring_init sent:", payload.recurring_init);
+    console.log("recurring_init sent:", payload.recurring_init, "| req_token sent:", payload.req_token);
 
+    // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
     payload.hash = md5sha1(
       `${orderNumber}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase(),
     );
