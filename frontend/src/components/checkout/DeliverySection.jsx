@@ -109,14 +109,16 @@ const DeliverySection = React.memo(
             placeholder={t("checkout_phone")}
           />
 
-          {/* Apartment Input (Condition: Only show address fields if functionality implies need, usually always shown but maybe context dependent? Keeping standard) */}
-          <InputField
-            label="apartment"
-            title={`${t("checkout_apartment_floor")} (${t("checkout_optional")})`}
-            value={formState.details.apartment}
-            onChange={(v) => updateDetails("apartment", v)}
-            placeholder={t("checkout_apartment_floor")}
-          />
+          {/* Apartment Input - Only show for delivery */}
+          {formState.orderType === ORDER_TYPES.DELIVERY && (
+            <InputField
+              label="apartment"
+              title={`${t("checkout_apartment_floor")} (${t("checkout_optional")})`}
+              value={formState.details.apartment}
+              onChange={(v) => updateDetails("apartment", v)}
+              placeholder={t("checkout_apartment_floor")}
+            />
+          )}
 
           {/* Area Selector - Only show for delivery */}
           {formState.orderType === ORDER_TYPES.DELIVERY && (

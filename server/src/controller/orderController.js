@@ -528,13 +528,23 @@ exports.createOrderLogic = async ({
   // Clear the cart after successful order creation
   await Cart.findOneAndUpdate({ userId }, { products: [] });
 
-  // ✅ تسجيل استخدام كود الخصم — الطلب هون بينحفظ مباشرة (كاش مثلاً) فمافي
-  // خطوة "تأكيد دفع" منفصلة زي بوابات الدفع الإلكترونية، فنسجل هون مباشرة
   if (promoCode) {
     try {
       await recordPromoUsage(promoCode, userId, newOrder._id);
     } catch (e) {
       console.error("Failed to record promo usage:", e.message);
+    }
+  }
+
+  // ✅ Update the user's name and apartment in their profile if they provided them during checkout
+  if (userDetails?.name || userDetails?.apartment) {
+    try {
+      const updateFields = {};
+      if (userDetails.name) updateFields.name = userDetails.name;
+      if (userDetails.apartment !== undefined) updateFields.apartment = userDetails.apartment;
+      await User.findByIdAndUpdate(userId, updateFields);
+    } catch (e) {
+      console.error("Failed to update user profile:", e.message);
     }
   }
 

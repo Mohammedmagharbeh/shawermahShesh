@@ -1,4 +1,3 @@
-
 // // const userSchema = new mongoose.Schema(
 // //   {
 // //     phone: { type: String, sparse: true, unique: true },
@@ -10,23 +9,22 @@
 // //   { timestamps: true }
 // // );
 
-
-
-
 const { USER_ROLES } = require("../constants");
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
     phone: { type: String, sparse: true, unique: true },
-    username: { type: String, sparse: true, unique: true }, // سيستخدم لاسم الموظف
-    password: { type: String }, // أضف هذا الحقل للموظفين
+    username: { type: String, sparse: true, unique: true },
+    password: { type: String },
+    name: { type: String },
+    apartment: { type: String },
     role: { type: String, enum: USER_ROLES, default: "user", required: true },
     otp: String,
     otpExpires: Date,
     otpLastSentAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Compound index: supports role-filter + createdAt sort used by GET /users
@@ -34,4 +32,3 @@ userSchema.index({ role: 1, createdAt: -1 });
 
 const User = mongoose.model("users", userSchema);
 module.exports = User;
-

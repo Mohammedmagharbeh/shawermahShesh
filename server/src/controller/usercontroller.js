@@ -75,6 +75,8 @@ exports.getCurrentUser = async (req, res) => {
       phone: user.phone,
       role: user.role, // سيجلب admin أو employee المخزن فعلياً
       username: user.username,
+      name: user.name,
+      apartment: user.apartment,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

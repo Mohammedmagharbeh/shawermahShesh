@@ -61,7 +61,8 @@ export const useCheckoutLogic = (t) => {
     ...DEFAULT_FORM_STATE,
     details: {
       ...DEFAULT_FORM_STATE.details,
-      name: user?.name || "",
+      name: user?.name || user?.username || "",
+      apartment: user?.apartment || "",
       phone: user?.phone || "",
     },
   }));
@@ -150,6 +151,18 @@ export const useCheckoutLogic = (t) => {
 
   // --- Effects ---
 
+  useEffect(() => {
+    if (!user) return;
+    setFormState((prev) => ({
+      ...prev,
+      details: {
+        ...prev.details,
+        name: prev.details.name || user.name || user.username || "",
+        apartment: prev.details.apartment || user.apartment || "",
+        phone: prev.details.phone || user.phone || "",
+      },
+    }));
+  }, [user]);
   useEffect(() => {
     if (isTestMode) {
       setFormState((prev) => ({
