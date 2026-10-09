@@ -20,6 +20,7 @@ exports.postEat = async (req, res) => {
       hasTypeChoices = false,
       additions = [],
       additionsSelectionType,
+      additionCategories = [],
       inStock = true,
     } = req.body;
 
@@ -109,6 +110,7 @@ exports.postEat = async (req, res) => {
       hasTypeChoices: typeChoices,
       additions, // embedded additions
       additionsSelectionType,
+      additionCategories, // new feature
       inStock: Boolean(inStock),
     });
 
@@ -139,6 +141,7 @@ exports.updatedfood = async (req, res) => {
       hasProteinChoices,
       additions = [],
       additionsSelectionType,
+      additionCategories = [],
       inStock = true,
     } = req.body;
 
@@ -211,6 +214,7 @@ exports.updatedfood = async (req, res) => {
       hasTypeChoices: Boolean(hasTypeChoices),
       additions,
       additionsSelectionType,
+      additionCategories,
       inStock: Boolean(inStock),
     };
 

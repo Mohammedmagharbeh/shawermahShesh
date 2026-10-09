@@ -100,6 +100,7 @@ export default function ProductCard({
         // Arrays & Complex Objects
         additions: data.additions || [],
         additionsSelectionType: data.additionsSelectionType || "radio", // Default to radio if missing
+        additionCategories: data.additionCategories || [],
 
         // The formatted prices object we built above
         prices: formattedPrices,

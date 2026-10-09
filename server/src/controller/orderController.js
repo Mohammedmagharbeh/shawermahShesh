@@ -347,13 +347,27 @@ exports.createOrderLogic = async ({
 
   // helper: get addition price from product by _id or by name if needed
   const getAdditionFromProduct = (matchedProduct, addRef) => {
-    if (!matchedProduct || !Array.isArray(matchedProduct.additions))
-      return null;
+    if (!matchedProduct) return null;
+
+    // Build a flat array of all valid additions for this product
+    let allValidAdditions = [];
+    if (Array.isArray(matchedProduct.additions)) {
+      allValidAdditions = [...matchedProduct.additions];
+    }
+    if (Array.isArray(matchedProduct.additionCategories)) {
+      matchedProduct.additionCategories.forEach(cat => {
+        if (Array.isArray(cat.items)) {
+          allValidAdditions = allValidAdditions.concat(cat.items);
+        }
+      });
+    }
+
+    if (allValidAdditions.length === 0) return null;
 
     // addRef might be {_id: "..."} or { _id: ObjectId } or { name: {en/ar}, price }
     if (addRef?._id) {
-      const found = matchedProduct.additions.find(
-        (a) => a._id.toString() === addRef._id.toString(),
+      const found = allValidAdditions.find(
+        (a) => a._id && a._id.toString() === addRef._id.toString(),
       );
       if (found)
         return {
@@ -365,7 +379,7 @@ exports.createOrderLogic = async ({
 
     // try matching by name (fallback)
     if (addRef?.name?.en) {
-      const found = matchedProduct.additions.find(
+      const found = allValidAdditions.find(
         (a) => a.name?.en === addRef.name.en,
       );
       if (found)

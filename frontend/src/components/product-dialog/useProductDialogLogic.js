@@ -104,13 +104,22 @@ export const useProductDialogLogic = (id, t) => {
 
   // Additions Total
   const additionsPrice = useMemo(() => {
-    if (!product.additions) return 0;
+    let allAdditions = [];
+    if (product.additions) allAdditions = [...product.additions];
+    if (product.additionCategories) {
+      product.additionCategories.forEach(cat => {
+        if (cat.items) allAdditions = allAdditions.concat(cat.items);
+      });
+    }
+    
+    if (allAdditions.length === 0) return 0;
+    
     return selectedAdditions.reduce((total, addId) => {
-      const addition = product.additions.find((a) => a._id === addId);
+      const addition = allAdditions.find((a) => a._id === addId);
       const addPrice = addition ? Number(addition.price || 0) : 0;
       return total + (isNaN(addPrice) ? 0 : addPrice);
     }, 0);
-  }, [selectedAdditions, product.additions]);
+  }, [selectedAdditions, product.additions, product.additionCategories]);
 
   // Unit & Grand Totals
   const pricePerUnit = useMemo(() => {
@@ -160,7 +169,15 @@ export const useProductDialogLogic = (id, t) => {
         return;
       }
 
-      const selectedFullAdditions = product.additions?.filter((a) =>
+      let allAdditions = [];
+      if (product.additions) allAdditions = [...product.additions];
+      if (product.additionCategories) {
+        product.additionCategories.forEach(cat => {
+          if (cat.items) allAdditions = allAdditions.concat(cat.items);
+        });
+      }
+
+      const selectedFullAdditions = allAdditions.filter((a) =>
         selectedAdditions.includes(a._id),
       );
 
@@ -200,14 +217,19 @@ export const useProductDialogLogic = (id, t) => {
   const handleTypeSelect = useCallback((val) => setSelectedType(val), []);
   const handleSpicySelect = useCallback((val) => setSpicy(val), []);
 
-  const handleAdditionToggle = useCallback((id, isCheckbox) => {
+  const handleAdditionToggle = useCallback((id, isCheckbox, groupIds = []) => {
     setSelectedAdditions((prev) => {
       if (isCheckbox) {
         return prev.includes(id)
           ? prev.filter((item) => item !== id)
           : [...prev, id];
       }
-      return prev.includes(id) ? [] : [id]; // Radio behavior
+      // For radio within a specific group, we must unselect only other items in THAT group
+      if (groupIds.length > 0) {
+        const otherGroupsItems = prev.filter(item => !groupIds.includes(item));
+        return prev.includes(id) ? otherGroupsItems : [...otherGroupsItems, id];
+      }
+      return prev.includes(id) ? [] : [id]; // Legacy Radio behavior (only one addition overall)
     });
   }, []);
 

@@ -199,10 +199,11 @@ export function ProductDialog({
                     )}
 
                     {/* Additions List */}
-                    {product.additions?.length > 0 && (
+                    {((product.additions?.length > 0) || (product.additionCategories?.length > 0)) && (
                       <AdditionsList
                         t={t}
                         additions={product.additions}
+                        additionCategories={product.additionCategories}
                         selectedAdditions={selectedAdditions}
                         selectedLanguage={selectedLanguage}
                         onToggle={handleAdditionToggle}

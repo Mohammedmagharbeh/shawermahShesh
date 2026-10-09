@@ -93,31 +93,7 @@ function ProductManagement({
     }
   };
 
-  const handleAddAddition = () => {
-    setFormData((prev) => ({
-      ...prev,
-      additions: [
-        ...(prev.additions ?? []),
-        { name: { ar: "", en: "" }, price: "" },
-      ],
-    }));
-  };
 
-  const handleRemoveAddition = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      additions: prev.additions.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleAdditionChange = (index, field, value) => {
-    setFormData((prev) => {
-      const updated = [...prev.additions];
-      if (field === "name") updated[index].name = value;
-      else updated[index][field] = value;
-      return { ...prev, additions: updated };
-    });
-  };
 
   return (
     <Card className="shadow-md border-border/50 max-h-none lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
@@ -251,10 +227,7 @@ function ProductManagement({
           {/* Product Additions Component */}
           <ProductAdditions
             formData={formData}
-            handleAddAddition={handleAddAddition}
-            handleRemoveAddition={handleRemoveAddition}
-            handleAdditionChange={handleAdditionChange}
-            handleRadioChange={handleRadioChange}
+            setFormData={setFormData}
           />
 
           <div className="h-px bg-border" />

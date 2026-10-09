@@ -59,9 +59,17 @@ exports.addToCart = async (req, res) => {
     // Map addition _id from request to actual addition object
     const fullAdditions = (additions || [])
       .map((add) => {
-        const found = product.additions.find(
+        let found = product.additions?.find(
           (a) => a._id.toString() === add._id
         );
+        
+        if (!found && product.additionCategories) {
+          for (const cat of product.additionCategories) {
+            found = cat.items?.find((item) => item._id.toString() === add._id);
+            if (found) break;
+          }
+        }
+        
         return found ? { ...found.toObject() } : null;
       })
       .filter(Boolean);

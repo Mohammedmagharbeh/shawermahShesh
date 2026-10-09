@@ -341,10 +341,25 @@ const { recordPromoUsage } = require("../controller/promoCodeController"); // �
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
 const getAdditionFromProduct = (matchedProduct, addRef) => {
-  if (!matchedProduct || !Array.isArray(matchedProduct.additions)) return null;
+  if (!matchedProduct) return null;
+
+  let allValidAdditions = [];
+  if (Array.isArray(matchedProduct.additions)) {
+    allValidAdditions = [...matchedProduct.additions];
+  }
+  if (Array.isArray(matchedProduct.additionCategories)) {
+    matchedProduct.additionCategories.forEach((cat) => {
+      if (Array.isArray(cat.items)) {
+        allValidAdditions = allValidAdditions.concat(cat.items);
+      }
+    });
+  }
+
+  if (allValidAdditions.length === 0) return null;
+
   if (addRef?._id) {
-    const found = matchedProduct.additions.find(
-      (a) => a._id.toString() === addRef._id.toString(),
+    const found = allValidAdditions.find(
+      (a) => a._id && a._id.toString() === addRef._id.toString(),
     );
     if (found)
       return {
@@ -354,7 +369,7 @@ const getAdditionFromProduct = (matchedProduct, addRef) => {
       };
   }
   if (addRef?.name?.en) {
-    const found = matchedProduct.additions.find(
+    const found = allValidAdditions.find(
       (a) => a.name?.en === addRef.name.en,
     );
     if (found)

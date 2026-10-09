@@ -225,6 +225,7 @@ export const INITIAL_FORM_DATA = {
   hasProteinChoices: false,
   additions: [],
   additionsSelectionType: null,
+  additionCategories: [],
   prices: {
     sandwich: "",
     meal: "",
