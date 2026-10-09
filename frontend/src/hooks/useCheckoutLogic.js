@@ -24,7 +24,7 @@ import {
 } from "@/services/orangeMoneyService";
 
 export const useCheckoutLogic = (t) => {
-  const { cart } = useCart();
+  const { cart, refreshCart } = useCart();
   const { user } = useUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -460,13 +460,42 @@ export const useCheckoutLogic = (t) => {
         return;
       }
 
+      setIsSubmitting(true);
+
+      // Verify stock right before proceeding to payment gateway
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BASE_URL}/cart/${user._id}`, {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const serverHasOutOfStock = data?.products?.some(
+            (item) => item.productId && item.productId.inStock === false
+          );
+          if (serverHasOutOfStock) {
+            toast.error(t("cart_out_of_stock_warning", "One or more items in your cart are currently out of stock. Please remove them to proceed."));
+            await refreshCart();
+            setIsSubmitting(false);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Cart stock validation error:", error);
+        // proceed if the check fails due to network, etc (backend createOrder will still catch it)
+      }
+
       if (formState.paymentMethod === PAYMENT_METHODS.CLIQ) {
         await handleZainCashFlow();
+        setIsSubmitting(false); // remove loading state when modal opens
         return;
       }
 
       if (formState.paymentMethod === PAYMENT_METHODS.ORANGE_MONEY) {
         await handleOrangeMoneyFlow();
+        setIsSubmitting(false); // remove loading state when modal opens
         return;
       }
 
@@ -484,6 +513,8 @@ export const useCheckoutLogic = (t) => {
       formState,
       isTestMode,
       t,
+      user,
+      refreshCart,
       handleZainCashFlow,
       handleOrangeMoneyFlow,
       handleMontyPayFlow,

@@ -21,11 +21,14 @@ const OrderItemsList = React.memo(({ cart, t, lang }) => {
     <div className="space-y-4 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200">
       {cart.products.map((item) => {
         const itemKey = `${item.productId._id}-${item.selectedType || ""}-${item.selectedProtein || ""}`;
+        const isOutOfStock = item.productId && item.productId.inStock === false;
 
         return (
           <div
             key={itemKey}
-            className="flex gap-4 py-3 border-b border-gray-100 last:border-b-0 animate-in fade-in duration-300"
+            className={`flex gap-4 py-3 border-b last:border-b-0 animate-in fade-in duration-300 ${
+              isOutOfStock ? "border-red-400 bg-red-50 p-2 rounded-lg opacity-80" : "border-gray-100"
+            }`}
           >
             {/* Thumbnail */}
             <div className="w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-100">
@@ -41,6 +44,11 @@ const OrderItemsList = React.memo(({ cart, t, lang }) => {
               <div className="flex justify-between items-start gap-2">
                 <h4 className="font-bold text-gray-900 text-sm sm:text-base leading-tight truncate-2-lines">
                   {item.productId.name[lang]}
+                  {isOutOfStock && (
+                    <span className="ml-2 inline-block px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded-full">
+                      {t("out_of_stock", "Out of Stock")}
+                    </span>
+                  )}
                 </h4>
                 <div className="shrink-0 text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded">
                   x{item.quantity}

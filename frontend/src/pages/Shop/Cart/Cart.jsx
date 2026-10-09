@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { useUser } from "@/contexts/UserContext";
 import Loading from "@/components/common/Loading";
@@ -9,10 +9,51 @@ import { ArrowLeft, ArrowRight, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Cart = () => {
-  const { cart, loading, updateQuantity, removeFromCart } = useCart();
+  const { cart, loading, updateQuantity, removeFromCart, refreshCart } = useCart();
   const { user } = useUser();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const isRTL = i18n.dir() === "rtl";
+  const [isValidating, setIsValidating] = useState(false);
+
+  const hasOutOfStockItems = cart?.products?.some(
+    (item) => item.productId && item.productId.inStock === false
+  );
+
+  const handleProceedToCheckout = async () => {
+    if (!user?._id) return;
+    setIsValidating(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/cart/${user._id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      const data = await res.json();
+      
+      const serverHasOutOfStock = data?.products?.some(
+        (item) => item.productId && item.productId.inStock === false
+      );
+
+      if (serverHasOutOfStock) {
+        // Backend detected out of stock items, refresh the cart context to show warnings
+        await refreshCart();
+      } else {
+        // All good, navigate to checkout
+        navigate("/checkout");
+      }
+    } catch (error) {
+      console.error("Error validating cart:", error);
+      navigate("/checkout"); // fallback
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   // --- 💰 Order Summary Calculations ---
   const orderSummary = useMemo(() => {
@@ -143,6 +184,11 @@ const Cart = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Cart Items List */}
           <div className="lg:col-span-2 space-y-4">
+            {hasOutOfStockItems && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 text-sm font-semibold mb-4">
+                {t("cart_out_of_stock_warning", "One or more items in your cart are currently out of stock. Please remove them to proceed.")}
+              </div>
+            )}
             {cart.products.map((product, idx) => (
               <CartCard
                 key={product._id || `${product.productId?._id}-${idx}`}
@@ -204,11 +250,19 @@ const Cart = () => {
                 </div>
               </div>
 
-              <Link to="/checkout">
-                <Button className="w-full h-12 text-base font-bold bg-gray-900 hover:bg-black text-white shadow-lg rounded-xl">
+              {hasOutOfStockItems ? (
+                <Button disabled className="w-full h-12 text-base font-bold bg-gray-400 text-white shadow-lg rounded-xl cursor-not-allowed">
                   {t("cart_checkout")}
                 </Button>
-              </Link>
+              ) : (
+                <Button 
+                  onClick={handleProceedToCheckout} 
+                  disabled={isValidating}
+                  className="w-full h-12 text-base font-bold bg-gray-900 hover:bg-black text-white shadow-lg rounded-xl"
+                >
+                  {isValidating ? t("processing", "Processing...") : t("cart_checkout")}
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -231,11 +285,21 @@ const Cart = () => {
               </span>
             )}
           </div>
-          <Link to="/checkout" className="flex-1">
-            <Button className="w-full h-12 text-base font-bold bg-gray-900 hover:bg-black text-white shadow-lg rounded-xl">
-              {t("cart_checkout")}
-            </Button>
-          </Link>
+          <div className="flex-1">
+            {hasOutOfStockItems ? (
+              <Button disabled className="w-full h-12 text-base font-bold bg-gray-400 text-white shadow-lg rounded-xl cursor-not-allowed">
+                {t("cart_checkout")}
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleProceedToCheckout} 
+                disabled={isValidating}
+                className="w-full h-12 text-base font-bold bg-gray-900 hover:bg-black text-white shadow-lg rounded-xl"
+              >
+                {isValidating ? t("processing", "Processing...") : t("cart_checkout")}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -12,6 +12,7 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
   // Extract relevant data for cleaner code
   const { productId, additions, selectedProtein, selectedType, quantity } =
     product;
+  const isOutOfStock = productId && productId.inStock === false;
 
   // --- 💰 PRICE CALCULATION ENGINE ---
   const priceDetails = useMemo(() => {
@@ -88,7 +89,9 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 hover:shadow-md transition-shadow duration-300 relative overflow-hidden group">
+    <div className={`bg-white rounded-xl shadow-sm border p-3 sm:p-4 hover:shadow-md transition-shadow duration-300 relative overflow-hidden group ${
+      isOutOfStock ? "border-red-400 bg-red-50 opacity-80" : "border-gray-100"
+    }`}>
       <div className="flex gap-3 sm:gap-5">
         {/* Image Section */}
         <div className="shrink-0 relative">
@@ -114,6 +117,11 @@ function CartCard({ product, updateQuantity, removeFromCart }) {
             <div className="space-y-1">
               <h3 className="font-bold text-gray-900 text-base sm:text-lg leading-tight line-clamp-1">
                 {productId?.name?.[selectedLanguage] ?? t("deleted_product")}
+                {isOutOfStock && (
+                  <span className="ml-2 inline-block px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded-full">
+                    {t("out_of_stock", "Out of Stock")}
+                  </span>
+                )}
               </h3>
 
               {/* Options Badges */}

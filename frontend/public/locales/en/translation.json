@@ -700,5 +700,7 @@
   "starts_from": "Starts from",
   "calculated_at_checkout": "Calculated at checkout",
   "OutForDelivery": "Order is on the way",
-  "ReadyForPickup": "Order is ready for pickup"
+  "ReadyForPickup": "Order is ready for pickup",
+  "cart_out_of_stock_warning": "One or more items in your cart are currently out of stock. Please remove them to proceed.",
+  "out_of_stock": "Out of Stock"
 }

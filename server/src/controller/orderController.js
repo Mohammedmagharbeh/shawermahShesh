@@ -339,6 +339,12 @@ exports.createOrderLogic = async ({
     throw new Error(`Products not found: ${missing.join(", ")}`);
   }
 
+  // check out of stock products
+  const outOfStock = dbProducts.filter((p) => p.inStock === false);
+  if (outOfStock.length) {
+    throw new Error(`One or more products are out of stock: ${outOfStock.map(p => p.name?.en || p.name?.ar || "Unknown").join(", ")}`);
+  }
+
   // helper: get addition price from product by _id or by name if needed
   const getAdditionFromProduct = (matchedProduct, addRef) => {
     if (!matchedProduct || !Array.isArray(matchedProduct.additions))

@@ -715,5 +715,7 @@
   "starts_from": "يبدأ من",
   "calculated_at_checkout": "يتم الحساب عند الدفع",
   "outfordelivery": "طلبك في الطريق",
-  "readyforpickup": "طلبك جاهز للاستلام"
+  "readyforpickup": "طلبك جاهز للاستلام",
+  "cart_out_of_stock_warning": "واحد أو أكثر من المنتجات في سلتك نفدت كميتها حالياً. يرجى إزالتها للمتابعة.",
+  "out_of_stock": "نفدت الكمية"
 }

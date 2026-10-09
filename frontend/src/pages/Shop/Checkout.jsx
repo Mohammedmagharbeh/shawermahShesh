@@ -824,6 +824,10 @@ function Checkout() {
     savedCards,
   } = useCheckoutLogic(t);
 
+  const hasOutOfStockItems = cart?.products?.some(
+    (item) => item.productId && item.productId.inStock === false
+  );
+
   // --- CliQ Handlers ---
   const handleOtpChange = useCallback(
     (value) => updateForm("otp", value),
@@ -873,9 +877,9 @@ function Checkout() {
 
   const submitButtonClass = useMemo(() => {
     return `w-full bg-gradient-to-r ${
-      isSubmitting ? "from-gray-500 to-gray-600" : "from-gray-900 to-black"
+      isSubmitting || hasOutOfStockItems ? "from-gray-500 to-gray-600" : "from-gray-900 to-black"
     } text-white py-4 px-6 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed`;
-  }, [isSubmitting]);
+  }, [isSubmitting, hasOutOfStockItems]);
 
   if (isLoading) return <Loading />;
 
@@ -989,6 +993,12 @@ function Checkout() {
               <OrderTotals summary={orderSummary} t={t} />
             </div>
 
+            {hasOutOfStockItems && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 text-sm font-semibold mb-6">
+                {t("cart_out_of_stock_warning", "One or more items in your cart are currently out of stock. Please remove them to proceed.")}
+              </div>
+            )}
+
             <div className="mb-8">
               <h3 className="text-base font-semibold text-gray-800 mb-3 block">
                 {t("payment_method")}
@@ -1008,7 +1018,7 @@ function Checkout() {
               <button
                 className={submitButtonClass}
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || hasOutOfStockItems}
                 aria-busy={isSubmitting}
               >
                 {submitButtonText}
@@ -1023,7 +1033,7 @@ function Checkout() {
         <button
           className={submitButtonClass}
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || hasOutOfStockItems}
           aria-busy={isSubmitting}
         >
           {submitButtonText}
