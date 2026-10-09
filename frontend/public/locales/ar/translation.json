@@ -1,4 +1,7 @@
 {
+  "invalid_price": "لا يمكن أن يكون السعر أقل من الصفر",
+  "required_field": "هذا الحقل مطلوب",
+  "fix_errors_before_submitting": "يرجى تصحيح الأخطاء قبل الإرسال",
   "welcome": "مرحبا بكم في شاورما شيش",
   "name": "الاسم",
   "place_order": "تأكيد الطلب",

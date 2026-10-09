@@ -1,4 +1,7 @@
 {
+  "invalid_price": "Price cannot be negative",
+  "required_field": "Required field",
+  "fix_errors_before_submitting": "Please fix errors before submitting",
   "welcome": "Welcome",
   "name": "Name",
   "place_order": "Place Order",

@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, X, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-export default function ProductAdditions({ formData, setFormData }) {
+export default function ProductAdditions({ formData, setFormData, errors = {} }) {
   const { t } = useTranslation();
 
   // --- Legacy Additions Handlers ---
@@ -160,8 +160,9 @@ export default function ProductAdditions({ formData, setFormData }) {
                       })
                     }
                     dir="ltr"
-                    className="h-8 border-orange-200"
+                    className={`h-8 ${errors[`additions.${index}.name.en`] ? "border-red-500" : "border-orange-200"}`}
                   />
+                  {errors[`additions.${index}.name.en`] && <p className="text-red-500 text-xs mt-1">{errors[`additions.${index}.name.en`]}</p>}
                 </div>
                 <div className="w-full">
                   <Input
@@ -174,8 +175,9 @@ export default function ProductAdditions({ formData, setFormData }) {
                       })
                     }
                     dir="rtl"
-                    className="h-8 border-orange-200"
+                    className={`h-8 ${errors[`additions.${index}.name.ar`] ? "border-red-500" : "border-orange-200"}`}
                   />
+                  {errors[`additions.${index}.name.ar`] && <p className="text-red-500 text-xs mt-1 text-right">{errors[`additions.${index}.name.ar`]}</p>}
                 </div>
                 <div className="w-full flex gap-2">
                   <Input
@@ -185,7 +187,7 @@ export default function ProductAdditions({ formData, setFormData }) {
                     onChange={(e) =>
                       handleLegacyAdditionChange(index, "price", e.target.value)
                     }
-                    className="h-8 border-orange-200 flex-1"
+                    className={`h-8 flex-1 ${errors[`additions.${index}.price`] ? "border-red-500" : "border-orange-200"}`}
                   />
                   <Button
                     type="button"
@@ -197,6 +199,7 @@ export default function ProductAdditions({ formData, setFormData }) {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
+                {errors[`additions.${index}.price`] && <p className="text-red-500 text-xs mt-0 text-left">{errors[`additions.${index}.price`]}</p>}
               </div>
             ))}
           </div>
@@ -270,8 +273,9 @@ export default function ProductAdditions({ formData, setFormData }) {
                     })
                   }
                   dir="ltr"
-                  className="font-medium"
+                  className={`font-medium ${errors[`additionCategories.${catIndex}.name.en`] ? "border-red-500" : ""}`}
                 />
+                {errors[`additionCategories.${catIndex}.name.en`] && <p className="text-red-500 text-xs mt-1">{errors[`additionCategories.${catIndex}.name.en`]}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
                 <Input
@@ -284,8 +288,9 @@ export default function ProductAdditions({ formData, setFormData }) {
                     })
                   }
                   dir="rtl"
-                  className="font-medium"
+                  className={`font-medium ${errors[`additionCategories.${catIndex}.name.ar`] ? "border-red-500" : ""}`}
                 />
+                {errors[`additionCategories.${catIndex}.name.ar`] && <p className="text-red-500 text-xs mt-1 text-right">{errors[`additionCategories.${catIndex}.name.ar`]}</p>}
               </div>
             </div>
 
@@ -319,8 +324,9 @@ export default function ProductAdditions({ formData, setFormData }) {
                         })
                       }
                       dir="ltr"
-                      className="h-10 bg-white"
+                      className={`h-10 ${errors[`additionCategories.${catIndex}.items.${itemIndex}.name.en`] ? "border-red-500 bg-red-50" : "bg-white"}`}
                     />
+                    {errors[`additionCategories.${catIndex}.items.${itemIndex}.name.en`] && <p className="text-red-500 text-xs mt-1">{errors[`additionCategories.${catIndex}.items.${itemIndex}.name.en`]}</p>}
                   </div>
 
                   {/* Item Arabic Name */}
@@ -335,8 +341,9 @@ export default function ProductAdditions({ formData, setFormData }) {
                         })
                       }
                       dir="rtl"
-                      className="h-10 bg-white"
+                      className={`h-10 ${errors[`additionCategories.${catIndex}.items.${itemIndex}.name.ar`] ? "border-red-500 bg-red-50" : "bg-white"}`}
                     />
+                    {errors[`additionCategories.${catIndex}.items.${itemIndex}.name.ar`] && <p className="text-red-500 text-xs mt-1 text-right">{errors[`additionCategories.${catIndex}.items.${itemIndex}.name.ar`]}</p>}
                   </div>
 
                   {/* Item Price and Delete */}
@@ -348,7 +355,7 @@ export default function ProductAdditions({ formData, setFormData }) {
                       onChange={(e) =>
                         handleCategoryItemChange(catIndex, itemIndex, "price", e.target.value)
                       }
-                      className="h-10 bg-white flex-1"
+                      className={`h-10 flex-1 ${errors[`additionCategories.${catIndex}.items.${itemIndex}.price`] ? "border-red-500 bg-red-50" : "bg-white"}`}
                     />
                     <Button
                       type="button"
@@ -360,6 +367,7 @@ export default function ProductAdditions({ formData, setFormData }) {
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
+                  {errors[`additionCategories.${catIndex}.items.${itemIndex}.price`] && <p className="text-red-500 text-xs mt-0">{errors[`additionCategories.${catIndex}.items.${itemIndex}.price`]}</p>}
                 </div>
               ))}
               

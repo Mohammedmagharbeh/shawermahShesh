@@ -76,6 +76,36 @@ exports.postEat = async (req, res) => {
           message: "Each addition must have { name: {ar,en}, price }",
         });
       }
+      if (Number(add.price) < 0) {
+        return res.status(400).json({ message: "Addition price cannot be negative" });
+      }
+    }
+
+    // ================================
+    // ✅ Validate addition categories
+    // ================================
+    if (!Array.isArray(additionCategories)) {
+      return res.status(400).json({ message: "Addition categories must be an array" });
+    }
+
+    for (const cat of additionCategories) {
+      if (!cat?.name?.ar || !cat?.name?.en) {
+        return res.status(400).json({
+          message: "Each addition category must have an English and Arabic name",
+        });
+      }
+      if (Array.isArray(cat.items)) {
+        for (const item of cat.items) {
+          if (!item?.name?.ar || !item?.name?.en || item.price == null || item.price === "") {
+            return res.status(400).json({
+              message: "Each option in the addition category must have an English name, Arabic name, and price",
+            });
+          }
+          if (Number(item.price) < 0) {
+            return res.status(400).json({ message: "Addition category option price cannot be negative" });
+          }
+        }
+      }
     }
 
     // ================================
@@ -184,6 +214,36 @@ exports.updatedfood = async (req, res) => {
         return res.status(400).json({
           message: "Each addition must have { name: {ar,en}, price }",
         });
+      }
+      if (Number(add.price) < 0) {
+        return res.status(400).json({ message: "Addition price cannot be negative" });
+      }
+    }
+
+    // ================================
+    // ✅ Validate addition categories
+    // ================================
+    if (!Array.isArray(additionCategories)) {
+      return res.status(400).json({ message: "Addition categories must be an array" });
+    }
+
+    for (const cat of additionCategories) {
+      if (!cat?.name?.ar || !cat?.name?.en) {
+        return res.status(400).json({
+          message: "Each addition category must have an English and Arabic name",
+        });
+      }
+      if (Array.isArray(cat.items)) {
+        for (const item of cat.items) {
+          if (!item?.name?.ar || !item?.name?.en || item.price == null || item.price === "") {
+            return res.status(400).json({
+              message: "Each option in the addition category must have an English name, Arabic name, and price",
+            });
+          }
+          if (Number(item.price) < 0) {
+            return res.status(400).json({ message: "Addition category option price cannot be negative" });
+          }
+        }
       }
     }
 

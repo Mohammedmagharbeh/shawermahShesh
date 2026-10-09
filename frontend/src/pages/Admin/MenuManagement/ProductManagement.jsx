@@ -46,9 +46,52 @@ function ProductManagement({
     setFormData,
   );
 
+  const [errors, setErrors] = useState({});
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  const validateForm = () => {
+    const newErrors = {};
+    let hasError = false;
+
+    if (formData.additionCategories) {
+      formData.additionCategories.forEach((cat, catIndex) => {
+        if (!cat?.name?.en) { newErrors[`additionCategories.${catIndex}.name.en`] = t("required_field"); hasError = true; }
+        if (!cat?.name?.ar) { newErrors[`additionCategories.${catIndex}.name.ar`] = t("required_field"); hasError = true; }
+        
+        if (cat.items) {
+          cat.items.forEach((item, itemIndex) => {
+            if (!item?.name?.en) { newErrors[`additionCategories.${catIndex}.items.${itemIndex}.name.en`] = t("required_field"); hasError = true; }
+            if (!item?.name?.ar) { newErrors[`additionCategories.${catIndex}.items.${itemIndex}.name.ar`] = t("required_field"); hasError = true; }
+            if (item.price == null || item.price === "") { newErrors[`additionCategories.${catIndex}.items.${itemIndex}.price`] = t("required_field"); hasError = true; }
+            else if (Number(item.price) < 0) { newErrors[`additionCategories.${catIndex}.items.${itemIndex}.price`] = t("invalid_price", "Invalid price"); hasError = true; }
+          });
+        }
+      });
+    }
+
+    if (formData.additions) {
+      formData.additions.forEach((add, index) => {
+        if (!add?.name?.en) { newErrors[`additions.${index}.name.en`] = t("required_field"); hasError = true; }
+        if (!add?.name?.ar) { newErrors[`additions.${index}.name.ar`] = t("required_field"); hasError = true; }
+        if (add.price == null || add.price === "") { newErrors[`additions.${index}.price`] = t("required_field"); hasError = true; }
+        else if (Number(add.price) < 0) { newErrors[`additions.${index}.price`] = t("invalid_price", "Invalid price"); hasError = true; }
+      });
+    }
+
+    setErrors(newErrors);
+    return !hasError;
+  };
+
+  useEffect(() => {
+    if (hasSubmitted) {
+      validateForm();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData, hasSubmitted, t]);
 
   const handleRadioChange = (e) => {
     setFormData({ ...formData, additionsSelectionType: e.target.value });
@@ -56,6 +99,11 @@ function ProductManagement({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setHasSubmitted(true);
+    if (!validateForm()) {
+      toast.error(t("fix_errors_before_submitting") || "يرجى تصحيح الأخطاء قبل الإرسال");
+      return;
+    }
     setLoading(true);
     try {
       const payload = buildPayload(formData);
@@ -84,10 +132,13 @@ function ProductManagement({
         setProducts((prev) => [res.data, ...prev]);
       }
       setFormData(INITIAL_FORM_DATA);
+      setHasSubmitted(false);
+      setErrors({});
       toast.success(editingId ? t("product_updated") : t("product_added"));
     } catch (error) {
       console.error(error);
-      toast.error(t("submit_error"));
+      const serverMessage = error.response?.data?.message;
+      toast.error(serverMessage || t("submit_error"));
     } finally {
       setLoading(false);
     }
@@ -228,6 +279,7 @@ function ProductManagement({
           <ProductAdditions
             formData={formData}
             setFormData={setFormData}
+            errors={errors}
           />
 
           <div className="h-px bg-border" />
