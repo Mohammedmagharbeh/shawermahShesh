@@ -179,7 +179,11 @@ function AdminDashboard() {
   };
 
   const handleStatusChange = (orderId, newStatus) => {
-    updateOrder(orderId, { status: newStatus });
+    const updatePayload = { status: newStatus };
+    if (newStatus === "Confirmed" && (user?.name || user?.username)) {
+      updatePayload.confirmedBy = user.name || user.username;
+    }
+    updateOrder(orderId, updatePayload);
   };
 
   const handlePaymentStatusChange = (orderId, newPaymentStatus) => {
@@ -405,7 +409,9 @@ function AdminDashboard() {
                       <Button
                         onClick={() => {
                           stopSound();
-                          updateOrder(o._id, { status: "Confirmed" });
+                          const payload = { status: "Confirmed" };
+                          if (user?.name || user?.username) payload.confirmedBy = user.name || user.username;
+                          updateOrder(o._id, payload);
                           setIncomingOrder((prev) =>
                             prev.filter((ord) => ord._id !== o._id),
                           );
@@ -513,6 +519,16 @@ function AdminDashboard() {
                         </span>
                         <span className="text-sm text-foreground">
                           {order.shippingAddress?.name || "N/A"}
+                        </span>
+                      </div>
+                    )}
+                    {order.confirmedBy && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {t("confirmed_by")}:
+                        </span>
+                        <span className="text-sm font-medium text-purple-600">
+                          {order.confirmedBy}
                         </span>
                       </div>
                     )}

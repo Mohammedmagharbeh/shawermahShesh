@@ -612,6 +612,7 @@ exports.updateOrder = async (req, res) => {
       "payment",
       "products",
       "totalPrice",
+      "confirmedBy",
     ];
     const updates = {};
 

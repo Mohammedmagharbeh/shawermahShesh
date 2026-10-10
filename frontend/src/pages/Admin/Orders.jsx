@@ -90,7 +90,11 @@ function Orders() {
   }, [currentPage, debouncedSearch]);
 
   const handleStatusChange = (orderId, newStatus) => {
-    updateOrder(orderId, { status: newStatus });
+    const updatePayload = { status: newStatus };
+    if (newStatus === "Confirmed" && (user?.name || user?.username)) {
+      updatePayload.confirmedBy = user.name || user.username;
+    }
+    updateOrder(orderId, updatePayload);
   };
 
   const handlePaymentStatusChange = (orderId, newPaymentStatus) => {
@@ -195,6 +199,16 @@ function Orders() {
                               : t("pickup")}
                           </span>
                         </div>
+                        {order.confirmedBy && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-muted-foreground">
+                              {t("confirmed_by")}:
+                            </span>
+                            <span className="text-sm font-medium text-purple-600">
+                              {order.confirmedBy}
+                            </span>
+                          </div>
+                        )}
                         {/* ✅ جديد — كود الخصم + نسبته + مقداره بالدينار */}
                         {promo.hasPromo && (
                           <div className="flex items-center gap-2 flex-wrap md:col-span-2">

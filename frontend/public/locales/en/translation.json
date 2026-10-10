@@ -663,5 +663,6 @@
   "options": "Options",
   "category_name_ar": "Category Name (Arabic)",
   "category_name_en": "Category Name (English)",
-  "additions_categories": "Additions (Categories)"
+  "additions_categories": "Additions (Categories)",
+  "confirmed_by": "Confirmed By"
 }

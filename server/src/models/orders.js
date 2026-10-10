@@ -171,6 +171,7 @@ const ordersSchema = new mongoose.Schema(
     // ✅ جديد — كود الخصم المستخدم بهالطلب (لو في)، ومقدار الخصم الفعلي بالدينار
     promoCode: { type: String, default: null },
     discountAmount: { type: Number, default: 0 },
+    confirmedBy: { type: String, default: null },
     userDetails: {
       type: {
         name: { type: String, required: true },
