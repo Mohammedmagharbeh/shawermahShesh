@@ -1,0 +1,93 @@
+{
+  "listItem": {
+    "id": "01a13fc3-fc52-7a64-aa3a-a1187ad622c5",
+    "sequence": 2,
+    "customerName": "Mohammed",
+    "branchName": {
+      "en": "Test Branch",
+      "ar": "تست"
+    },
+    "channelCode": "CALL_CENTER",
+    "referenceOrderId": "01a13fc2-d33d-7f58-9c46-1dce36dee31a",
+    "isScheduled": false,
+    "serviceType": "Pickup",
+    "orderStatus": "New",
+    "deliveryType": "Pickup",
+    "createdAt": "2026-10-15T16:32:51.155794Z",
+    "itemsGross": 4.25,
+    "totalDiscountPercentage": 0,
+    "channelDiscountsAndFees": null
+  },
+  "full": {
+    "id": "01a13fc3-fc52-7a64-aa3a-a1187ad622c5",
+    "sequence": 2,
+    "customerName": "Mohammed",
+    "customerPhone": "+962799860118",
+    "branchName": {
+      "en": "Test Branch",
+      "ar": "تست"
+    },
+    "branchId": "01a13a01-574d-76aa-86aa-af586f6692ce",
+    "channelCode": "CALL_CENTER",
+    "referenceOrderId": "01a13fc2-d33d-7f58-9c46-1dce36dee31a",
+    "referanceShortCode": null,
+    "isScheduled": false,
+    "scheduledTime": null,
+    "serviceType": "Pickup",
+    "orderStatus": "New",
+    "deliveryType": "Pickup",
+    "createdAt": "2026-10-15T13:32:51.155794Z",
+    "discount": null,
+    "subTotal": 4.25,
+    "totalAmount": 4.25,
+    "channelAmount": 4.25,
+    "tax": 0,
+    "serviceFee": 0,
+    "deliveryFee": 0,
+    "deliveryDiscount": 0,
+    "deliveryProviderReferenceId": null,
+    "discountAmount": 0,
+    "promotionAmount": 0,
+    "totalDiscountAmount": 0,
+    "itemsGross": 4.25,
+    "totalDiscountPercentage": 0,
+    "discountPercentage": 0,
+    "promotionPercentage": 0,
+    "deliveryDiscountPercentage": 0,
+    "deliveryTotalFee": 0,
+    "taxPercentage": 0,
+    "items": [
+      {
+        "name": {
+          "en": "Double Shawarma Mix Meal",
+          "ar": "وجبة دبل  مكس"
+        },
+        "categoryId": "01a13eb3-a771-7389-bc59-f62ac462980b",
+        "productId": "01a13eb3-a77a-7d77-85ba-9df02707c022",
+        "originalId": "69d8e6a90d197335a04b3f30",
+        "price": 4.25,
+        "quantity": 1,
+        "note": "TEST",
+        "tax": 0,
+        "discount": null,
+        "options": [
+          {
+            "name": {
+              "en": "Pomegranate molasses",
+              "ar": "اضافة دبس رمان"
+            },
+            "quantity": 1,
+            "discount": null,
+            "productId": null,
+            "price": 0,
+            "modifierOptionId": "01a13eb3-a844-7958-9ba8-0ed8ec2087e3",
+            "originalId": "6a243e893d62f3cb17c1c3bf",
+            "tax": 0
+          }
+        ],
+        "id": "01a13fc3-fc51-7ec6-b721-89fddb8f19fa"
+      }
+    ],
+    "note": ""
+  }
+}

@@ -701,10 +701,24 @@ exports.updateOrder = async (req, res) => {
     }
 
     // Send OTP if status confirmed
-    if (updates.status === "Confirmed") {
+    // if (updates.status === "Confirmed") {
+    //   const { sendOrderConfirm } = require("../utils/otp");
+    //   await sendOrderConfirm(updatedOrder.userId.phone);
+    // }
+    // Send OTP if status confirmed
+if (updates.status === "Confirmed") {
+  const phone = updatedOrder.userId?.phone || updatedOrder.customerPhone;
+  if (phone) {
+    try {
       const { sendOrderConfirm } = require("../utils/otp");
-      await sendOrderConfirm(updatedOrder.userId.phone);
+      await sendOrderConfirm(phone);
+    } catch (e) {
+      console.error("sendOrderConfirm failed:", e.message);
     }
+  } else {
+    console.log("[otp] skipped: no phone for order", updatedOrder._id);
+  }
+}
 
     const io = req.app.get("io");
     if (io) io.emit("updatedOrder", updatedOrder);
