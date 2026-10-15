@@ -647,10 +647,15 @@ function AdminDashboard() {
                             }}
                           />
                           <div className="flex flex-col gap-1">
-                            <p className="font-semibold">
+                            {/* <p className="font-semibold">
                               {item.productId?.name[selectedLanguage] ||
                                 t("deleted_product")}
-                            </p>
+                            </p> */}
+                            <p className="font-semibold">
+  {item.productId?.name?.[selectedLanguage] ||
+    item.name?.[selectedLanguage] ||
+    t("deleted_product")}
+</p>
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-sm font-semibold text-muted-foreground">
                                 {t("quantity")}:
