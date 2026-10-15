@@ -1,0 +1,5866 @@
+{
+  "menuId": "01a13a03-39ea-7474-bfc0-157098f97460",
+  "overrides": [],
+  "categories": [
+    {
+      "originalId": "69d8dc600d197335a04b3e59",
+      "name": {
+        "en": "Shawarma🥙",
+        "ar": "شاورما 🥙"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 0,
+      "products": [
+        {
+          "originalId": "69d8e4820d197335a04b3ed3",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347046/products/wrqvt8nmqikm3v13j4uv.jpg",
+          "name": {
+            "en": "Regular Shawarma Meal",
+            "ar": "وجبة عادي"
+          },
+          "description": {
+            "en": "1 large sandwich - pickles - vegetables - garlic sauce - potatoes - ketchup",
+            "ar": "1 ساندويش كبير - مخلل -خضار-مثومة -بطاطا-كاتشاب"
+          },
+          "price": 2.7,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8e4820d197335a04b3ed3",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8e4820d197335a04b3ed3_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8e4820d197335a04b3ed3_choice_chicken",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8e4820d197335a04b3ed3_choice_meat",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8e4820d197335a04b3ed3_additions",
+              "minSelection": 0,
+              "maxSelection": 6,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69d9469f486e1f4622e54272",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243d1d3d62f3cb17c1c2e2",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243d1d3d62f3cb17c1c2e3",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74c7f0c29d9f954eecfffd",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74eafbc29d9f954eed084c",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74eafbc29d9f954eed084d",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8e55b0d197335a04b3f16",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347007/products/k7soeei0nbtpd2fagqcx.jpg",
+          "name": {
+            "en": "Super Shawarma Meal",
+            "ar": "وجبة سوبر"
+          },
+          "description": {
+            "en": "1.5 Large Sandwich - Pickles - Vegetables - Garlic Sauce - Potatoes - Ketchup",
+            "ar": "1.5 ساندويش كبير - مخلل -خضار-مثومة -بطاطا-كاتشاب"
+          },
+          "price": 3.3,
+          "pricingType": 0,
+          "order": 1,
+          "tax": 0,
+          "sku": "69d8e55b0d197335a04b3f16",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8e55b0d197335a04b3f16_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8e55b0d197335a04b3f16_choice_chicken",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8e55b0d197335a04b3f16_choice_meat",
+                  "additionalPrice": 0.4,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8e55b0d197335a04b3f16_additions",
+              "minSelection": 0,
+              "maxSelection": 6,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69d946f6486e1f4622e5428e",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243d923d62f3cb17c1c342",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243d923d62f3cb17c1c343",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74c800c29d9f954eed000a",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74eb41c29d9f954eed086d",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74eb41c29d9f954eed086e",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8e6380d197335a04b3f19",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347055/products/m9taonepxpvzsl9ij5rd.jpg",
+          "name": {
+            "en": "Double Shawarma Meal",
+            "ar": "وجبة دبل"
+          },
+          "description": {
+            "en": "2 large sandwiches - pickles - vegetables - 2 garlic sauces - potatoes - ketchup",
+            "ar": "2 ساندويش كبير - مخلل -خضار-2مثومة -بطاطا-كاتشاب"
+          },
+          "price": 4,
+          "pricingType": 0,
+          "order": 2,
+          "tax": 0,
+          "sku": "69d8e6380d197335a04b3f19",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8e6380d197335a04b3f19_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8e6380d197335a04b3f19_choice_chicken",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8e6380d197335a04b3f19_choice_meat",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8e6380d197335a04b3f19_additions",
+              "minSelection": 0,
+              "maxSelection": 6,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69d9475a486e1f4622e5429d",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243ddd3d62f3cb17c1c370",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243ddd3d62f3cb17c1c371",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74c811c29d9f954eed0017",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74eb69c29d9f954eed088e",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74eb69c29d9f954eed088f",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8e75b0d197335a04b3f46",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347136/products/j42u4qyurfbclzrua9sy.jpg",
+          "name": {
+            "en": "Triple Shawarma Meal",
+            "ar": "وجبة تربل"
+          },
+          "description": {
+            "en": "3 large sandwiches - pickles - vegetables - 2 garlic sauces - potatoes - ketchup",
+            "ar": "3ساندويش كبير - مخلل -خضار-2مثومة -بطاطا-كاتشاب"
+          },
+          "price": 5.2,
+          "pricingType": 0,
+          "order": 3,
+          "tax": 0,
+          "sku": "69d8e75b0d197335a04b3f46",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8e75b0d197335a04b3f46_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8e75b0d197335a04b3f46_choice_chicken",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8e75b0d197335a04b3f46_choice_meat",
+                  "additionalPrice": 0.55,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8e75b0d197335a04b3f46_additions",
+              "minSelection": 0,
+              "maxSelection": 6,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69d9479d486e1f4622e542a8",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243e4d3d62f3cb17c1c394",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243e4d3d62f3cb17c1c395",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74c828c29d9f954eed0024",
+                  "additionalPrice": 0.75,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74eb9fc29d9f954eed08a1",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74eb9fc29d9f954eed08a2",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8e6a90d197335a04b3f30",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347161/products/yv3bg6sqr03wis08d9za.jpg",
+          "name": {
+            "en": "Double Shawarma Mix Meal",
+            "ar": "وجبة دبل  مكس"
+          },
+          "description": {
+            "en": "2 large sandwiches - pickles - vegetables - 2 garlic sauces - potatoes - ketchup",
+            "ar": "2 ساندويش كبير - مخلل -خضار-2مثومة -بطاطا-كاتشاب"
+          },
+          "price": 4.25,
+          "pricingType": 0,
+          "order": 4,
+          "tax": 0,
+          "sku": "69d8e6a90d197335a04b3f30",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8e6a90d197335a04b3f30_additions",
+              "minSelection": 0,
+              "maxSelection": 6,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d947f4486e1f4622e542b3",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243e893d62f3cb17c1c3be",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243e893d62f3cb17c1c3bf",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74c83bc29d9f954eed0031",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ebcec29d9f954eed08b2",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ebcec29d9f954eed08b3",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8e7000d197335a04b3f43",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347176/products/pp5fwaue4ewqs6mbv1uj.jpg",
+          "name": {
+            "en": "Triple Shawarma Mix Meal",
+            "ar": "وجبة تربل مكس"
+          },
+          "description": {
+            "en": "3 large sandwiches - pickles - vegetables - 2 garlic sauces - potatoes - ketchup",
+            "ar": "3ساندويش كبير - مخلل -خضار-2مثومة -بطاطا-كاتشاب"
+          },
+          "price": 5.6,
+          "pricingType": 0,
+          "order": 5,
+          "tax": 0,
+          "sku": "69d8e7000d197335a04b3f43",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8e7000d197335a04b3f43_additions",
+              "minSelection": 0,
+              "maxSelection": 6,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d9482b486e1f4622e542be",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243ebe3d62f3cb17c1c3f0",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243ebe3d62f3cb17c1c3f1",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74c84fc29d9f954eed003e",
+                  "additionalPrice": 0.75,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ebf9c29d9f954eed08d5",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ebf9c29d9f954eed08d6",
+                  "additionalPrice": 0.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8e7a80d197335a04b3f49",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346395/products/w7itte9axcussi2p3jek.jpg",
+          "name": {
+            "en": "Chicken Saver Meal - Group",
+            "ar": "وجبة توفير دجاج- جماعية"
+          },
+          "description": {
+            "en": "5 large sandwiches - a plate of vegetables and pickles - 1 chipotle sauce - 1 sheesh sauce - 3 garlic sauces - 3 potatoes - 2 ketchup - 1 liter of local cola",
+            "ar": "5 ساندويش كبير- طبق خضار ومخلل -1شيبوتلي صوص-1 شيش صوص- 3 مثومة -3بطاطا-2 كاتشاب - 1 لتر كولا وطني"
+          },
+          "price": 11,
+          "pricingType": 0,
+          "order": 6,
+          "tax": 0,
+          "sku": "69d8e7a80d197335a04b3f49",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8e7a80d197335a04b3f49_additions",
+              "minSelection": 0,
+              "maxSelection": 6,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d94918486e1f4622e542d9",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243ef13d62f3cb17c1c412",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243ef13d62f3cb17c1c413",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74c866c29d9f954eed004b",
+                  "additionalPrice": 1.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ec1ec29d9f954eed08e6",
+                  "additionalPrice": 2,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ec1ec29d9f954eed08e7",
+                  "additionalPrice": 2,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "6a116f4b12705e5cf6dce721",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346379/products/frxhi62xkuefe7emc13i.jpg",
+          "name": {
+            "en": "Meat Saver Meal - Group",
+            "ar": "وجبة توفير لحمة- جماعية"
+          },
+          "description": {
+            "en": "5 large sandwiches - a plate of vegetables and pickles - 1 chipotle sauce - 1 sheesh sauce - 3 garlic sauces - 3 potatoes - 2 ketchup - 1 liter of local cola",
+            "ar": "5 ساندويش كبير- طبق خضار ومخلل -1شيبوتلي صوص-1 شيش صوص- 3 مثومة -3بطاطا-2 كاتشاب - 1 لتر كولا وطني"
+          },
+          "price": 13,
+          "pricingType": 0,
+          "order": 7,
+          "tax": 0,
+          "sku": "6a116f4b12705e5cf6dce721",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "6a116f4b12705e5cf6dce721_additions",
+              "minSelection": 0,
+              "maxSelection": 6,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "6a1170fe12705e5cf6dce84a",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243f283d62f3cb17c1c429",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243f283d62f3cb17c1c42a",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74c876c29d9f954eed0058",
+                  "additionalPrice": 1,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ec55c29d9f954eed08fa",
+                  "additionalPrice": 2,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ec55c29d9f954eed08fb",
+                  "additionalPrice": 2,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8e7ef0d197335a04b3f4c",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346336/products/lomgcel9g4lkvygzczwo.jpg",
+          "name": {
+            "en": "Value Mix Meal - Group",
+            "ar": "وجبة توفير مكس- جماعية"
+          },
+          "description": {
+            "en": "3 Large Chicken Sandwiches – 2 Large Beef Sandwiches – Mixed Vegetables & Pickles Platter – 1 Chipotle Sauce – 1 Shish Sauce – 3 Garlic Sauce – 3 Fries – 2 Ketchup – 1L Cola",
+            "ar": "3 ساندويش كبير دجاج - 2 ساندويش كبير لحم -طبق خضار ومخلل -1شيبوتلي صوص-1 شيش صوص- 3 مثومة -3بطاطا-2 كاتشاب - 1 لتر كولا وطني"
+          },
+          "price": 12,
+          "pricingType": 0,
+          "order": 8,
+          "tax": 0,
+          "sku": "69d8e7ef0d197335a04b3f4c",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8e7ef0d197335a04b3f4c_additions",
+              "minSelection": 0,
+              "maxSelection": 6,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d948e2486e1f4622e542cd",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243f613d62f3cb17c1c443",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a243f613d62f3cb17c1c444",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74c892c29d9f954eed0065",
+                  "additionalPrice": 1.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ec7bc29d9f954eed090d",
+                  "additionalPrice": 2,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a74ec7bc29d9f954eed090e",
+                  "additionalPrice": 2,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ed880d197335a04b3f92",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346431/products/kmxclxk6i5howkvznk4r.jpg",
+          "name": {
+            "en": "Shawarma Sandwich",
+            "ar": "ساندويش شاورما"
+          },
+          "description": {
+            "en": "Chicken - Pickles - Pickled",
+            "ar": "دجاج - مثومة - مخلل"
+          },
+          "price": 1.6,
+          "pricingType": 0,
+          "order": 9,
+          "tax": 0,
+          "sku": "69d8ed880d197335a04b3f92",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ed880d197335a04b3f92_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8ed880d197335a04b3f92_choice_chicken",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8ed880d197335a04b3f92_choice_meat",
+                  "additionalPrice": 0.15,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8ed880d197335a04b3f92_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "6a74c8b3c29d9f954eed006f",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ffa40d197335a04b4221",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346511/products/ddzgqo3wfhjdwiolgeyh.jpg",
+          "name": {
+            "en": "Luxurious Italian meal",
+            "ar": "الوجبة الايطالية الفاخرة"
+          },
+          "description": {
+            "en": "Luxury special bread - Mayonnaise - Chicken breast shawarma - Cream with a selection of cheeses - Bell peppers, mushrooms, and mixed grilled vegetables - Special sauce with an Italian touch - Yellow cheddar cheese",
+            "ar": "خبزة خاصة فاخرة-مايونيز-شاورما صدر الدجاج-كريمة مع خليط اجبان مختارة-فلفل حلو وفطر ومكس خضار مشوية عالجريل-صوص خاص بلمسة ايطالية-جبنة شيدر اصفر"
+          },
+          "price": 4.5,
+          "pricingType": 0,
+          "order": 10,
+          "tax": 0,
+          "sku": "69d8ffa40d197335a04b4221",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d900320d197335a04b4224",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346555/products/kzogovelglgixzmrggyn.jpg",
+          "name": {
+            "en": "Italian meat meal",
+            "ar": "الوجبة الايطالية باللحم"
+          },
+          "description": {
+            "en": "Luxury special bread - Mayonnaise - Beef shawarma - Cream with a selection of cheeses - Grilled mixed vegetables - Special sauce with an Italian touch - Yellow cheddar cheese",
+            "ar": "خبزة خاصة فاخرة-مايونيز-شاورما لحم-كريمة مع خليط اجبان مختارة-مكس خضار مشوية عالجريل-صوص خاص بلمسة ايطالية-جبنة شيدر اصفر"
+          },
+          "price": 5.5,
+          "pricingType": 0,
+          "order": 11,
+          "tax": 0,
+          "sku": "69d900320d197335a04b4224",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f0530d197335a04b3faa",
+      "name": {
+        "en": "Chicken Burger🍔",
+        "ar": "برجر دجاج🍔"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 1,
+      "products": [
+        {
+          "originalId": "6ab382ed2442ea6871d7685d",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1790183556/products/xxu1wa3wphq4tvvztdvj.jpg",
+          "name": {
+            "en": "Crown Burger",
+            "ar": "برجر كراون"
+          },
+          "description": {
+            "en": "Crispy Chicken, Turkey, Premium Mozzarella, Signature Sauce, Arugula & Mayo.",
+            "ar": "صدر دجاج مقرمش , تيركي , جبنة موزريلا مميزة صوص خاص خس جرجير مايونيز"
+          },
+          "price": 3.5,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6ab382ed2442ea6871d7685d",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "6ab382ed2442ea6871d7685d_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "6ab382ed2442ea6871d7685d_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6ab382ed2442ea6871d7685d_choice_meal",
+                  "additionalPrice": 1,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "6a60f68bf0fcfd432e947ad8",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1784748902/products/cvx7xbtm3bxbc1cvkeuh.jpg",
+          "name": {
+            "en": "Chicken Cheese Mix",
+            "ar": "مكس أجبان دجاج"
+          },
+          "description": {
+            "en": "Crispy chicken breast, three types of cheese (White Cheddar, Yellow Cheddar & Mozzarella Sticks), special sauce, roast beef, mayonnaise, and fresh lettuce.",
+            "ar": "صدر دجاج مقرمش ، 3 أنواع من الجبن\n(شيدر أبيض، شيدر أصفر، وموزاريلا ستيكس)\nصوص خاص، روست بيف، مايونيز، خس،"
+          },
+          "price": 3.5,
+          "pricingType": 0,
+          "order": 1,
+          "tax": 0,
+          "sku": "6a60f68bf0fcfd432e947ad8",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "6a60f68bf0fcfd432e947ad8_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "6a60f68bf0fcfd432e947ad8_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a60f68bf0fcfd432e947ad8_choice_meal",
+                  "additionalPrice": 1.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f09f0d197335a04b3fad",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347550/products/skp1kzgtvwpmhlndtnge.jpg",
+          "name": {
+            "en": "Classic Chicken Burger",
+            "ar": "كلاسيك دجاج"
+          },
+          "description": {
+            "en": "Premium Bun-Large Chicken Breast, White Cheddar, Pickles, Tomato, Mayo & Lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "خبزة فاخرة -قطعة دجاج كبيرة من صدر الدجاج الصافي  - قطعة شيدر أبيض مميزة - مخلل - بندورة - مايونيز  - خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.75,
+          "pricingType": 0,
+          "order": 2,
+          "tax": 0,
+          "sku": "69d8f09f0d197335a04b3fad",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f09f0d197335a04b3fad_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f09f0d197335a04b3fad_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f09f0d197335a04b3fad_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f0d80d197335a04b3fb0",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347578/products/zi8huwr8cfyxinplwbim.jpg",
+          "name": {
+            "en": "Mushroom Chicken Burger",
+            "ar": "ماشروم دجاج"
+          },
+          "description": {
+            "en": "Premium Bun -Large Chicken Breast, Mushroom Cream Sauce, White Cheddar, Mayo & Lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "خبزة فاخرة -قطعة دجاج كبيرة من صدر الدجاج الصافي - صوص الماشروم مع الكريمة البيضاء الفاخرة - قطعة شيدر أبيض مميزة  - مايونيز -خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 3,
+          "pricingType": 0,
+          "order": 3,
+          "tax": 0,
+          "sku": "69d8f0d80d197335a04b3fb0",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f0d80d197335a04b3fb0_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f0d80d197335a04b3fb0_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f0d80d197335a04b3fb0_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f1140d197335a04b3fb3",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345661/products/fdvimgi6n4f6cnfjcux6.jpg",
+          "name": {
+            "en": "Spicy Chicken Burger",
+            "ar": "سبايسي دجاج"
+          },
+          "description": {
+            "en": "Premium Bun -Large Chicken Breast, Spicy Sauce, White Cheddar, Roast Beef, Pickles, Tomato, Onion, Jalapeño, Mayo & Lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "خبزة فاخرة -قطعة دجاج كبيرة من صدر الدجاج الصافي  - صوص حار لذيذ - قطعة شيدر أبيض مميزة - روست بيف - مخلل - بندورة - بصل - هلابينو - مايونيز - خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 3,
+          "pricingType": 0,
+          "order": 4,
+          "tax": 0,
+          "sku": "69d8f1140d197335a04b3fb3",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f1140d197335a04b3fb3_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f1140d197335a04b3fb3_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f1140d197335a04b3fb3_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f15e0d197335a04b3fb6",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347619/products/wipgrj26cehksjhvqdxo.jpg",
+          "name": {
+            "en": "Armenian Chicken Burger with Cream & Corn",
+            "ar": "الأرمني بالكريمة و الذرة"
+          },
+          "description": {
+            "en": "Premium Bun-Large Chicken Breast, Creamy Corn & Cheese Sauce, White Cheddar, Mayo & Lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "خبزة فاخرة -قطعة دجاج كبيرة من صدر الدجاج الصافي  - صوص الكريمة الشهي مع الذرة و الأجبان الفاخرة -  قطعة شيدر أبيض مميزة - مايونيز - خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 3,
+          "pricingType": 0,
+          "order": 5,
+          "tax": 0,
+          "sku": "69d8f15e0d197335a04b3fb6",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f15e0d197335a04b3fb6_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f15e0d197335a04b3fb6_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f15e0d197335a04b3fb6_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f2f80d197335a04b3fb9",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347593/products/opbq42f013ors6cjeav2.jpg",
+          "name": {
+            "en": "Fried Chicken Sheesh",
+            "ar": "فرايد شيش"
+          },
+          "description": {
+            "en": "Premium Bun-Breaded Fried Chicken Breast, Special Sauce, Yellow Cheddar, Turkey, Pickles, Mayo & LettuceFries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "خبزة فاخرة -صدر دجاج مقلي بالبقسماط - صوص خاص لذيذ - قطعة شيدر أصفر مميزة  - تيركي - مخلل - مايونيز - خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.9,
+          "pricingType": 0,
+          "order": 6,
+          "tax": 0,
+          "sku": "69d8f2f80d197335a04b3fb9",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f2f80d197335a04b3fb9_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f2f80d197335a04b3fb9_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f2f80d197335a04b3fb9_choice_meal",
+                  "additionalPrice": 1.6,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8f2f80d197335a04b3fb9_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f2f80d197335a04b3fba",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f2f80d197335a04b3fbb",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f2f80d197335a04b3fbc",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69f6fea325e964955e518ddd",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f3280d197335a04b3fbf",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345690/products/lsc5ad5wfo5hintd33tr.jpg",
+          "name": {
+            "en": "Chicken Escalope Burger",
+            "ar": "اسكالوب برجر"
+          },
+          "description": {
+            "en": "Premium Bun-Chicken Escalope, Yellow Cheddar, Mayo & Lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "خبزة فاخرة -اسكالوب دجاج - قطعة شيدر أصفر مميزة  - مايونيز  - خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 1.65,
+          "pricingType": 0,
+          "order": 7,
+          "tax": 0,
+          "sku": "69d8f3280d197335a04b3fbf",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f3280d197335a04b3fbf_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f3280d197335a04b3fbf_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f3280d197335a04b3fbf_choice_meal",
+                  "additionalPrice": 1.6,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ede10d197335a04b3f95",
+      "name": {
+        "en": "Beef Burger🍔",
+        "ar": "برجر لحم🍔"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 2,
+      "products": [
+        {
+          "originalId": "6a85ec98c29d9f954eee8edf",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1787163683/products/lazndy3ygd9hswngdu6u.jpg",
+          "name": {
+            "en": "Burger Overload",
+            "ar": "برجر اوفر لود"
+          },
+          "description": {
+            "en": "Grilled Beef Patty\nBeef Bacon\nMelted Cheddar Cheese\nCrispy Fried Onion Rings\nNew Sers Sauce\nMayonnaise & Fresh Lettuce",
+            "ar": "قطعه لحم مشوي بيف بيكون بقري جبنة شيدر مميوة حلقات بصل مقلية الصوص السرس الجديد مايونيز-خس"
+          },
+          "price": 3.75,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6a85ec98c29d9f954eee8edf",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "6a85ec98c29d9f954eee8edf_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "6a85ec98c29d9f954eee8edf_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a85ec98c29d9f954eee8edf_choice_meal",
+                  "additionalPrice": 1.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "6a39975438e589c4769d47df",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1782159187/products/as5ikvxp2nxqryqm51vj.jpg",
+          "name": {
+            "en": "Mixed Cheese Beef Burger 200 g",
+            "ar": "برجر لحم مكس اجبان 200 غرام"
+          },
+          "description": {
+            "en": "200g juicy beef patty topped with a blend of three cheeses (white cheddar, yellow cheddar, and crispy mozzarella sticks), layered with roast beef, special sauce, mayonnaise, fresh lettuce, and onions.",
+            "ar": "لحم بقري 200 غرام، 3 أنواع من الجبن (شيدر أبيض، شيدر أصفر، وموزاريلا ستيكس)، صوص خاص، روست بيف، مايونيز، خس، بصل"
+          },
+          "price": 3.5,
+          "pricingType": 0,
+          "order": 1,
+          "tax": 0,
+          "sku": "6a39975438e589c4769d47df",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "6a39975438e589c4769d47df_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "6a39975438e589c4769d47df_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a39975438e589c4769d47df_choice_meal",
+                  "additionalPrice": 1.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ef890d197335a04b3fa1",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347382/products/eukpt6apno4kzokdpcql.jpg",
+          "name": {
+            "en": "Classic Beef Burger 200g",
+            "ar": "كلاسيك لحم 200 غرام"
+          },
+          "description": {
+            "en": "Premium Bun Burger- Grilled Beef Patty, Cheddar Cheese, Tomato, Onion, Pickles, Mayo & Lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "خبزة فاخرة - قطعة لحم مشوي - قطعة شيدر أصفر مميزة -بندورة - بصل - مخلل - مايونيز - خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 3.25,
+          "pricingType": 0,
+          "order": 2,
+          "tax": 0,
+          "sku": "69d8ef890d197335a04b3fa1",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ef890d197335a04b3fa1_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8ef890d197335a04b3fa1_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8ef890d197335a04b3fa1_choice_meal",
+                  "additionalPrice": 1.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8eff00d197335a04b3fa4",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347392/products/cqaujuhdldmrqelcy6zs.jpg",
+          "name": {
+            "en": "Mushroom Beef Burger 200g",
+            "ar": "ماشروم لحم 200 غرام"
+          },
+          "description": {
+            "en": "Premium Bun-Grilled Beef Patty, Special Mushroom Sauce with Caramelized Onions, White Cheddar, Mayo & Lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "خبزة فاخرة -قطعة لحم مشوي - صوص الماشروم الخاص مع البصل المكرمل - قطعة شيدر أبيض مميز - مايونيز  - خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 3.25,
+          "pricingType": 0,
+          "order": 3,
+          "tax": 0,
+          "sku": "69d8eff00d197335a04b3fa4",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8eff00d197335a04b3fa4_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8eff00d197335a04b3fa4_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8eff00d197335a04b3fa4_choice_meal",
+                  "additionalPrice": 1.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f0360d197335a04b3fa7",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347493/products/sh9ubxlc0fjiub5aq3gw.jpg",
+          "name": {
+            "en": "Spicy Beef Burger 200g",
+            "ar": "سبايسي لحم 200غرام"
+          },
+          "description": {
+            "en": "Premium Bun- Grilled Beef Patty, Spicy Sauce, White Cheddar, Roast Beef, Pickles, Tomato, Onion, Jalapeño, Mayo & Lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "خبزة فاخرة -قطعة لحم مشوي - صوص حار لذيذ - قطعة شيدر أبيض مميزة  -روست بيف - مخلل - بندورة - بصل - هلابينو - مايونيز -خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 3.25,
+          "pricingType": 0,
+          "order": 4,
+          "tax": 0,
+          "sku": "69d8f0360d197335a04b3fa7",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f0360d197335a04b3fa7_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f0360d197335a04b3fa7_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f0360d197335a04b3fa7_choice_meal",
+                  "additionalPrice": 1.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "originalId": "6a4556bb1d418c5cf3980821",
+      "name": {
+        "en": "Sea Food🦞",
+        "ar": "مأكولات بحرية🦞"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 3,
+      "products": [
+        {
+          "originalId": "6a4557361d418c5cf3980857",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1782935598/products/buagg45ps2kmx02zk0gl.jpg",
+          "name": {
+            "en": "Shrimp Sheesh",
+            "ar": "شرمب شيش"
+          },
+          "description": {
+            "en": "Grilled jumbo shrimp, signature Sheesh sauce, mayonnaise, fresh lettuce, and jalapeños.",
+            "ar": "جمبري جامبو مشوي ، صوص شيش الخاص ، مايونيز، خس طازج، هالبينو."
+          },
+          "price": 3.3,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6a4557361d418c5cf3980857",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e83f0d197335a04b3f4f",
+      "name": {
+        "en": "Group meals🍱",
+        "ar": "وجبات جماعية🍱"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 4,
+      "products": [
+        {
+          "originalId": "69d8e8860d197335a04b3f52",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347107/products/ztbxx0dkjdwvhepmx9uq.jpg",
+          "name": {
+            "en": "Snack Box",
+            "ar": "سناك بوكس"
+          },
+          "description": {
+            "en": "Special Sheesh - Royal Sheesh - Supreme Sandwich - Philly Chicken - Fries - 1 Chipotle Sauce - 1 Shish Sauce - 1 BBQ - 1 Garlic Sauce - 2 Ketchup - 1 Liter of National Cola",
+            "ar": "سبيشال شيش - رويال شيش -ساندويش سوبريم - فيلي تشيكن -بطاطا -1 شيبوتلي صوص -1شيش صوص-1باربكيو-1 مثومة-2 كاتشاب -  1 لتر كولا وطني"
+          },
+          "price": 13,
+          "pricingType": 0,
+          "order": 1,
+          "tax": 0,
+          "sku": "69d8e8860d197335a04b3f52",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8e8d10d197335a04b3f55",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347136/products/v5c6efurmfkoqfuvmgnv.jpg",
+          "name": {
+            "en": "Yalla Sheesh Beef Burger Box",
+            "ar": "بوكس برجر يلا شيش لحم"
+          },
+          "description": {
+            "en": "Mushroom Beef Burger 200g - Spicy Beef Shish 200g - 2 Classic Beef Burgers 100g - Fries - 1 Chipotle Sauce - 1 Shish Sauce - 1 BBQ Sauce - 1 Garlic Sauce - 2 Ketchup - 1 Liter National Cola",
+            "ar": "ماشروم برجر لحم 200 جرام - سبايسي شيش لحم 200 جرام - 2 كلاسيك برجر لحم 100 جرام - بطاطا - 1 شيبوتلي - 1 شيش صوص - 1 بابكيو صوص - 1 مثومة - 2 كاتشاب - 1 لتر كولا وطني"
+          },
+          "price": 14,
+          "pricingType": 0,
+          "order": 2,
+          "tax": 0,
+          "sku": "69d8e8d10d197335a04b3f55",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8e9130d197335a04b3f58",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347187/products/rfa7dfwokpvhyt6nlwqe.jpg",
+          "name": {
+            "en": "Yalla Sheesh Mix Burger Box",
+            "ar": "بوكس برجر يلا شيش مكس"
+          },
+          "description": {
+            "en": "Mushroom Beef Burger 200g - Spicy Beef Shish 200g - 2 Classic Beef Burgers 100g - Fries - 1 Chipotle Sauce - 1 Shish Sauce - 1 BBQ Sauce - 1 Garlic Sauce - 2 Ketchup - 1 Liter National Cola",
+            "ar": "كلاسيك برجر لحم 200 جرام - ماشروم برجر لحم 200 جرام - أرمني برجر دجاج بالكريمة والذرة - فرايد شيش دجاج  - بطاطا - 1 شيبوتلي - 1 شيش صوص - 1 بابكيو صوص - 1 مثومة - 2 كاتشاب - 1 لتر كولا وطني"
+          },
+          "price": 13.5,
+          "pricingType": 0,
+          "order": 3,
+          "tax": 0,
+          "sku": "69d8e9130d197335a04b3f58",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8e94c0d197335a04b3f5b",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347178/products/xig8hwjgjtp43opfouai.jpg",
+          "name": {
+            "en": "Yalla Sheesh Chicken Burger Box",
+            "ar": "بوكس برجر يلا شيش دجاج"
+          },
+          "description": {
+            "en": "Armenian Chicken Burger with Cream & Corn, Fried Chicken Sheesh, Spicy Chicken Burger, Escalope Burger, Fries – 1 Chipotle, 1 Sheesh Sauce, 1 BBQ, 1 Garlic Sauce, 2 Ketchups & 1L Local Cola",
+            "ar": "أرمني برجر دجاج بالكريمة والذرة - فرايد شيش دجاج - سباسيي برجر دجاج - اسكالوب برجر  - بطاطا - 1 شيبوتلي - 1 شيش صوص - 1 بابكيو صوص - 1 مثومة - 2 كاتشاب -  1 لتر كولا وطني"
+          },
+          "price": 13,
+          "pricingType": 0,
+          "order": 4,
+          "tax": 0,
+          "sku": "69d8e94c0d197335a04b3f5b",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8e9750d197335a04b3f5e",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347158/products/sm0u9ty6mzwh8atph7ce.jpg",
+          "name": {
+            "en": "Fried Box",
+            "ar": "فرايد بوكس"
+          },
+          "description": {
+            "en": "Fried Chicken - Spicy Fried Chicken - Garlic Fried Chicken - Sweet & Sour Fried Chicken - Potatoes - 1 Chipotle Sauce - 1 Chicken Sauce - 1 BBQ Sauce - 1 Garlic Sauce - 2 Ketchup - 1 Liter of National Cola",
+            "ar": "فرايد شيش - فرايد سبايسي - فرايد جارلك - فرايد سويت اند سور   - بطاطا - 1 شيبوتلي - 1 شيش صوص - 1 بابكيو صوص - 1 مثومة - 2 كاتشاب -  1 لتر كولا وطني"
+          },
+          "price": 14,
+          "pricingType": 0,
+          "order": 5,
+          "tax": 0,
+          "sku": "69d8e9750d197335a04b3f5e",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e98d0d197335a04b3f61",
+      "name": {
+        "en": "Snacks🍟",
+        "ar": "سناكات🍟"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 5,
+      "products": [
+        {
+          "originalId": "6abd65d9c4efc345e1b4d171",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1790797273/products/txoxbfbz2agyvsubus0d.jpg",
+          "name": {
+            "en": "Special  Sheesh Grilled",
+            "ar": "سبيشل شيش مشوي"
+          },
+          "description": {
+            "en": "Grilled chicken breast - Turkey - Special cheddar cheese slice - Special sauce - Arugula - Tomato - Pickles - Mayonnaise-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "صدر دجاج مشوي - تيركي - قطعة جبنة شدر مميزة - صوص خاص - جرجير -بندورة - مخلل -مايونيز-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.5,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6abd65d9c4efc345e1b4d171",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "6abd65d9c4efc345e1b4d171_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "6abd65d9c4efc345e1b4d171_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6abd65d9c4efc345e1b4d171_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "6abd65d9c4efc345e1b4d171_additions",
+              "minSelection": 0,
+              "maxSelection": 3,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "6abd65d9c4efc345e1b4d172",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6abd65d9c4efc345e1b4d173",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6abd65d9c4efc345e1b4d174",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ea980d197335a04b3f67",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345401/products/dmpezojcenn6lseenlac.jpg",
+          "name": {
+            "en": "Special Sheesh Fried",
+            "ar": "سبيشل شيش مقلي"
+          },
+          "description": {
+            "en": "Fried chicken breast - Turkey - Special cheddar cheese slice - Special sauce - Arugula - Tomato - Pickles - Mayonnaise-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "صدر دجاج مقلي - تيركي - قطعة جبنة شدر مميزة - صوص خاص - جرجير -بندورة - مخلل -مايونيز-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.5,
+          "pricingType": 0,
+          "order": 1,
+          "tax": 0,
+          "sku": "69d8ea980d197335a04b3f67",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ea980d197335a04b3f67_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8ea980d197335a04b3f67_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8ea980d197335a04b3f67_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8ea980d197335a04b3f67_additions",
+              "minSelection": 0,
+              "maxSelection": 3,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69ff434f0e30f36bd29f14fc",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69ff434f0e30f36bd29f14fd",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69ff434f0e30f36bd29f14fe",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ea250d197335a04b3f64",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780342394/products/xb3w1d6qzhkxcl85qfgs.jpg",
+          "name": {
+            "en": "Fillet steak",
+            "ar": "فيلي ستيك"
+          },
+          "description": {
+            "en": "Beef - Mushrooms - Cream - Mozzarella - Bell Peppers - Onions - Mayonnaise-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "لحم بقري - فطر - كريمة - موزاريلا -فلفل حلو -بصل - مايونيز-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.6,
+          "pricingType": 0,
+          "order": 2,
+          "tax": 0,
+          "sku": "69d8ea250d197335a04b3f64",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ea250d197335a04b3f64_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8ea250d197335a04b3f64_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8ea250d197335a04b3f64_choice_meal",
+                  "additionalPrice": 1.4,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8ea250d197335a04b3f64_additions",
+              "minSelection": 0,
+              "maxSelection": 4,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69dab2d8b03a518bfa1f3c62",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69dab2d8b03a518bfa1f3c63",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69f63389ef96b84ae83b0650",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a0090550e30f36bd29fd2a8",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8eb170d197335a04b3f6a",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345773/products/csfdjnaxdjrmqncsx4ub.jpg",
+          "name": {
+            "en": "Royal Sheesh",
+            "ar": "رويال شيش"
+          },
+          "description": {
+            "en": "Fried chicken breast - Special cheddar cheese slice - Delicious special sauce - Turkey - Mayonnaise - Lettuce - Special crispy bread-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "قطعة صدر دجاج مقلي -قطعة جبنة شدر مميزة -صوص خاص لذيذ -تيركي - مايونيز- خس - خبزة خاصة هشة-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.5,
+          "pricingType": 0,
+          "order": 3,
+          "tax": 0,
+          "sku": "69d8eb170d197335a04b3f6a",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8eb170d197335a04b3f6a_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8eb170d197335a04b3f6a_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8eb170d197335a04b3f6a_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8eb170d197335a04b3f6a_additions",
+              "minSelection": 0,
+              "maxSelection": 2,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69f6344cef96b84ae83b0673",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69f6344cef96b84ae83b0674",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8eb6f0d197335a04b3f6d",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345421/products/qss9pbvrxle2ks5zlgyn.jpg",
+          "name": {
+            "en": "Crunchy Caesar",
+            "ar": "كرانشي سيزر"
+          },
+          "description": {
+            "en": "Crunchy chicken pieces - Summer Caesar dressing - Premium white cheddar cheese-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "قطع دجاج كرانشي - صوص السيزر الصيفي - جبن شيدر  أبيض مميز-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.5,
+          "pricingType": 0,
+          "order": 4,
+          "tax": 0,
+          "sku": "69d8eb6f0d197335a04b3f6d",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8eb6f0d197335a04b3f6d_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8eb6f0d197335a04b3f6d_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8eb6f0d197335a04b3f6d_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8eb6f0d197335a04b3f6d_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69f63478ef96b84ae83b067c",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ebb10d197335a04b3f70",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345439/products/z5s1tloq4tuzx5bc2xsz.jpg",
+          "name": {
+            "en": "Crispy cream-filled fillet",
+            "ar": "فيليه كريسبي بالكريمة"
+          },
+          "description": {
+            "en": "Crispy chicken - mayonnaise - lettuce - cream - turkey - premium white cheddar cheese-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "دجاج كريسبي - مايونيز - خس - كريمة - تيركي - جبن شيدر  أبيض مميز-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.35,
+          "pricingType": 0,
+          "order": 5,
+          "tax": 0,
+          "sku": "69d8ebb10d197335a04b3f70",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ebb10d197335a04b3f70_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8ebb10d197335a04b3f70_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8ebb10d197335a04b3f70_choice_meal",
+                  "additionalPrice": 1.4,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8ebb10d197335a04b3f70_additions",
+              "minSelection": 0,
+              "maxSelection": 4,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69dab392b03a518bfa1f3c88",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69dab392b03a518bfa1f3c89",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69f63495ef96b84ae83b0685",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a00909f0e30f36bd29fd2d5",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ebf20d197335a04b3f73",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345457/products/hjcwzad4c4rbgten35n4.jpg",
+          "name": {
+            "en": "Philly chicken",
+            "ar": "فيلي تشيكن"
+          },
+          "description": {
+            "en": "Chicken breast - mushrooms - cream - mozzarella - bell peppers - onions - mayonnaise-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "صدر دجاج  - فطر - كريمة - موزاريلا -فلفل حلو -بصل - مايونيز-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.35,
+          "pricingType": 0,
+          "order": 6,
+          "tax": 0,
+          "sku": "69d8ebf20d197335a04b3f73",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ebf20d197335a04b3f73_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8ebf20d197335a04b3f73_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8ebf20d197335a04b3f73_choice_meal",
+                  "additionalPrice": 1.4,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8ebf20d197335a04b3f73_additions",
+              "minSelection": 0,
+              "maxSelection": 5,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69dab3b3b03a518bfa1f3c91",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69dab3b3b03a518bfa1f3c92",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69f634d8ef96b84ae83b0690",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69f634d8ef96b84ae83b0691",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a0090cf0e30f36bd29fd2e9",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ec460d197335a04b3f76",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345473/products/gyslw530x2dq2mv7diqa.jpg",
+          "name": {
+            "en": "Supreme",
+            "ar": "سوبريم"
+          },
+          "description": {
+            "en": "Crispy chicken - special sauce - turkey slices - mayonnaise - a special cheddar cheese slice - lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "دجاج كريسبي - صوص خاص - شرائح تيركي - مايونيز  - قطعة جبنة شدر مميزة - خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2.35,
+          "pricingType": 0,
+          "order": 7,
+          "tax": 0,
+          "sku": "69d8ec460d197335a04b3f76",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ec460d197335a04b3f76_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8ec460d197335a04b3f76_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8ec460d197335a04b3f76_choice_meal",
+                  "additionalPrice": 1.4,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8ec460d197335a04b3f76_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69dab3d5b03a518bfa1f3c9a",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69dab3d5b03a518bfa1f3c9b",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a0091000e30f36bd29fd300",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ec820d197335a04b3f79",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345490/products/bikqoo2k3fhg2mshdefc.jpg",
+          "name": {
+            "en": "Crispy Fillet",
+            "ar": "فيليه كريسبي"
+          },
+          "description": {
+            "en": "Crispy chicken - special sauce - mayonnaise, lettuce-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "دجاج كريسبي - صوص خاص  - مايونيز خس-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2,
+          "pricingType": 0,
+          "order": 8,
+          "tax": 0,
+          "sku": "69d8ec820d197335a04b3f79",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ec820d197335a04b3f79_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8ec820d197335a04b3f79_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8ec820d197335a04b3f79_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8ec820d197335a04b3f79_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69dab404b03a518bfa1f3ca3",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69dab404b03a518bfa1f3ca4",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a0091350e30f36bd29fd331",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ecc30d197335a04b3f7c",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345500/products/jnlmy9ym1m4vqazhmxr5.jpg",
+          "name": {
+            "en": "Frankfurt",
+            "ar": "فرانكفورت"
+          },
+          "description": {
+            "en": "Beef sausages - Special sauce - Premium cheddar cheese slice - Chip sticks - Mayonnaise - Corn - Roast beef-Fries Box – Cola 250 ml – Spicy Chipotle Sauce – Ketchup Packet",
+            "ar": "نقانق بقري - صوص خاص - قطعة جبنة شدر مميزة - شيبس ستيكس - مايونيز- ذرة -روست بيف-علبة بطاطا - كولا 250مل - علبة شيبوتلي حار - علبة كاتشاب"
+          },
+          "price": 2,
+          "pricingType": 0,
+          "order": 9,
+          "tax": 0,
+          "sku": "69d8ecc30d197335a04b3f7c",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ecc30d197335a04b3f7c_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8ecc30d197335a04b3f7c_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8ecc30d197335a04b3f7c_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69d8ecc30d197335a04b3f7c_additions",
+              "minSelection": 0,
+              "maxSelection": 3,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "6a0091640e30f36bd29fd34f",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a01a5f44f9284d230a8405b",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a01a5f44f9284d230a8405c",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8ed2c0d197335a04b3f7f",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345636/products/tgzkcauabiv3ur4fdp4b.jpg",
+          "name": {
+            "en": "potato sandwich",
+            "ar": "ساندويش بطاطا"
+          },
+          "description": {
+            "en": "French fries - special sauce - mayonnaise - lettuce - ketchup (optional)",
+            "ar": "بطاطا مقلية -صوص خاص - مايونيز - خس - كاتشاب (حسب الرغبة )"
+          },
+          "price": 1,
+          "pricingType": 0,
+          "order": 10,
+          "tax": 0,
+          "sku": "69d8ed2c0d197335a04b3f7f",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8ed2c0d197335a04b3f7f_additions",
+              "minSelection": 0,
+              "maxSelection": 4,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69dab426b03a518bfa1f3caf",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69dab426b03a518bfa1f3cb0",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a0091870e30f36bd29fd362",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a036bd74f9284d230a91e75",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69f5f5fac5cf6b0a3d26a985",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345625/products/tu8duxvw7i76mambgirz.jpg",
+          "name": {
+            "en": "Rap crunchy",
+            "ar": "راب كرنشي"
+          },
+          "description": {
+            "en": "Crispy chicken pieces – summer Caesar sauce – white cheddar cheese – lettuce",
+            "ar": "قطع دجاج كرنشي-صوص السيزر الصيفي-جبنة شيدر ابيض-خس"
+          },
+          "price": 2.5,
+          "pricingType": 0,
+          "order": 11,
+          "tax": 0,
+          "sku": "69f5f5fac5cf6b0a3d26a985",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69f5f5fac5cf6b0a3d26a985_choice",
+              "minSelection": 1,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69f5f5fac5cf6b0a3d26a985_choice_sandwich",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69f5f5fac5cf6b0a3d26a985_choice_meal",
+                  "additionalPrice": 1.5,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            },
+            {
+              "originalId": "69f5f5fac5cf6b0a3d26a985_additions",
+              "minSelection": 0,
+              "maxSelection": 2,
+              "order": 2,
+              "modifierOptions": [
+                {
+                  "originalId": "69f634fcef96b84ae83b069b",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6a01a3714f9284d230a83dc7",
+                  "additionalPrice": 0.25,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f3530d197335a04b3fc2",
+      "name": {
+        "en": "Sheesh Dishes 🥪",
+        "ar": "اطباق شيش🥪"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 6,
+      "products": [
+        {
+          "originalId": "69d8f37b0d197335a04b3fc5",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345941/products/lvkfchlhhg0jqu6hosnu.jpg",
+          "name": {
+            "en": "Fatteh Sheesh",
+            "ar": "فتة شيش"
+          },
+          "description": {
+            "en": "Chicken Shawarma – Rice – Special Sauce – Lettuce – Crispy Bread",
+            "ar": "شاورما دجاج - أرز - صوص خاص - خس -خبز مقرمش"
+          },
+          "price": 2.75,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f37b0d197335a04b3fc5",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f3a60d197335a04b3fc8",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345891/products/xa8zkeejtag39dn6fpdl.jpg",
+          "name": {
+            "en": "Riceo",
+            "ar": "ريزو"
+          },
+          "description": {
+            "en": "Rice – Lettuce – Corn – Special Sauce – Crispy Chicken Pieces",
+            "ar": "أرز - خس - ذرة - صوص خاص -قطع دجاج كريسبي"
+          },
+          "price": 3,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f3a60d197335a04b3fc8",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f3d10d197335a04b3fcb",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345906/products/c3brwrwd69uqoieouffa.jpg",
+          "name": {
+            "en": "Sheesh Caesar Salad",
+            "ar": "سلطة سيزر شيش"
+          },
+          "description": {
+            "en": "Grilled Chicken Breast – Chopped Iceberg Lettuce – Delicious Caesar Dressing – Parmesan Cheese – Toasted Croutons",
+            "ar": "قطع صدر دجاج مشوية - خس ايسبيرغ مقطع - صوص السيزر الشهي - جبنة بارميزان - قطع خبز الكروتونز المحمص"
+          },
+          "price": 3,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f3d10d197335a04b3fcb",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f3e20d197335a04b3fce",
+      "name": {
+        "en": "Kids Meal👶",
+        "ar": "وجبات الأطفال👶"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 7,
+      "products": [
+        {
+          "originalId": "69d8f47d0d197335a04b3fd7",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345849/products/yrh42ye1aps0bmq68lcm.jpg",
+          "name": {
+            "en": "Kids’ Chicken Burger Meal",
+            "ar": "وجبة أطفال برجر دجاج"
+          },
+          "description": {
+            "en": "Chicken Burger – Fries – Juice – Ketchup – Kids’ Gift",
+            "ar": "برجر دجاج -بطاطا - عصير -كاتشاب - هدية للطفل"
+          },
+          "price": 2.25,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f47d0d197335a04b3fd7",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f47d0d197335a04b3fd7_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f47d0d197335a04b3fd8",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f47d0d197335a04b3fd9",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f4eb0d197335a04b3fdc",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347286/products/bx8vwiuswsbylyvluybw.jpg",
+          "name": {
+            "en": "Kids’ Beef Burger Meal",
+            "ar": "وجبة أطفال برجر لحم"
+          },
+          "description": {
+            "en": "Beef Burger – Fries – Juice – Ketchup – Kids’ Gift",
+            "ar": "برجر لحم  -بطاطا - عصير -كاتشاب - هدية للطفل"
+          },
+          "price": 2.25,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f4eb0d197335a04b3fdc",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f4eb0d197335a04b3fdc_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f4eb0d197335a04b3fdd",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f4eb0d197335a04b3fde",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f55d0d197335a04b3fe1",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347294/products/tekfszspdc4wm7qbuee5.jpg",
+          "name": {
+            "en": "Kids’ Nuggets Meal",
+            "ar": "وجبة  أطفال ناجيتس"
+          },
+          "description": {
+            "en": "5-Piece Chicken Nuggets – Fries – Juice – Ketchup – Kids’ Gift",
+            "ar": "5 قطع ناجيت دجاج - بطاطا -عصير - كاتشاب -هدية للطفل"
+          },
+          "price": 2.25,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f55d0d197335a04b3fe1",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f55d0d197335a04b3fe1_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f55d0d197335a04b3fe2",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f55d0d197335a04b3fe3",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f5b10d197335a04b3fe6",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347312/products/gbd0fesuzoccxsgmnlg8.jpg",
+          "name": {
+            "en": "Kids’ Chicken Sausage Meal",
+            "ar": "وجبة أطفال نقانق دجاج"
+          },
+          "description": {
+            "en": "Chicken Sausage – Fries – Juice – Ketchup – Kids’ Gift",
+            "ar": "نقانق دجاج -بطاطا - عصير -كاتشاب - هدية للطفل"
+          },
+          "price": 2.25,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f5b10d197335a04b3fe6",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f5b10d197335a04b3fe6_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f5b10d197335a04b3fe7",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f5b10d197335a04b3fe8",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "originalId": "6a4fb60b6774757996012c41",
+      "name": {
+        "en": "Sheesh Cafe🧋",
+        "ar": "كافية وحلويات شيش🧋"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 8,
+      "products": [
+        {
+          "originalId": "6a4fb6ab6774757996012c67",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1784127915/products/oxx4ginuhwwhl28nuqrd.jpg",
+          "name": {
+            "en": "Ice Latte",
+            "ar": "ايس لاتيه"
+          },
+          "description": {
+            "en": "Ice Latte",
+            "ar": "ايس لاتيه"
+          },
+          "price": 1.75,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6a4fb6ab6774757996012c67",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "6a4fb7936774757996012c7b",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1784127962/products/pc9zrjeyxivvmekkvr7v.jpg",
+          "name": {
+            "en": "Ice Spanish Latte",
+            "ar": "ايس سبانش لاتيه"
+          },
+          "description": {
+            "en": "Ice Spanish Latte",
+            "ar": "سبانش لاتيه"
+          },
+          "price": 2,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6a4fb7936774757996012c7b",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "6a4fb7ed6774757996012c9f",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1784127980/products/df6ziumcnvn2hcphykoz.jpg",
+          "name": {
+            "en": "Ice Amercano",
+            "ar": "ايس امريكانو"
+          },
+          "description": {
+            "en": "Ice Amercano",
+            "ar": "امريكانو كافيه"
+          },
+          "price": 1.5,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6a4fb7ed6774757996012c9f",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "6a6e4e90c29d9f954eec4c7d",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1785613967/products/yr3fq7uwxydstiswmf8i.jpg",
+          "name": {
+            "en": "Blue Sheesh",
+            "ar": "بلو شيش"
+          },
+          "description": {
+            "en": "Sparkling Water with Sheesh's Special Flavor",
+            "ar": "مياه غازية + نكهة خاصة من شيش"
+          },
+          "price": 1.25,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6a6e4e90c29d9f954eec4c7d",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "6aac375d49da3154f495678f",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1789671260/products/b9q86il6gqyjm69seju5.jpg",
+          "name": {
+            "en": "Turkish Tres Leches Cake",
+            "ar": "كيكة التريليشيا التركية"
+          },
+          "description": {
+            "en": "Turkish Tres Leches Cake",
+            "ar": "كيكة التريليشيا التركية"
+          },
+          "price": 3,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6aac375d49da3154f495678f",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "6ac4bbadc4efc345e1b54bbc",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1791288294/products/jrdbx0pjg32kg6j3zqoy.jpg",
+          "name": {
+            "en": "Hot Americano",
+            "ar": "هوت أمريكانو"
+          },
+          "description": {
+            "en": "Hot Americano",
+            "ar": "قهوة امريكية ساخنة"
+          },
+          "price": 1,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6ac4bbadc4efc345e1b54bbc",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f6230d197335a04b3feb",
+      "name": {
+        "en": "Side Orders🥬",
+        "ar": "الأضافات الجانبية🥬"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 9,
+      "products": [
+        {
+          "originalId": "69d8f67e0d197335a04b3fef",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780341161/products/br4ttwfys0pugjc5ziii.jpg",
+          "name": {
+            "en": "Potato Box",
+            "ar": "علبة بطاطا"
+          },
+          "description": {
+            "en": "Potato Box",
+            "ar": "علبة بطاطا"
+          },
+          "price": 1,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f67e0d197335a04b3fef",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "6a75d463c29d9f954eed1da5",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1786107005/products/o8zdrskt4nxa1gnrbhgy.png",
+          "name": {
+            "en": "Potato Wedges box",
+            "ar": "علبة بطاطا ودجز"
+          },
+          "description": {
+            "en": "Potato Wedges",
+            "ar": "بطاطا ودجز"
+          },
+          "price": 1.5,
+          "pricingType": 0,
+          "order": 1,
+          "tax": 0,
+          "sku": "6a75d463c29d9f954eed1da5",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "6a75d422c29d9f954eed1d95",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1786106913/products/vvsqewf56jfu7eyfvrml.png",
+          "name": {
+            "en": "Curly Fries box",
+            "ar": "علبة بطاطا كيرلي"
+          },
+          "description": {
+            "en": "Curly Fries",
+            "ar": "بطاطا كيرلي"
+          },
+          "price": 1.5,
+          "pricingType": 0,
+          "order": 2,
+          "tax": 0,
+          "sku": "6a75d422c29d9f954eed1d95",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f6b40d197335a04b3ff2",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346914/products/i0czvno3giogf6uc7lek.jpg",
+          "name": {
+            "en": "Vegetable Plate",
+            "ar": "طبق خضار"
+          },
+          "description": {
+            "en": "Vegetable Plate",
+            "ar": "طبق خضار"
+          },
+          "price": 2,
+          "pricingType": 0,
+          "order": 3,
+          "tax": 0,
+          "sku": "69d8f6b40d197335a04b3ff2",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f6e40d197335a04b3ff5",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346706/products/db8xanggzmppwihlvugd.jpg",
+          "name": {
+            "en": "Vegetable Box",
+            "ar": "علبة خضار"
+          },
+          "description": {
+            "en": "Vegetable Box",
+            "ar": "علبة خضار"
+          },
+          "price": 0.25,
+          "pricingType": 0,
+          "order": 4,
+          "tax": 0,
+          "sku": "69d8f6e40d197335a04b3ff5",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f7150d197335a04b3ff8",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780342187/products/z0pb15vuxeaby6b42prc.jpg",
+          "name": {
+            "en": "Jalapeno Box",
+            "ar": "علبة هالبينو"
+          },
+          "description": {
+            "en": "Jalapeno Box",
+            "ar": "علبة هالبينو"
+          },
+          "price": 0.4,
+          "pricingType": 0,
+          "order": 5,
+          "tax": 0,
+          "sku": "69d8f7150d197335a04b3ff8",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f74b0d197335a04b3ffb",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346741/products/r8kc9xgryyyaw6jcrdho.jpg",
+          "name": {
+            "en": "Pickles Box",
+            "ar": "علبة مخلل"
+          },
+          "description": {
+            "en": "Pickles Box",
+            "ar": "علبة مخلل"
+          },
+          "price": 0.25,
+          "pricingType": 0,
+          "order": 6,
+          "tax": 0,
+          "sku": "69d8f74b0d197335a04b3ffb",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f7810d197335a04b3ffe",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780341220/products/gfrebiurumf8btfyggrx.jpg",
+          "name": {
+            "en": "Ketchup Box",
+            "ar": "علبة كاتشاب"
+          },
+          "description": {
+            "en": "Ketchup Box",
+            "ar": "علبة كاتشاب"
+          },
+          "price": 0.15,
+          "pricingType": 0,
+          "order": 7,
+          "tax": 0,
+          "sku": "69d8f7810d197335a04b3ffe",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f7b60d197335a04b4001",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346040/products/obiiewk37s21s0vwmjel.jpg",
+          "name": {
+            "en": "Garlic Sauce Box",
+            "ar": "علبة مثومة"
+          },
+          "description": {
+            "en": "Garlic Sauce Box",
+            "ar": "علبة مثومة"
+          },
+          "price": 0.25,
+          "pricingType": 0,
+          "order": 8,
+          "tax": 0,
+          "sku": "69d8f7b60d197335a04b4001",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f7ef0d197335a04b4004",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780342107/products/dfcgb667mbvsz4wnhpin.jpg",
+          "name": {
+            "en": "Tahini Sauce Box",
+            "ar": "علبة طحينية"
+          },
+          "description": {
+            "en": "Tahini Sauce Box",
+            "ar": "علبة طحينية"
+          },
+          "price": 0.25,
+          "pricingType": 0,
+          "order": 9,
+          "tax": 0,
+          "sku": "69d8f7ef0d197335a04b4004",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f8240d197335a04b4007",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780345999/products/c1fmzohriykfte7r2sbu.jpg",
+          "name": {
+            "en": "Sheesh Sauce Box",
+            "ar": "علبة شيش صوص"
+          },
+          "description": {
+            "en": "Sheesh Sauce Box",
+            "ar": "علبة شيش صوص"
+          },
+          "price": 0.4,
+          "pricingType": 0,
+          "order": 10,
+          "tax": 0,
+          "sku": "69d8f8240d197335a04b4007",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f8480d197335a04b400a",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780341998/products/a3ttjy8msvfhqor1sur4.jpg",
+          "name": {
+            "en": "Spicy Chipotle Box",
+            "ar": "علبة شيبوتلي حار"
+          },
+          "description": {
+            "en": "Spicy Chipotle Box",
+            "ar": "علبة شيبوتلي حار"
+          },
+          "price": 0.4,
+          "pricingType": 0,
+          "order": 11,
+          "tax": 0,
+          "sku": "69d8f8480d197335a04b400a",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f86c0d197335a04b400d",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780342169/products/emc3o7fum381xgan8j1v.jpg",
+          "name": {
+            "en": "BBQ Sauce Box",
+            "ar": "علبة باربكيو صوص"
+          },
+          "description": {
+            "en": "BBQ Sauce Box",
+            "ar": "علبة باربكيو صوص"
+          },
+          "price": 0.4,
+          "pricingType": 0,
+          "order": 12,
+          "tax": 0,
+          "sku": "69d8f86c0d197335a04b400d",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8f8a30d197335a04b4015",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780342067/products/zdfk74mbnxbhesumbfnl.jpg",
+          "name": {
+            "en": "Molasses Box",
+            "ar": "علبة دبس"
+          },
+          "description": {
+            "en": "Molasses Box",
+            "ar": "علبة دبس"
+          },
+          "price": 0.4,
+          "pricingType": 0,
+          "order": 13,
+          "tax": 0,
+          "sku": "69d8f8a30d197335a04b4015",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e0340d197335a04b3ec2",
+      "name": {
+        "en": "Drink🍹",
+        "ar": "المشروبات🍹"
+      },
+      "description": {
+        "en": "",
+        "ar": ""
+      },
+      "order": 10,
+      "products": [
+        {
+          "originalId": "69d8f9850d197335a04b401d",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780342326/products/udyuc3lk0mheqskfaqtl.jpg",
+          "name": {
+            "en": "250ml soft drink",
+            "ar": "مشروب وطني 250 مل"
+          },
+          "description": {
+            "en": "Cola – Fanta – Sprite – Shani (Local) 250 ml",
+            "ar": "كولا-فانتا-سبرايت-شاني (وطني) 250مل"
+          },
+          "price": 0.35,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f9850d197335a04b401d",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f9850d197335a04b401d_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f9850d197335a04b401e",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f9850d197335a04b401f",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f9850d197335a04b4020",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f9850d197335a04b4021",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8f9fa0d197335a04b4024",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780347200/products/nn0vaafcewa3ebboswze.jpg",
+          "name": {
+            "en": "1 liter soft drink",
+            "ar": "مشروب وطني 1لتر"
+          },
+          "description": {
+            "en": "Cola – Fanta – Sprite – Shani (Local) 1 L",
+            "ar": "كولا-فانتا-سبرايت-شاني (وطني) 1 لتر"
+          },
+          "price": 0.75,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8f9fa0d197335a04b4024",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": [
+            {
+              "originalId": "69d8f9fa0d197335a04b4024_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "69d8f9fa0d197335a04b4025",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f9fa0d197335a04b4026",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f9fa0d197335a04b4027",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "69d8f9fa0d197335a04b4028",
+                  "additionalPrice": 0,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "originalId": "69d8fa200d197335a04b402b",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346759/products/vksgpz94bprvc7ecfuql.jpg",
+          "name": {
+            "en": "ِAyran",
+            "ar": "لبن عيران"
+          },
+          "description": {
+            "en": "Shanina – Yogurt Drink",
+            "ar": "لبن عيران"
+          },
+          "price": 0.5,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8fa200d197335a04b402b",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8fa480d197335a04b402e",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780342307/products/oi9gosisrged1rr42egx.jpg",
+          "name": {
+            "en": "Almarai Juice",
+            "ar": "عصير المراعي"
+          },
+          "description": {
+            "en": "Almarai Juice",
+            "ar": "عصير المراعي"
+          },
+          "price": 0.4,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8fa480d197335a04b402e",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "69d8fa700d197335a04b4031",
+          "imageUrl": "https://res.cloudinary.com/ddslrkusl/image/upload/v1780346840/products/hlojg3my4m3wafaxzzuq.jpg",
+          "name": {
+            "en": "Small Water Bottle",
+            "ar": "مياه معدنية صغيرة"
+          },
+          "description": {
+            "en": "Small Water Bottle",
+            "ar": "مياه معدنية صغيرة"
+          },
+          "price": 0.35,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "69d8fa700d197335a04b4031",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        },
+        {
+          "originalId": "6a941e4cc29d9f954eefe9f1",
+          "name": {
+            "en": "aa",
+            "ar": "jj"
+          },
+          "description": {
+            "en": "htgrf",
+            "ar": "ytg"
+          },
+          "price": 0.01,
+          "pricingType": 0,
+          "order": 0,
+          "tax": 0,
+          "sku": "6a941e4cc29d9f954eefe9f1",
+          "preparingTimeInMinutes": 15,
+          "modifierGroups": []
+        }
+      ]
+    }
+  ],
+  "modifierGroups": [
+    {
+      "originalId": "69d8e4820d197335a04b3ed3_choice",
+      "name": {
+        "en": "Protein",
+        "ar": "البروتين"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8e4820d197335a04b3ed3_choice_chicken",
+          "name": {
+            "en": "Chicken",
+            "ar": "دجاج"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8e4820d197335a04b3ed3_choice_meat",
+          "name": {
+            "en": "Meat",
+            "ar": "لحمة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e4820d197335a04b3ed3_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 6,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69d9469f486e1f4622e54272",
+          "name": {
+            "en": "Add cheese",
+            "ar": "اضافة جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243d1d3d62f3cb17c1c2e2",
+          "name": {
+            "en": "Jalapeno",
+            "ar": "اضافة هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243d1d3d62f3cb17c1c2e3",
+          "name": {
+            "en": "Pomegranate molasses",
+            "ar": "اضافة دبس رمان"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a74c7f0c29d9f954eecfffd",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "ورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "6a74eafbc29d9f954eed084c",
+          "name": {
+            "en": "Curly",
+            "ar": "كيرلي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 0.5
+        },
+        {
+          "originalId": "6a74eafbc29d9f954eed084d",
+          "name": {
+            "en": "Wedges",
+            "ar": "ودجز"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 6,
+          "additionalPrice": 0.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e55b0d197335a04b3f16_choice",
+      "name": {
+        "en": "Protein",
+        "ar": "البروتين"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8e55b0d197335a04b3f16_choice_chicken",
+          "name": {
+            "en": "Chicken",
+            "ar": "دجاج"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8e55b0d197335a04b3f16_choice_meat",
+          "name": {
+            "en": "Meat",
+            "ar": "لحمة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0.4
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e55b0d197335a04b3f16_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 6,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69d946f6486e1f4622e5428e",
+          "name": {
+            "en": "Add cheese",
+            "ar": "اضافة جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243d923d62f3cb17c1c342",
+          "name": {
+            "en": "Jalapeño",
+            "ar": "اضافة هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243d923d62f3cb17c1c343",
+          "name": {
+            "en": "Pomegranate molasses",
+            "ar": "اضافة دبس مان"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a74c800c29d9f954eed000a",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "ورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.5
+        },
+        {
+          "originalId": "6a74eb41c29d9f954eed086d",
+          "name": {
+            "en": "ودجز",
+            "ar": "كيرلي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 0.5
+        },
+        {
+          "originalId": "6a74eb41c29d9f954eed086e",
+          "name": {
+            "en": "Wedges",
+            "ar": "ودجز"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 6,
+          "additionalPrice": 0.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e6380d197335a04b3f19_choice",
+      "name": {
+        "en": "Protein",
+        "ar": "البروتين"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8e6380d197335a04b3f19_choice_chicken",
+          "name": {
+            "en": "Chicken",
+            "ar": "دجاج"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8e6380d197335a04b3f19_choice_meat",
+          "name": {
+            "en": "Meat",
+            "ar": "لحمة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e6380d197335a04b3f19_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 6,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69d9475a486e1f4622e5429d",
+          "name": {
+            "en": "Add cheese",
+            "ar": "اضافة جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243ddd3d62f3cb17c1c370",
+          "name": {
+            "en": "Jalapeño",
+            "ar": "اضافة هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243ddd3d62f3cb17c1c371",
+          "name": {
+            "en": "Pomegranate molasses",
+            "ar": "اضافة دبس رمان"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a74c811c29d9f954eed0017",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.5
+        },
+        {
+          "originalId": "6a74eb69c29d9f954eed088e",
+          "name": {
+            "en": "Curly",
+            "ar": "كيرلي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 0.5
+        },
+        {
+          "originalId": "6a74eb69c29d9f954eed088f",
+          "name": {
+            "en": "Wedges",
+            "ar": "ودجز"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 6,
+          "additionalPrice": 0.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e75b0d197335a04b3f46_choice",
+      "name": {
+        "en": "Protein",
+        "ar": "البروتين"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8e75b0d197335a04b3f46_choice_chicken",
+          "name": {
+            "en": "Chicken",
+            "ar": "دجاج"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8e75b0d197335a04b3f46_choice_meat",
+          "name": {
+            "en": "Meat",
+            "ar": "لحمة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0.55
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e75b0d197335a04b3f46_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 6,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69d9479d486e1f4622e542a8",
+          "name": {
+            "en": "Add cheese",
+            "ar": "اضافة جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243e4d3d62f3cb17c1c394",
+          "name": {
+            "en": "Jalapeño",
+            "ar": "اضافة هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243e4d3d62f3cb17c1c395",
+          "name": {
+            "en": "Pomegranate molasses",
+            "ar": "اضافة دبس رمان"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a74c828c29d9f954eed0024",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.75
+        },
+        {
+          "originalId": "6a74eb9fc29d9f954eed08a1",
+          "name": {
+            "en": "Wedges",
+            "ar": "ودجز"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 0.5
+        },
+        {
+          "originalId": "6a74eb9fc29d9f954eed08a2",
+          "name": {
+            "en": "Curly",
+            "ar": "كيرلي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 6,
+          "additionalPrice": 0.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e6a90d197335a04b3f30_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 6,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d947f4486e1f4622e542b3",
+          "name": {
+            "en": "Add cheese",
+            "ar": "اضافة جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243e893d62f3cb17c1c3be",
+          "name": {
+            "en": "Jalapeño",
+            "ar": "اضافة هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243e893d62f3cb17c1c3bf",
+          "name": {
+            "en": "Pomegranate molasses",
+            "ar": "اضافة دبس رمان"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a74c83bc29d9f954eed0031",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.5
+        },
+        {
+          "originalId": "6a74ebcec29d9f954eed08b2",
+          "name": {
+            "en": "Wedges",
+            "ar": "ودجز"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 0.5
+        },
+        {
+          "originalId": "6a74ebcec29d9f954eed08b3",
+          "name": {
+            "en": "Curly",
+            "ar": "كيرلي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 6,
+          "additionalPrice": 0.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e7000d197335a04b3f43_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 6,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d9482b486e1f4622e542be",
+          "name": {
+            "en": "Add cheese",
+            "ar": "اضافة جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243ebe3d62f3cb17c1c3f0",
+          "name": {
+            "en": "Jalapeño",
+            "ar": "اضافة هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243ebe3d62f3cb17c1c3f1",
+          "name": {
+            "en": "Pomegranate molasses",
+            "ar": "اضافة دبس رمان"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a74c84fc29d9f954eed003e",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.75
+        },
+        {
+          "originalId": "6a74ebf9c29d9f954eed08d5",
+          "name": {
+            "en": "Curly",
+            "ar": "كيرلي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 0.5
+        },
+        {
+          "originalId": "6a74ebf9c29d9f954eed08d6",
+          "name": {
+            "en": "Wedges",
+            "ar": "ودجز"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 6,
+          "additionalPrice": 0.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e7a80d197335a04b3f49_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 6,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d94918486e1f4622e542d9",
+          "name": {
+            "en": "Add cheese",
+            "ar": "اضافة جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243ef13d62f3cb17c1c412",
+          "name": {
+            "en": "Jalapeño",
+            "ar": "اضافة هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243ef13d62f3cb17c1c413",
+          "name": {
+            "en": "Pomegranate molasses",
+            "ar": "اضافة دبس رمان"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a74c866c29d9f954eed004b",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 1.25
+        },
+        {
+          "originalId": "6a74ec1ec29d9f954eed08e6",
+          "name": {
+            "en": "Curly",
+            "ar": "كيرلي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 2
+        },
+        {
+          "originalId": "6a74ec1ec29d9f954eed08e7",
+          "name": {
+            "en": "Wedges",
+            "ar": "ودجز"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 6,
+          "additionalPrice": 2
+        }
+      ]
+    },
+    {
+      "originalId": "6a116f4b12705e5cf6dce721_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 6,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "6a1170fe12705e5cf6dce84a",
+          "name": {
+            "en": "Cheese",
+            "ar": "جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243f283d62f3cb17c1c429",
+          "name": {
+            "en": "Jalapeño",
+            "ar": "اضافة هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243f283d62f3cb17c1c42a",
+          "name": {
+            "en": "Pomegranate molasses",
+            "ar": "اضافة دبس رمان"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a74c876c29d9f954eed0058",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 1
+        },
+        {
+          "originalId": "6a74ec55c29d9f954eed08fa",
+          "name": {
+            "en": "Curly",
+            "ar": "كيرلي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 2
+        },
+        {
+          "originalId": "6a74ec55c29d9f954eed08fb",
+          "name": {
+            "en": "Wedges",
+            "ar": "ودجز"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 6,
+          "additionalPrice": 2
+        }
+      ]
+    },
+    {
+      "originalId": "69d8e7ef0d197335a04b3f4c_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 6,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d948e2486e1f4622e542cd",
+          "name": {
+            "en": "Add cheese",
+            "ar": "اضافة جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243f613d62f3cb17c1c443",
+          "name": {
+            "en": "Jalapeño",
+            "ar": "اضافة هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a243f613d62f3cb17c1c444",
+          "name": {
+            "en": "Pomegranate molasses",
+            "ar": "اضافة دبس رمان"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a74c892c29d9f954eed0065",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 1.25
+        },
+        {
+          "originalId": "6a74ec7bc29d9f954eed090d",
+          "name": {
+            "en": "Curly",
+            "ar": "كيرلي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 2
+        },
+        {
+          "originalId": "6a74ec7bc29d9f954eed090e",
+          "name": {
+            "en": "Wedges",
+            "ar": "ودجز"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 6,
+          "additionalPrice": 2
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ed880d197335a04b3f92_choice",
+      "name": {
+        "en": "Protein",
+        "ar": "البروتين"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8ed880d197335a04b3f92_choice_chicken",
+          "name": {
+            "en": "Chicken",
+            "ar": "دجاج"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8ed880d197335a04b3f92_choice_meat",
+          "name": {
+            "en": "Meat",
+            "ar": "لحمة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0.15
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ed880d197335a04b3f92_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "6a74c8b3c29d9f954eed006f",
+          "name": {
+            "en": "Whole wheat tortilla",
+            "ar": "تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "6ab382ed2442ea6871d7685d_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "6ab382ed2442ea6871d7685d_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6ab382ed2442ea6871d7685d_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1
+        }
+      ]
+    },
+    {
+      "originalId": "6a60f68bf0fcfd432e947ad8_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "6a60f68bf0fcfd432e947ad8_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a60f68bf0fcfd432e947ad8_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f09f0d197335a04b3fad_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f09f0d197335a04b3fad_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f09f0d197335a04b3fad_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f0d80d197335a04b3fb0_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f0d80d197335a04b3fb0_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f0d80d197335a04b3fb0_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f1140d197335a04b3fb3_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f1140d197335a04b3fb3_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f1140d197335a04b3fb3_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f15e0d197335a04b3fb6_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f15e0d197335a04b3fb6_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f15e0d197335a04b3fb6_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f2f80d197335a04b3fb9_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f2f80d197335a04b3fb9_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f2f80d197335a04b3fb9_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.6
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f2f80d197335a04b3fb9_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69d8f2f80d197335a04b3fba",
+          "name": {
+            "en": "Fried Sweet and Sour",
+            "ar": "فرايد سويت اند سور"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f2f80d197335a04b3fbb",
+          "name": {
+            "en": "Fried Garlic",
+            "ar": "فرايد جارلك"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f2f80d197335a04b3fbc",
+          "name": {
+            "en": "Fried Spicy",
+            "ar": "فرايد سبايسي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69f6fea325e964955e518ddd",
+          "name": {
+            "en": "Orginal",
+            "ar": "الاصلية"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f3280d197335a04b3fbf_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f3280d197335a04b3fbf_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f3280d197335a04b3fbf_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.6
+        }
+      ]
+    },
+    {
+      "originalId": "6a85ec98c29d9f954eee8edf_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "6a85ec98c29d9f954eee8edf_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a85ec98c29d9f954eee8edf_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.25
+        }
+      ]
+    },
+    {
+      "originalId": "6a39975438e589c4769d47df_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "6a39975438e589c4769d47df_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a39975438e589c4769d47df_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ef890d197335a04b3fa1_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8ef890d197335a04b3fa1_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8ef890d197335a04b3fa1_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8eff00d197335a04b3fa4_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8eff00d197335a04b3fa4_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8eff00d197335a04b3fa4_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f0360d197335a04b3fa7_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f0360d197335a04b3fa7_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f0360d197335a04b3fa7_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.25
+        }
+      ]
+    },
+    {
+      "originalId": "6abd65d9c4efc345e1b4d171_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "6abd65d9c4efc345e1b4d171_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6abd65d9c4efc345e1b4d171_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "6abd65d9c4efc345e1b4d171_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 3,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "6abd65d9c4efc345e1b4d172",
+          "name": {
+            "en": "Cheddar Cheese",
+            "ar": "جبنة شيدر"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "6abd65d9c4efc345e1b4d173",
+          "name": {
+            "en": "Jalapeños",
+            "ar": "هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "6abd65d9c4efc345e1b4d174",
+          "name": {
+            "en": "Turkey",
+            "ar": "تيركي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ea980d197335a04b3f67_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8ea980d197335a04b3f67_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8ea980d197335a04b3f67_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ea980d197335a04b3f67_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 3,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69ff434f0e30f36bd29f14fc",
+          "name": {
+            "en": "jalapeño 🌶️",
+            "ar": "هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "69ff434f0e30f36bd29f14fd",
+          "name": {
+            "en": "Extra turkey 🥪",
+            "ar": "تيركي اكسترا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "69ff434f0e30f36bd29f14fe",
+          "name": {
+            "en": "Cheddar Cheese 🧀",
+            "ar": "جبنة شيدر"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ea250d197335a04b3f64_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8ea250d197335a04b3f64_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8ea250d197335a04b3f64_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.4
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ea250d197335a04b3f64_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 4,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69dab2d8b03a518bfa1f3c62",
+          "name": {
+            "en": "French bread",
+            "ar": "خبز فرنسي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69dab2d8b03a518bfa1f3c63",
+          "name": {
+            "en": "Tortilla",
+            "ar": "خبز تورتيلا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69f63389ef96b84ae83b0650",
+          "name": {
+            "en": "jalapeño 🌶️",
+            "ar": "هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "6a0090550e30f36bd29fd2a8",
+          "name": {
+            "en": "wheat tortilla",
+            "ar": "خبز تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8eb170d197335a04b3f6a_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8eb170d197335a04b3f6a_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8eb170d197335a04b3f6a_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8eb170d197335a04b3f6a_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 2,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69f6344cef96b84ae83b0673",
+          "name": {
+            "en": "jalapeño 🌶️",
+            "ar": "هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "69f6344cef96b84ae83b0674",
+          "name": {
+            "en": "extra turkey 🥪",
+            "ar": "تيركي اكسترا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8eb6f0d197335a04b3f6d_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8eb6f0d197335a04b3f6d_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8eb6f0d197335a04b3f6d_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8eb6f0d197335a04b3f6d_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69f63478ef96b84ae83b067c",
+          "name": {
+            "en": "jalapeño 🌶️",
+            "ar": "هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ebb10d197335a04b3f70_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8ebb10d197335a04b3f70_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8ebb10d197335a04b3f70_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.4
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ebb10d197335a04b3f70_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 4,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69dab392b03a518bfa1f3c88",
+          "name": {
+            "en": "French bread",
+            "ar": "خبز فرنسي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69dab392b03a518bfa1f3c89",
+          "name": {
+            "en": "Tortilla",
+            "ar": "خبز تورتيلا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69f63495ef96b84ae83b0685",
+          "name": {
+            "en": "jalapeño 🌶️",
+            "ar": "هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "6a00909f0e30f36bd29fd2d5",
+          "name": {
+            "en": "wheat tortilla",
+            "ar": "خبز تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ebf20d197335a04b3f73_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8ebf20d197335a04b3f73_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8ebf20d197335a04b3f73_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.4
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ebf20d197335a04b3f73_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 5,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69dab3b3b03a518bfa1f3c91",
+          "name": {
+            "en": "French bread",
+            "ar": "خبز فرنسي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69dab3b3b03a518bfa1f3c92",
+          "name": {
+            "en": "Tortilla",
+            "ar": "خبز تورتيلا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69f634d8ef96b84ae83b0690",
+          "name": {
+            "en": "jalapeño 🌶️",
+            "ar": "هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "69f634d8ef96b84ae83b0691",
+          "name": {
+            "en": "cheddar cheese 🧀",
+            "ar": "جبنة شيدر"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "6a0090cf0e30f36bd29fd2e9",
+          "name": {
+            "en": "wheat tortilla",
+            "ar": "خبز تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 5,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ec460d197335a04b3f76_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8ec460d197335a04b3f76_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8ec460d197335a04b3f76_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.4
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ec460d197335a04b3f76_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69dab3d5b03a518bfa1f3c9a",
+          "name": {
+            "en": "French bread",
+            "ar": "خبز فرنسي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69dab3d5b03a518bfa1f3c9b",
+          "name": {
+            "en": "Tortilla",
+            "ar": "خبز تورتيلا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a0091000e30f36bd29fd300",
+          "name": {
+            "en": "wheat tortilla",
+            "ar": "خبز تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ec820d197335a04b3f79_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8ec820d197335a04b3f79_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8ec820d197335a04b3f79_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ec820d197335a04b3f79_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69dab404b03a518bfa1f3ca3",
+          "name": {
+            "en": "French bread",
+            "ar": "خبز فرنسي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69dab404b03a518bfa1f3ca4",
+          "name": {
+            "en": "Tortilla",
+            "ar": "خبز تورتيلا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a0091350e30f36bd29fd331",
+          "name": {
+            "en": "wheat tortilla",
+            "ar": "خبز تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ecc30d197335a04b3f7c_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8ecc30d197335a04b3f7c_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8ecc30d197335a04b3f7c_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ecc30d197335a04b3f7c_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 3,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "6a0091640e30f36bd29fd34f",
+          "name": {
+            "en": "wheat tortilla",
+            "ar": "خبز تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "6a01a5f44f9284d230a8405b",
+          "name": {
+            "en": "Tortilla",
+            "ar": "خبز تورتيلا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a01a5f44f9284d230a8405c",
+          "name": {
+            "en": "French bread",
+            "ar": "خبز فرنسي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        }
+      ]
+    },
+    {
+      "originalId": "69d8ed2c0d197335a04b3f7f_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 4,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69dab426b03a518bfa1f3caf",
+          "name": {
+            "en": "French bread",
+            "ar": "خبز فرنسي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69dab426b03a518bfa1f3cb0",
+          "name": {
+            "en": "Tortilla",
+            "ar": "خبز تورتيلا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "6a0091870e30f36bd29fd362",
+          "name": {
+            "en": "wheat tortilla",
+            "ar": "خبز تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "6a036bd74f9284d230a91e75",
+          "name": {
+            "en": "Add cheese",
+            "ar": "اضافة جبنة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69f5f5fac5cf6b0a3d26a985_choice",
+      "name": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "minSelection": 1,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69f5f5fac5cf6b0a3d26a985_choice_sandwich",
+          "name": {
+            "en": "Sandwich",
+            "ar": "ساندويش"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69f5f5fac5cf6b0a3d26a985_choice_meal",
+          "name": {
+            "en": "Meal",
+            "ar": "وجبة"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 1.5
+        }
+      ]
+    },
+    {
+      "originalId": "69f5f5fac5cf6b0a3d26a985_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 2,
+      "order": 2,
+      "options": [
+        {
+          "originalId": "69f634fcef96b84ae83b069b",
+          "name": {
+            "en": "jalapeño 🌶️",
+            "ar": "هلابينو"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0.25
+        },
+        {
+          "originalId": "6a01a3714f9284d230a83dc7",
+          "name": {
+            "en": "wheat tortilla",
+            "ar": "خبز تورتيلا قمح"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0.25
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f47d0d197335a04b3fd7_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f47d0d197335a04b3fd8",
+          "name": {
+            "en": "Sheesho Boy",
+            "ar": "شيشو ولادي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f47d0d197335a04b3fd9",
+          "name": {
+            "en": "Sheeshi Girl",
+            "ar": "شيشي بناتي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f4eb0d197335a04b3fdc_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f4eb0d197335a04b3fdd",
+          "name": {
+            "en": "Sheesho Boy",
+            "ar": "شيشو ولادي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f4eb0d197335a04b3fde",
+          "name": {
+            "en": "Sheeshi Girl",
+            "ar": "شيشي بناتي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f55d0d197335a04b3fe1_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f55d0d197335a04b3fe2",
+          "name": {
+            "en": "Sheesho Boy",
+            "ar": "شيشو ولادي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f55d0d197335a04b3fe3",
+          "name": {
+            "en": "Sheeshi Girl",
+            "ar": "شيشي بناتي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f5b10d197335a04b3fe6_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f5b10d197335a04b3fe7",
+          "name": {
+            "en": "Sheesho Boy",
+            "ar": "شيشو ولادي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f5b10d197335a04b3fe8",
+          "name": {
+            "en": "Sheeshi Girl",
+            "ar": "شيشي بناتي"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f9850d197335a04b401d_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f9850d197335a04b401e",
+          "name": {
+            "en": "Cola",
+            "ar": "كولا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f9850d197335a04b401f",
+          "name": {
+            "en": "Fanta",
+            "ar": "فانتا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f9850d197335a04b4020",
+          "name": {
+            "en": "Sprite",
+            "ar": "سبرايت"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f9850d197335a04b4021",
+          "name": {
+            "en": "Shani",
+            "ar": "شاني"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0
+        }
+      ]
+    },
+    {
+      "originalId": "69d8f9fa0d197335a04b4024_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "69d8f9fa0d197335a04b4025",
+          "name": {
+            "en": "Cola",
+            "ar": "كولا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f9fa0d197335a04b4026",
+          "name": {
+            "en": "Fanta",
+            "ar": "فانتا"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f9fa0d197335a04b4027",
+          "name": {
+            "en": "Sprite",
+            "ar": "سبرايت"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 3,
+          "additionalPrice": 0
+        },
+        {
+          "originalId": "69d8f9fa0d197335a04b4028",
+          "name": {
+            "en": "Shani",
+            "ar": "شاني"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 4,
+          "additionalPrice": 0
+        }
+      ]
+    }
+  ]
+}

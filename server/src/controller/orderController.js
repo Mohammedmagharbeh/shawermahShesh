@@ -6,6 +6,7 @@ const counterModel = require("../models/counter");
 const Cart = require("../models/cart");
 const mongoose = require("mongoose");
 const { recordPromoUsage } = require("../controller/promoCodeController"); // ✅ جديد
+const { sendToUser, ORDER_STATUS_MESSAGES } = require("../utils/pushService");
 
 // Validate ObjectId
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
@@ -602,6 +603,53 @@ exports.deleteOrder = async (req, res) => {
 };
 
 // UPDATE order
+// exports.updateOrder = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const body = req.body;
+//     const allowedUpdates = [
+//       "status",
+//       "shippingAddress",
+//       "payment",
+//       "products",
+//       "totalPrice",
+//       "confirmedBy",
+//     ];
+//     const updates = {};
+
+//     allowedUpdates.forEach(
+//       (f) => body[f] !== undefined && (updates[f] = body[f]),
+//     );
+//     if (!Object.keys(updates).length)
+//       return res.status(400).json({ message: "No valid fields to update" });
+
+//     const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
+//       new: true,
+//     })
+//       .populate("products.productId")
+//       .populate("userId")
+//       .populate("shippingAddress");
+
+//     if (!updatedOrder)
+//       return res.status(404).json({ message: "Order not found" });
+
+//     // Send OTP if status confirmed
+//     if (updates.status === "Confirmed") {
+//       const { sendOrderConfirm } = require("../utils/otp");
+//       await sendOrderConfirm(updatedOrder.userId.phone);
+//     }
+
+//     const io = req.app.get("io");
+//     if (io) io.emit("updatedOrder", updatedOrder);
+
+//     res.status(200).json(updatedOrder);
+//   } catch (err) {
+//     console.error("updateOrder error:", err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// UPDATE order
 exports.updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
@@ -622,6 +670,11 @@ exports.updateOrder = async (req, res) => {
     if (!Object.keys(updates).length)
       return res.status(400).json({ message: "No valid fields to update" });
 
+    // ✅ جديد — الحالة القديمة، عشان ما نبعث إشعار إذا الحالة ما تغيّرت
+    const before = updates.status
+      ? await Order.findById(id).select("status").lean()
+      : null;
+
     const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
       new: true,
     })
@@ -631,6 +684,21 @@ exports.updateOrder = async (req, res) => {
 
     if (!updatedOrder)
       return res.status(404).json({ message: "Order not found" });
+
+    // ✅ جديد — إشعار للزبون عند تغيّر الحالة (بدون await عشان ما يبطّئ الرد)
+    if (
+      updates.status &&
+      before &&
+      updates.status !== before.status &&
+      ORDER_STATUS_MESSAGES[updates.status]
+    ) {
+      sendToUser(
+        updatedOrder.userId?._id,
+        `طلب #${updatedOrder.sequenceNumber}`,
+        ORDER_STATUS_MESSAGES[updates.status],
+        { orderId: String(updatedOrder._id) },
+      );
+    }
 
     // Send OTP if status confirmed
     if (updates.status === "Confirmed") {
