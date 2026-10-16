@@ -16,6 +16,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/contexts/UserContext";
+import { ChevronDown } from "lucide-react";
 
 const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
@@ -27,8 +28,7 @@ const statusColors = {
   Cancelled: "bg-destructive text-destructive-foreground",
 };
 
-// ✅ جديد — يحسب المجموع الفرعي قبل الخصم + نسبة الخصم الفعلية من بيانات الطلب
-// (بدون الحاجة لأي حقل إضافي بقاعدة البيانات غير discountAmount الموجود أصلاً)
+// يحسب المجموع الفرعي قبل الخصم + نسبة الخصم الفعلية من بيانات الطلب
 function getPromoBreakdown(order) {
   const discountAmount = Number(order.discountAmount || 0);
   const deliveryCost = Number(order.shippingAddress?.deliveryCost || 0);
@@ -58,6 +58,103 @@ function getPromoBreakdown(order) {
   };
 }
 
+// منطقة التوصيل
+function getOrderArea(order) {
+  return order.shippingAddress?.name || order.userDetails?.apartment || "";
+}
+
+// طباعة الفاتورة (نفس منطق الداشبورد)
+function printOrderInvoice(order, t, selectedLanguage) {
+  const customerPhone =
+    order.userId?.phone || order.userDetails?.phone || "N/A";
+  const customerName = order.userDetails?.name || "N/A";
+  const deliveryType =
+    order.orderType === "delivery" ? t("delivery") : t("pickup");
+  const area = getOrderArea(order);
+
+  const discountRow =
+    order.discountAmount > 0
+      ? `<p style="display:flex; justify-content:space-between; color:#15803d;"><strong>${t("promo_discount") || "خصم الكود"}${order.promoCode ? ` (${order.promoCode})` : ""}:</strong> <span>- ${Number(order.discountAmount).toFixed(2)} JOD</span></p>`
+      : "";
+
+  const areaRow =
+    order.orderType === "delivery" && area
+      ? `<p style="text-align:center; font-size:14px; background:#f9f9f9; padding:4px;"><strong>${t("area")}:</strong> ${area}</p>`
+      : "";
+
+  const rows = (order.products || [])
+    .map((item) => {
+      const additions =
+        item.additions?.length > 0
+          ? `<div style="font-size:12px; color:#555;">+ ${item.additions.map((a) => a.name?.[selectedLanguage]).join(", ")}</div>`
+          : "";
+      const protein = item.selectedProtein
+        ? `<div style="font-size:13px; color:#000; font-weight:bold; margin-top:2px;">${t("protein")}: ${t(item.selectedProtein.toLowerCase())}</div>`
+        : "";
+      const spicy = item.isSpicy
+        ? `<div style="color:red; font-size:12px;">${t("spicy")}</div>`
+        : "";
+      const notes = item.notes
+        ? `<div style="font-size:12px; color:#777;">${t("notes")}: ${item.notes}</div>`
+        : "";
+
+      return `
+        <tr>
+          <td style="padding:6px; border-bottom:1px solid #eee;">
+            ${item.productId?.name?.[selectedLanguage] || item.name?.[selectedLanguage] || "Unknown"}
+            ${additions}${protein}${spicy}${notes}
+          </td>
+          <td style="text-align:center; padding:6px; border-bottom:1px solid #eee;">${item.quantity}</td>
+          <td style="text-align:left; padding:6px; border-bottom:1px solid #eee;">${(item.priceAtPurchase * item.quantity).toFixed(2)} JOD</td>
+        </tr>`;
+    })
+    .join("");
+
+  const subtotal = (
+    order.totalPrice -
+    (order.shippingAddress?.deliveryCost || 0) +
+    (order.discountAmount || 0)
+  ).toFixed(2);
+
+  const invoiceHtml = `
+    <div style="direction:rtl; font-family:Tahoma, sans-serif; width:100%; max-width:480px; margin:auto; padding:16px; border:1px solid #ccc; background:#fff;">
+      <h2 style="text-align:center; margin-bottom:8px;">${t("invoice_title")} #${order.sequenceNumber}</h2>
+      <p style="text-align:center; font-size:14px;"><strong>${t("invoice_customer")}</strong> ${customerName}</p>
+      <p style="text-align:center; font-size:14px;"><strong>${t("invoice_phone")}</strong> ${customerPhone}</p>
+      <p style="text-align:center; font-size:14px;"><strong>${t("order_type")}</strong> ${deliveryType}</p>
+      ${areaRow}
+      <hr/>
+      <table style="width:100%; border-collapse:collapse; font-size:14px;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th style="padding:6px; border-bottom:1px solid #000; text-align:right;">${t("product")}</th>
+            <th style="padding:6px; border-bottom:1px solid #000; text-align:center;">${t("quantity")}</th>
+            <th style="padding:6px; border-bottom:1px solid #000; text-align:left;">${t("price")}</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="margin-top:10px; font-size:14px;">
+        <p style="display:flex; justify-content:space-between;"><strong>${t("subtotal")}:</strong> <span>${subtotal} JOD</span></p>
+        ${discountRow}
+        <p style="display:flex; justify-content:space-between;"><strong>${t("delivery")}:</strong> <span>${order.shippingAddress?.deliveryCost || 0} JOD</span></p>
+        <p style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px;"><strong>${t("total")}:</strong> <span>${order.totalPrice.toFixed(2)} JOD</span></p>
+      </div>
+      <hr />
+      <p style="text-align:center; font-weight:bold;"> ${t("invoice_thank_you")} </p>
+    </div>`;
+
+  const printWindow = window.open("", "", "width=400,height=600");
+  if (!printWindow) return;
+  printWindow.document.write(
+    `<html><head><title>فاتورة</title><meta charset="UTF-8" /></head><body>${invoiceHtml}</body></html>`,
+  );
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
+}
+
 function Orders() {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
@@ -72,6 +169,10 @@ function Orders() {
   const { user } = useUser();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  // الطلبات المفتوحة (المنتجات ظاهرة)
+  const [expandedOrders, setExpandedOrders] = useState({});
+  const toggleOrder = (id) =>
+    setExpandedOrders((prev) => ({ ...prev, [id]: !prev[id] }));
   // Debounce search to avoid hammering the server on every keystroke
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -154,6 +255,8 @@ function Orders() {
           ) : (
             filteredOrders.map((order) => {
               const promo = getPromoBreakdown(order);
+              const area = getOrderArea(order);
+              const isOpen = !!expandedOrders[order._id];
 
               return (
                 <Card
@@ -176,7 +279,8 @@ function Orders() {
                             {t("customer")}:
                           </span>
                           <span className="text-sm font-semibold">
-                            {order.userDetails?.name} ({order.userId?.phone})
+                            {order.userDetails?.name} (
+                            {order.userId?.phone || order.userDetails?.phone})
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -195,10 +299,27 @@ function Orders() {
                           </span>
                           <span className="text-sm">
                             {order.orderType === "delivery"
-                              ? t("delivery")
+                              ? `${t("delivery")}${area ? ` - ${area}` : ""}`
                               : t("pickup")}
                           </span>
                         </div>
+                        {/* منطقة التوصيل + العنوان المفصل */}
+                        {order.orderType === "delivery" && area && (
+                          <div className="flex items-center gap-2 flex-wrap md:col-span-2">
+                            <span className="text-sm font-medium text-muted-foreground">
+                              {t("address")}:
+                            </span>
+                            <Badge className="bg-blue-100 text-blue-800">
+                              {area}
+                            </Badge>
+                            {order.userDetails?.apartment &&
+                              order.userDetails.apartment !== area && (
+                                <span className="text-sm text-foreground">
+                                  ({order.userDetails.apartment})
+                                </span>
+                              )}
+                          </div>
+                        )}
                         {order.confirmedBy && (
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-muted-foreground">
@@ -209,7 +330,7 @@ function Orders() {
                             </span>
                           </div>
                         )}
-                        {/* ✅ جديد — كود الخصم + نسبته + مقداره بالدينار */}
+                        {/* كود الخصم + نسبته + مقداره بالدينار */}
                         {promo.hasPromo && (
                           <div className="flex items-center gap-2 flex-wrap md:col-span-2">
                             <span className="text-sm font-medium text-muted-foreground">
@@ -300,6 +421,22 @@ function Orders() {
                   </CardHeader>
 
                   <CardContent className="p-6">
+                    {/* زر فتح/إغلاق المنتجات */}
+                    <button
+                      type="button"
+                      onClick={() => toggleOrder(order._id)}
+                      className="mb-4 flex w-full items-center justify-between rounded-lg border bg-muted/30 px-4 py-2 text-sm font-semibold hover:bg-muted transition-colors"
+                    >
+                      <span>
+                        {t("products") || "المنتجات"} (
+                        {order.products?.length || 0})
+                      </span>
+                      <ChevronDown
+                        className={`h-5 w-5 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
+
+                    {isOpen && (
                     <div className="space-y-4">
                       {order.products?.map((item) => (
                         <div
@@ -316,7 +453,8 @@ function Orders() {
                             />
                             <div className="flex flex-col gap-1">
                               <p className="font-semibold">
-                                {item.productId?.name[selectedLanguage] ||
+                                {item.productId?.name?.[selectedLanguage] ||
+                                  item.name?.[selectedLanguage] ||
                                   t("deleted_product")}
                               </p>
                               <p className="text-sm text-muted-foreground">
@@ -341,7 +479,7 @@ function Orders() {
                                       variant="secondary"
                                       className="text-[10px]"
                                     >
-                                      {a.name[selectedLanguage]}
+                                      {a.name?.[selectedLanguage]}
                                       {a.price > 0 &&
                                         ` (+${a.price.toFixed(2)})`}
                                     </Badge>
@@ -375,6 +513,7 @@ function Orders() {
                         </div>
                       ))}
                     </div>
+                    )}
 
                     {/* ملخص السعر */}
                     <div className="mt-6 border-t pt-4 space-y-1">
@@ -401,7 +540,7 @@ function Orders() {
                         </div>
                       )}
 
-                      {/* ✅ جديد — سطر خصم واضح فيه الكود، النسبة، والمبلغ */}
+                      {/* سطر خصم واضح فيه الكود، النسبة، والمبلغ */}
                       {promo.hasPromo && (
                         <div className="flex justify-between items-center text-sm bg-green-50 -mx-2 px-2 py-1.5 rounded-md">
                           <span className="text-green-700 font-medium">
@@ -435,6 +574,19 @@ function Orders() {
                           {order.totalPrice.toFixed(2)} JOD
                         </span>
                       </div>
+                    </div>
+
+                    {/* زر طباعة الفاتورة */}
+                    <div className="mt-6 flex justify-end border-t pt-4">
+                      <Button
+                        variant="outline"
+                        className="border-primary text-primary"
+                        onClick={() =>
+                          printOrderInvoice(order, t, selectedLanguage)
+                        }
+                      >
+                        {t("print_invoice")}
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
