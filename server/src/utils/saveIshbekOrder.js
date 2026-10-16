@@ -120,8 +120,8 @@ async function saveIshbekOrder(full) {
     },
     products,
   });
-
   await order.save();
+  await order.populate("products.productId");
   return order;
 }
 
