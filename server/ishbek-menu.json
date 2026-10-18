@@ -1,5 +1,5 @@
 {
-  "menuId": "01a13a03-39ea-7474-bfc0-157098f97460",
+  "menuId": "01a14f75-7327-7b2c-af8b-d5f8d3cf6c34",
   "overrides": [],
   "categories": [
     {
@@ -3290,7 +3290,30 @@
           "tax": 0,
           "sku": "6a941e4cc29d9f954eefe9f1",
           "preparingTimeInMinutes": 15,
-          "modifierGroups": []
+          "modifierGroups": [
+            {
+              "originalId": "6a941e4cc29d9f954eefe9f1_additions",
+              "minSelection": 0,
+              "maxSelection": 1,
+              "order": 1,
+              "modifierOptions": [
+                {
+                  "originalId": "6ad28f5236c5c3aa17c31989",
+                  "additionalPrice": 1,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                },
+                {
+                  "originalId": "6ad28f5236c5c3aa17c3198a",
+                  "additionalPrice": 2,
+                  "minCount": 0,
+                  "maxCount": 1,
+                  "isHidden": false
+                }
+              ]
+            }
+          ]
         }
       ]
     }
@@ -5859,6 +5882,40 @@
           "maxCount": 1,
           "order": 4,
           "additionalPrice": 0
+        }
+      ]
+    },
+    {
+      "originalId": "6a941e4cc29d9f954eefe9f1_additions",
+      "name": {
+        "en": "Additions",
+        "ar": "الإضافات"
+      },
+      "minSelection": 0,
+      "maxSelection": 1,
+      "order": 1,
+      "options": [
+        {
+          "originalId": "6ad28f5236c5c3aa17c31989",
+          "name": {
+            "en": "a2",
+            "ar": "a1"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 1,
+          "additionalPrice": 1
+        },
+        {
+          "originalId": "6ad28f5236c5c3aa17c3198a",
+          "name": {
+            "en": "a2",
+            "ar": "a2"
+          },
+          "minCount": 0,
+          "maxCount": 1,
+          "order": 2,
+          "additionalPrice": 2
         }
       ]
     }
