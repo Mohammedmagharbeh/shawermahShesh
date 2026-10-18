@@ -2328,7 +2328,7 @@ function AdminDashboard() {
                       {order.source === "ishbek" && (
                         <>
                           <Badge className="bg-orange-500 text-white">
-                            اشبك
+                            Talabat
                           </Badge>
                           {order.channel && (
                             <Badge className="bg-slate-700 text-white">
@@ -2405,17 +2405,6 @@ function AdminDashboard() {
                         <span className="text-sm font-medium text-purple-600">
                           {order.confirmedBy}
                         </span>
-                      </div>
-                    )}
-                    {/* ملاحظة الطلب العامة (طلبات اشبك) */}
-                    {order.orderNote && (
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          {t("notes")}:
-                        </span>
-                        <Badge className="bg-[#FFC400] text-black font-bold">
-                          {order.orderNote}
-                        </Badge>
                       </div>
                     )}
                     {/* شارة كود الخصم إذا كان مطبق على الطلب */}
@@ -2511,7 +2500,7 @@ function AdminDashboard() {
               <CardContent className="p-6">
                 <div id={`invoice-${order._id}`}>
                   <div className="space-y-4">
-                    {order.products?.map((item) => (
+                    {order.products?.map((item, idx) => (
                       <div
                         key={item._id}
                         className="flex items-center justify-between gap-4 rounded-lg border p-4 bg-muted/30"
@@ -2576,16 +2565,28 @@ function AdminDashboard() {
                                 ))}
                               </div>
                             )}
-                            {item.notes && (
+                            {/* ملاحظات المنتج + ملاحظة الطلب العامة (اشبك) مع بعض بنفس المكان */}
+                            {(item.notes || (idx === 0 && order.orderNote)) && (
                               <div className="flex gap-1 flex-wrap">
                                 {t("notes")}:{" "}
-                                <Badge
-                                  className={
-                                    "bg-[#FFC400] text-black font-bold"
-                                  }
-                                >
-                                  {item.notes}
-                                </Badge>
+                                {item.notes && (
+                                  <Badge
+                                    className={
+                                      "bg-[#FFC400] text-black font-bold"
+                                    }
+                                  >
+                                    {item.notes}
+                                  </Badge>
+                                )}
+                                {idx === 0 && order.orderNote && (
+                                  <Badge
+                                    className={
+                                      "bg-[#FFC400] text-black font-bold"
+                                    }
+                                  >
+                                    {order.orderNote}
+                                  </Badge>
+                                )}
                               </div>
                             )}
                           </div>
