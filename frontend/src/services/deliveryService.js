@@ -67,11 +67,14 @@ export const deliveryService = {
     return data;
   },
 
-  // 4. Driver: Verify customer OTP
-  verifyOtp: async ({ orderId, otp, riderId = null }, token) => {
+  // 4. Driver: Verify customer OTP (or Force Submit / Override)
+  verifyOtp: async (
+    { orderId, otp, riderId = null, forceSubmit = false, overrideReason = null },
+    token
+  ) => {
     const { data } = await axios.post(
       `${API_URL}/delivery/verify-otp`,
-      { orderId, otp, riderId },
+      { orderId, otp, riderId, forceSubmit, overrideReason },
       getAuthHeaders(token)
     );
     return data;

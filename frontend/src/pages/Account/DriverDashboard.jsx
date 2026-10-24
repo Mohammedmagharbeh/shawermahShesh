@@ -65,6 +65,13 @@ export default function DriverDashboard() {
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const otpInputRefs = [useRef(null), useRef(null), useRef(null)];
 
+  // Live queue position
+  const [queuePosition, setQueuePosition] = useState(null);
+  const [totalAvailableDrivers, setTotalAvailableDrivers] = useState(null);
+
+  // 5-minute timer for OTP Override (Customer Unreachable)
+  const [secondsAtDelivery, setSecondsAtDelivery] = useState(0);
+
   // Pickup confirmation loading
   const [confirmingPickup, setConfirmingPickup] = useState(false);
 
@@ -88,6 +95,8 @@ export default function DriverDashboard() {
 
       if (res?.success) {
         setDriver(res.rider);
+        setQueuePosition(res.queuePosition || null);
+        setTotalAvailableDrivers(res.totalAvailableDrivers || null);
         const ordersList =
           res.activeOrders || (res.currentOrder ? [res.currentOrder] : []);
         setActiveOrders(ordersList);
@@ -212,6 +221,35 @@ export default function DriverDashboard() {
     activeOrders[0] ||
     currentOrder;
 
+  // Delivery timer tracking elapsed seconds since dispatch for OTP override
+  useEffect(() => {
+    if (
+      currentActiveOrder?.status === "Shipped" ||
+      driver?.driverStatus === "on_delivery"
+    ) {
+      const startTime = currentActiveOrder?.shippedAt
+        ? new Date(currentActiveOrder.shippedAt).getTime()
+        : Date.now();
+
+      const updateTimer = () => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        setSecondsAtDelivery(Math.max(elapsed, 0));
+      };
+      updateTimer();
+      const interval = setInterval(updateTimer, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setSecondsAtDelivery(0);
+    }
+  }, [
+    currentActiveOrder?._id,
+    currentActiveOrder?.status,
+    currentActiveOrder?.shippedAt,
+    driver?.driverStatus,
+  ]);
+
+  const canForceSubmit = secondsAtDelivery >= 300; // 5 minutes (300 seconds)
+
   // Confirm Pickup action (single or all)
   const handleConfirmPickup = async (orderId = null, all = false) => {
     const targetOrderId =
@@ -268,17 +306,24 @@ export default function DriverDashboard() {
     }
   };
 
-  // Verify OTP action
-  const handleVerifyOtp = async () => {
+  // Verify OTP action (supports normal OTP or Force Submit override)
+  const handleVerifyOtp = async (forceSubmit = false) => {
     const targetOrderId =
       currentActiveOrder?._id ||
       currentOrder?._id ||
       driver?.currentOrderId;
 
     const fullOtp = otpDigits.join("");
-    if (fullOtp.length !== 3) {
+    if (!forceSubmit && fullOtp.length !== 3) {
       toast.error("يرجى إدخال رمز التحقق المكون من 3 أرقام");
       return;
+    }
+
+    if (forceSubmit) {
+      const confirmOverride = window.confirm(
+        "هل أنت متأكد من تعذر الوصول إلى الزبون وإغلاق الطلب قسرياً؟"
+      );
+      if (!confirmOverride) return;
     }
 
     setVerifyingOtp(true);
@@ -286,7 +331,9 @@ export default function DriverDashboard() {
       const res = await deliveryService.verifyOtp(
         {
           orderId: targetOrderId,
-          otp: fullOtp,
+          otp: forceSubmit ? null : fullOtp,
+          forceSubmit: !!forceSubmit,
+          overrideReason: "customer_unreachable",
           riderId: isAdmin ? activeRiderId : null,
         },
         user.token
@@ -298,12 +345,16 @@ export default function DriverDashboard() {
           res.rider?.driverStatus === "available"
         ) {
           toast.success(
-            "تم تسليم جميع الطلبات بنجاح! شكراً لجهودك، توجه الآن للعودة إلى الفرع 👏",
+            forceSubmit
+              ? "تم إغلاق الطلب قسرياً (تعذر الوصول للزبون). يرجى العودة للفرع وتسليم الوجبة 👏"
+              : "تم تسليم جميع الطلبات بنجاح! شكراً لجهودك، توجه الآن للعودة إلى الفرع 👏",
             { duration: 5000 }
           );
         } else {
           toast.success(
-            res.message || "تم تسليم الطلب بنجاح! انتقل للطلب التالي 👏",
+            forceSubmit
+              ? "تم إغلاق الطلب استثنائياً! انتقل للطلب التالي 👏"
+              : res.message || "تم تسليم الطلب بنجاح! انتقل للطلب التالي 👏",
             { duration: 5000 }
           );
         }
@@ -590,6 +641,18 @@ export default function DriverDashboard() {
               </span>
             </div>
 
+            {/* Live FIFO Queue Position Box */}
+            {queuePosition && (
+              <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 text-center space-y-1">
+                <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block">
+                  موقعك الحالي في طابور الانطلاق (FIFO) 🛵
+                </span>
+                <p className="text-base font-black text-emerald-950">
+                  أنت رقم <span className="text-2xl text-emerald-600 font-extrabold mx-1">#{queuePosition}</span> في الدور من أصل {totalAvailableDrivers || 1} سائقين متاحين
+                </p>
+              </div>
+            )}
+
 
           </Card>
         )}
@@ -820,6 +883,12 @@ export default function DriverDashboard() {
                       </div>
                     </div>
 
+                    {/* Pre-paid Notice (All orders are 100% pre-paid) */}
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center gap-2.5 text-xs text-emerald-800 font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                      <span>الطلب مدفوع إلكترونياً مسبقاً بالكامل (لا تطلب أي مبالغ نقدية من الزبون) ✅</span>
+                    </div>
+
                     {/* Call Customer & Map Links */}
                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
                       <a
@@ -890,7 +959,7 @@ export default function DriverDashboard() {
                   </div>
 
                   <Button
-                    onClick={handleVerifyOtp}
+                    onClick={() => handleVerifyOtp(false)}
                     disabled={verifyingOtp || otpDigits.join("").length !== 3}
                     className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black py-6 rounded-2xl shadow-xl shadow-red-200 text-base"
                   >
@@ -903,6 +972,31 @@ export default function DriverDashboard() {
                       </>
                     )}
                   </Button>
+
+                  {/* Fallback OTP Override: Force Submit if Customer is Unreachable after 5 minutes */}
+                  {canForceSubmit && (
+                    <div className="pt-3 border-t border-dashed border-red-200 mt-2 space-y-2.5">
+                      <div className="bg-amber-50 border border-amber-300 rounded-2xl p-3 text-right">
+                        <div className="flex items-center gap-2 text-amber-900 font-bold text-xs mb-1">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                          <span>تعذر الوصول إلى الزبون (أكثر من 5 دقائق في الموقع)</span>
+                        </div>
+                        <p className="text-[11px] text-amber-700 leading-relaxed">
+                          إذا كان هاتف الزبون مغلقاً أو لم يقم بالرد بعد وصولك، يمكنك إنهاء الطلب قسرياً وإرجاع الوجبة إلى الفرع.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => handleVerifyOtp(true)}
+                        disabled={verifyingOtp}
+                        variant="outline"
+                        className="w-full border-2 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-700 font-black py-5 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        <AlertTriangle className="w-4 h-4 text-red-600" />
+                        <span>إغلاق الطلب قسرياً / تعذر الوصول للزبون (Force Submit)</span>
+                      </Button>
+                    </div>
+                  )}
                 </Card>
               </>
             )}

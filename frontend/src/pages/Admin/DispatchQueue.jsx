@@ -525,15 +525,42 @@ export default function DispatchQueue() {
                   const assignedRider = order.assignedRiderId;
                   const topDriver = availableDrivers[0];
 
+                  // Overdue assignment check: assigned for >= 3 minutes without pickup confirmation
+                  const isPendingPickup = isAssigned && (order.status === "ReadyForPickup" || !order.status);
+                  const assignedTimestamp = order.assignedAt
+                    ? new Date(order.assignedAt).getTime()
+                    : (order.updatedAt ? new Date(order.updatedAt).getTime() : null);
+                  const minutesSinceAssignment = assignedTimestamp
+                    ? Math.floor((Date.now() - assignedTimestamp) / 60000)
+                    : 0;
+                  const isOverdueAssignment = isPendingPickup && minutesSinceAssignment >= 3;
+
                   return (
                     <Card
                       key={order._id}
                       className={`rounded-2xl border transition-all duration-200 shadow-sm overflow-hidden ${
-                        isAssigned
+                        isOverdueAssignment
+                          ? "border-2 border-red-500 bg-red-50/40 shadow-lg shadow-red-100 ring-2 ring-red-400"
+                          : isAssigned
                           ? "border-amber-300 bg-amber-50/20"
                           : "border-gray-200 bg-white hover:border-red-300 hover:shadow-md"
                       }`}
                     >
+                      {/* Overdue Warning Alert Banner */}
+                      {isOverdueAssignment && (
+                        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 flex items-center justify-between text-xs font-black animate-pulse">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 text-yellow-300" />
+                            <span>
+                              تنبيه تأخر: السائق مُعيّن منذ {minutesSinceAssignment} دقيقة ولم يؤكد استلام الوجبة من الكاونتر بعد! ⚠️
+                            </span>
+                          </div>
+                          <span className="bg-white/20 px-2 py-0.5 rounded text-[11px] font-bold">
+                            يرجى متابعة السائق
+                          </span>
+                        </div>
+                      )}
+
                       <CardHeader className="bg-gray-50/60 p-4 border-b border-gray-100 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-xl font-black text-red-700 tracking-tight">
@@ -544,11 +571,15 @@ export default function DispatchQueue() {
                             className={`text-xs font-bold ${
                               order.status === "Confirmed"
                                 ? "border-purple-300 bg-purple-50 text-purple-800"
+                                : isOverdueAssignment
+                                ? "border-red-500 bg-red-100 text-red-800 font-black animate-pulse"
                                 : "border-amber-400 bg-amber-50 text-amber-800"
                             }`}
                           >
                             {order.status === "Confirmed"
                               ? "تم التأكيد ✅"
+                              : isOverdueAssignment
+                              ? `تأخر بالاستلام (${minutesSinceAssignment} د) ⚠️`
                               : "بانتظار السائق 🛵"}
                           </Badge>
                         </div>
@@ -656,8 +687,16 @@ export default function DispatchQueue() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-                                <Badge className="bg-amber-600 text-white text-xs animate-pulse">
-                                  بانتظار السائق (للاستلام) 🛵
+                                <Badge
+                                  className={`text-xs animate-pulse font-bold ${
+                                    isOverdueAssignment
+                                      ? "bg-red-600 text-white shadow-md shadow-red-200"
+                                      : "bg-amber-600 text-white"
+                                  }`}
+                                >
+                                  {isOverdueAssignment
+                                    ? `متأخر في الاستلام (${minutesSinceAssignment} د) ⚠️`
+                                    : "بانتظار السائق (للاستلام) 🛵"}
                                 </Badge>
                                 <Button
                                   variant="ghost"
