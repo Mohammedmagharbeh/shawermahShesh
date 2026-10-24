@@ -678,7 +678,8 @@
   "starts_from": "يبدأ من",
   "calculated_at_checkout": "يتم الحساب عند الدفع",
   "outfordelivery": "طلبك في الطريق",
-  "readyforpickup": "طلبك جاهز للاستلام",
+  "readyforpickup": "جاهز للاستلام (ReadyForPickup)",
+  "ReadyForPickup": "جاهز للاستلام (ReadyForPickup)",
   "cart_out_of_stock_warning": "واحد أو أكثر من المنتجات في سلتك نفدت كميتها حالياً. يرجى إزالتها للمتابعة.",
   "multiple_choices": "خيارات متعددة",
   "one_choice": "خيار واحد",
@@ -688,5 +689,17 @@
   "category_name_ar": "اسم الفئة (بالعربية)",
   "category_name_en": "اسم الفئة (بالانجليزية)",
   "additions_categories": "إضافات (Categories)",
-  "confirmed_by": "تم التأكيد بواسطة"
+  "confirmed_by": "تم التأكيد بواسطة",
+  "dispatch_queue": "إدارة التوصيل والإرسال",
+  "rider": "سائق توصيل",
+  "cashier": "كاشير",
+  "submitted": "تم التسليم",
+  "driver_available": "متاح بالفرع",
+  "driver_assigned": "تم التعيين",
+  "driver_on_delivery": "قيد التوصيل",
+  "driver_returning": "عائد للفرع",
+  "waiting_for_driver": "بانتظار السائق",
+  "on_the_way": "طلبك في الطريق",
+  "ready_for_pickup": "جاهز للاستلام",
+  "picked_up": "تم الاستلام"
 }

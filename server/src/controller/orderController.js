@@ -5,8 +5,11 @@ const Location = require("../models/locations");
 const counterModel = require("../models/counter");
 const Cart = require("../models/cart");
 const mongoose = require("mongoose");
-const { recordPromoUsage } = require("../controller/promoCodeController"); // ✅ جديد
-const { sendToUser, ORDER_STATUS_MESSAGES } = require("../utils/pushService");
+const {
+  sendToUser,
+  ORDER_STATUS_MESSAGES,
+  getOrderStatusPushMessage,
+} = require("../utils/pushService");
 
 // Validate ObjectId
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
@@ -38,6 +41,7 @@ exports.getOrderById = async (req, res) => {
       .populate("products.productId")
       .populate("userId")
       .populate("shippingAddress")
+      .populate("assignedRiderId", "_id name username phone")
       .lean();
 
     if (!order)
@@ -258,6 +262,44 @@ exports.getTodayOrders = async (req, res) => {
   }
 };
 
+// GET active order for the logged-in customer
+exports.getMyActiveOrder = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const activeOrder = await Order.findOne({
+      userId,
+      status: {
+        $in: [
+          "Processing",
+          "Confirmed",
+          "ReadyForPickup",
+          "Shipped",
+          "OutForDelivery",
+          "processing",
+          "confirmed",
+          "readyforpickup",
+          "shipped",
+          "outfordelivery",
+        ],
+      },
+    })
+      .populate("products.productId")
+      .populate("shippingAddress")
+      .populate("assignedRiderId", "_id name username phone")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({ success: true, order: activeOrder || null });
+  } catch (err) {
+    console.error("getMyActiveOrder error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 // GET orders by user ID
 exports.getOrdersByUserId = async (req, res) => {
   try {
@@ -276,6 +318,7 @@ exports.getOrdersByUserId = async (req, res) => {
     const orders = await Order.find({ userId })
       .populate("products.productId")
       .populate("shippingAddress")
+      .populate("assignedRiderId", "_id name username phone")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -680,24 +723,26 @@ exports.updateOrder = async (req, res) => {
     })
       .populate("products.productId")
       .populate("userId")
-      .populate("shippingAddress");
+      .populate("shippingAddress")
+      .populate("assignedRiderId", "_id name username phone");
 
     if (!updatedOrder)
       return res.status(404).json({ message: "Order not found" });
 
-    // ✅ جديد — إشعار للزبون عند تغيّر الحالة (بدون await عشان ما يبطّئ الرد)
-    if (
-      updates.status &&
-      before &&
-      updates.status !== before.status &&
-      ORDER_STATUS_MESSAGES[updates.status]
-    ) {
-      sendToUser(
-        updatedOrder.userId?._id,
-        `طلب #${updatedOrder.sequenceNumber}`,
-        ORDER_STATUS_MESSAGES[updates.status],
-        { orderId: String(updatedOrder._id) },
+    // ✅ جديد — إشعار للزبون عند تغيّر الحالة بحسب نوع الطلب (توصيل / استلام)
+    if (updates.status && before && updates.status !== before.status) {
+      const pushMsg = getOrderStatusPushMessage(
+        updates.status,
+        updatedOrder.orderType,
       );
+      if (pushMsg) {
+        sendToUser(
+          updatedOrder.userId?._id,
+          `طلب #${updatedOrder.sequenceNumber}`,
+          pushMsg,
+          { orderId: String(updatedOrder._id) },
+        );
+      }
     }
 
     // Send OTP if status confirmed
@@ -719,6 +764,53 @@ if (updates.status === "Confirmed") {
     console.log("[otp] skipped: no phone for order", updatedOrder._id);
   }
 }
+
+    // Sync driver state if order status is updated from cashier / admin
+    if (updates.status && updatedOrder.assignedRiderId) {
+      try {
+        const User = require("../models/user");
+        const riderId = updatedOrder.assignedRiderId._id || updatedOrder.assignedRiderId;
+        const rider = await User.findById(riderId);
+        if (rider && rider.role === "rider") {
+          const ioInstance = req.app.get("io");
+          if (["Delivered", "Submitted"].includes(updates.status)) {
+            if (!updatedOrder.submittedAt) {
+              updatedOrder.submittedAt = new Date();
+              await updatedOrder.save();
+            }
+            rider.driverStatus = "returning";
+            rider.currentOrderId = null;
+            await rider.save();
+
+            if (ioInstance) {
+              ioInstance.emit("driverStatusChanged", {
+                riderId: rider._id,
+                driverStatus: "returning",
+                currentOrderId: null,
+              });
+            }
+          } else if (updates.status === "Shipped") {
+            if (!updatedOrder.shippedAt) {
+              updatedOrder.shippedAt = new Date();
+              await updatedOrder.save();
+            }
+            rider.driverStatus = "on_delivery";
+            rider.currentOrderId = updatedOrder._id;
+            await rider.save();
+
+            if (ioInstance) {
+              ioInstance.emit("driverStatusChanged", {
+                riderId: rider._id,
+                driverStatus: "on_delivery",
+                currentOrderId: updatedOrder._id,
+              });
+            }
+          }
+        }
+      } catch (errSync) {
+        console.error("Error syncing rider status in updateOrder:", errSync);
+      }
+    }
 
     const io = req.app.get("io");
     if (io) io.emit("updatedOrder", updatedOrder);

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useCategoryContext } from "@/contexts/CategoryContext";
 import ProductCard from "@/components/shop/ProductCard";
+import ActiveOrderBanner from "@/components/shop/ActiveOrderBanner";
 import {
   DndContext,
   useSensor,
@@ -179,6 +180,9 @@ export default function Products() {
       dir={i18n.dir()}
     >
       <div className="container mx-auto px-4 max-w-4xl">
+        {/* --- Active Order Floating Notification Banner --- */}
+        <ActiveOrderBanner />
+
         {/* --- Category Tabs (Sticky Mobile Header) --- */}
         <div className="sticky top-16 z-30 bg-gray-50/95 backdrop-blur-md py-3 -mx-4 px-4 mb-6 border-b border-gray-100 shadow-sm transition-all duration-300">
           <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide snap-x mandatory touch-pan-x">

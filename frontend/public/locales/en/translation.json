@@ -658,7 +658,8 @@
   "starts_from": "Starts from",
   "calculated_at_checkout": "Calculated at checkout",
   "OutForDelivery": "Order is on the way",
-  "ReadyForPickup": "Order is ready for pickup",
+  "ReadyForPickup": "Ready For Pickup",
+  "readyforpickup": "Ready For Pickup",
   "cart_out_of_stock_warning": "One or more items in your cart are currently out of stock. Please remove them to proceed.",
   "multiple_choices": "Multiple Choices",
   "one_choice": "One Choice",
@@ -668,5 +669,17 @@
   "category_name_ar": "Category Name (Arabic)",
   "category_name_en": "Category Name (English)",
   "additions_categories": "Additions (Categories)",
-  "confirmed_by": "Confirmed By"
+  "confirmed_by": "Confirmed By",
+  "dispatch_queue": "Dispatch & Delivery",
+  "rider": "Delivery Rider",
+  "cashier": "Cashier",
+  "submitted": "Delivered / Submitted",
+  "driver_available": "Available at Branch",
+  "driver_assigned": "Assigned",
+  "driver_on_delivery": "On Delivery",
+  "driver_returning": "Returning to Branch",
+  "waiting_for_driver": "Waiting for Driver",
+  "on_the_way": "On the Way",
+  "ready_for_pickup": "Ready for Pickup",
+  "picked_up": "Picked Up"
 }

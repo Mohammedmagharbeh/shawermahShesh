@@ -20,6 +20,9 @@ exports.getuser = async (req, res) => {
       filter.$or = [
         { phone: { $regex: search, $options: "i" } },
         { username: { $regex: search, $options: "i" } },
+        { name: { $regex: search, $options: "i" } },
+        { firstName: { $regex: search, $options: "i" } },
+        { lastName: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -29,7 +32,7 @@ exports.getuser = async (req, res) => {
     const [users, total] = await Promise.all([
       userModel
         .find(filter)
-        .select("_id phone username role createdAt") // never send otp / password
+        .select("_id phone username name firstName lastName role createdAt") // never send otp / password
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
@@ -53,7 +56,7 @@ exports.getAllUsers = async (req, res) => {
   try {
     const users = await userModel
       .find()
-      .select("_id phone username role createdAt") // never send otp / password
+      .select("_id phone username name apartment role createdAt") // never send otp / password
       .sort({ createdAt: -1 })
       .lean();
 
@@ -77,6 +80,9 @@ exports.getCurrentUser = async (req, res) => {
       username: user.username,
       name: user.name,
       apartment: user.apartment,
+      driverStatus: user.driverStatus,
+      currentOrderId: user.currentOrderId,
+      returnedAt: user.returnedAt,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -171,31 +177,53 @@ exports.verifyLoginOTP = async (req, res) => {
 
 // --- نظام الموظفين والمدراء (Password) ---
 
-// ✅ إنشاء حساب جديد (موظف أو مدير)
+// ✅ إنشاء حساب جديد (موظف، مدير، سائق، كاشير، موارد بشرية)
 exports.createEmployee = async (req, res) => {
   try {
-    // نأخذ الـ role من الـ body لكي لا يتثبت كموظف دائماً
-    const { name, password, role } = req.body;
+    const { username, name, password, phone, firstName, lastName, role } = req.body;
 
-    if (!name || !password) {
-      return res.status(400).json({ message: "يرجى إدخال الاسم وكلمة المرور" });
+    const finalUsername = String(username || name || "").trim();
+    if (!finalUsername) {
+      return res.status(400).json({ message: "يرجى إدخال اسم المستخدم" });
     }
 
-    const userExists = await userModel.findOne({ username: name });
-    if (userExists)
+    if (!password || !String(password).trim()) {
+      return res.status(400).json({ message: "يرجى إدخال كلمة المرور" });
+    }
+
+    const userExists = await userModel.findOne({ username: finalUsername });
+    if (userExists) {
       return res.status(400).json({ message: "اسم المستخدم موجود مسبقاً" });
+    }
+
+    let cleanPhone;
+    if (phone && String(phone).trim()) {
+      cleanPhone = String(phone).trim();
+      const phoneExists = await userModel.findOne({ phone: cleanPhone });
+      if (phoneExists) {
+        return res.status(400).json({ message: "رقم الهاتف مسجل لمستخدم آخر بالفعل" });
+      }
+    }
+
+    const fName = String(firstName || "").trim();
+    const lName = String(lastName || "").trim();
+    const fullName = [fName, lName].filter(Boolean).join(" ") || String(name || "").trim() || finalUsername;
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(String(password).trim(), salt);
 
     const newUser = new userModel({
-      username: name,
+      username: finalUsername,
       password: hashedPassword,
-      role: role || "employee", // سيأخذ القيمة القادمة من الشاشة (admin أو employee)
+      role: role || "employee",
+      firstName: fName,
+      lastName: lName,
+      name: fullName,
+      ...(cleanPhone ? { phone: cleanPhone } : {}),
     });
 
     await newUser.save();
-    res.status(201).json({ success: true, message: "تم إنشاء الحساب بنجاح" });
+    res.status(201).json({ success: true, message: "تم إنشاء الحساب بنجاح", user: newUser });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -204,11 +232,16 @@ exports.createEmployee = async (req, res) => {
 // ✅ تسجيل دخول الموظف أو المدير
 exports.employeeLogin = async (req, res) => {
   try {
-    const { name, password } = req.body;
+    const { name, username, password } = req.body;
+    const identifier = String(username || name || "").trim();
 
-    // البحث عن المستخدم إذا كان employee أو admin أو hr أو rider أو cashier
+    if (!identifier || !password) {
+      return res.status(400).json({ message: "يرجى إدخال اسم المستخدم وكلمة المرور" });
+    }
+
+    // البحث عن المستخدم باسم المستخدم أو رقم الهاتف
     const user = await userModel.findOne({
-      username: name,
+      $or: [{ username: identifier }, { phone: identifier }],
       role: { $in: ["employee", "admin", "hr", "rider", "cashier"] },
     });
 
@@ -229,7 +262,15 @@ exports.employeeLogin = async (req, res) => {
     res.status(200).json({
       success: true,
       token,
-      user: { _id: user._id, name: user.username, role: user.role },
+      user: {
+        _id: user._id,
+        name: user.name || user.username,
+        username: user.username,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

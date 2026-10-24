@@ -451,6 +451,21 @@ export const OrderProvider = ({ children }) => {
     }
   };
 
+  const getActiveOrder = async () => {
+    if (!user?.token) return null;
+    try {
+      const res = await axios.get(`${API_URL}/active/current`, {
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      });
+      return res.data?.order || null;
+    } catch (err) {
+      console.error("Failed to fetch active order:", err);
+      return null;
+    }
+  };
+
   return (
     <OrderContext.Provider
       value={{
@@ -465,6 +480,7 @@ export const OrderProvider = ({ children }) => {
         patchOrder,
         getOrdersByUserId,
         getOrderById,
+        getActiveOrder,
         createOrder,
         updateOrder,
         deleteOrder,

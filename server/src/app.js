@@ -22,6 +22,7 @@ const zainCash = require("./routes/zainCash");
 const orangeMoneyRoutes = require("./routes/orangeMoney");
 const promoCodeRoutes = require("./routes/promoCodeRoutes");
 const pushRoutes = require("./routes/push");
+const deliveryRoutes = require("./routes/deliveryRoutes");
 const { startIshbekPoller } = require("./utils/ishbekPoller");
 // const notifications = require("./routes/notifications");
 
@@ -65,5 +66,6 @@ app.use("/api/apply", applicationRoutes);
 app.use("/api/zaincash", zainCash);
 app.use("/api/orange", orangeMoneyRoutes);
 app.use("/api/promo-codes", promoCodeRoutes);
+app.use("/api/delivery", deliveryRoutes);
 app.use("/api/push", require("./routes/push"));
 module.exports = server;

@@ -648,6 +648,11 @@ import { saveAs } from "file-saver";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/contexts/UserContext";
 import { ChevronDown } from "lucide-react";
+import {
+  getOrderStatusOptions,
+  getOrderStatusLabel,
+  ORDER_STATUS_COLORS,
+} from "@/constants";
 
 const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
@@ -1041,35 +1046,25 @@ function Orders() {
                             handleStatusChange(order._id, val)
                           }
                         >
-                          <SelectTrigger className="w-[160px]">
+                          <SelectTrigger className="w-[180px]">
                             <SelectValue>
-                              <Badge className={statusColors[order.status]}>
-                                {t(order.status?.toLowerCase())}
+                              <Badge
+                                className={
+                                  ORDER_STATUS_COLORS[order.status] ||
+                                  statusColors[order.status] ||
+                                  "bg-gray-500"
+                                }
+                              >
+                                {getOrderStatusLabel(order.status, order.orderType, t)}
                               </Badge>
                             </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Processing">
-                              {t("processing")}
-                            </SelectItem>
-                            <SelectItem value="Confirmed">
-                              {t("confirmed")}
-                            </SelectItem>
-                            <SelectItem value="Shipped">
-                              {t("shipped")}
-                            </SelectItem>
-                            <SelectItem value="OutForDelivery">
-                              {t("outfordelivery")}
-                            </SelectItem>
-                            <SelectItem value="ReadyForPickup">
-                              {t("readyforpickup")}
-                            </SelectItem>
-                            <SelectItem value="Delivered">
-                              {t("delivered")}
-                            </SelectItem>
-                            <SelectItem value="Cancelled">
-                              {t("cancelled")}
-                            </SelectItem>
+                            {getOrderStatusOptions(order.orderType).map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {t(opt.labelKey, opt.defaultLabel)}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>

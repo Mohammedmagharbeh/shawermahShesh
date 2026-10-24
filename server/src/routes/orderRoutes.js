@@ -9,6 +9,7 @@
     getTodayOrders,
     getOrderById,
     getOrdersByUserId,
+    getMyActiveOrder,
     updateOrder,
   } = require("../controller/orderController.js");
 
@@ -17,6 +18,7 @@
   router.get("/get",   validateJWT, getAllOrders);              // paginated — Orders.jsx
   router.get("/stats", validateJWT, getOrdersStats);            // aggregated — Statistics.jsx
   router.get("/today", validateJWT, getTodayOrders);            // date-scoped — AdminDashboard
+  router.get("/active/current", validateJWT, getMyActiveOrder); // active order for logged-in user
   router.get("/user/:userId", validateJWT, getOrdersByUserId);  // must come BEFORE /:id
   router.get("/:id", validateJWT, getOrderById);
   router.post("/post", validateJWT, createOrder);

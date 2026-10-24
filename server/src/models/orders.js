@@ -551,6 +551,18 @@ const ordersSchema = new mongoose.Schema(
     },
     sequenceNumber: { type: Number, unique: true },
 
+    // Delivery & Dispatch tracking
+    assignedRiderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      default: null,
+    },
+    deliveryOtp: { type: String, default: null },
+    assignedAt: { type: Date, default: null },
+    shippedAt: { type: Date, default: null },
+    submittedAt: { type: Date, default: null },
+    returnedAt: { type: Date, default: null },
+
     // مصدر الطلب، ورقم الطلب عند اشبك (لمنع تخزين نفس الطلب مرتين)
     source: {
       type: String,
@@ -598,6 +610,8 @@ ordersSchema.index({ createdAt: -1 });
 
 // Compound — covers fetchPendingOrders (status filter) + createdAt sort in one scan
 ordersSchema.index({ status: 1, createdAt: -1 });
+ordersSchema.index({ assignedRiderId: 1 });
+ordersSchema.index({ status: 1, orderType: 1 });
 
 const Order = mongoose.model("orders", ordersSchema);
 

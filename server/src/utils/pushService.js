@@ -6,11 +6,27 @@ const expo = new Expo();
 // الرسائل اللي بتوصل للزبون عند كل حالة (عدّلها زي ما بدك)
 const ORDER_STATUS_MESSAGES = {
   Confirmed: "تم تأكيد طلبك وجاري تجهيزه 👨‍🍳",
-  Shipped: "طلبك صار جاهز وبطريقه إلك",
+  Shipped: "طلبك صار جاهز وبطريقه إلك 🚗",
   OutForDelivery: "طلبك بالطريق إلك 🚗",
-  ReadyForPickup: "طلبك جاهز للاستلام ✅",
+  ReadyForPickup: "طلبك جاهز للاستلام من الفرع ✅",
   Delivered: "تم تسليم طلبك، بالهنا والشفا 🍽️",
+  Submitted: "تم تسليم طلبك، بالهنا والشفا 🍽️",
   Cancelled: "تم إلغاء طلبك",
+};
+
+const getOrderStatusPushMessage = (status, orderType) => {
+  if (orderType === "pickup") {
+    if (status === "ReadyForPickup") return "طلبك جاهز للاستلام من الفرع ✅";
+    if (status === "Delivered" || status === "Submitted") return "تم استلام طلبك، بالهنا والشفا 🍽️";
+  } else {
+    // Delivery orders: don't notify customer on ReadyForPickup (it's for the driver dispatch).
+    // Notify when driver picks up (Shipped) or delivers (Delivered).
+    if (status === "ReadyForPickup") return null;
+    if (status === "Shipped" || status === "OutForDelivery") return "طلبك صار جاهز وبطريقه إلك 🚗";
+    if (status === "Delivered" || status === "Submitted") return "تم تسليم طلبك، بالهنا والشفا 🍽️";
+  }
+
+  return ORDER_STATUS_MESSAGES[status] || null;
 };
 
 // async function sendToUser(userId, title, body, data = {}) {
@@ -89,4 +105,8 @@ async function sendToUser(userId, title, body, data = {}) {
     console.error("sendToUser failed:", e);
   }
 }
-module.exports = { sendToUser, ORDER_STATUS_MESSAGES };
+module.exports = {
+  sendToUser,
+  ORDER_STATUS_MESSAGES,
+  getOrderStatusPushMessage,
+};

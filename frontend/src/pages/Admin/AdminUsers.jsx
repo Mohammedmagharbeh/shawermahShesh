@@ -54,10 +54,12 @@ const AdminUsersPage = () => {
   const [roleFilter, setRoleFilter]   = useState("all");
   const [showUsers, setShowUsers]     = useState(true);
 
-  // ── add-user form state ──────────────────────────────────────────────────
   const [newUser, setNewUser] = useState({
     phone: "",
+    username: "",
     name: "",
+    firstName: "",
+    lastName: "",
     password: "",
     role: "user",
   });
@@ -113,20 +115,35 @@ const AdminUsersPage = () => {
 
   // ── add user ────────────────────────────────────────────────────────────
   const handleAddUser = async () => {
-    if (["employee", "admin", "hr", "rider", "cashier"].includes(newUser.role)) {
-      if (!newUser.name || !newUser.password)
-        return toast.error(t("fill_name_and_password"));
+    const isEmployeeRole = ["employee", "admin", "hr", "rider", "cashier"].includes(newUser.role);
+
+    if (isEmployeeRole) {
+      const usernameVal = (newUser.username || newUser.name).trim();
+      if (!usernameVal) {
+        return toast.error("يرجى إدخال اسم المستخدم (Username)");
+      }
+      if (!newUser.password.trim()) {
+        return toast.error(t("fill_name_and_password") || "يرجى إدخال كلمة المرور (Password)");
+      }
     } else {
-      if (!newUser.phone)
+      if (!newUser.phone.trim()) {
         return toast.error(t("fill_phone_field"));
+      }
     }
 
     try {
       setActionLoading(true);
-      const payload = { ...newUser };
-      if (newUser.role !== "user") payload.username = newUser.name;
+      const payload = {
+        role: newUser.role,
+        username: (newUser.username || newUser.name).trim(),
+        firstName: newUser.firstName.trim(),
+        lastName: newUser.lastName.trim(),
+        name: [newUser.firstName, newUser.lastName].filter(Boolean).join(" ") || newUser.name || newUser.username,
+        password: newUser.password,
+        phone: newUser.phone.trim() || undefined,
+      };
 
-      const endpoint = ["employee", "admin", "hr", "rider", "cashier"].includes(newUser.role)
+      const endpoint = isEmployeeRole
         ? `${import.meta.env.VITE_BASE_URL}/auth/create-employee`
         : `${import.meta.env.VITE_BASE_URL}/admin/user/add`;
 
@@ -134,7 +151,15 @@ const AdminUsersPage = () => {
         headers: { authorization: `Bearer ${user.token}` },
       });
 
-      setNewUser({ phone: "", name: "", password: "", role: "user" });
+      setNewUser({
+        phone: "",
+        username: "",
+        name: "",
+        firstName: "",
+        lastName: "",
+        password: "",
+        role: "user",
+      });
       // Go back to page 1 so the new user is visible
       setPage(1);
       fetchUsers(1);
@@ -198,12 +223,12 @@ const AdminUsersPage = () => {
             <h2 className="text-xl font-bold text-gray-800">{t("add_new_account")}</h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
-            {/* Role select */}
-            <div className="lg:col-span-3 space-y-2">
-              <label className="text-sm font-bold text-gray-600 mr-1">{t("account_type")}</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-end">
+            {/* Account Type */}
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700 mr-1">{t("account_type")}</label>
               <Select value={newUser.role} onValueChange={(val) => setNewUser({ ...newUser, role: val })}>
-                <SelectTrigger className="border-gray-200 rounded-xl h-12">
+                <SelectTrigger className="border-gray-200 rounded-xl h-12 bg-white">
                   <SelectValue placeholder={t("select_role")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -220,20 +245,60 @@ const AdminUsersPage = () => {
             {/* Dynamic fields */}
             {["employee", "admin", "hr", "rider", "cashier"].includes(newUser.role) ? (
               <>
-                <div className="lg:col-span-3 space-y-2">
-                  <label className="text-sm font-bold text-gray-600 mr-1">{t("username")}</label>
+                {/* First Name */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 mr-1">الاسم الأول (First Name)</label>
+                  <Input
+                    placeholder="مثال: أحمد"
+                    value={newUser.firstName}
+                    onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                    className="border-gray-200 rounded-xl h-12 bg-white"
+                  />
+                </div>
+
+                {/* Last Name */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 mr-1">اسم العائلة (Last Name)</label>
+                  <Input
+                    placeholder="مثال: العلي"
+                    value={newUser.lastName}
+                    onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                    className="border-gray-200 rounded-xl h-12 bg-white"
+                  />
+                </div>
+
+                {/* Username */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 mr-1">اسم المستخدم (Username) *</label>
                   <div className="relative">
                     <User className="absolute right-3 top-3.5 w-5 h-5 text-gray-400" />
                     <Input
-                      placeholder={t("username_placeholder")}
-                      value={newUser.name}
-                      onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                      className="pr-10 border-gray-200 rounded-xl h-12"
+                      placeholder="اسم تسجيل الدخول (username)"
+                      value={newUser.username}
+                      onChange={(e) => setNewUser({ ...newUser, username: e.target.value, name: e.target.value })}
+                      className="pr-10 border-gray-200 rounded-xl h-12 bg-white"
                     />
                   </div>
                 </div>
-                <div className="lg:col-span-3 space-y-2">
-                  <label className="text-sm font-bold text-gray-600 mr-1">{t("password")}</label>
+
+                {/* Phone Number */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 mr-1">{t("phone_number")}</label>
+                  <div className="relative">
+                    <Phone className="absolute right-3 top-3.5 w-5 h-5 text-gray-400" />
+                    <Input
+                      placeholder="07XXXXXXXX"
+                      value={newUser.phone}
+                      onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                      className="pr-10 border-gray-200 rounded-xl h-12 bg-white"
+                      maxLength={10}
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 mr-1">{t("password")} *</label>
                   <div className="relative">
                     <Lock className="absolute right-3 top-3.5 w-5 h-5 text-gray-400" />
                     <Input
@@ -241,7 +306,7 @@ const AdminUsersPage = () => {
                       placeholder="••••••••"
                       value={newUser.password}
                       onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                      className="pr-10 border-gray-200 rounded-xl h-12"
+                      className="pr-10 border-gray-200 rounded-xl h-12 bg-white"
                     />
                     <button
                       type="button"
@@ -252,30 +317,43 @@ const AdminUsersPage = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* Submit button */}
+                <div className="md:col-span-2 lg:col-span-3 flex justify-end pt-2">
+                  <Button
+                    onClick={handleAddUser}
+                    disabled={actionLoading}
+                    className="w-full sm:w-auto px-10 h-12 bg-red-700 text-white rounded-xl hover:bg-red-800 font-bold shadow-md shadow-red-200 flex items-center justify-center gap-2"
+                  >
+                    {actionLoading ? <Loader2 className="animate-spin" /> : <UserPlus className="w-5 h-5" />}
+                    <span>{t("create_account")}</span>
+                  </Button>
+                </div>
               </>
             ) : (
-              <div className="lg:col-span-6 space-y-2">
-                <label className="text-sm font-bold text-gray-600 mr-1">{t("phone_number")}</label>
-                <Input
-                  placeholder="07XXXXXXXX"
-                  value={newUser.phone}
-                  onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-                  className="border-gray-200 rounded-xl h-12"
-                  maxLength={10}
-                />
-              </div>
+              <>
+                <div className="lg:col-span-6 space-y-2">
+                  <label className="text-sm font-bold text-gray-700 mr-1">{t("phone_number")}</label>
+                  <Input
+                    placeholder="07XXXXXXXX"
+                    value={newUser.phone}
+                    onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                    className="border-gray-200 rounded-xl h-12 bg-white"
+                    maxLength={10}
+                  />
+                </div>
+                <div className="lg:col-span-3">
+                  <Button
+                    onClick={handleAddUser}
+                    disabled={actionLoading}
+                    className="w-full h-12 bg-red-700 text-white rounded-xl hover:bg-red-800 font-bold shadow-md shadow-red-200 flex items-center justify-center gap-2"
+                  >
+                    {actionLoading ? <Loader2 className="animate-spin" /> : <UserPlus className="w-5 h-5" />}
+                    <span>{t("create_account")}</span>
+                  </Button>
+                </div>
+              </>
             )}
-
-            <div className="lg:col-span-3">
-              <Button
-                onClick={handleAddUser}
-                disabled={actionLoading}
-                className="w-full h-12 bg-red-700 text-white rounded-xl hover:bg-red-800 font-bold"
-              >
-                {actionLoading ? <Loader2 className="animate-spin" /> : <UserPlus className="ml-2 w-5 h-5" />}
-                {t("create_account")}
-              </Button>
-            </div>
           </div>
         </Card>
 
@@ -370,11 +448,16 @@ const AdminUsersPage = () => {
                         </div>
                         <div>
                           <p className="font-black text-gray-900 text-lg leading-tight">
-                            {u.username || u.name || u.phone}
+                            {u.name || (u.firstName ? `${u.firstName} ${u.lastName}`.trim() : "") || u.username || u.phone}
                           </p>
-                          {(u.username || u.name) && u.phone && (
-                            <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                              <Phone size={10} /> {u.phone}
+                          {u.username && (
+                            <p className="text-xs text-red-600 font-mono mt-0.5">
+                              @{u.username}
+                            </p>
+                          )}
+                          {u.phone && (
+                            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 font-mono" dir="ltr">
+                              <Phone size={11} className="text-gray-400" /> {u.phone}
                             </p>
                           )}
                           <p className="text-[10px] text-gray-400 font-bold uppercase mt-1 tracking-wider">

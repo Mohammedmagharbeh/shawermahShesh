@@ -347,6 +347,7 @@ import {
   X,
   Settings,
   MonitorIcon as MonitorCog,
+  Bike,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -447,10 +448,24 @@ function Header() {
               </Link>
             )}
 
+            {isAuthenticated && user.role === "rider" && (
+              <Link to="/rider">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-red-600 border-2 border-red-700 text-white hover:bg-red-700 h-9 sm:h-10 md:h-11 text-xs sm:text-sm font-bold gap-1.5 px-3 md:px-4 rounded-xl shadow-md"
+                >
+                  <Bike className="h-4 w-4" />
+                  <span>لوحة السائق 🛵</span>
+                </Button>
+              </Link>
+            )}
+
             {isAuthenticated &&
               (user.role === "admin" ||
                 user.role === "employee" ||
-                user.role === "hr") && (
+                user.role === "hr" ||
+                user.role === "cashier") && (
                 <div className="hidden lg:block">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

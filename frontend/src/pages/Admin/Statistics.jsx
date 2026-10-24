@@ -23,7 +23,10 @@ import {
   Package,
   CreditCard,
   Star,
+  Bike,
+  MapPin,
 } from "lucide-react";
+import DriverStatistics from "./DriverStatistics";
 import { useTranslation } from "react-i18next";
 import {
   PieChart,
@@ -69,6 +72,7 @@ export default function StatisticsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
+  const [activeMainTab, setActiveMainTab] = useState("overview"); // "overview" | "drivers"
   const [totalVisitors, setTotalVisitors] = useState([]);
   const [allUsers, setAllUsers] = useState([]); // ✅ القائمة الكاملة غير المفلترة (لأي بحث عن اسم زبون بغض النظر عن فلتر التاريخ)
   const [loading, setLoading] = useState(true);
@@ -245,7 +249,8 @@ export default function StatisticsPage() {
       (user) =>
         (user.phone && user.phone.toLowerCase().includes(term)) ||
         (user.username && user.username.toLowerCase().includes(term)) ||
-        (user.name && user.name.toLowerCase().includes(term)),
+        (user.name && user.name.toLowerCase().includes(term)) ||
+        (user.apartment && user.apartment.toLowerCase().includes(term)),
     );
   }, [filterStatus, orderedUsers, notOrderedUsers, totalVisitors, searchTerm]);
 
@@ -283,6 +288,7 @@ export default function StatisticsPage() {
     const usersData = totalVisitors.map((user) => ({
       [t("phone")]: user.phone || "-",
       [t("name")]: user.username || user.name || "-",
+      [t("address") || "العنوان"]: user.apartment || "-",
       [t("registration_date")]: new Date(user.createdAt).toLocaleDateString(
         i18n.language === "ar" ? "ar-SA" : "en-US",
       ),
@@ -316,27 +322,70 @@ export default function StatisticsPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-red-600 rounded-2xl shadow-lg shadow-red-100">
-              <BarChart3 className="h-8 w-8 text-white" />
+              {activeMainTab === "drivers" ? (
+                <Bike className="h-8 w-8 text-white" />
+              ) : (
+                <BarChart3 className="h-8 w-8 text-white" />
+              )}
             </div>
             <div>
               <h1 className="text-2xl font-black text-gray-900">
-                {t("statisticsTitle")}
+                {activeMainTab === "drivers"
+                  ? "إحصائيات وأداء أسطول السائقين"
+                  : t("statisticsTitle")}
               </h1>
               <p className="text-gray-500 text-sm">
-                {t("statisticsDescription")}
+                {activeMainTab === "drivers"
+                  ? "متابعة أداء السائقين، أوقات الاستلام، التسليم، العودة للفرع وسجل الرحلات"
+                  : t("statisticsDescription")}
               </p>
             </div>
           </div>
-          <Button
-            onClick={exportToExcel}
-            className="bg-green-600 hover:bg-green-700 text-white rounded-xl h-12 px-6 font-bold flex gap-2"
-          >
-            <TrendingUp size={20} />
-            {t("export_to_excel")}
-          </Button>
+          {activeMainTab === "overview" && (
+            <Button
+              onClick={exportToExcel}
+              className="bg-green-600 hover:bg-green-700 text-white rounded-xl h-12 px-6 font-bold flex gap-2"
+            >
+              <TrendingUp size={20} />
+              {t("export_to_excel")}
+            </Button>
+          )}
         </div>
 
-        {/* Date Filters */}
+        {/* Main Section Navigation Switcher */}
+        <div className="flex bg-gray-100/90 p-1.5 rounded-2xl max-w-md border border-gray-200/60 shadow-inner">
+          <button
+            onClick={() => setActiveMainTab("overview")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-black transition-all ${
+              activeMainTab === "overview"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            <BarChart3 className={`w-4 h-4 ${activeMainTab === "overview" ? "text-red-600" : ""}`} />
+            <span>نظرة عامة والمبيعات</span>
+          </button>
+          <button
+            onClick={() => setActiveMainTab("drivers")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-black transition-all ${
+              activeMainTab === "drivers"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            <Bike className={`w-4 h-4 ${activeMainTab === "drivers" ? "text-red-600" : ""}`} />
+            <span>إحصائيات وأداء السائقين</span>
+          </button>
+        </div>
+
+        {activeMainTab === "drivers" ? (
+          <DriverStatistics
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+          />
+        ) : (
+          <>
+            {/* Date Filters */}
         <div className="flex flex-wrap gap-2">
           {["all", "today", "week", "month"].map((f) => (
             <Button
@@ -590,10 +639,20 @@ export default function StatisticsPage() {
                                 <Phone size={12} /> {u.phone}
                               </p>
                             )}
-                            <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-tighter">
-                              <Calendar size={10} />
-                              {new Date(u.createdAt).toLocaleDateString(
-                                "ar-JO",
+                            <div className="flex flex-wrap items-center gap-3 mt-2 text-[10px] font-bold text-gray-400">
+                              <div className="flex items-center gap-1 uppercase tracking-tighter">
+                                <Calendar size={10} />
+                                {new Date(u.createdAt).toLocaleDateString(
+                                  "ar-JO",
+                                )}
+                              </div>
+                              {u.apartment && (
+                                <div className="flex items-center gap-1 text-gray-600 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+                                  <MapPin size={10} className="text-red-500" />
+                                  <span className="truncate max-w-[200px]" title={u.apartment}>
+                                    {u.apartment}
+                                  </span>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -629,6 +688,8 @@ export default function StatisticsPage() {
             </div>
           </CardContent>
         </Card>
+      </>
+    )}
       </div>
     </div>
   );

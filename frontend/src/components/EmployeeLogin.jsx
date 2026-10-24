@@ -496,10 +496,14 @@ function EmployeeLogin() {
         toast.success(t("success_login"));
 
         // توجيه ذكي بناءً على الرول
-        if (userRole === "admin") {
+        if (userRole === "admin" || userRole === "employee") {
           navigate("/admin/dashboard");
+        } else if (userRole === "rider") {
+          navigate("/rider");
+        } else if (userRole === "cashier") {
+          navigate("/admin/dispatch");
         } else {
-          navigate("/products"); // أو الصفحة المخصصة للموظفين
+          navigate("/products");
         }
       }
     } catch (error) {

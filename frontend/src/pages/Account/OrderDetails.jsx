@@ -14,9 +14,12 @@ import {
   ArrowLeft,
   Phone,
   User,
+  KeyRound,
 } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import burger from "@/assets/burger.jpg";
+import { io } from "socket.io-client";
+import { getOrderStatusLabel, ORDER_STATUS_COLORS } from "@/constants";
 
 function OrderDetails() {
   const { getOrderById, loading } = useOrder();
@@ -32,6 +35,19 @@ function OrderDetails() {
       if (data) setOrder(data);
     };
     fetchOrder();
+
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+    const socket = io(socketUrl, { transports: ["websocket", "polling"] });
+
+    socket.on("updatedOrder", (updated) => {
+      if (updated && (updated._id === id || String(updated._id) === String(id))) {
+        setOrder(updated);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [id]);
 
   if (loading) return <Loading />;
@@ -77,9 +93,9 @@ function OrderDetails() {
             </div>
             <div className="flex flex-col sm:items-end gap-2">
               <Badge
-                className={`${statusColors[order.status]} w-fit px-3 py-1 text-sm`}
+                className={`${ORDER_STATUS_COLORS[order.status] || statusColors[order.status]} w-fit px-3 py-1 text-sm`}
               >
-                {t(order.status.toLowerCase())}
+                {getOrderStatusLabel(order.status, order.orderType, t)}
               </Badge>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="w-4 h-4" />
@@ -101,6 +117,22 @@ function OrderDetails() {
         </CardHeader>
 
         <CardContent className="p-4 sm:p-6 space-y-8">
+          {/* Out for Delivery Customer OTP Box */}
+          {order.deliveryOtp && (order.status === "Shipped" || order.status === "OutForDelivery") && (
+            <div className="bg-gradient-to-r from-amber-500/10 via-yellow-500/20 to-amber-500/10 border-2 border-dashed border-amber-500 rounded-2xl p-5 text-center shadow-sm animate-in fade-in zoom-in-95 duration-200">
+              <div className="inline-flex items-center gap-2 text-amber-900 font-bold text-sm mb-1">
+                <KeyRound className="w-4 h-4 text-amber-600" />
+                <span>رمز تأكيد استلام الطلب من السائق (OTP)</span>
+              </div>
+              <div className="text-4xl sm:text-5xl font-black tracking-widest text-red-600 my-2 font-mono" dir="ltr">
+                {order.deliveryOtp}
+              </div>
+              <p className="text-xs text-amber-800 font-medium max-w-sm mx-auto">
+                طلبك الآن بالطريق إلك! يرجى إعطاء هذا الرمز لسائق التوصيل عند استلام الوجبة لتأكيد التسليم.
+              </p>
+            </div>
+          )}
+
           {/* Delivery & Payment Info */}
           <div className="grid gap-6 md:grid-cols-2">
             <div className="bg-background rounded-lg border p-4 space-y-3">

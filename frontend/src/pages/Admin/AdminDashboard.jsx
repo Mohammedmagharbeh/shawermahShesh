@@ -2843,6 +2843,11 @@ import {
 } from "@/components/ui/dialog";
 import { useUser } from "@/contexts/UserContext";
 import { Label } from "@/components/ui/label";
+import {
+  getOrderStatusOptions,
+  getOrderStatusLabel,
+  ORDER_STATUS_COLORS,
+} from "@/constants";
 
 const statusColors = {
   Processing: "bg-secondary text-secondary-foreground",
@@ -3427,37 +3432,25 @@ function AdminDashboard() {
                           handleStatusChange(order._id, value)
                         }
                       >
-                        <SelectTrigger className="w-[160px]">
+                        <SelectTrigger className="w-[180px]">
                           <SelectValue>
-                            <Badge className={statusColors[order.status]}>
-                              {order.status
-                                ? t(order.status.toLowerCase())
-                                : "N/A"}
+                            <Badge
+                              className={
+                                ORDER_STATUS_COLORS[order.status] ||
+                                statusColors[order.status] ||
+                                "bg-gray-500"
+                              }
+                            >
+                              {getOrderStatusLabel(order.status, order.orderType, t)}
                             </Badge>
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Processing">
-                            {t("processing")}
-                          </SelectItem>
-                          <SelectItem value="Confirmed">
-                            {t("confirmed")}
-                          </SelectItem>
-                          <SelectItem value="Shipped">
-                            {t("shipped")}
-                          </SelectItem>
-                          <SelectItem value="OutForDelivery">
-                            {t("outfordelivery")}
-                          </SelectItem>
-                          <SelectItem value="ReadyForPickup">
-                            {t("readyforpickup")}
-                          </SelectItem>
-                          <SelectItem value="Delivered">
-                            {t("delivered")}
-                          </SelectItem>
-                          <SelectItem value="Cancelled">
-                            {t("cancelled")}
-                          </SelectItem>
+                          {getOrderStatusOptions(order.orderType).map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {t(opt.labelKey, opt.defaultLabel)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>

@@ -28,6 +28,8 @@ import NotFound from "./components/NotFound";
 import JobsPage from "./pages/General/JobsPage";
 import AdminJobs from "./pages/Admin/AdminJobs";
 import PrivacyPolicy from "./pages/General/PrivacyPolicy";
+import DispatchQueue from "./pages/Admin/DispatchQueue";
+import DriverDashboard from "./pages/Account/DriverDashboard";
 import { useBusinessHours } from "./hooks/useBusinessHours";
 // import AuthChoice from "./pages/AuthChoice";
 
@@ -204,6 +206,34 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin", "employee"]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Staff Delivery Dispatch Queue */}
+            <Route
+              path="/admin/dispatch"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "employee", "cashier"]}>
+                  <DispatchQueue />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Rider / Delivery Driver Portal */}
+            <Route
+              path="/rider"
+              element={
+                <ProtectedRoute allowedRoles={["rider", "admin"]}>
+                  <DriverDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/driver"
+              element={
+                <ProtectedRoute allowedRoles={["rider", "admin"]}>
+                  <DriverDashboard />
                 </ProtectedRoute>
               }
             />
