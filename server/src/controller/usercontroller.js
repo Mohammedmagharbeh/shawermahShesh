@@ -206,10 +206,10 @@ exports.employeeLogin = async (req, res) => {
   try {
     const { name, password } = req.body;
 
-    // البحث عن المستخدم إذا كان employee أو admin
+    // البحث عن المستخدم إذا كان employee أو admin أو hr أو rider أو cashier
     const user = await userModel.findOne({
       username: name,
-      role: { $in: ["employee", "admin", "hr"] },
+      role: { $in: ["employee", "admin", "hr", "rider", "cashier"] },
     });
 
     if (!user || !user.password) {

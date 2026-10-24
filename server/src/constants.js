@@ -23,7 +23,7 @@ const ORDER_STATUSES = Object.freeze([
 const PAYMENT_METHODS = Object.freeze(["cash", "card", "cliq", "orange_money",]);
 const PAYMENT_STATUSES = Object.freeze(["unpaid", "paid"]);
 
-const USER_ROLES = Object.freeze(["user", "employee", "admin", "hr"]);
+const USER_ROLES = Object.freeze(["user", "employee", "admin", "hr", "rider", "cashier"]);
 
 module.exports = {
   CATEGORIES,

@@ -25,6 +25,8 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  Bike,
+  Receipt,
 } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import { useUser } from "@/contexts/UserContext";
@@ -111,7 +113,7 @@ const AdminUsersPage = () => {
 
   // ── add user ────────────────────────────────────────────────────────────
   const handleAddUser = async () => {
-    if (["employee", "admin", "hr"].includes(newUser.role)) {
+    if (["employee", "admin", "hr", "rider", "cashier"].includes(newUser.role)) {
       if (!newUser.name || !newUser.password)
         return toast.error(t("fill_name_and_password"));
     } else {
@@ -124,7 +126,7 @@ const AdminUsersPage = () => {
       const payload = { ...newUser };
       if (newUser.role !== "user") payload.username = newUser.name;
 
-      const endpoint = ["employee", "admin", "hr"].includes(newUser.role)
+      const endpoint = ["employee", "admin", "hr", "rider", "cashier"].includes(newUser.role)
         ? `${import.meta.env.VITE_BASE_URL}/auth/create-employee`
         : `${import.meta.env.VITE_BASE_URL}/admin/user/add`;
 
@@ -208,13 +210,15 @@ const AdminUsersPage = () => {
                   <SelectItem value="user">{t("user_role")}</SelectItem>
                   <SelectItem value="hr">موارد بشرية (HR)</SelectItem>
                   <SelectItem value="employee">{t("employee_role")}</SelectItem>
+                  <SelectItem value="cashier">{t("cashier_role")}</SelectItem>
+                  <SelectItem value="rider">{t("rider_role")}</SelectItem>
                   <SelectItem value="admin">{t("admin_role")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Dynamic fields */}
-            {["employee", "admin", "hr"].includes(newUser.role) ? (
+            {["employee", "admin", "hr", "rider", "cashier"].includes(newUser.role) ? (
               <>
                 <div className="lg:col-span-3 space-y-2">
                   <label className="text-sm font-bold text-gray-600 mr-1">{t("username")}</label>
@@ -299,6 +303,8 @@ const AdminUsersPage = () => {
                 <SelectItem value="user">{t("user_role")}</SelectItem>
                 <SelectItem value="hr">موارد بشرية (HR)</SelectItem>
                 <SelectItem value="employee">{t("employee_role")}</SelectItem>
+                <SelectItem value="cashier">{t("cashier_role")}</SelectItem>
+                <SelectItem value="rider">{t("rider_role")}</SelectItem>
                 <SelectItem value="admin">{t("admin_role")}</SelectItem>
               </SelectContent>
             </Select>
@@ -341,7 +347,11 @@ const AdminUsersPage = () => {
                                 ? "bg-purple-100 text-purple-700"
                                 : u.role === "employee"
                                   ? "bg-green-100 text-green-700"
-                                  : "bg-blue-50 text-blue-700"
+                                  : u.role === "rider"
+                                    ? "bg-amber-100 text-amber-700"
+                                    : u.role === "cashier"
+                                      ? "bg-teal-100 text-teal-700"
+                                      : "bg-blue-50 text-blue-700"
                           }`}
                         >
                           {u.role === "admin" ? (
@@ -350,6 +360,10 @@ const AdminUsersPage = () => {
                             <Briefcase size={24} />
                           ) : u.role === "employee" ? (
                             <UserCheck size={24} />
+                          ) : u.role === "rider" ? (
+                            <Bike size={24} />
+                          ) : u.role === "cashier" ? (
+                            <Receipt size={24} />
                           ) : (
                             <User size={24} />
                           )}
@@ -377,10 +391,14 @@ const AdminUsersPage = () => {
                               ? "border-purple-200 bg-purple-50 text-purple-700"
                               : u.role === "employee"
                                 ? "border-green-200 bg-green-50 text-green-700"
-                                : "border-gray-200 bg-gray-50 text-gray-600"
+                                : u.role === "rider"
+                                  ? "border-amber-200 bg-amber-50 text-amber-700"
+                                  : u.role === "cashier"
+                                    ? "border-teal-200 bg-teal-50 text-teal-700"
+                                    : "border-gray-200 bg-gray-50 text-gray-600"
                         }`}
                       >
-                        {u.role === "hr" ? "HR" : t(u.role)}
+                        {u.role === "hr" ? "HR" : t(u.role) || u.role}
                       </div>
                     </div>
 
@@ -395,6 +413,8 @@ const AdminUsersPage = () => {
                               <SelectItem value="user">{t("user_role")}</SelectItem>
                               <SelectItem value="hr">موارد بشرية (HR)</SelectItem>
                               <SelectItem value="employee">{t("employee_role")}</SelectItem>
+                              <SelectItem value="cashier">{t("cashier_role")}</SelectItem>
+                              <SelectItem value="rider">{t("rider_role")}</SelectItem>
                               <SelectItem value="admin">{t("admin_role")}</SelectItem>
                             </SelectContent>
                           </Select>
