@@ -4,6 +4,8 @@ const validateJWT = require("../middlewares/validateJWT");
 const requireRole = require("../middlewares/requireRole");
 
 const {
+  getDeliverySettings,
+  updateDeliverySettings,
   getDeliveryQueue,
   assignOrderToDriver,
   unassignOrder,
@@ -13,7 +15,20 @@ const {
   manualCheckIn,
   getMyDriverStatus,
   getDriverAnalytics,
+  riderLogout,
 } = require("../controller/deliveryController");
+
+// ==========================================
+// Delivery Settings Routes
+// (Read: authenticated staff/riders; Write: ADMIN ONLY)
+// ==========================================
+router.get("/settings", validateJWT, getDeliverySettings);
+router.put(
+  "/settings",
+  validateJWT,
+  requireRole("admin"),
+  updateDeliverySettings
+);
 
 // ==========================================
 // Staff Delivery & Dispatch Routes
@@ -95,6 +110,14 @@ router.post(
   validateJWT,
   requireRole("rider", "admin"),
   qrCheckIn
+);
+
+// 5.1 Rider Logout (Driver -> unavailable, reverts assigned order to queue)
+router.post(
+  "/rider-logout",
+  validateJWT,
+  requireRole("rider", "admin"),
+  riderLogout
 );
 
 module.exports = router;

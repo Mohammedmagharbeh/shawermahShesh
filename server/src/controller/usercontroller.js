@@ -150,6 +150,12 @@ exports.verifyLoginOTP = async (req, res) => {
     user.otp = null;
     user.otpExpires = null;
     if (phone && newPhone) user.phone = newPhone;
+
+    if (user.role === "rider") {
+      if (user.driverStatus !== "on_delivery" && user.driverStatus !== "assigned") {
+        user.driverStatus = "unavailable";
+      }
+    }
     await user.save();
 
     const token = jwt.sign(
@@ -169,6 +175,7 @@ exports.verifyLoginOTP = async (req, res) => {
       _id: user._id,
       phone: user.phone,
       role: user.role,
+      driverStatus: user.driverStatus,
     });
   } catch (err) {
     res.status(500).json({ msg: err.message });
@@ -253,6 +260,22 @@ exports.employeeLogin = async (req, res) => {
     if (!isMatch)
       return res.status(401).json({ message: "كلمة المرور غير صحيحة" });
 
+    // For riders: ensure driverStatus is set to unavailable upon login so they must scan branch QR first to become available
+    if (user.role === "rider") {
+      if (user.driverStatus !== "on_delivery" && user.driverStatus !== "assigned") {
+        user.driverStatus = "unavailable";
+        await user.save();
+      }
+      const io = req.app.get("io");
+      if (io && user.driverStatus === "unavailable") {
+        io.emit("driverStatusChanged", {
+          riderId: user._id,
+          driverStatus: "unavailable",
+          currentOrderId: user.currentOrderId || null,
+        });
+      }
+    }
+
     const token = jwt.sign(
       { id: user._id, username: user.username, role: user.role },
       process.env.JWT_SECRET,
@@ -270,6 +293,7 @@ exports.employeeLogin = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
+        driverStatus: user.driverStatus,
       },
     });
   } catch (error) {

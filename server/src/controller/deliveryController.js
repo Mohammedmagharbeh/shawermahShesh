@@ -1,9 +1,101 @@
 const Order = require("../models/orders");
 const User = require("../models/user");
+const DeliverySetting = require("../models/deliverySetting");
 require("../models/products");
 require("../models/locations");
 const { BRANCH_QR_CODE } = require("../constants");
 const { sendToUser } = require("../utils/pushService");
+
+// Helper: fetch configured maxOrdersPerRider (capped at 5, min 1)
+const getMaxOrdersPerRider = async () => {
+  try {
+    let setting = await DeliverySetting.findOne({ key: "global" });
+    if (!setting) {
+      setting = await DeliverySetting.create({ key: "global", maxOrdersPerRider: 3 });
+    }
+    return Math.min(Math.max(setting.maxOrdersPerRider || 3, 1), 5);
+  } catch (err) {
+    console.error("Error fetching maxOrdersPerRider:", err);
+    return 3;
+  }
+};
+
+/**
+ * 0. GET /api/delivery/settings
+ * Fetches delivery configurations (including maxOrdersPerRider)
+ * Accessible by: admin, employee, cashier, rider
+ */
+exports.getDeliverySettings = async (req, res) => {
+  try {
+    const maxOrdersPerRider = await getMaxOrdersPerRider();
+    return res.status(200).json({
+      success: true,
+      settings: {
+        maxOrdersPerRider,
+      },
+    });
+  } catch (error) {
+    console.error("Error in getDeliverySettings:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * 0.1 PUT /api/delivery/settings
+ * Updates delivery configurations (ADMIN ONLY)
+ * Body: { maxOrdersPerRider }
+ * Accessible by: admin only (max value capped at 5)
+ */
+exports.updateDeliverySettings = async (req, res) => {
+  try {
+    const callerId = req.user._id || req.user.id;
+    const caller = await User.findById(callerId);
+
+    if (!caller || caller.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "غير مصرح لك بتعديل إعدادات التوصيل (مسموح للمدراء فقط)",
+      });
+    }
+
+    const rawMax = req.body.maxOrdersPerRider;
+    const parsedMax = parseInt(rawMax, 10);
+
+    if (isNaN(parsedMax) || parsedMax < 1 || parsedMax > 5) {
+      return res.status(400).json({
+        success: false,
+        message: "الحد الأقصى لعدد الطلبات لكل سائق يجب أن يكون رقماً صحيحاً بين 1 و 5 فقط",
+      });
+    }
+
+    let setting = await DeliverySetting.findOne({ key: "global" });
+    if (!setting) {
+      setting = new DeliverySetting({ key: "global", maxOrdersPerRider: parsedMax });
+    } else {
+      setting.maxOrdersPerRider = parsedMax;
+    }
+    await setting.save();
+
+    // Socket emission: Notify all dispatchers, cashiers, and drivers of setting change
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("deliverySettingsUpdated", {
+        maxOrdersPerRider: parsedMax,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `تم تحديث الحد الأقصى للطلبات لكل سائق إلى ${parsedMax} طلبات بنجاح`,
+      settings: {
+        maxOrdersPerRider: parsedMax,
+      },
+    });
+  } catch (error) {
+    console.error("Error in updateDeliverySettings:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 /**
  * 1. GET /api/delivery/queue
@@ -12,9 +104,11 @@ const { sendToUser } = require("../utils/pushService");
  */
 exports.getDeliveryQueue = async (req, res) => {
   try {
-    // 1. Fetch orders ready for delivery pickup (excluding external ishbek orders)
+    const maxOrdersPerRider = await getMaxOrdersPerRider();
+
+    // 1. Fetch orders ready for delivery dispatch (Confirmed or ReadyForPickup, excluding external ishbek orders)
     const orders = await Order.find({
-      status: "ReadyForPickup",
+      status: { $in: ["Confirmed", "ReadyForPickup"] },
       orderType: "delivery",
       source: { $ne: "ishbek" },
     })
@@ -25,27 +119,80 @@ exports.getDeliveryQueue = async (req, res) => {
       .sort({ createdAt: 1 })
       .lean();
 
-    // 2. Fetch available drivers sorted FIFO by returnedAt (oldest return time first)
-    const availableDrivers = await User.find({
-      role: "rider",
-      driverStatus: "available",
-    })
+    // 2. Fetch active assigned orders per rider (Confirmed, ReadyForPickup, or Shipped)
+    const activeOrdersAgg = await Order.aggregate([
+      {
+        $match: {
+          status: { $in: ["Confirmed", "ReadyForPickup", "Shipped"] },
+          assignedRiderId: { $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: "$assignedRiderId",
+          count: { $sum: 1 },
+          orders: {
+            $push: {
+              _id: "$_id",
+              sequenceNumber: "$sequenceNumber",
+              status: "$status",
+              totalPrice: "$totalPrice",
+            },
+          },
+        },
+      },
+    ]);
+
+    const activeMap = {};
+    activeOrdersAgg.forEach((item) => {
+      activeMap[String(item._id)] = {
+        count: item.count,
+        orders: item.orders,
+      };
+    });
+
+    // 3. Fetch all riders for staff monitoring
+    const rawRiders = await User.find({ role: "rider" })
       .select("_id name username phone driverStatus currentOrderId returnedAt")
       .sort({ returnedAt: 1 })
       .lean();
 
-    // 3. Fetch all riders for staff monitoring
-    const allDrivers = await User.find({ role: "rider" })
-      .select("_id name username phone driverStatus currentOrderId returnedAt")
-      .populate("currentOrderId", "sequenceNumber status totalPrice userDetails")
-      .sort({ returnedAt: 1 })
-      .lean();
+    const allDrivers = rawRiders.map((d) => {
+      const activeData = activeMap[String(d._id)] || { count: 0, orders: [] };
+      // Strict order batching: Drivers who are on_delivery, returning, or unavailable are locked out of new assignments
+      const canAcceptMore =
+        (d.driverStatus === "available" || d.driverStatus === "assigned") &&
+        activeData.count < maxOrdersPerRider;
+
+      return {
+        ...d,
+        activeOrdersCount: activeData.count,
+        activeOrders: activeData.orders,
+        maxOrdersPerRider,
+        canAcceptMoreOrders: canAcceptMore,
+      };
+    });
+
+    // 4. Available drivers in FIFO order:
+    // Drivers who are at branch (not unavailable, not returning) and currently under max capacity
+    const availableDrivers = allDrivers
+      .filter((d) => d.canAcceptMoreOrders)
+      .sort((a, b) => {
+        // Drivers with 0 orders first, then by returnedAt
+        if (a.activeOrdersCount !== b.activeOrdersCount) {
+          return a.activeOrdersCount - b.activeOrdersCount;
+        }
+        return new Date(a.returnedAt || 0) - new Date(b.returnedAt || 0);
+      });
 
     return res.status(200).json({
       success: true,
       orders,
       availableDrivers,
       allDrivers,
+      settings: {
+        maxOrdersPerRider,
+      },
     });
   } catch (error) {
     console.error("Error in getDeliveryQueue:", error);
@@ -90,10 +237,11 @@ exports.assignOrderToDriver = async (req, res) => {
       });
     }
 
-    if (order.status !== "ReadyForPickup") {
+    const allowedStatuses = ["Confirmed", "ReadyForPickup"];
+    if (!allowedStatuses.includes(order.status)) {
       return res.status(400).json({
         success: false,
-        message: `الطلب ليس جاهزاً للتسليم (الحالة الحالية: ${order.status})`,
+        message: `لا يمكن تعيين السائق لهذا الطلب (الحالة الحالية: ${order.status})`,
       });
     }
 
@@ -103,19 +251,48 @@ exports.assignOrderToDriver = async (req, res) => {
       return res.status(404).json({ success: false, message: "السائق غير موجود" });
     }
 
-    if (rider.driverStatus !== "available") {
+    if (rider.driverStatus === "unavailable") {
       return res.status(400).json({
         success: false,
-        message: `السائق غير متاح حالياً (الحالة: ${rider.driverStatus})`,
+        message: "السائق غير متاح حالياً (مسجل خروج، يجب مسح باركود الفرع أولاً)",
       });
     }
 
-    // Update driver state
+    if (rider.driverStatus === "returning") {
+      return res.status(400).json({
+        success: false,
+        message: "السائق في طريق العودة للفرع ولم يسجل وصوله بعد",
+      });
+    }
+
+    // Strict batching: Once on the road (on_delivery), locked out of mid-route assignments
+    if (rider.driverStatus === "on_delivery") {
+      return res.status(400).json({
+        success: false,
+        message: "السائق في طريق التوصيل حالياً. لا يمكن تعيين طلبات إضافية أثناء الرحلة (يجب حسم جميع الطلبات قبل الخروج من الفرع).",
+      });
+    }
+
+    const maxOrdersPerRider = await getMaxOrdersPerRider();
+    const currentActiveCount = await Order.countDocuments({
+      assignedRiderId: rider._id,
+      status: { $in: ["ReadyForPickup", "Shipped"] },
+    });
+
+    if (currentActiveCount >= maxOrdersPerRider) {
+      return res.status(400).json({
+        success: false,
+        message: `لقد وصل هذا السائق إلى الحد الأقصى المسموح به (${maxOrdersPerRider} طلبات). لا يمكن تعيين طلب إضافي له حالياً.`,
+      });
+    }
+
+    // Update driver state to assigned
     rider.driverStatus = "assigned";
     rider.currentOrderId = order._id;
     await rider.save();
 
-    // Update order state (status remains ReadyForPickup until driver physically picks up)
+    // Update order state: status becomes ReadyForPickup ("بانتظار السائق" / waiting for driver)
+    order.status = "ReadyForPickup";
     order.assignedRiderId = rider._id;
     order.assignedAt = new Date();
     await order.save();
@@ -130,7 +307,7 @@ exports.assignOrderToDriver = async (req, res) => {
     sendToUser(
       rider._id,
       "طلب جديد بانتظارك 🛵",
-      `تم تعيين الطلب #${order.sequenceNumber} لك، يرجى استلامه من المطعم`,
+      `تم تعيين الطلب #${order.sequenceNumber} لك (${currentActiveCount + 1}/${maxOrdersPerRider} طلبات)، يرجى استلامه من المطعم`,
       { orderId: String(order._id) }
     );
 
@@ -141,31 +318,39 @@ exports.assignOrderToDriver = async (req, res) => {
         orderId: order._id,
         riderId: rider._id,
         order: populatedOrder,
+        activeOrdersCount: currentActiveCount + 1,
+        maxOrdersPerRider,
         rider: {
           _id: rider._id,
           name: rider.name || rider.username,
           phone: rider.phone,
           driverStatus: rider.driverStatus,
           currentOrderId: rider.currentOrderId,
+          activeOrdersCount: currentActiveCount + 1,
         },
       });
       io.emit("updatedOrder", populatedOrder);
+      io.emit("orderUpdated", populatedOrder);
       io.emit("driverStatusChanged", {
         riderId: rider._id,
-        driverStatus: "assigned",
+        driverStatus: rider.driverStatus,
         currentOrderId: order._id,
+        activeOrdersCount: currentActiveCount + 1,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "تم تعيين السائق للطلب بنجاح",
+      message: `تم تعيين السائق للطلب بنجاح (الحمولة الحالية: ${currentActiveCount + 1}/${maxOrdersPerRider})`,
       order: populatedOrder,
+      activeOrdersCount: currentActiveCount + 1,
+      maxOrdersPerRider,
       rider: {
         _id: rider._id,
         name: rider.name || rider.username,
         driverStatus: rider.driverStatus,
         currentOrderId: rider.currentOrderId,
+        activeOrdersCount: currentActiveCount + 1,
       },
     });
   } catch (error) {
@@ -197,72 +382,100 @@ exports.confirmPickup = async (req, res) => {
       return res.status(404).json({ success: false, message: "السائق غير موجود" });
     }
 
-    let orderId = req.body.orderId || rider.currentOrderId;
-    if (!orderId) {
-      const activeOrder = await Order.findOne({
+    // Support bulk confirm pickup (confirm all ready orders for rider)
+    const confirmAll = Boolean(req.body.all);
+    let targetOrders = [];
+
+    if (confirmAll) {
+      targetOrders = await Order.find({
         assignedRiderId: rider._id,
         status: "ReadyForPickup",
       });
-      if (activeOrder) orderId = activeOrder._id;
+    } else {
+      let orderId = req.body.orderId || rider.currentOrderId;
+      if (!orderId) {
+        const activeOrder = await Order.findOne({
+          assignedRiderId: rider._id,
+          status: "ReadyForPickup",
+        });
+        if (activeOrder) orderId = activeOrder._id;
+      }
+
+      if (!orderId) {
+        return res.status(400).json({
+          success: false,
+          message: "ليس لديك طلب مخصص قيد الانتظار للاستلام",
+        });
+      }
+
+      const singleOrder = await Order.findById(orderId);
+      if (!singleOrder) {
+        return res.status(404).json({ success: false, message: "الطلب غير موجود" });
+      }
+      targetOrders = [singleOrder];
     }
 
-    if (!orderId) {
+    if (targetOrders.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "ليس لديك طلب مخصص قيد الانتظار للاستلام",
+        message: "لا توجد طلبات جاهزة للاستلام قيد الانتظار",
       });
     }
 
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ success: false, message: "الطلب غير موجود" });
+    const io = req.app.get("io");
+    const updatedOrders = [];
+
+    for (const ord of targetOrders) {
+      const deliveryOtp = Math.floor(100 + Math.random() * 900).toString();
+      ord.status = "Shipped";
+      ord.shippedAt = new Date();
+      ord.deliveryOtp = deliveryOtp;
+      ord.assignedRiderId = rider._id;
+      await ord.save();
+
+      const populated = await Order.findById(ord._id)
+        .populate("products.productId")
+        .populate("userId")
+        .populate("shippingAddress")
+        .populate("assignedRiderId", "_id name username phone driverStatus");
+
+      updatedOrders.push(populated);
+
+      // Push notification to customer
+      const customerUserId = ord.userId?._id || ord.userId;
+      sendToUser(
+        customerUserId,
+        "طلبك صار جاهز وبطريقه إلك 🚗",
+        `طلب #${ord.sequenceNumber} بالطريق إلك! رمز التسليم عند الاستلام: ${deliveryOtp}`,
+        { orderId: String(ord._id), deliveryOtp }
+      );
+
+      if (io) {
+        io.emit("updatedOrder", populated);
+      }
     }
-
-    // Generate 3-digit OTP (100 - 999)
-    const deliveryOtp = Math.floor(100 + Math.random() * 900).toString();
-
-    // Update order state
-    order.status = "Shipped";
-    order.shippedAt = new Date();
-    order.deliveryOtp = deliveryOtp;
-    order.assignedRiderId = rider._id;
-    await order.save();
 
     // Update rider state
     rider.driverStatus = "on_delivery";
-    rider.currentOrderId = order._id;
+    rider.currentOrderId = targetOrders[0]._id;
     await rider.save();
 
-    const populatedOrder = await Order.findById(order._id)
-      .populate("products.productId")
-      .populate("userId")
-      .populate("shippingAddress")
-      .populate("assignedRiderId", "_id name username phone driverStatus");
-
-    // Push notification to customer with OTP
-    const customerUserId = order.userId?._id || order.userId;
-    sendToUser(
-      customerUserId,
-      "طلبك صار جاهز وبطريقه إلك 🚗",
-      `طلب #${order.sequenceNumber} بالطريق إلك! رمز التسليم عند الاستلام: ${deliveryOtp}`,
-      { orderId: String(order._id), deliveryOtp }
-    );
-
-    // Socket emission
-    const io = req.app.get("io");
     if (io) {
-      io.emit("updatedOrder", populatedOrder);
       io.emit("driverStatusChanged", {
         riderId: rider._id,
         driverStatus: "on_delivery",
-        currentOrderId: order._id,
+        currentOrderId: rider.currentOrderId,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "تم تأكيد استلام الطلب وبدء رحلة التوصيل",
-      order: populatedOrder,
+      message: targetOrders.length > 1
+        ? `تم تأكيد استلام ${targetOrders.length} طلبات وبدء رحلة التوصيل 🚗`
+        : "تم تأكيد استلام الطلب وبدء رحلة التوصيل 🚗",
+      order: updatedOrders[0],
+      orders: updatedOrders,
+      confirmedCount: targetOrders.length,
     });
   } catch (error) {
     console.error("Error in confirmPickup:", error);
@@ -285,12 +498,12 @@ exports.verifyDeliveryOtp = async (req, res) => {
       return res.status(403).json({ success: false, message: "غير مصرح لك" });
     }
 
-    const { orderId, otp } = req.body;
+    const { orderId, otp, forceSubmit, overrideReason } = req.body;
 
-    if (!otp) {
+    if (!otp && !forceSubmit) {
       return res.status(400).json({
         success: false,
-        message: "رمز التحقق (OTP) مطلوب",
+        message: "رمز التحقق (OTP) مطلوب، أو تفعيل خيار التسليم الاضطراري",
       });
     }
 
@@ -315,12 +528,17 @@ exports.verifyDeliveryOtp = async (req, res) => {
       return res.status(404).json({ success: false, message: "الطلب غير موجود" });
     }
 
-    // Verify OTP match
-    if (!order.deliveryOtp || String(order.deliveryOtp).trim() !== String(otp).trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "رمز التحقق غير صحيح، يرجى التأكد من الرمز وإعادة المحاولة",
-      });
+    // Verify OTP match if not force submitted
+    if (!forceSubmit) {
+      if (!order.deliveryOtp || String(order.deliveryOtp).trim() !== String(otp).trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "رمز التحقق غير صحيح، يرجى التأكد من الرمز وإعادة المحاولة",
+        });
+      }
+    } else {
+      order.deliveredViaOverride = true;
+      order.overrideReason = overrideReason || "customer_unreachable";
     }
 
     // Mark order as Delivered (terminal status in the system) and record submittedAt timestamp
@@ -329,17 +547,40 @@ exports.verifyDeliveryOtp = async (req, res) => {
     order.deliveryOtp = null;
     await order.save();
 
-    // Update driver: transitioning to returning
-    rider.driverStatus = "returning";
-    rider.currentOrderId = null;
+    // Check remaining active orders for this rider
+    const remainingActiveOrders = await Order.find({
+      assignedRiderId: rider._id,
+      status: { $in: ["ReadyForPickup", "Shipped"] },
+      _id: { $ne: order._id },
+    }).sort({ createdAt: 1 });
+
+    const allDelivered = remainingActiveOrders.length === 0;
+
+    if (allDelivered) {
+      rider.driverStatus = "returning";
+      rider.currentOrderId = null;
+    } else {
+      const hasShipped = remainingActiveOrders.some((o) => o.status === "Shipped");
+      rider.driverStatus = hasShipped ? "on_delivery" : "assigned";
+      rider.currentOrderId = remainingActiveOrders[0]._id;
+    }
     await rider.save();
 
     // If order has an assigned rider different from caller/target rider, update them too
     if (order.assignedRiderId && String(order.assignedRiderId) !== String(rider._id)) {
       const assignedRider = await User.findById(order.assignedRiderId);
       if (assignedRider && assignedRider.role === "rider") {
-        assignedRider.driverStatus = "returning";
-        assignedRider.currentOrderId = null;
+        const otherRemaining = await Order.find({
+          assignedRiderId: assignedRider._id,
+          status: { $in: ["ReadyForPickup", "Shipped"] },
+          _id: { $ne: order._id },
+        });
+        if (otherRemaining.length === 0) {
+          assignedRider.driverStatus = "returning";
+          assignedRider.currentOrderId = null;
+        } else {
+          assignedRider.currentOrderId = otherRemaining[0]._id;
+        }
         await assignedRider.save();
       }
     }
@@ -365,27 +606,33 @@ exports.verifyDeliveryOtp = async (req, res) => {
       io.emit("updatedOrder", populatedOrder);
       io.emit("driverStatusChanged", {
         riderId: rider._id,
-        driverStatus: "returning",
-        currentOrderId: null,
+        driverStatus: rider.driverStatus,
+        currentOrderId: rider.currentOrderId,
+        remainingOrdersCount: remainingActiveOrders.length,
       });
       if (order.assignedRiderId && String(order.assignedRiderId) !== String(rider._id)) {
         io.emit("driverStatusChanged", {
           riderId: order.assignedRiderId,
-          driverStatus: "returning",
-          currentOrderId: null,
+          driverStatus: rider.driverStatus,
+          currentOrderId: rider.currentOrderId,
+          remainingOrdersCount: remainingActiveOrders.length,
         });
       }
     }
 
     return res.status(200).json({
       success: true,
-      message: "تم التحقق من الرمز وتسليم الطلب بنجاح",
+      message: allDelivered
+        ? "تم تسليم جميع الطلبات بنجاح! أنت الآن في طريق العودة إلى الفرع 🛵"
+        : `تم تسليم الطلب #${order.sequenceNumber} بنجاح! متبقي لديك ${remainingActiveOrders.length} طلبات للتسليم`,
       order: populatedOrder,
+      allDelivered,
+      remainingOrdersCount: remainingActiveOrders.length,
       rider: {
         _id: rider._id,
         name: rider.name || rider.username,
-        driverStatus: "returning",
-        currentOrderId: null,
+        driverStatus: rider.driverStatus,
+        currentOrderId: rider.currentOrderId,
       },
     });
   } catch (error) {
@@ -456,7 +703,7 @@ exports.qrCheckIn = async (req, res) => {
       ord.assignedAt = null;
       ord.shippedAt = null;
       ord.deliveryOtp = null;
-      ord.status = "ReadyForPickup";
+      ord.status = "Confirmed";
       await ord.save();
 
       if (io) {
@@ -516,6 +763,89 @@ exports.qrCheckIn = async (req, res) => {
 };
 
 /**
+ * 5.1 POST /api/delivery/rider-logout
+ * Driver logs out -> status becomes 'unavailable' and any active assigned order is reverted to queue
+ * Accessible by: rider, admin
+ */
+exports.riderLogout = async (req, res) => {
+  try {
+    const callerId = req.user._id || req.user.id;
+    const caller = await User.findById(callerId);
+
+    if (!caller || !["rider", "admin"].includes(caller.role)) {
+      return res.status(403).json({ success: false, message: "غير مصرح لك" });
+    }
+
+    const targetRiderId =
+      caller.role === "admin" && req.body.riderId ? req.body.riderId : callerId;
+    const rider = await User.findById(targetRiderId);
+    if (!rider) {
+      return res.status(404).json({ success: false, message: "السائق غير موجود" });
+    }
+
+    const prevOrderId = rider.currentOrderId;
+
+    // Set status to unavailable and clear current order
+    rider.driverStatus = "unavailable";
+    rider.currentOrderId = null;
+    await rider.save();
+
+    // Revert any active assigned order(s) for this driver back to ReadyForPickup
+    const orderQuery = {
+      $or: [
+        { assignedRiderId: rider._id, status: { $nin: ["Delivered", "Submitted", "Canceled", "Cancelled"] } },
+        ...(prevOrderId ? [{ _id: prevOrderId, status: { $nin: ["Delivered", "Submitted", "Canceled", "Cancelled"] } }] : []),
+      ],
+    };
+
+    const activeOrders = await Order.find(orderQuery);
+    const io = req.app.get("io");
+
+    for (const ord of activeOrders) {
+      ord.assignedRiderId = null;
+      ord.assignedAt = null;
+      ord.shippedAt = null;
+      ord.deliveryOtp = null;
+      ord.status = "Confirmed";
+      await ord.save();
+
+      if (io) {
+        const populatedOrd = await Order.findById(ord._id)
+          .populate("products.productId", "name image basePrice")
+          .populate("userId", "name username phone")
+          .populate("shippingAddress");
+        io.emit("updatedOrder", populatedOrd || ord);
+        io.emit("orderUpdated", populatedOrd || ord);
+      }
+    }
+
+    // Socket emission: notify staff dispatch queue that driver is now unavailable
+    if (io) {
+      io.emit("driverStatusChanged", {
+        riderId: rider._id,
+        driverStatus: "unavailable",
+        currentOrderId: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "تم تسجيل خروج السائق وأصبحت الحالة غير متاح 🔴",
+      revertedOrdersCount: activeOrders.length,
+      rider: {
+        _id: rider._id,
+        name: rider.name || rider.username,
+        driverStatus: "unavailable",
+        currentOrderId: null,
+      },
+    });
+  } catch (error) {
+    console.error("Error in riderLogout:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
  * 6. POST /api/delivery/manual-checkin/:riderId
  * Staff manually resets/checks-in a driver back to 'available'
  * Param: riderId
@@ -553,7 +883,7 @@ exports.manualCheckIn = async (req, res) => {
       ord.assignedAt = null;
       ord.shippedAt = null;
       ord.deliveryOtp = null;
-      ord.status = "ReadyForPickup";
+      ord.status = "Confirmed";
       await ord.save();
 
       // Notify clients that order has been reverted back to unassigned queue
@@ -636,33 +966,48 @@ exports.unassignOrder = async (req, res) => {
     order.assignedAt = null;
     order.shippedAt = null;
     order.deliveryOtp = null;
-    order.status = "ReadyForPickup";
+    order.status = "Confirmed";
     await order.save();
 
     if (prevRiderId) {
       const rider = await User.findById(prevRiderId);
       if (rider && rider.role === "rider") {
-        rider.currentOrderId = null;
-        rider.driverStatus = "available";
-        rider.returnedAt = new Date();
+        const remainingActiveOrders = await Order.find({
+          assignedRiderId: rider._id,
+          status: { $in: ["ReadyForPickup", "Shipped"] },
+          _id: { $ne: order._id },
+        });
+
+        if (remainingActiveOrders.length === 0) {
+          rider.currentOrderId = null;
+          rider.driverStatus = "available";
+          rider.returnedAt = new Date();
+        } else {
+          rider.currentOrderId = remainingActiveOrders[0]._id;
+          const hasShipped = remainingActiveOrders.some((o) => o.status === "Shipped");
+          rider.driverStatus = hasShipped ? "on_delivery" : "assigned";
+        }
         await rider.save();
 
         const io = req.app.get("io");
         if (io) {
-          io.emit("driverAvailable", {
-            riderId: rider._id,
-            rider: {
-              _id: rider._id,
-              name: rider.name || rider.username,
-              phone: rider.phone,
-              driverStatus: rider.driverStatus,
-              returnedAt: rider.returnedAt,
-            },
-          });
+          if (remainingActiveOrders.length === 0) {
+            io.emit("driverAvailable", {
+              riderId: rider._id,
+              rider: {
+                _id: rider._id,
+                name: rider.name || rider.username,
+                phone: rider.phone,
+                driverStatus: rider.driverStatus,
+                returnedAt: rider.returnedAt,
+              },
+            });
+          }
           io.emit("driverStatusChanged", {
             riderId: rider._id,
-            driverStatus: "available",
-            currentOrderId: null,
+            driverStatus: rider.driverStatus,
+            currentOrderId: rider.currentOrderId,
+            activeOrdersCount: remainingActiveOrders.length,
           });
         }
       }
@@ -692,7 +1037,7 @@ exports.unassignOrder = async (req, res) => {
 
 /**
  * 7. GET /api/delivery/my-status
- * Driver fetches their own status and current assigned order details
+ * Driver fetches their own status and current assigned order details (all active orders)
  * Accessible by: rider, admin
  */
 exports.getMyDriverStatus = async (req, res) => {
@@ -709,62 +1054,63 @@ exports.getMyDriverStatus = async (req, res) => {
       caller.role === "admin" && req.query.riderId ? req.query.riderId : callerId;
 
     const rider = await User.findById(targetRiderId)
-      .select("_id name username phone role driverStatus currentOrderId returnedAt")
-      .populate({
-        path: "currentOrderId",
-        populate: [
-          { path: "products.productId" },
-          { path: "userId", select: "name username phone" },
-          { path: "shippingAddress" },
-        ],
-      });
+      .select("_id name username phone role driverStatus currentOrderId returnedAt");
 
     if (!rider) {
       return res.status(404).json({ success: false, message: "السائق غير موجود" });
     }
 
-    let currentOrder = rider.currentOrderId;
+    // Fetch all active orders for this driver
+    const activeOrders = await Order.find({
+      assignedRiderId: rider._id,
+      status: { $in: ["ReadyForPickup", "Shipped"] },
+    })
+      .populate("products.productId")
+      .populate("userId", "name username phone")
+      .populate("shippingAddress")
+      .sort({ createdAt: 1 });
 
-    // Self-healing: if rider has no currentOrderId or it wasn't populated, find active order for this driver
-    if (!currentOrder || !currentOrder._id) {
-      currentOrder = await Order.findOne({
-        assignedRiderId: rider._id,
-        status: { $in: ["ReadyForPickup", "Shipped"] },
-      })
-        .populate("products.productId")
-        .populate("userId", "name username phone")
-        .populate("shippingAddress");
-
-      if (currentOrder) {
-        rider.currentOrderId = currentOrder._id;
-        if (rider.driverStatus === "available" || rider.driverStatus === "returning") {
-          rider.driverStatus =
-            currentOrder.status === "Shipped" ? "on_delivery" : "assigned";
-          await rider.save();
-        }
-      } else {
-        // No active ongoing order found
-        // If rider was on_delivery, transition to returning
-        if (rider.driverStatus === "on_delivery") {
-          rider.driverStatus = "returning";
-          rider.currentOrderId = null;
-          await rider.save();
-        }
-      }
-    } else if (["Delivered", "Submitted", "Canceled", "Cancelled"].includes(currentOrder.status)) {
-      // Clean up finished order
-      const wasDelivered = ["Delivered", "Submitted"].includes(currentOrder.status);
-      rider.currentOrderId = null;
-      // If order was delivered/submitted, driver transitions to/stays "returning" until QR check-in!
-      rider.driverStatus = wasDelivered ? "returning" : "available";
+    if (activeOrders.length > 0) {
+      rider.currentOrderId = activeOrders[0]._id;
+      const hasShipped = activeOrders.some((o) => o.status === "Shipped");
+      const targetStatus = hasShipped ? "on_delivery" : "assigned";
+      rider.driverStatus = targetStatus;
       await rider.save();
-      currentOrder = null;
+    } else {
+      // If no active orders found and driver was on_delivery or assigned, transition to returning
+      if (rider.driverStatus === "on_delivery" || rider.driverStatus === "assigned") {
+        rider.driverStatus = "returning";
+        rider.currentOrderId = null;
+        await rider.save();
+      }
     }
+
+    const maxOrdersPerRider = await getMaxOrdersPerRider();
+
+    // Calculate live FIFO queue position among available drivers
+    const availableRiders = await User.find({
+      role: "rider",
+      driverStatus: "available",
+    })
+      .select("_id returnedAt")
+      .sort({ returnedAt: 1 })
+      .lean();
+
+    const riderIdx = availableRiders.findIndex(
+      (r) => String(r._id) === String(rider._id)
+    );
+    const queuePosition = riderIdx >= 0 ? riderIdx + 1 : null;
+    const totalAvailableDrivers = availableRiders.length;
 
     return res.status(200).json({
       success: true,
       rider,
-      currentOrder: currentOrder || null,
+      queuePosition,
+      totalAvailableDrivers,
+      currentOrder: activeOrders[0] || null,
+      activeOrders: activeOrders || [],
+      totalActiveOrders: activeOrders.length,
+      maxOrdersPerRider,
     });
   } catch (error) {
     console.error("Error in getMyDriverStatus:", error);

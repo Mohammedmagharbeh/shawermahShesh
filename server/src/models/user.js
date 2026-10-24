@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
     driverStatus: {
       type: String,
       enum: DRIVER_STATUSES,
-      default: "available",
+      default: "unavailable",
     },
     currentOrderId: {
       type: mongoose.Schema.Types.ObjectId,

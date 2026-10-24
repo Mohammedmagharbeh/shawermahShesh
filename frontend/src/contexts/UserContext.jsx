@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -21,6 +22,11 @@ export const UserProvider = ({ children }) => {
     typeof window !== "undefined" && window.location.protocol === "https:";
 
   const { t } = useTranslation();
+
+  const userRef = useRef(null);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const persistUser = useCallback(
     (value) => {
@@ -38,7 +44,19 @@ export const UserProvider = ({ children }) => {
     [COOKIE_KEY, isHttps],
   );
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const currentUser = userRef.current;
+    if (currentUser?.role === "rider" && currentUser?.token) {
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/delivery/rider-logout`,
+          {},
+          { headers: { authorization: `Bearer ${currentUser.token}` } }
+        );
+      } catch (e) {
+        console.warn("Failed to notify server of rider logout:", e?.message);
+      }
+    }
     persistUser(null);
     setUser(null);
     // مسح أي بيانات أخرى قد تؤثر على الدخول القادم

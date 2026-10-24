@@ -24,6 +24,8 @@ import {
   Send,
   Printer,
   X,
+  Sliders,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,12 +43,18 @@ export default function DispatchQueue() {
   const { user } = useUser();
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === "ar";
+  const isAdmin = user?.role === "admin";
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [orders, setOrders] = useState([]);
   const [availableDrivers, setAvailableDrivers] = useState([]);
   const [allDrivers, setAllDrivers] = useState([]);
+
+  // Max orders per rider configuration (Admin only, 1 to 5)
+  const [maxOrdersPerRider, setMaxOrdersPerRider] = useState(3);
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Active tab on right panel: "available" or "fleet"
   const [driverTab, setDriverTab] = useState("available");
@@ -69,7 +77,8 @@ export default function DispatchQueue() {
     if (!soundEnabled) return;
     try {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        audioContextRef.current = new (window.AudioContext ||
+          window.webkitAudioContext)();
       }
       const ctx = audioContextRef.current;
       if (ctx.state === "suspended") {
@@ -98,16 +107,19 @@ export default function DispatchQueue() {
     try {
       const data = await deliveryService.getQueue(user.token);
       if (data?.success) {
-        setOrders(
-          (data.orders || []).filter((o) => o.source !== "ishbek")
-        );
+        setOrders((data.orders || []).filter((o) => o.source !== "ishbek"));
         setAvailableDrivers(data.availableDrivers || []);
         setAllDrivers(data.allDrivers || []);
+        if (data.settings?.maxOrdersPerRider) {
+          setMaxOrdersPerRider(data.settings.maxOrdersPerRider);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch delivery queue:", error);
       if (isManual) {
-        toast.error(error.response?.data?.message || "فشل تحديث بيانات الإرسال");
+        toast.error(
+          error.response?.data?.message || "فشل تحديث بيانات الإرسال",
+        );
       }
     } finally {
       setLoading(false);
@@ -138,21 +150,61 @@ export default function DispatchQueue() {
     socket.on("driverAssigned", handleUpdate);
     socket.on("driverAvailable", (data) => {
       toast.success(
-        `السائق ${data.rider?.name || "سائق"} وصل للفرع وهو متاح الآن! 🛵`
+        `السائق ${data.rider?.name || "سائق"} وصل للفرع وهو متاح الآن! 🛵`,
       );
       handleUpdate();
     });
     socket.on("driverStatusChanged", handleUpdate);
     socket.on("updatedOrder", handleUpdate);
+    socket.on("deliverySettingsUpdated", (settings) => {
+      if (settings?.maxOrdersPerRider) {
+        setMaxOrdersPerRider(settings.maxOrdersPerRider);
+        toast.success(
+          `تم تحديث سعة السائق إلى ${settings.maxOrdersPerRider} طلبات 🛵`,
+        );
+        fetchQueueData();
+      }
+    });
 
     return () => {
       socket.disconnect();
     };
   }, [soundEnabled]);
 
+  // Handle updating max orders per rider (Admin only)
+  const handleUpdateMaxOrders = async (newMax) => {
+    if (!isAdmin) {
+      toast.error("تعديل سعة السائقين متاح للمدراء فقط");
+      return;
+    }
+    setSavingSettings(true);
+    try {
+      const res = await deliveryService.updateSettings(
+        { maxOrdersPerRider: newMax },
+        user.token,
+      );
+      if (res?.success) {
+        setMaxOrdersPerRider(res.settings?.maxOrdersPerRider || newMax);
+        toast.success(`تم تحديث سعة السائق إلى ${newMax} طلبات بنجاح 🛵`);
+        setShowSettingsModal(false);
+        fetchQueueData();
+      }
+    } catch (error) {
+      console.error("Failed to update delivery settings:", error);
+      toast.error(
+        error.response?.data?.message || "فشل تحديث إعدادات سعة السائقين",
+      );
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   // Handle assigning an order to a driver
   const handleAssign = async (orderId, targetRiderId = null) => {
-    const riderId = targetRiderId || selectedRiderForOrder[orderId] || availableDrivers[0]?._id;
+    const riderId =
+      targetRiderId ||
+      selectedRiderForOrder[orderId] ||
+      availableDrivers[0]?._id;
     if (!riderId) {
       toast.error("لا يوجد سائق متاح لتعيين الطلب إليه");
       return;
@@ -162,7 +214,7 @@ export default function DispatchQueue() {
     try {
       const res = await deliveryService.assignOrder(
         { orderId, riderId },
-        user.token
+        user.token,
       );
       if (res?.success) {
         toast.success(res.message || "تم تعيين السائق للطلب بنجاح");
@@ -185,7 +237,7 @@ export default function DispatchQueue() {
         toast.success(
           res.revertedOrdersCount > 0
             ? "تم إعادة تعيين السائق إلى متاح، وإلغاء تعيين الطلب وإعادته لطابور الإرسال بنجاح 🛵"
-            : "تم تسجيل عودة السائق وتعيينه كمتاح بنجاح"
+            : "تم تسجيل عودة السائق وتعيينه كمتاح بنجاح",
         );
         fetchQueueData();
       }
@@ -237,6 +289,11 @@ export default function DispatchQueue() {
         return { label: "في الطريق للزبون", color: "bg-blue-600 text-white" };
       case "returning":
         return { label: "عائد للفرع", color: "bg-purple-600 text-white" };
+      case "unavailable":
+        return {
+          label: "غير متاح (خارج الخدمة) 🔴",
+          color: "bg-red-600 text-white",
+        };
       default:
         return { label: status, color: "bg-gray-500 text-white" };
     }
@@ -247,7 +304,9 @@ export default function DispatchQueue() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-3">
           <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-600 font-bold">جاري تحميل لوحة الإرسال والتوصيل...</p>
+          <p className="text-gray-600 font-bold">
+            جاري تحميل لوحة الإرسال والتوصيل...
+          </p>
         </div>
       </div>
     );
@@ -283,7 +342,7 @@ export default function DispatchQueue() {
               onClick={() => {
                 setSoundEnabled((prev) => !prev);
                 toast.success(
-                  !soundEnabled ? "تم تفعيل التنبيه الصوتي" : "تم كتم الصوت"
+                  !soundEnabled ? "تم تفعيل التنبيه الصوتي" : "تم كتم الصوت",
                 );
               }}
               className={`rounded-xl border transition-all ${
@@ -315,6 +374,24 @@ export default function DispatchQueue() {
               <Bike className="w-4 h-4 ml-1.5" />
               شاشة السائق 🛵
             </a>
+
+            {/* Max Orders Per Rider Setting / Indicator */}
+            {isAdmin ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettingsModal(true)}
+                className="rounded-xl border-red-300 text-red-800 bg-red-50 hover:bg-red-100 font-bold shadow-sm"
+              >
+                <Sliders className="w-4 h-4 ml-1.5 text-red-600" />
+                سعة السائق: {maxOrdersPerRider} طلبات ⚙️
+              </Button>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200">
+                <Bike className="w-3.5 h-3.5 text-gray-500" />
+                سعة السائق: {maxOrdersPerRider} طلبات كحد أقصى
+              </div>
+            )}
 
             {/* Show Branch QR Modal */}
             <Button
@@ -348,7 +425,7 @@ export default function DispatchQueue() {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">
-                  طلبات جاهزة للتوصيل
+                  طلبات بانتظار الإرسال والتوصيل
                 </p>
                 <h3 className="text-3xl font-black text-amber-900 mt-1">
                   {orders.length}
@@ -383,7 +460,10 @@ export default function DispatchQueue() {
                   طلبات في الطريق
                 </p>
                 <h3 className="text-3xl font-black text-blue-900 mt-1">
-                  {allDrivers.filter((d) => d.driverStatus === "on_delivery").length}
+                  {
+                    allDrivers.filter((d) => d.driverStatus === "on_delivery")
+                      .length
+                  }
                 </h3>
               </div>
               <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
@@ -399,7 +479,10 @@ export default function DispatchQueue() {
                   سائقين عائدين للفرع
                 </p>
                 <h3 className="text-3xl font-black text-purple-900 mt-1">
-                  {allDrivers.filter((d) => d.driverStatus === "returning").length}
+                  {
+                    allDrivers.filter((d) => d.driverStatus === "returning")
+                      .length
+                  }
                 </h3>
               </div>
               <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold">
@@ -416,7 +499,7 @@ export default function DispatchQueue() {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <Package className="w-5 h-5 text-red-600" />
-                طابور الطلبات الجاهزة للإرسال
+                طابور الطلبات المؤكدة وبانتظار الإرسال
                 <Badge className="bg-red-600 text-white mr-2">
                   {orders.length}
                 </Badge>
@@ -429,10 +512,10 @@ export default function DispatchQueue() {
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
                 <h3 className="text-base font-bold text-gray-900">
-                  لا توجد طلبات توصيل جاهزة حالياً
+                  لا توجد طلبات توصيل مؤكدة حالياً
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  عندما يقوم المطبخ بتجهيز طلبات توصيل، ستظهر فوراً في هذا القسم
+                  عندما يتم تأكيد طلبات توصيل جديدة، ستظهر فوراً في هذا القسم لتعيينها للسائقين
                 </p>
               </Card>
             ) : (
@@ -458,9 +541,15 @@ export default function DispatchQueue() {
                           </span>
                           <Badge
                             variant="outline"
-                            className="text-xs font-bold border-amber-400 bg-amber-50 text-amber-800"
+                            className={`text-xs font-bold ${
+                              order.status === "Confirmed"
+                                ? "border-purple-300 bg-purple-50 text-purple-800"
+                                : "border-amber-400 bg-amber-50 text-amber-800"
+                            }`}
                           >
-                            جاهز للاستلام 📦
+                            {order.status === "Confirmed"
+                              ? "تم التأكيد ✅"
+                              : "بانتظار السائق 🛵"}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
@@ -475,7 +564,11 @@ export default function DispatchQueue() {
                           <div className="space-y-1.5">
                             <div className="flex items-center gap-2 text-gray-900 font-bold">
                               <User className="w-4 h-4 text-red-600 flex-shrink-0" />
-                              <span>{order.userDetails?.name || order.userId?.name || "زبون"}</span>
+                              <span>
+                                {order.userDetails?.name ||
+                                  order.userId?.name ||
+                                  "زبون"}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-600 text-xs">
                               <Phone className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
@@ -484,7 +577,9 @@ export default function DispatchQueue() {
                                 className="font-mono hover:text-red-600 underline"
                                 dir="ltr"
                               >
-                                {order.userDetails?.phone || order.userId?.phone || "-"}
+                                {order.userDetails?.phone ||
+                                  order.userId?.phone ||
+                                  "-"}
                               </a>
                             </div>
                           </div>
@@ -493,8 +588,12 @@ export default function DispatchQueue() {
                             <div className="flex items-start gap-1.5">
                               <MapPin className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                               <span className="font-medium line-clamp-2">
-                                {order.shippingAddress?.name || order.shippingAddress?.area || order.shippingAddress?.details || "عنوان الزبون"}
-                                {order.userDetails?.apartment && ` (شقة/طابق: ${order.userDetails.apartment})`}
+                                {order.shippingAddress?.name ||
+                                  order.shippingAddress?.area ||
+                                  order.shippingAddress?.details ||
+                                  "عنوان الزبون"}
+                                {order.userDetails?.apartment &&
+                                  ` (شقة/طابق: ${order.userDetails.apartment})`}
                               </span>
                             </div>
                           </div>
@@ -511,8 +610,12 @@ export default function DispatchQueue() {
                                 key={idx}
                                 className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-800 px-2.5 py-1 rounded-lg font-medium"
                               >
-                                <span className="font-bold text-red-700">{item.quantity}×</span>
-                                {item.productId?.name?.ar || item.name?.ar || "وجبة"}
+                                <span className="font-bold text-red-700">
+                                  {item.quantity}×
+                                </span>
+                                {item.productId?.name?.ar ||
+                                  item.name?.ar ||
+                                  "وجبة"}
                               </span>
                             ))}
                           </div>
@@ -525,7 +628,9 @@ export default function DispatchQueue() {
 
                         {/* Total Price */}
                         <div className="flex items-center justify-between border-t border-gray-100 pt-3 text-sm">
-                          <span className="text-gray-500 font-medium">إجمالي الطلب:</span>
+                          <span className="text-gray-500 font-medium">
+                            إجمالي الطلب:
+                          </span>
                           <span className="text-base font-black text-red-600 font-mono">
                             {order.totalPrice?.toFixed(2)} JOD
                           </span>
@@ -544,13 +649,15 @@ export default function DispatchQueue() {
                                     معين للسائق:
                                   </p>
                                   <p className="text-sm font-black text-gray-900">
-                                    {assignedRider?.name || assignedRider?.username || "سائق"}
+                                    {assignedRider?.name ||
+                                      assignedRider?.username ||
+                                      "سائق"}
                                   </p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
                                 <Badge className="bg-amber-600 text-white text-xs animate-pulse">
-                                  بانتظار الاستلام من الكاونتر
+                                  بانتظار السائق (للاستلام) 🛵
                                 </Badge>
                                 <Button
                                   variant="ghost"
@@ -569,12 +676,16 @@ export default function DispatchQueue() {
                               {/* One-click quick assign to top driver in FIFO */}
                               {topDriver ? (
                                 <Button
-                                  onClick={() => handleAssign(order._id, topDriver._id)}
+                                  onClick={() =>
+                                    handleAssign(order._id, topDriver._id)
+                                  }
                                   disabled={assigningOrderId === order._id}
                                   className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold rounded-xl shadow-md shadow-emerald-200"
                                 >
                                   <Send className="w-4 h-4 ml-2" />
-                                  إرسال للسائق التالي #{1}: {topDriver.name || topDriver.username}
+                                  إرسال للسائق التالي #{1}:{" "}
+                                  {topDriver.name || topDriver.username}{" "}
+                                  ({topDriver.activeOrdersCount || 0}/{maxOrdersPerRider})
                                 </Button>
                               ) : null}
 
@@ -591,11 +702,15 @@ export default function DispatchQueue() {
                                   className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500"
                                 >
                                   <option value="">
-                                    {topDriver ? "أو اختر سائقاً آخر..." : "اختر سائقاً..."}
+                                    {topDriver
+                                      ? "أو اختر سائقاً آخر..."
+                                      : "اختر سائقاً..."}
                                   </option>
                                   {availableDrivers.map((driver, idx) => (
                                     <option key={driver._id} value={driver._id}>
-                                      #{idx + 1} {driver.name || driver.username} ({driver.phone || "بدون هاتف"})
+                                      #{idx + 1}{" "}
+                                      {driver.name || driver.username} (
+                                      {driver.activeOrdersCount || 0}/{maxOrdersPerRider} طلبات) - {driver.phone || "بدون هاتف"}
                                     </option>
                                   ))}
                                 </select>
@@ -604,7 +719,8 @@ export default function DispatchQueue() {
                                   onClick={() => handleAssign(order._id)}
                                   disabled={
                                     assigningOrderId === order._id ||
-                                    (!selectedRiderForOrder[order._id] && !topDriver)
+                                    (!selectedRiderForOrder[order._id] &&
+                                      !topDriver)
                                   }
                                   size="sm"
                                   className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl whitespace-nowrap"
@@ -664,7 +780,8 @@ export default function DispatchQueue() {
                 <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs text-emerald-800 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                   <span>
-                    ترتيب السائقين تلقائي بنظام <strong>FIFO</strong> بناءً على وقت مسح كود العودة للفرع.
+                    ترتيب السائقين تلقائي بنظام <strong>FIFO</strong> بناءً على
+                    وقت مسح كود العودة للفرع.
                   </span>
                 </div>
 
@@ -711,10 +828,15 @@ export default function DispatchQueue() {
                                     الدور التالي 🚀
                                   </Badge>
                                 )}
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                                  الحمولة: {driver.activeOrdersCount || 0}/{maxOrdersPerRider}
+                                </span>
                               </div>
                               <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                                 <Phone className="w-3 h-3" />
-                                <span dir="ltr">{driver.phone || "بدون هاتف"}</span>
+                                <span dir="ltr">
+                                  {driver.phone || "بدون هاتف"}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -760,21 +882,32 @@ export default function DispatchQueue() {
                               <h4 className="text-sm font-bold text-gray-900">
                                 {driver.name || driver.username}
                               </h4>
-                              <p className="text-xs text-gray-500 font-mono" dir="ltr">
+                              <p
+                                className="text-xs text-gray-500 font-mono"
+                                dir="ltr"
+                              >
                                 {driver.phone || "-"}
                               </p>
                             </div>
-                            <Badge className={`${statusInfo.color} text-xs font-bold`}>
+                            <Badge
+                              className={`${statusInfo.color} text-xs font-bold`}
+                            >
                               {statusInfo.label}
                             </Badge>
                           </div>
 
                           {/* Order info if delivering */}
-                          {driver.currentOrderId && (
+                          {(driver.activeOrdersCount > 0 || driver.currentOrderId) && (
                             <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 text-xs flex items-center justify-between">
-                              <span className="text-gray-600">طلب قيد التوصيل:</span>
+                              <span className="text-gray-600">
+                                الطلبات النشطة ({driver.activeOrdersCount || 0}/{maxOrdersPerRider}):
+                              </span>
                               <span className="font-bold text-red-600 font-mono">
-                                #{driver.currentOrderId?.sequenceNumber || "الطلب"}
+                                {driver.activeOrders && driver.activeOrders.length > 0
+                                  ? driver.activeOrders
+                                      .map((o) => `#${o.sequenceNumber || o._id?.slice(-4)}`)
+                                      .join(", ")
+                                  : `#${driver.currentOrderId?.sequenceNumber || "الطلب"}`}
                               </span>
                             </div>
                           )}
@@ -796,8 +929,8 @@ export default function DispatchQueue() {
                               {checkingInRiderId === driver._id
                                 ? "جاري التعيين..."
                                 : isReturning
-                                ? "تسجيل عودة يدوي للفرع 📍"
-                                : "إعادة تعيين إلى متاح"}
+                                  ? "تسجيل عودة يدوي للفرع 📍"
+                                  : "إعادة تعيين إلى متاح"}
                             </Button>
                           </div>
                         </CardContent>
@@ -813,7 +946,10 @@ export default function DispatchQueue() {
 
       {/* Branch QR Code Modal */}
       <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
-        <DialogContent className="max-w-md rounded-3xl p-6 text-center" dir={isRtl ? "rtl" : "ltr"}>
+        <DialogContent
+          className="max-w-md rounded-3xl p-6 text-center"
+          dir={isRtl ? "rtl" : "ltr"}
+        >
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-gray-900">
               رمز QR نقطة العودة للفرع 📍
@@ -822,7 +958,8 @@ export default function DispatchQueue() {
 
           <div className="my-4 space-y-4">
             <p className="text-xs text-gray-600">
-              يتم وضع هذا الرمز عند كاونتر الإرسال بالفرع. يمسحه السائق عند عودته ليصبح تلقائياً في قائمة المتاحين (FIFO).
+              يتم وضع هذا الرمز عند كاونتر الإرسال بالفرع. يمسحه السائق عند
+              عودته ليصبح تلقائياً في قائمة المتاحين (FIFO).
             </p>
 
             <div className="bg-white p-6 border-2 border-dashed border-red-300 rounded-2xl inline-block shadow-inner">
@@ -831,7 +968,7 @@ export default function DispatchQueue() {
                 id="branch-qr-img"
                 crossOrigin="anonymous"
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
-                  BRANCH_QR_CODE
+                  BRANCH_QR_CODE,
                 )}`}
                 alt="Branch QR Code"
                 className="w-48 h-48 mx-auto object-contain rounded-lg"
@@ -847,7 +984,7 @@ export default function DispatchQueue() {
                 onClick={() => {
                   const qrImg = document.getElementById("branch-qr-img");
                   let qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(
-                    BRANCH_QR_CODE
+                    BRANCH_QR_CODE,
                   )}`;
 
                   // If modal image is loaded, convert to dataURL for instant zero-network printing
@@ -861,7 +998,10 @@ export default function DispatchQueue() {
                       qrSrc = canvas.toDataURL("image/png");
                     }
                   } catch (e) {
-                    console.warn("Could not convert QR to dataURL, using URL instead", e);
+                    console.warn(
+                      "Could not convert QR to dataURL, using URL instead",
+                      e,
+                    );
                   }
 
                   const printWin = window.open("", "_blank");
@@ -981,6 +1121,62 @@ export default function DispatchQueue() {
                 <Printer className="w-4 h-4 ml-1.5" />
                 طباعة الرمز
               </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Settings Modal (Admin Only: Configure Max Orders Per Rider) */}
+      <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
+        <DialogContent
+          className="max-w-md rounded-3xl p-6 text-center"
+          dir={isRtl ? "rtl" : "ltr"}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-gray-900 flex items-center justify-center gap-2">
+              <Sliders className="w-5 h-5 text-red-600" />
+              إعداد سعة السائقين (الحد الأقصى للطلبات)
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="my-4 space-y-4 text-right">
+            <p className="text-xs text-gray-600 leading-relaxed">
+              حدد الحد الأقصى لعدد الطلبات النشطة التي يمكن تعيينها لنفس السائق في نفس الوقت (بين 1 و 5 طلبات).
+              السائق الذي يصل للحد الأقصى لن يظهر في طابور المتاحين حتى يقوم بتسليم أحد طلباته.
+            </p>
+
+            <div className="grid grid-cols-5 gap-2 pt-2">
+              {[1, 2, 3, 4, 5].map((val) => {
+                const isSelected = maxOrdersPerRider === val;
+                return (
+                  <button
+                    key={val}
+                    type="button"
+                    disabled={savingSettings}
+                    onClick={() => handleUpdateMaxOrders(val)}
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all font-bold ${
+                      isSelected
+                        ? "border-red-600 bg-red-50 text-red-700 shadow-md scale-105"
+                        : "border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className="text-2xl font-black">{val}</span>
+                    <span className="text-[10px] mt-1 text-gray-500">
+                      {val === 1
+                        ? "طلب واحد"
+                        : val === 2
+                          ? "طلبان"
+                          : `${val} طلبات`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <span>
+                الحد الأقصى المسموح به في النظام هو <strong>5 طلبات</strong> لكل سائق كحد أعلى. التعديل متاح للمدراء فقط.
+              </span>
             </div>
           </div>
         </DialogContent>

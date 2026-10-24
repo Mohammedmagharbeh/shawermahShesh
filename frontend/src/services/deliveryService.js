@@ -9,6 +9,25 @@ const getAuthHeaders = (token) => ({
 });
 
 export const deliveryService = {
+  // 0. Settings: Fetch delivery configuration
+  getSettings: async (token) => {
+    const { data } = await axios.get(
+      `${API_URL}/delivery/settings`,
+      getAuthHeaders(token)
+    );
+    return data;
+  },
+
+  // 0.1 Settings: Update delivery configuration (ADMIN ONLY)
+  updateSettings: async (settings, token) => {
+    const { data } = await axios.put(
+      `${API_URL}/delivery/settings`,
+      settings,
+      getAuthHeaders(token)
+    );
+    return data;
+  },
+
   // 1. Staff: Get delivery queue (ReadyForPickup orders & available drivers)
   getQueue: async (token) => {
     const { data } = await axios.get(
@@ -38,11 +57,11 @@ export const deliveryService = {
     return data;
   },
 
-  // 3. Driver: Confirm pickup from branch counter
-  confirmPickup: async (orderId, token, riderId = null) => {
+  // 3. Driver: Confirm pickup from branch counter (single or bulk)
+  confirmPickup: async (orderId, token, riderId = null, all = false) => {
     const { data } = await axios.post(
       `${API_URL}/delivery/confirm-pickup`,
-      { orderId, riderId },
+      { orderId, riderId, all },
       getAuthHeaders(token)
     );
     return data;
@@ -63,6 +82,16 @@ export const deliveryService = {
     const { data } = await axios.post(
       `${API_URL}/delivery/qr-checkin`,
       { qrCode, riderId },
+      getAuthHeaders(token)
+    );
+    return data;
+  },
+
+  // 5.1 Driver: Logout and become unavailable
+  riderLogout: async (token, riderId = null) => {
+    const { data } = await axios.post(
+      `${API_URL}/delivery/rider-logout`,
+      { riderId },
       getAuthHeaders(token)
     );
     return data;

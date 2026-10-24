@@ -28,6 +28,7 @@ const USER_ROLES = Object.freeze(["user", "employee", "admin", "hr", "rider", "c
 
 // Driver Statuses & Branch QR
 const DRIVER_STATUSES = Object.freeze([
+  "unavailable",
   "available",
   "assigned",
   "on_delivery",
