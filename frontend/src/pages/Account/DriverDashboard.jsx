@@ -525,7 +525,7 @@ export default function DriverDashboard() {
           </div>
 
           <div className="flex items-center gap-2">
-            {driverStatus !== "available" && (
+            {(driverStatus === "unavailable" || driverStatus === "returning") && (
               <Button
                 size="sm"
                 onClick={startCamera}
@@ -619,7 +619,7 @@ export default function DriverDashboard() {
                 أنت متاح بالفرع 🟢
               </Badge>
               <h3 className="text-xl font-black text-gray-900">
-                في قائمة انتظار الإرسال (FIFO)
+                في قائمة انتظار الطلبات
               </h3>
               <p className="text-xs text-gray-500 max-w-xs mx-auto mt-2 leading-relaxed">
                 يرجى البقاء في استراحة الفرع. عند قيام الكاونتر بتعيين طلب جديد لك، ستظهر تفاصيله وزر تأكيد الاستلام هنا فوراً.
@@ -641,11 +641,11 @@ export default function DriverDashboard() {
               </span>
             </div>
 
-            {/* Live FIFO Queue Position Box */}
+            {/* Live Queue Position Box */}
             {queuePosition && (
               <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 text-center space-y-1">
                 <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block">
-                  موقعك الحالي في طابور الانطلاق (FIFO) 🛵
+                  موقعك الحالي في طابور الانطلاق 🛵
                 </span>
                 <p className="text-base font-black text-emerald-950">
                   أنت رقم <span className="text-2xl text-emerald-600 font-extrabold mx-1">#{queuePosition}</span> في الدور من أصل {totalAvailableDrivers || 1} سائقين متاحين
@@ -1020,7 +1020,7 @@ export default function DriverDashboard() {
                 تسجيل العودة للفرع
               </h3>
               <p className="text-xs text-gray-500 max-w-xs mx-auto mt-2 leading-relaxed">
-                عند وصولك إلى كاونتر الفرع، امسح رمز الـ QR لتسجيل وقت عودتك وحجز دورك في طابور الانتظار القادم (FIFO).
+                عند وصولك إلى كاونتر الفرع، امسح رمز الـ QR لتسجيل وقت عودتك وحجز دورك في طابور الانتظار.
               </p>
             </div>
 

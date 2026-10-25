@@ -661,6 +661,18 @@ function Login() {
             ) : isOpen ? t("login") : t("closed_btn")}
           </motion.button>
         </form>
+
+        {/* زر الانتقال إلى تسجيل دخول الموظفين / Staff Login Button */}
+        <div className="mt-6 pt-5 border-t border-white/20">
+          <button
+            type="button"
+            onClick={() => navigate("/employee-login")}
+            className="w-full py-3.5 px-4 bg-white/10 hover:bg-white/20 active:scale-[0.98] text-white border-2 border-white/30 hover:border-white/50 rounded-xl font-black text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm backdrop-blur-sm"
+          >
+            <span>دخول الموظفين والسائقين (Staff Portal)</span>
+            <span dir="ltr">👨‍🍳 ➔</span>
+          </button>
+        </div>
       </motion.div>
     </div>
   );

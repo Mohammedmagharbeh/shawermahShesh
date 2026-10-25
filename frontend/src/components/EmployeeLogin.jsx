@@ -507,8 +507,15 @@ function EmployeeLogin() {
         }
       }
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || t("error_invalid_credentials"));
+      console.error("Employee login failed:", error);
+      const serverMsg =
+        error.response?.data?.message ||
+        (typeof error.response?.data === "string" ? error.response.data : null);
+      toast.error(
+        serverMsg ||
+          t("error_invalid_credentials", "اسم المستخدم أو كلمة المرور غير صحيحة"),
+        { duration: 4000 }
+      );
     } finally {
       setLoading(false);
     }
@@ -599,6 +606,17 @@ function EmployeeLogin() {
         <p className="mt-8 text-white/60 text-xs italic">
           {t("employee_security_notice")}
         </p>
+
+        {/* العودة لتسجيل دخول الزبائن */}
+        <div className="mt-5 pt-4 border-t border-white/20">
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="text-white/80 hover:text-white text-xs font-bold underline transition-colors"
+          >
+            {t("back_to_customer_login", "العودة إلى تسجيل دخول الزبائن")} ➔
+          </button>
+        </div>
       </motion.div>
     </div>
   );

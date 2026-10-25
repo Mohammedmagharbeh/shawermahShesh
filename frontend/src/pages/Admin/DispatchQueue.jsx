@@ -51,6 +51,9 @@ export default function DispatchQueue() {
   const [availableDrivers, setAvailableDrivers] = useState([]);
   const [allDrivers, setAllDrivers] = useState([]);
 
+  // Live timer for real-time reactivity without manual page refresh
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
   // Max orders per rider configuration (Admin only, 1 to 5)
   const [maxOrdersPerRider, setMaxOrdersPerRider] = useState(3);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -129,6 +132,22 @@ export default function DispatchQueue() {
 
   useEffect(() => {
     fetchQueueData();
+  }, [user?.token]);
+
+  // Live ticker that runs every 5 seconds so waiting times and delay warnings update live without refreshing
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Periodic background refresh to guarantee fresh queue data
+  useEffect(() => {
+    const syncTimer = setInterval(() => {
+      fetchQueueData();
+    }, 10000);
+    return () => clearInterval(syncTimer);
   }, [user?.token]);
 
   // Socket.IO real-time synchronization
@@ -266,11 +285,122 @@ export default function DispatchQueue() {
   // Format wait time
   const formatWaitTime = (timestamp) => {
     if (!timestamp) return "الآن";
-    const minutes = Math.floor((new Date() - new Date(timestamp)) / 60000);
+    const minutes = Math.floor((currentTime - new Date(timestamp)) / 60000);
     if (minutes < 1) return "منذ لحظات";
     if (minutes < 60) return `منذ ${minutes} دقيقة`;
     const hours = Math.floor(minutes / 60);
     return `منذ ${hours} ساعة و ${minutes % 60} دقيقة`;
+  };
+
+  const selectedLanguage = i18n.language || "ar";
+
+  // منطقة التوصيل
+  const getOrderArea = (order) => {
+    return (
+      order.shippingAddress?.name ||
+      order.shippingAddress?.area ||
+      order.shippingAddress?.details ||
+      order.userDetails?.apartment ||
+      ""
+    );
+  };
+
+  // طباعة الفاتورة (نفس منطق الداشبورد وصفحة الطلبات)
+  const printOrderInvoice = (order) => {
+    const customerPhone =
+      order.userId?.phone || order.userDetails?.phone || "N/A";
+    const customerName =
+      order.userDetails?.name || order.userId?.name || "N/A";
+    const deliveryType =
+      order.orderType === "delivery"
+        ? (t("delivery") || "توصيل")
+        : (t("pickup") || "استلام من الفرع");
+    const area = getOrderArea(order);
+
+    const discountRow =
+      order.discountAmount > 0
+        ? `<p style="display:flex; justify-content:space-between; color:#15803d;"><strong>${t("promo_discount") || "خصم الكود"}${order.promoCode ? ` (${order.promoCode})` : ""}:</strong> <span>- ${Number(order.discountAmount).toFixed(2)} JOD</span></p>`
+        : "";
+
+    const areaRow =
+      order.orderType === "delivery" && area
+        ? `<p style="text-align:center; font-size:14px; background:#f9f9f9; padding:4px;"><strong>${t("area") || "المنطقة"}:</strong> ${area}</p>`
+        : "";
+
+    const rows = (order.products || [])
+      .map((item, idx) => {
+        const additions =
+          item.additions?.length > 0
+            ? `<div style="font-size:12px; color:#555;">+ ${item.additions.map((a) => a.name?.[selectedLanguage] || a.name?.ar || a.name).join(", ")}</div>`
+            : "";
+        const protein = item.selectedProtein
+          ? `<div style="font-size:13px; color:#000; font-weight:bold; margin-top:2px;">${t("protein") || "البروتين"}: ${t(item.selectedProtein.toLowerCase()) || item.selectedProtein}</div>`
+          : "";
+        const spicy = item.isSpicy
+          ? `<div style="color:red; font-size:12px;">${t("spicy") || "حار"}</div>`
+          : "";
+        const allNotes = [item.notes, idx === 0 ? order.orderNote : ""]
+          .filter(Boolean)
+          .join(" - ");
+        const notes = allNotes
+          ? `<div style="font-size:12px; color:#777;">${t("notes") || "ملاحظات"}: ${allNotes}</div>`
+          : "";
+
+        return `
+          <tr>
+            <td style="padding:6px; border-bottom:1px solid #eee;">
+              ${item.productId?.name?.[selectedLanguage] || item.name?.[selectedLanguage] || item.productId?.name?.ar || item.name?.ar || "وجبة"}
+              ${additions}${protein}${spicy}${notes}
+            </td>
+            <td style="text-align:center; padding:6px; border-bottom:1px solid #eee;">${item.quantity}</td>
+            <td style="text-align:left; padding:6px; border-bottom:1px solid #eee;">${((item.priceAtPurchase || item.price || 0) * item.quantity).toFixed(2)} JOD</td>
+          </tr>`;
+      })
+      .join("");
+
+    const subtotal = (
+      (order.totalPrice || 0) -
+      (order.shippingAddress?.deliveryCost || 0) +
+      (order.discountAmount || 0)
+    ).toFixed(2);
+
+    const invoiceHtml = `
+      <div style="direction:rtl; font-family:Tahoma, sans-serif; width:100%; max-width:480px; margin:auto; padding:16px; border:1px solid #ccc; background:#fff;">
+        <h2 style="text-align:center; margin-bottom:8px;">${t("invoice_title") || "فاتورة"} #${order.sequenceNumber || order._id?.slice(-6)}</h2>
+        <p style="text-align:center; font-size:14px;"><strong>${t("invoice_customer") || "العميل:"}</strong> ${customerName}</p>
+        <p style="text-align:center; font-size:14px;"><strong>${t("invoice_phone") || "الهاتف:"}</strong> ${customerPhone}</p>
+        <p style="text-align:center; font-size:14px;"><strong>${t("order_type") || "نوع الطلب:"}</strong> ${deliveryType}</p>
+        ${areaRow}
+        <hr/>
+        <table style="width:100%; border-collapse:collapse; font-size:14px;">
+          <thead>
+            <tr style="background:#f0f0f0;">
+              <th style="padding:6px; border-bottom:1px solid #000; text-align:right;">${t("product") || "المنتج"}</th>
+              <th style="padding:6px; border-bottom:1px solid #000; text-align:center;">${t("quantity") || "الكمية"}</th>
+              <th style="padding:6px; border-bottom:1px solid #000; text-align:left;">${t("price") || "السعر"}</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div style="margin-top:10px; font-size:14px;">
+          <p style="display:flex; justify-content:space-between;"><strong>${t("subtotal") || "المجموع الفرعي"}:</strong> <span>${subtotal} JOD</span></p>
+          ${discountRow}
+          <p style="display:flex; justify-content:space-between;"><strong>${t("delivery") || "التوصيل"}:</strong> <span>${order.shippingAddress?.deliveryCost || 0} JOD</span></p>
+          <p style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px;"><strong>${t("total") || "الإجمالي"}:</strong> <span>${(order.totalPrice || 0).toFixed(2)} JOD</span></p>
+        </div>
+        <hr />
+        <p style="text-align:center; font-weight:bold;"> ${t("invoice_thank_you") || "شكراً لاختياركم شاورما شيش"} </p>
+      </div>`;
+
+    const printWindow = window.open("", "", "width=400,height=600");
+    if (!printWindow) return;
+    printWindow.document.write(
+      `<html><head><title>فاتورة #${order.sequenceNumber || order._id?.slice(-6)}</title><meta charset="UTF-8" /></head><body>${invoiceHtml}</body></html>`,
+    );
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
   };
 
   // Active / on-route drivers filter
@@ -329,7 +459,7 @@ export default function DispatchQueue() {
                 لوحة إرسال وتتبع التوصيل
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 font-medium">
-                إدارة طابور السائقين (FIFO) وتعيين الطلبات الجاهزة فوريّاً
+                إدارة طابور السائقين وتعيين الطلبات الجاهزة فوريّاً
               </p>
             </div>
           </div>
@@ -531,7 +661,7 @@ export default function DispatchQueue() {
                     ? new Date(order.assignedAt).getTime()
                     : (order.updatedAt ? new Date(order.updatedAt).getTime() : null);
                   const minutesSinceAssignment = assignedTimestamp
-                    ? Math.floor((Date.now() - assignedTimestamp) / 60000)
+                    ? Math.floor((currentTime - assignedTimestamp) / 60000)
                     : 0;
                   const isOverdueAssignment = isPendingPickup && minutesSinceAssignment >= 3;
 
@@ -583,9 +713,22 @@ export default function DispatchQueue() {
                               : "بانتظار السائق 🛵"}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
-                          <Clock className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{formatWaitTime(order.createdAt)}</span>
+                        <div className="flex items-center gap-2">
+                          {/* زر طباعة الفاتورة في رأس الكرت */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-gray-200 text-gray-700 hover:text-red-700 hover:border-red-300 font-bold text-xs flex items-center gap-1.5 rounded-lg h-7 px-2 shadow-xs"
+                            onClick={() => printOrderInvoice(order)}
+                            title={t("print_invoice") || "طباعة الفاتورة"}
+                          >
+                            <Printer className="w-3.5 h-3.5 text-red-600" />
+                            <span className="hidden sm:inline">{t("print_invoice") || "طباعة الفاتورة"}</span>
+                          </Button>
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
+                            <Clock className="w-3.5 h-3.5 text-gray-400" />
+                            <span>{formatWaitTime(order.createdAt)}</span>
+                          </div>
                         </div>
                       </CardHeader>
 
@@ -657,14 +800,25 @@ export default function DispatchQueue() {
                           )}
                         </div>
 
-                        {/* Total Price */}
+                        {/* Total Price & Print Invoice Button */}
                         <div className="flex items-center justify-between border-t border-gray-100 pt-3 text-sm">
                           <span className="text-gray-500 font-medium">
                             إجمالي الطلب:
                           </span>
-                          <span className="text-base font-black text-red-600 font-mono">
-                            {order.totalPrice?.toFixed(2)} JOD
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-base font-black text-red-600 font-mono">
+                              {order.totalPrice?.toFixed(2)} JOD
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-primary text-primary hover:bg-red-50 font-bold text-xs flex items-center gap-1.5 rounded-xl h-8 px-3"
+                              onClick={() => printOrderInvoice(order)}
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              <span>{t("print_invoice") || "طباعة الفاتورة"}</span>
+                            </Button>
+                          </div>
                         </div>
 
                         {/* Assignment Section */}
@@ -712,7 +866,7 @@ export default function DispatchQueue() {
                             </div>
                           ) : (
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                              {/* One-click quick assign to top driver in FIFO */}
+                              {/* One-click quick assign to top driver in queue */}
                               {topDriver ? (
                                 <Button
                                   onClick={() =>
@@ -778,7 +932,7 @@ export default function DispatchQueue() {
             )}
           </div>
 
-          {/* Right Column (5 cols): Driver Fleet & FIFO Queue */}
+          {/* Right Column (5 cols): Driver Fleet & Waiting Queue */}
           <div className="lg:col-span-5 space-y-4">
             {/* Tabs */}
             <div className="flex bg-white rounded-2xl p-1.5 border border-gray-200 shadow-sm">
@@ -791,7 +945,7 @@ export default function DispatchQueue() {
                 }`}
               >
                 <UserCheck className="w-4 h-4" />
-                طابور الفرع (FIFO)
+                طابور السائقين المتاحين
                 <span className="inline-flex items-center justify-center bg-white/20 text-white rounded-full px-1.5 py-0.2 text-[10px]">
                   {availableDrivers.length}
                 </span>
@@ -813,14 +967,13 @@ export default function DispatchQueue() {
               </button>
             </div>
 
-            {/* Tab 1: Available FIFO Queue */}
+            {/* Tab 1: Available Drivers Queue */}
             {driverTab === "available" && (
               <div className="space-y-3">
                 <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs text-emerald-800 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                   <span>
-                    ترتيب السائقين تلقائي بنظام <strong>FIFO</strong> بناءً على
-                    وقت مسح كود العودة للفرع.
+                    ترتيب السائقين تلقائي بحسب أسبقية الحضور ومسح رمز الـ QR عند العودة للفرع.
                   </span>
                 </div>
 
@@ -998,7 +1151,7 @@ export default function DispatchQueue() {
           <div className="my-4 space-y-4">
             <p className="text-xs text-gray-600">
               يتم وضع هذا الرمز عند كاونتر الإرسال بالفرع. يمسحه السائق عند
-              عودته ليصبح تلقائياً في قائمة المتاحين (FIFO).
+              عودته ليصبح تلقائياً في قائمة السائقين المتاحين بالدور.
             </p>
 
             <div className="bg-white p-6 border-2 border-dashed border-red-300 rounded-2xl inline-block shadow-inner">
@@ -1122,7 +1275,7 @@ export default function DispatchQueue() {
                           <h1>شاورما شيش 🌯</h1>
                           <p class="subtitle">
                             <strong>كاونتر الاستلام والإرسال — نقطة تسجيل العودة</strong><br />
-                            امسح هذا الرمز عند عودتك للفرع لتسجيل الدخول في طابور الانتظار (FIFO)
+                            امسح هذا الرمز عند عودتك للفرع لتسجيل الدخول في طابور الانتظار
                           </p>
                           <div class="qr-box">
                             <img id="qrPrintImg" src="${qrSrc}" alt="Branch QR Code" />

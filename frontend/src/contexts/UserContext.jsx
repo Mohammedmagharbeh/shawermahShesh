@@ -141,11 +141,18 @@ export const UserProvider = ({ children }) => {
     await syncUserWithServer(userData.token);
   };
 
-  // ✅ Axios Interceptor لمعالجة انتهاء الجلسة
+  // ✅ Axios Interceptor لمعالجة انتهاء الجلسة (مع استثناء محاولات تسجيل الدخول)
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
+        const requestUrl = String(error.config?.url || "").toLowerCase();
+        const isAuthEndpoint =
+          requestUrl.includes("login") ||
+          requestUrl.includes("employee-login") ||
+          requestUrl.includes("register") ||
+          requestUrl.includes("otp");
+
         const errorMessage =
           error.response?.data?.message || error.response?.data || "";
         const errorString =
@@ -153,9 +160,12 @@ export const UserProvider = ({ children }) => {
             ? errorMessage
             : JSON.stringify(errorMessage);
 
+        // لا نقوم بتسجيل الخروج إذا كان الخطأ 401 نتيجة إدخال بيانات خاطئة في شاشات تسجيل الدخول
         if (
-          error.response?.status === 401 ||
-          errorString.toLowerCase().includes("invalid token")
+          !isAuthEndpoint &&
+          (error.response?.status === 401 ||
+            errorString.toLowerCase().includes("invalid token") ||
+            errorString.toLowerCase().includes("jwt expired"))
         ) {
           logout();
           toast.error(t("session_expired"));
