@@ -201,6 +201,7 @@ const validateJWT = require("../middlewares/validateJWT");
 const PushToken = require("../models/pushToken");
 const User = require("../models/user");
 
+const mongoose = require("mongoose");
 const router = express.Router();
 const expo = new Expo();
 
@@ -231,11 +232,17 @@ const optionalAuth = async (req, res, next) => {
 
 router.post("/register", optionalAuth, async (req, res) => {
   try {
-    const { token, platform } = req.body;
+    const { token, platform, userId: bodyUserId } = req.body;
+    const resolvedUserId =
+      req.user?._id ||
+      (bodyUserId && mongoose.Types.ObjectId.isValid(bodyUserId)
+        ? bodyUserId
+        : null);
+
     console.log("[push] register", {
       hasBearer: !!req.get("authorization"),
       hasUser: !!req.user,
-      userId: req.user?._id,
+      userId: resolvedUserId,
     });
 
     if (!Expo.isExpoPushToken(token)) {
@@ -247,7 +254,7 @@ router.post("/register", optionalAuth, async (req, res) => {
         $set: {
           token,
           platform,
-          ...(req.user ? { userId: req.user._id } : {}),
+          ...(resolvedUserId ? { userId: resolvedUserId } : {}),
         },
       },
       { upsert: true },

@@ -442,16 +442,16 @@ exports.confirmPickup = async (req, res) => {
       updatedOrders.push(populated);
 
       // Push notification to customer
-      const customerUserId = ord.userId?._id || ord.userId;
       sendToUser(
-        customerUserId,
-        "طلبك صار جاهز وبطريقه إلك 🚗",
+        populated,
+        "طلبك في الطريق إليك 🚗",
         `طلب #${ord.sequenceNumber} بالطريق إلك! رمز التسليم عند الاستلام: ${deliveryOtp}`,
-        { orderId: String(ord._id), deliveryOtp }
+        { orderId: String(ord._id), deliveryOtp, status: "Shipped" }
       );
 
       if (io) {
         io.emit("updatedOrder", populated);
+        io.emit("orderUpdated", populated);
       }
     }
 
@@ -592,18 +592,18 @@ exports.verifyDeliveryOtp = async (req, res) => {
       .populate("assignedRiderId", "_id name username phone driverStatus");
 
     // Push notification to customer
-    const customerUserId = order.userId?._id || order.userId;
     sendToUser(
-      customerUserId,
+      populatedOrder,
       "تم تسليم طلبك، بالهنا والشفا 🍽️",
       `تم تسليم طلبك #${order.sequenceNumber} بنجاح. شكراً لطلبك من شاورما شيش!`,
-      { orderId: String(order._id) }
+      { orderId: String(order._id), status: "Delivered" }
     );
 
     // Socket emission
     const io = req.app.get("io");
     if (io) {
       io.emit("updatedOrder", populatedOrder);
+      io.emit("orderUpdated", populatedOrder);
       io.emit("driverStatusChanged", {
         riderId: rider._id,
         driverStatus: rider.driverStatus,

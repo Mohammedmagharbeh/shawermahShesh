@@ -1,4 +1,4 @@
-const server = require("./app"); // note: fixed path
+const server = require("./app");
 const PORT = process.env.PORT;
 
 server.listen(PORT, () => {

@@ -17,19 +17,15 @@ import {
   AlertCircle,
   Volume2,
   VolumeX,
-  ExternalLink,
-  ChevronRight,
-  ArrowRight,
   UserCheck,
   Send,
   Printer,
   X,
   Sliders,
-  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -309,12 +305,11 @@ export default function DispatchQueue() {
   const printOrderInvoice = (order) => {
     const customerPhone =
       order.userId?.phone || order.userDetails?.phone || "N/A";
-    const customerName =
-      order.userDetails?.name || order.userId?.name || "N/A";
+    const customerName = order.userDetails?.name || order.userId?.name || "N/A";
     const deliveryType =
       order.orderType === "delivery"
-        ? (t("delivery") || "توصيل")
-        : (t("pickup") || "استلام من الفرع");
+        ? t("delivery") || "توصيل"
+        : t("pickup") || "استلام من الفرع";
     const area = getOrderArea(order);
 
     const discountRow =
@@ -645,7 +640,8 @@ export default function DispatchQueue() {
                   لا توجد طلبات توصيل مؤكدة حالياً
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  عندما يتم تأكيد طلبات توصيل جديدة، ستظهر فوراً في هذا القسم لتعيينها للسائقين
+                  عندما يتم تأكيد طلبات توصيل جديدة، ستظهر فوراً في هذا القسم
+                  لتعيينها للسائقين
                 </p>
               </Card>
             ) : (
@@ -656,14 +652,19 @@ export default function DispatchQueue() {
                   const topDriver = availableDrivers[0];
 
                   // Overdue assignment check: assigned for >= 3 minutes without pickup confirmation
-                  const isPendingPickup = isAssigned && (order.status === "ReadyForPickup" || !order.status);
+                  const isPendingPickup =
+                    isAssigned &&
+                    (order.status === "ReadyForPickup" || !order.status);
                   const assignedTimestamp = order.assignedAt
                     ? new Date(order.assignedAt).getTime()
-                    : (order.updatedAt ? new Date(order.updatedAt).getTime() : null);
+                    : order.updatedAt
+                      ? new Date(order.updatedAt).getTime()
+                      : null;
                   const minutesSinceAssignment = assignedTimestamp
                     ? Math.floor((currentTime - assignedTimestamp) / 60000)
                     : 0;
-                  const isOverdueAssignment = isPendingPickup && minutesSinceAssignment >= 3;
+                  const isOverdueAssignment =
+                    isPendingPickup && minutesSinceAssignment >= 3;
 
                   return (
                     <Card
@@ -672,8 +673,8 @@ export default function DispatchQueue() {
                         isOverdueAssignment
                           ? "border-2 border-red-500 bg-red-50/40 shadow-lg shadow-red-100 ring-2 ring-red-400"
                           : isAssigned
-                          ? "border-amber-300 bg-amber-50/20"
-                          : "border-gray-200 bg-white hover:border-red-300 hover:shadow-md"
+                            ? "border-amber-300 bg-amber-50/20"
+                            : "border-gray-200 bg-white hover:border-red-300 hover:shadow-md"
                       }`}
                     >
                       {/* Overdue Warning Alert Banner */}
@@ -682,7 +683,9 @@ export default function DispatchQueue() {
                           <div className="flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 text-yellow-300" />
                             <span>
-                              تنبيه تأخر: السائق مُعيّن منذ {minutesSinceAssignment} دقيقة ولم يؤكد استلام الوجبة من الكاونتر بعد! ⚠️
+                              تنبيه تأخر: السائق مُعيّن منذ{" "}
+                              {minutesSinceAssignment} دقيقة ولم يؤكد استلام
+                              الوجبة من الكاونتر بعد! ⚠️
                             </span>
                           </div>
                           <span className="bg-white/20 px-2 py-0.5 rounded text-[11px] font-bold">
@@ -702,15 +705,15 @@ export default function DispatchQueue() {
                               order.status === "Confirmed"
                                 ? "border-purple-300 bg-purple-50 text-purple-800"
                                 : isOverdueAssignment
-                                ? "border-red-500 bg-red-100 text-red-800 font-black animate-pulse"
-                                : "border-amber-400 bg-amber-50 text-amber-800"
+                                  ? "border-red-500 bg-red-100 text-red-800 font-black animate-pulse"
+                                  : "border-amber-400 bg-amber-50 text-amber-800"
                             }`}
                           >
                             {order.status === "Confirmed"
                               ? "تم التأكيد ✅"
                               : isOverdueAssignment
-                              ? `تأخر بالاستلام (${minutesSinceAssignment} د) ⚠️`
-                              : "بانتظار السائق 🛵"}
+                                ? `تأخر بالاستلام (${minutesSinceAssignment} د) ⚠️`
+                                : "بانتظار السائق 🛵"}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-2">
@@ -723,7 +726,9 @@ export default function DispatchQueue() {
                             title={t("print_invoice") || "طباعة الفاتورة"}
                           >
                             <Printer className="w-3.5 h-3.5 text-red-600" />
-                            <span className="hidden sm:inline">{t("print_invoice") || "طباعة الفاتورة"}</span>
+                            <span className="hidden sm:inline">
+                              {t("print_invoice") || "طباعة الفاتورة"}
+                            </span>
                           </Button>
                           <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
                             <Clock className="w-3.5 h-3.5 text-gray-400" />
@@ -816,7 +821,9 @@ export default function DispatchQueue() {
                               onClick={() => printOrderInvoice(order)}
                             >
                               <Printer className="w-3.5 h-3.5" />
-                              <span>{t("print_invoice") || "طباعة الفاتورة"}</span>
+                              <span>
+                                {t("print_invoice") || "طباعة الفاتورة"}
+                              </span>
                             </Button>
                           </div>
                         </div>
@@ -877,8 +884,9 @@ export default function DispatchQueue() {
                                 >
                                   <Send className="w-4 h-4 ml-2" />
                                   إرسال للسائق التالي #{1}:{" "}
-                                  {topDriver.name || topDriver.username}{" "}
-                                  ({topDriver.activeOrdersCount || 0}/{maxOrdersPerRider})
+                                  {topDriver.name || topDriver.username} (
+                                  {topDriver.activeOrdersCount || 0}/
+                                  {maxOrdersPerRider})
                                 </Button>
                               ) : null}
 
@@ -903,7 +911,9 @@ export default function DispatchQueue() {
                                     <option key={driver._id} value={driver._id}>
                                       #{idx + 1}{" "}
                                       {driver.name || driver.username} (
-                                      {driver.activeOrdersCount || 0}/{maxOrdersPerRider} طلبات) - {driver.phone || "بدون هاتف"}
+                                      {driver.activeOrdersCount || 0}/
+                                      {maxOrdersPerRider} طلبات) -{" "}
+                                      {driver.phone || "بدون هاتف"}
                                     </option>
                                   ))}
                                 </select>
@@ -973,7 +983,8 @@ export default function DispatchQueue() {
                 <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs text-emerald-800 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                   <span>
-                    ترتيب السائقين تلقائي بحسب أسبقية الحضور ومسح رمز الـ QR عند العودة للفرع.
+                    ترتيب السائقين تلقائي بحسب أسبقية الحضور ومسح رمز الـ QR عند
+                    العودة للفرع.
                   </span>
                 </div>
 
@@ -1021,7 +1032,8 @@ export default function DispatchQueue() {
                                   </Badge>
                                 )}
                                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                                  الحمولة: {driver.activeOrdersCount || 0}/{maxOrdersPerRider}
+                                  الحمولة: {driver.activeOrdersCount || 0}/
+                                  {maxOrdersPerRider}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
@@ -1089,15 +1101,21 @@ export default function DispatchQueue() {
                           </div>
 
                           {/* Order info if delivering */}
-                          {(driver.activeOrdersCount > 0 || driver.currentOrderId) && (
+                          {(driver.activeOrdersCount > 0 ||
+                            driver.currentOrderId) && (
                             <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 text-xs flex items-center justify-between">
                               <span className="text-gray-600">
-                                الطلبات النشطة ({driver.activeOrdersCount || 0}/{maxOrdersPerRider}):
+                                الطلبات النشطة ({driver.activeOrdersCount || 0}/
+                                {maxOrdersPerRider}):
                               </span>
                               <span className="font-bold text-red-600 font-mono">
-                                {driver.activeOrders && driver.activeOrders.length > 0
+                                {driver.activeOrders &&
+                                driver.activeOrders.length > 0
                                   ? driver.activeOrders
-                                      .map((o) => `#${o.sequenceNumber || o._id?.slice(-4)}`)
+                                      .map(
+                                        (o) =>
+                                          `#${o.sequenceNumber || o._id?.slice(-4)}`,
+                                      )
                                       .join(", ")
                                   : `#${driver.currentOrderId?.sequenceNumber || "الطلب"}`}
                               </span>
@@ -1332,8 +1350,9 @@ export default function DispatchQueue() {
 
           <div className="my-4 space-y-4 text-right">
             <p className="text-xs text-gray-600 leading-relaxed">
-              حدد الحد الأقصى لعدد الطلبات النشطة التي يمكن تعيينها لنفس السائق في نفس الوقت (بين 1 و 5 طلبات).
-              السائق الذي يصل للحد الأقصى لن يظهر في طابور المتاحين حتى يقوم بتسليم أحد طلباته.
+              حدد الحد الأقصى لعدد الطلبات النشطة التي يمكن تعيينها لنفس السائق
+              في نفس الوقت (بين 1 و 5 طلبات). السائق الذي يصل للحد الأقصى لن
+              يظهر في طابور المتاحين حتى يقوم بتسليم أحد طلباته.
             </p>
 
             <div className="grid grid-cols-5 gap-2 pt-2">
@@ -1367,7 +1386,8 @@ export default function DispatchQueue() {
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
               <span>
-                الحد الأقصى المسموح به في النظام هو <strong>5 طلبات</strong> لكل سائق كحد أعلى. التعديل متاح للمدراء فقط.
+                الحد الأقصى المسموح به في النظام هو <strong>5 طلبات</strong> لكل
+                سائق كحد أعلى. التعديل متاح للمدراء فقط.
               </span>
             </div>
           </div>

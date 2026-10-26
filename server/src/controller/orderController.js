@@ -9,6 +9,7 @@ const {
   sendToUser,
   ORDER_STATUS_MESSAGES,
   getOrderStatusPushMessage,
+  notifyCustomerOnOrderStatusChange,
 } = require("../utils/pushService");
 
 // Validate ObjectId
@@ -729,41 +730,34 @@ exports.updateOrder = async (req, res) => {
     if (!updatedOrder)
       return res.status(404).json({ message: "Order not found" });
 
-    // ✅ جديد — إشعار للزبون عند تغيّر الحالة بحسب نوع الطلب (توصيل / استلام)
-    if (updates.status && before && updates.status !== before.status) {
-      const pushMsg = getOrderStatusPushMessage(
+    // ✅ إشعار للزبون عند تغيّر الحالة بحسب نوع الطلب (توصيل / استلام)
+    if (updates.status && (!before || updates.status !== before.status)) {
+      notifyCustomerOnOrderStatusChange(
+        updatedOrder,
         updates.status,
-        updatedOrder.orderType,
+        before?.status,
+      ).catch((errPush) =>
+        console.error("[push] updateOrder notification error:", errPush)
       );
-      if (pushMsg) {
-        sendToUser(
-          updatedOrder.userId?._id,
-          `طلب #${updatedOrder.sequenceNumber}`,
-          pushMsg,
-          { orderId: String(updatedOrder._id) },
-        );
-      }
     }
 
     // Send OTP if status confirmed
-    // if (updates.status === "Confirmed") {
-    //   const { sendOrderConfirm } = require("../utils/otp");
-    //   await sendOrderConfirm(updatedOrder.userId.phone);
-    // }
-    // Send OTP if status confirmed
-if (updates.status === "Confirmed") {
-  const phone = updatedOrder.userId?.phone || updatedOrder.customerPhone;
-  if (phone) {
-    try {
-      const { sendOrderConfirm } = require("../utils/otp");
-      await sendOrderConfirm(phone);
-    } catch (e) {
-      console.error("sendOrderConfirm failed:", e.message);
+    if (updates.status === "Confirmed") {
+      const phone =
+        updatedOrder.userId?.phone ||
+        updatedOrder.userDetails?.phone ||
+        updatedOrder.customerPhone;
+      if (phone) {
+        try {
+          const { sendOrderConfirm } = require("../utils/otp");
+          await sendOrderConfirm(phone);
+        } catch (e) {
+          console.error("sendOrderConfirm failed:", e.message);
+        }
+      } else {
+        console.log("[otp] skipped: no phone for order", updatedOrder._id);
+      }
     }
-  } else {
-    console.log("[otp] skipped: no phone for order", updatedOrder._id);
-  }
-}
 
     // Sync driver state if order status is updated from cashier / admin
     if (updates.status && updatedOrder.assignedRiderId) {
@@ -813,7 +807,15 @@ if (updates.status === "Confirmed") {
     }
 
     const io = req.app.get("io");
-    if (io) io.emit("updatedOrder", updatedOrder);
+    if (io) {
+      io.emit("updatedOrder", updatedOrder);
+      io.emit("orderUpdated", updatedOrder);
+      io.emit("orderStatusChanged", {
+        orderId: updatedOrder._id,
+        status: updatedOrder.status,
+        order: updatedOrder,
+      });
+    }
 
     res.status(200).json(updatedOrder);
   } catch (err) {

@@ -199,12 +199,13 @@ router.post("/session", async (req, res) => {
 
     console.log("saveCard received:", saveCard);
 
-    // ✅ Adjusted Tokenization Flags (MontyPay expects "Y")
-    if (saveCard === true) {
-      payload.recurring_init = "Y";
+    // ✅ Tokenization Flag: MontyPay / Akurateco supports recurring_init and req_token
+    if (saveCard === true || saveCard === "true") {
+      payload.recurring_init = true;
+      payload.req_token = true;
     }
 
-    console.log("recurring_init sent:", payload.recurring_init);
+    console.log("recurring_init sent:", payload.recurring_init, "| req_token sent:", payload.req_token);
 
     // Hash: SHA1(MD5(UPPER(OrderNumber + Amount + Currency + Description + Password)))
     payload.hash = md5sha1(
@@ -368,9 +369,15 @@ router.post("/callback", async (req, res) => {
           );
         }
 
-        // ✅ حفظ الكرت — فقط لو MontyPay رجّعت الحقلين الحقيقيين
-        const recurringToken = data.recurring_token || null;
-        const recurringInitTransId = data.recurring_init_trans_id || null;
+        // ✅ حفظ الكرت — استخراج recurring_token (أو card_token) و recurring_init_trans_id (أو id للعملية الأولية)
+        const recurringToken =
+          data.recurring_token || data.recurringToken || data.card_token || null;
+        const recurringInitTransId =
+          data.recurring_init_trans_id ||
+          data.id ||
+          data.trans_id ||
+          data.payment_id ||
+          null;
         const actualUserId = updatedOrder
           ? updatedOrder.userId?._id || updatedOrder.userId
           : null;
@@ -379,17 +386,23 @@ router.post("/callback", async (req, res) => {
           try {
             const last4 =
               typeof data.card === "string" ? data.card.slice(-4) : undefined;
+            const cardBrand =
+              data.card_brand || data.card_type || data.brand || "Card";
             await SavedCard.findOneAndUpdate(
               { userId: actualUserId, card_last_4: last4 },
               {
                 userId: actualUserId,
                 recurring_init_trans_id: recurringInitTransId,
                 recurring_token: recurringToken,
+                card_token: data.card_token || null,
                 card_last_4: last4,
+                card_brand: cardBrand,
               },
               { upsert: true, new: true },
             );
-            console.log(`✅ Saved card ****${last4} for user ${actualUserId}`);
+            console.log(
+              `✅ Saved card ****${last4} (${cardBrand}) for user ${actualUserId}`,
+            );
           } catch (cardErr) {
             console.error("Failed to save card info (non-critical):", cardErr);
           }
@@ -398,7 +411,6 @@ router.post("/callback", async (req, res) => {
           data.recurring_token ||
           data.card_token
         ) {
-          // ملاحظة: card_token مش بديل عن recurring_token، لا نحفظه كـ recurring
           console.warn(
             "⚠️ Callback has partial/other token data, card NOT saved:",
             {
@@ -473,7 +485,12 @@ router.post("/verify", async (req, res) => {
     }
 
     if (existingOrder && existingOrder.payment?.status === "paid") {
-      return res.json({ success: true, alreadyConfirmed: true });
+      const alreadySaved = await SavedCard.exists({
+        userId: existingOrder.userId?._id || existingOrder.userId,
+      });
+      if (alreadySaved) {
+        return res.json({ success: true, alreadyConfirmed: true });
+      }
     }
 
     const hash = md5sha1(`${orderRef}${MERCHANT_PASSWORD}`.toUpperCase());
@@ -557,25 +574,37 @@ router.post("/verify", async (req, res) => {
       );
       
       // ✅ حفظ الكرت في الـ verify كـ fallback (مفيد جداً في بيئة الـ localhost)
-      const recurringToken = montyData.recurring_token || null;
-      const recurringInitTransId = montyData.recurring_init_trans_id || null;
+      const recurringToken =
+        montyData.recurring_token || montyData.recurringToken || montyData.card_token || null;
+      const recurringInitTransId =
+        montyData.recurring_init_trans_id ||
+        montyData.payment_id ||
+        montyData.id ||
+        montyData.trans_id ||
+        null;
       const actualUserId = finalOrder.userId?._id || finalOrder.userId;
 
       if (recurringToken && recurringInitTransId && actualUserId) {
         try {
           const last4 =
             typeof montyData.card === "string" ? montyData.card.slice(-4) : undefined;
+          const cardBrand =
+            montyData.card_brand || montyData.card_type || montyData.brand || "Card";
           await SavedCard.findOneAndUpdate(
             { userId: actualUserId, card_last_4: last4 },
             {
               userId: actualUserId,
               recurring_init_trans_id: recurringInitTransId,
               recurring_token: recurringToken,
+              card_token: montyData.card_token || null,
               card_last_4: last4,
+              card_brand: cardBrand,
             },
             { upsert: true, new: true },
           );
-          console.log(`✅ Saved card ****${last4} for user ${actualUserId} via /verify fallback`);
+          console.log(
+            `✅ Saved card ****${last4} (${cardBrand}) for user ${actualUserId} via /verify fallback`,
+          );
         } catch (cardErr) {
           console.error("Failed to save card info in verify (non-critical):", cardErr);
         }

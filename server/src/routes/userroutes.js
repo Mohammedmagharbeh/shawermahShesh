@@ -1,72 +1,3 @@
-// const express = require("express");
-// const routes = express.Router();
-// require("dotenv").config();
-// const {
-//   getuser,
-//   getAllProducts,
-//   getSingleProduct,
-//   getCurrentUser,
-//   sendLoginOTP,
-//   sendEmployeeLoginOTP,
-//   verifyLoginOTP,
-//   updatePhone,
-// } = require("../controller/usercontroller");
-// const validateJWT = require("../middlewares/validateJWT");
-
-// routes.get("/users", getuser);
-
-// routes.get("/me", validateJWT, getCurrentUser);
-
-// routes.post("/login", sendLoginOTP);
-
-// // التعديل هنا: استقبال اسم الموظف وإرساله مع الـ OTP
-// routes.post("/employee-login", sendEmployeeLoginOTP);
-
-// routes.post("/verify-otp", verifyLoginOTP);
-
-// routes.get("/products", validateJWT, getAllProducts);
-// routes.get("/products/:id", validateJWT, getSingleProduct);
-
-// routes.put("/update-phone", validateJWT, updatePhone);
-
-// module.exports = routes;
-
-// const express = require("express");
-// const routes = express.Router();
-// const {
-//   getuser,
-//   getAllProducts,
-//   getSingleProduct,
-//   getCurrentUser,
-//   sendLoginOTP,
-//   verifyLoginOTP,
-//   updatePhone,
-//   createEmployee, // الدالة الجديدة
-//   employeeLogin   // الدالة الجديدة
-// } = require("../controller/usercontroller");
-// const validateJWT = require("../middlewares/validateJWT");
-
-// // مسارات المستخدمين والمسؤولين
-// routes.get("/users", validateJWT, getuser);
-// routes.get("/me", validateJWT, getCurrentUser);
-// routes.put("/update-phone", validateJWT, updatePhone);
-
-// // مسارات تسجيل الدخول (OTP للمستخدمين)
-// routes.post("/login", sendLoginOTP);
-// routes.post("/verify-otp", verifyLoginOTP);
-
-// // --- مسارات الموظفين (التي كانت تظهر لك الخطأ) ---
-// // إنشاء موظف (يستخدمه الأدمن في صفحة AdminUsersPage)
-// routes.post("/auth/create-employee", validateJWT, createEmployee);
-
-// // تسجيل دخول الموظف (يستخدم في صفحة EmployeeLogin)
-// routes.post("/auth/employee-login", employeeLogin);
-
-// // مسارات المنتجات
-// routes.get("/products", validateJWT, getAllProducts);
-// routes.get("/products/:id", validateJWT, getSingleProduct);
-
-// module.exports = routes;
 const express = require("express");
 const routes = express.Router();
 const {
@@ -80,7 +11,7 @@ const {
   updatePhone,
   createEmployee,
   employeeLogin,
-  deleteAccount
+  deleteAccount,
 } = require("../controller/usercontroller");
 const validateJWT = require("../middlewares/validateJWT");
 
@@ -98,21 +29,19 @@ routes.post("/auth/employee-login", employeeLogin);
 // إنشاء موظف جديد (يستخدمه الأدمن فقط)
 routes.post("/auth/create-employee", validateJWT, createEmployee);
 
-
 // ==========================================
 // 2. مسارات المستخدمين (User Management)
 // ==========================================
 
-routes.get("/users", validateJWT, getuser);           // paginated — AdminUsers.jsx
-routes.get("/users/all", validateJWT, getAllUsers);    // flat array — Statistics.jsx
+routes.get("/users", validateJWT, getuser); // paginated — AdminUsers.jsx
+routes.get("/users/all", validateJWT, getAllUsers); // flat array — Statistics.jsx
 routes.get("/me", validateJWT, getCurrentUser);
 routes.delete("/me", validateJWT, deleteAccount);
 routes.put("/update-phone", validateJWT, updatePhone);
 
 // مسار إضافي لإضافة مستخدم عادي (Role: user) من لوحة التحكم إذا لزم الأمر
-routes.post("/admin/user/add", validateJWT, createEmployee); 
+routes.post("/admin/user/add", validateJWT, createEmployee);
 // ملاحظة: يمكنك استخدام نفس دالة createEmployee لأنها تعالج الـ role
-
 
 // ==========================================
 // 3. مسارات المنتجات (Products)
@@ -120,6 +49,5 @@ routes.post("/admin/user/add", validateJWT, createEmployee);
 
 routes.get("/products", getAllProducts);
 routes.get("/products/:id", getSingleProduct);
-
 
 module.exports = routes;
