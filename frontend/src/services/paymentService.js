@@ -294,7 +294,10 @@ export const initiateRecurringPayment = async ({
 
     if (!data.success) throw new Error(data.reason || "Recurring payment failed");
 
-    return data.dbOrderId;
+    return {
+      dbOrderId: data.dbOrderId,
+      redirectUrl: data.redirect_url,
+    };
   } catch (error) {
     console.error("Recurring payment error:", error);
     throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || "Recurring payment failed");

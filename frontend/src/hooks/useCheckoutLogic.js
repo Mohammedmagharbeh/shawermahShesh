@@ -272,7 +272,7 @@ export const useCheckoutLogic = (t) => {
   const handleMontyPayFlow = useCallback(async () => {
     if (formState.savedCardId) {
       // Use recurring payment flow
-      const orderId = await PaymentService.montyPayRecurring({
+      const result = await PaymentService.montyPayRecurring({
         cart,
         formState,
         user,
@@ -280,8 +280,15 @@ export const useCheckoutLogic = (t) => {
         savedCardId: formState.savedCardId,
         token: user?.token,
       });
-      // Direct redirect to success page since it's processed server-side immediately
-      navigate(`/success?dbOrderId=${orderId}`);
+
+      if (result?.redirectUrl) {
+        window.location.href = result.redirectUrl;
+        return;
+      }
+
+      if (result?.dbOrderId) {
+        navigate(`/success?dbOrderId=${result.dbOrderId}`);
+      }
     } else {
       // Use standard checkout session flow
       const redirectUrl = await PaymentService.montyPay({

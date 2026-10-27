@@ -668,53 +668,107 @@ router.post("/recurring", validateJWT, async (req, res) => {
     const formattedAmount = Number(amount).toFixed(decimals);
     const safeDescription = "Recurring Order";
 
-    const payload = {
-      merchant_key: MERCHANT_KEY,
-      recurring_init_trans_id: savedCard.recurring_init_trans_id,
-      recurring_token: savedCard.recurring_token,
-      order: {
-        number: dbOrderId,
-        amount: formattedAmount,
-        description: safeDescription,
-      },
-    };
+    const cardTokenToUse = savedCard.card_token || savedCard.recurring_token;
 
-    // Hash حسب توثيق Recurring Sale (بدون currency):
-    // SHA1(MD5(UPPER(recurring_init_trans_id + recurring_token + order.number + order.amount + order.description + password)))
-    payload.hash = md5sha1(
-      `${savedCard.recurring_init_trans_id}${savedCard.recurring_token}${dbOrderId}${formattedAmount}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase(),
-    );
+    // 1) إذا كان فيه recurring_token حقيقي ومختلف عن الـ card_token وموجود init_trans_id، جرب الشحن المباشر
+    if (
+      savedCard.recurring_init_trans_id &&
+      savedCard.recurring_token &&
+      savedCard.recurring_token !== savedCard.card_token &&
+      savedCard.recurring_token.length < 50
+    ) {
+      try {
+        const payload = {
+          merchant_key: MERCHANT_KEY,
+          recurring_init_trans_id: savedCard.recurring_init_trans_id,
+          recurring_token: savedCard.recurring_token,
+          order: {
+            number: dbOrderId,
+            amount: formattedAmount,
+            description: safeDescription,
+          },
+        };
 
-    const response = await axios.post(
-      `${MONTY_BASE}/payment/recurring`,
-      payload,
-      { headers: { "Content-Type": "application/json" } },
-    );
+        payload.hash = md5sha1(
+          `${savedCard.recurring_init_trans_id}${savedCard.recurring_token}${dbOrderId}${formattedAmount}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase(),
+        );
 
-    const data = response.data;
-    console.log("MontyPay Recurring response:", JSON.stringify(data, null, 2));
+        const response = await axios.post(
+          `${MONTY_BASE}/payment/recurring`,
+          payload,
+          { headers: { "Content-Type": "application/json" } },
+        );
 
-    if (getUpperString(data.status) === "SETTLED") {
-      const io = req.app.get("io");
-      const transactionId = data.payment_id || data.id || null;
+        const data = response.data;
+        console.log("MontyPay Recurring direct response:", JSON.stringify(data, null, 2));
 
-      const finalOrder = await createOrderLogic({
-        ...safeOrderData,
-        paymentMethod: safeOrderData.paymentMethod || "card",
-        transactionId,
-        paidAt: new Date(),
-        status: "Processing",
-        paymentStatus: "paid",
-        io,
+        if (getUpperString(data.status) === "SETTLED") {
+          const io = req.app.get("io");
+          const transactionId = data.payment_id || data.id || null;
+
+          const finalOrder = await createOrderLogic({
+            ...safeOrderData,
+            paymentMethod: safeOrderData.paymentMethod || "card",
+            transactionId,
+            paidAt: new Date(),
+            status: "Processing",
+            paymentStatus: "paid",
+            io,
+          });
+          await CheckoutSession.findByIdAndDelete(dbOrderId);
+          return res.json({ success: true, dbOrderId: finalOrder._id });
+        }
+      } catch (directErr) {
+        console.warn("Direct recurring sale failed, falling back to card_token session:", directErr.response?.data || directErr.message);
+      }
+    }
+
+    // 2) Fallback: استخدام Checkout Session مع card_token المخزن
+    // هذا البروتوكول الرسمي من MontyPay لشحن كروت الـ Card on File
+    if (cardTokenToUse) {
+      const customerPhone = safeOrderData.userDetails?.phone || req.user.phone || "";
+      const customerName = safeOrderData.userDetails?.name || req.user.name || "Customer";
+      const orderNumber = customerPhone ? `${customerPhone}-${dbOrderId}` : dbOrderId;
+
+      const finalSuccessUrl = `${process.env.FRONT_BASE}/success?dbOrderId=${dbOrderId}&orderRef=${encodeURIComponent(orderNumber)}`;
+      const finalCancelUrl = `${process.env.FRONT_BASE}/cancel?dbOrderId=${dbOrderId}`;
+
+      const sessionPayload = {
+        merchant_key: MERCHANT_KEY,
+        operation: "purchase",
+        order: {
+          number: orderNumber,
+          amount: formattedAmount,
+          currency: currency,
+          description: safeDescription,
+        },
+        customer: {
+          name: /^[A-Za-z]+(?: [A-Za-z]+)+$/.test(customerName) ? customerName : "Customer User",
+          email: req.user.email || "customer@example.com",
+        },
+        card_token: [cardTokenToUse],
+        success_url: finalSuccessUrl,
+        cancel_url: finalCancelUrl,
+        callback_url: `${process.env.BACK_BASE || "https://shawermahshesh.onrender.com"}/api/montypay/callback`,
+      };
+
+      sessionPayload.hash = md5sha1(
+        `${orderNumber}${formattedAmount}${currency}${safeDescription}${MERCHANT_PASSWORD}`.toUpperCase(),
+      );
+
+      const sessionResponse = await axios.post(`${MONTY_BASE}/session`, sessionPayload, {
+        headers: { "Content-Type": "application/json" },
       });
-      await CheckoutSession.findByIdAndDelete(dbOrderId);
-      return res.json({ success: true, dbOrderId: finalOrder._id });
+
+      return res.json({
+        success: true,
+        redirect_url: sessionResponse.data.redirect_url,
+        dbOrderId,
+      });
     }
 
     return res.status(400).json({
-      success: false,
-      status: data.status,
-      reason: data.reason,
+      error: "No valid token available for this card",
     });
   } catch (err) {
     console.error("Recurring error:", err.response?.data || err.message || err);
