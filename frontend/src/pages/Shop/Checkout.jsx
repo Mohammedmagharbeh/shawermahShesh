@@ -51,6 +51,8 @@ function Checkout() {
     applyPromoCode,
     removePromoCode,
     savedCards,
+  deleteSavedCard,   // ← جديد
+
   } = useCheckoutLogic(t);
 
   const hasOutOfStockItems = cart?.products?.some(
@@ -237,7 +239,7 @@ function Checkout() {
               <h3 className="text-base font-semibold text-gray-800 mb-3 block">
                 {t("payment_method")}
               </h3>
-              <PaymentMethodSelector
+              {/* <PaymentMethodSelector
                 method={formState.paymentMethod}
                 setMethod={handlePaymentMethodChange}
                 t={t}
@@ -245,7 +247,17 @@ function Checkout() {
                 savedCards={savedCards}
                 selectedSavedCardId={formState.savedCardId}
                 onSelectSavedCard={(id) => updateForm("savedCardId", id)}
-              />
+              /> */}
+              <PaymentMethodSelector
+  method={formState.paymentMethod}
+  setMethod={handlePaymentMethodChange}
+  t={t}
+  totalAmount={orderSummary.total}
+  savedCards={savedCards}
+  selectedSavedCardId={formState.savedCardId}
+  onSelectSavedCard={(id) => updateForm("savedCardId", id)}
+  onDeleteSavedCard={deleteSavedCard}
+/>
             </div>
 
             <div className="hidden lg:block">

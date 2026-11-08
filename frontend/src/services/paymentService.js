@@ -249,6 +249,21 @@ export const fetchSavedCards = async (token) => {
   }
 };
 
+
+// delete saved card
+export const deleteSavedCard = async (cardId, token) => {
+  try {
+    if (!token) throw new Error("Authentication token is required");
+    const { data } = await apiClient.delete(`/montypay/saved-cards/${cardId}`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    return data;
+  } catch (error) {
+    console.error("Delete saved card error:", error);
+    throw new Error(error.response?.data?.error || "Failed to delete saved card");
+  }
+};
+
 /**
  * Initiate recurring payment with a saved card
  * @param {Object} params - Payment parameters
@@ -312,6 +327,7 @@ export const PaymentService = {
   montyPay: initiateMontyPayPayment,
   montyPayRecurring: initiateRecurringPayment,
   fetchSavedCards,
+    deleteSavedCard,        // ← هاد السطر الجديد
   zainCash: {
     initiate: initiateZainCashPayment,
     confirm: confirmZainCashPayment,

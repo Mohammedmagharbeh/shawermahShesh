@@ -269,6 +269,23 @@ export const useCheckoutLogic = (t) => {
     setAppliedPromo(null);
   }, []);
 
+  const deleteSavedCard = useCallback(
+  async (cardId) => {
+    try {
+      await PaymentService.deleteSavedCard(cardId, user?.token);
+      setSavedCards((prev) => prev.filter((c) => c._id !== cardId));
+      setFormState((prev) =>
+        prev.savedCardId === cardId ? { ...prev, savedCardId: null } : prev,
+      );
+      toast.success("تم حذف البطاقة");
+    } catch (err) {
+      console.error("Delete card failed:", err);
+      toast.error("فشل حذف البطاقة");
+    }
+  },
+  [user?.token],
+);
+
   const handleMontyPayFlow = useCallback(async () => {
     if (formState.savedCardId) {
       // Use recurring payment flow
@@ -565,5 +582,6 @@ export const useCheckoutLogic = (t) => {
     applyPromoCode,
     removePromoCode,
     savedCards,
+    deleteSavedCard,   // ← جديد
   };
 };

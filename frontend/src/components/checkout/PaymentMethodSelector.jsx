@@ -15,6 +15,8 @@ const PaymentMethodSelector = React.memo(
     savedCards = [],
     selectedSavedCardId,
     onSelectSavedCard,
+        onDeleteSavedCard,   // ← جديد
+
   }) => {
     const handleCardClick = useCallback(() => {
       setMethod(PAYMENT_METHODS.CARD);
@@ -88,7 +90,7 @@ const PaymentMethodSelector = React.memo(
                           <div className="w-2 h-2 bg-red-500 rounded-full" />
                         )}
                       </div>
-                      <span className="flex-1 font-medium text-sm">
+                                           <span className="flex-1 font-medium text-sm">
                         •••• {card.card_last_4}
                       </span>
                       <div className="flex items-center gap-1.5">
@@ -96,6 +98,26 @@ const PaymentMethodSelector = React.memo(
                           {card.card_brand.toUpperCase()}
                         </span>
                       </div>
+                      {onDeleteSavedCard && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (
+                              window.confirm(
+                                t("delete_card_confirm", "حذف هذه البطاقة؟"),
+                              )
+                            ) {
+                              onDeleteSavedCard(card._id);
+                            }
+                          }}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          aria-label={t("delete_card", "حذف البطاقة")}
+                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          🗑
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -242,6 +264,8 @@ PaymentMethodSelector.propTypes = {
   savedCards: PropTypes.array,
   selectedSavedCardId: PropTypes.string,
   onSelectSavedCard: PropTypes.func,
+    onDeleteSavedCard: PropTypes.func,   // ← جديد
+
 };
 
 export default PaymentMethodSelector;

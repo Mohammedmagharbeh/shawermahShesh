@@ -634,6 +634,32 @@ router.get("/saved-cards", validateJWT, async (req, res) => {
   }
 });
 
+// Delete a saved card (by ID) — only if it belongs to the user
+// ─── 5b) Delete a saved card ─────────────────────────────────────────────────
+router.delete("/saved-cards/:id", validateJWT, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid card id" });
+    }
+
+    const card = await SavedCard.findOneAndDelete({
+      _id: id,
+      userId: req.user._id,
+    });
+
+    if (!card) {
+      return res.status(404).json({ error: "Saved card not found" });
+    }
+
+    res.json({ success: true, id });
+  } catch (err) {
+    console.error("Delete card error:", err);
+    res.status(500).json({ error: "Failed to delete saved card" });
+  }
+});
+
 // ─── 6) Pay with saved card (Recurring Sale) ─────────────────────────────────
 router.post("/recurring", validateJWT, async (req, res) => {
   try {
