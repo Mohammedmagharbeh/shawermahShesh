@@ -115,7 +115,7 @@ const PaymentMethodSelector = React.memo(
                           aria-label={t("delete_card", "حذف البطاقة")}
                           className="p-1 text-gray-400 hover:text-red-500 transition-colors"
                         >
-                          🗑
+                          ❌
                         </button>
                       )}
                     </div>
