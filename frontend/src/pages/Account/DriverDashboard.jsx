@@ -56,9 +56,7 @@ export default function DriverDashboard() {
 
   // Effective rider ID to query and act upon
   const activeRiderId =
-    isAdmin && selectedRiderId
-      ? selectedRiderId
-      : user?._id || user?.id;
+    isAdmin && selectedRiderId ? selectedRiderId : user?._id || user?.id;
 
   // OTP inputs: 3 separate digits
   const [otpDigits, setOtpDigits] = useState(["", "", ""]);
@@ -90,7 +88,7 @@ export default function DriverDashboard() {
     try {
       const res = await deliveryService.getMyStatus(
         user.token,
-        isAdmin && activeRiderId ? activeRiderId : null
+        isAdmin && activeRiderId ? activeRiderId : null,
       );
 
       if (res?.success) {
@@ -119,7 +117,8 @@ export default function DriverDashboard() {
     try {
       const queueData = await deliveryService.getQueue(user.token);
       if (queueData?.success) {
-        const drivers = queueData.allDrivers || queueData.availableDrivers || [];
+        const drivers =
+          queueData.allDrivers || queueData.availableDrivers || [];
         setAllRiders(drivers);
         // Default to the first rider if nothing selected yet
         if (!selectedRiderId && drivers.length > 0) {
@@ -182,7 +181,10 @@ export default function DriverDashboard() {
             driverStatus: data.driverStatus,
             currentOrderId: data.currentOrderId || null,
           }));
-          if (data.driverStatus === "returning" || data.driverStatus === "available") {
+          if (
+            data.driverStatus === "returning" ||
+            data.driverStatus === "available"
+          ) {
             setCurrentOrder(null);
           }
         }
@@ -269,13 +271,13 @@ export default function DriverDashboard() {
         all ? null : targetOrderId,
         user.token,
         isAdmin ? activeRiderId : null,
-        all ? { all: true } : {}
+        all ? { all: true } : {},
       );
       if (res?.success) {
         toast.success(
           all
             ? "تم تأكيد استلام جميع الطلبات! انطلق للتوصيل 🚗"
-            : "تم تأكيد استلام الطلب! توجه الآن إلى عنوان الزبون 🚗"
+            : "تم تأكيد استلام الطلب! توجه الآن إلى عنوان الزبون 🚗",
         );
         fetchDriverStatus(true);
       }
@@ -309,9 +311,7 @@ export default function DriverDashboard() {
   // Verify OTP action (supports normal OTP or Force Submit override)
   const handleVerifyOtp = async (forceSubmit = false) => {
     const targetOrderId =
-      currentActiveOrder?._id ||
-      currentOrder?._id ||
-      driver?.currentOrderId;
+      currentActiveOrder?._id || currentOrder?._id || driver?.currentOrderId;
 
     const fullOtp = otpDigits.join("");
     if (!forceSubmit && fullOtp.length !== 3) {
@@ -321,7 +321,7 @@ export default function DriverDashboard() {
 
     if (forceSubmit) {
       const confirmOverride = window.confirm(
-        "هل أنت متأكد من تعذر الوصول إلى الزبون وإغلاق الطلب قسرياً؟"
+        "هل أنت متأكد من تعذر الوصول إلى الزبون وإغلاق الطلب قسرياً؟",
       );
       if (!confirmOverride) return;
     }
@@ -336,7 +336,7 @@ export default function DriverDashboard() {
           overrideReason: "customer_unreachable",
           riderId: isAdmin ? activeRiderId : null,
         },
-        user.token
+        user.token,
       );
       if (res?.success) {
         setOtpDigits(["", "", ""]);
@@ -348,14 +348,14 @@ export default function DriverDashboard() {
             forceSubmit
               ? "تم إغلاق الطلب قسرياً (تعذر الوصول للزبون). يرجى العودة للفرع وتسليم الوجبة 👏"
               : "تم تسليم جميع الطلبات بنجاح! شكراً لجهودك، توجه الآن للعودة إلى الفرع 👏",
-            { duration: 5000 }
+            { duration: 5000 },
           );
         } else {
           toast.success(
             forceSubmit
               ? "تم إغلاق الطلب استثنائياً! انتقل للطلب التالي 👏"
               : res.message || "تم تسليم الطلب بنجاح! انتقل للطلب التالي 👏",
-            { duration: 5000 }
+            { duration: 5000 },
           );
         }
         if (res.rider) {
@@ -379,10 +379,12 @@ export default function DriverDashboard() {
       const res = await deliveryService.qrCheckIn(
         code,
         user.token,
-        isAdmin ? activeRiderId : null
+        isAdmin ? activeRiderId : null,
       );
       if (res?.success) {
-        toast.success("تم تسجيل العودة للفرع بنجاح! أنت الآن في طابور الانتظار 🟢");
+        toast.success(
+          "تم تسجيل العودة للفرع بنجاح! أنت الآن في طابور الانتظار 🟢",
+        );
         setShowScannerModal(false);
         stopCamera();
         fetchDriverStatus(true);
@@ -430,9 +432,16 @@ export default function DriverDashboard() {
   }
 
   const handleDashboardLogout = async () => {
-    if (window.confirm("هل أنت متأكد من رغبتك في تسجيل الخروج؟ ستتحول حالتك إلى غير متاح حتى تسجل الدخول وتمسح رمز الـ QR.")) {
+    if (
+      window.confirm(
+        "هل أنت متأكد من رغبتك في تسجيل الخروج؟ ستتحول حالتك إلى غير متاح حتى تسجل الدخول وتمسح رمز الـ QR.",
+      )
+    ) {
       try {
-        await deliveryService.riderLogout(user?.token, isAdmin ? activeRiderId : null);
+        await deliveryService.riderLogout(
+          user?.token,
+          isAdmin ? activeRiderId : null,
+        );
       } catch (err) {
         console.warn("Rider logout error:", err);
       }
@@ -443,7 +452,7 @@ export default function DriverDashboard() {
   const driverStatus = driver?.driverStatus || "unavailable";
 
   const pendingPickupOrders = activeOrders.filter(
-    (o) => o.status === "ReadyForPickup"
+    (o) => o.status === "ReadyForPickup",
   );
   const isCurrentOrderPendingPickup =
     currentActiveOrder?.status === "ReadyForPickup" ||
@@ -493,14 +502,19 @@ export default function DriverDashboard() {
                 ) : (
                   allRiders.map((r) => {
                     let statusAr = "غير متاح 🔴";
-                    if (r.driverStatus === "available") statusAr = "متاح بالفرع 🟢";
-                    if (r.driverStatus === "assigned") statusAr = "معين له طلب 📦";
-                    if (r.driverStatus === "on_delivery") statusAr = "قيد التوصيل 🚗";
-                    if (r.driverStatus === "returning") statusAr = "عائد للفرع 🛵";
+                    if (r.driverStatus === "available")
+                      statusAr = "متاح بالفرع 🟢";
+                    if (r.driverStatus === "assigned")
+                      statusAr = "معين له طلب 📦";
+                    if (r.driverStatus === "on_delivery")
+                      statusAr = "قيد التوصيل 🚗";
+                    if (r.driverStatus === "returning")
+                      statusAr = "عائد للفرع 🛵";
 
                     return (
                       <option key={r._id} value={r._id}>
-                        {r.name || r.username} ({statusAr} - {r.phone || "بدون هاتف"})
+                        {r.name || r.username} ({statusAr} -{" "}
+                        {r.phone || "بدون هاتف"})
                       </option>
                     );
                   })
@@ -525,7 +539,8 @@ export default function DriverDashboard() {
           </div>
 
           <div className="flex items-center gap-2">
-            {(driverStatus === "unavailable" || driverStatus === "returning") && (
+            {(driverStatus === "unavailable" ||
+              driverStatus === "returning") && (
               <Button
                 size="sm"
                 onClick={startCamera}
@@ -573,7 +588,8 @@ export default function DriverDashboard() {
                 تسجيل الحضور وبدء الوردية 🛵
               </h3>
               <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto leading-relaxed">
-                أنت حالياً غير متاح لاستقبال الطلبات. يجب مسح باركود الـ QR الخاص بالفرع لبدء ورديتك والدخول في طابور الانتظار.
+                أنت حالياً غير متاح لاستقبال الطلبات. يجب مسح باركود الـ QR
+                الخاص بالفرع لبدء ورديتك والدخول في طابور الانتظار.
               </p>
             </div>
 
@@ -622,7 +638,8 @@ export default function DriverDashboard() {
                 في قائمة انتظار الطلبات
               </h3>
               <p className="text-xs text-gray-500 max-w-xs mx-auto mt-2 leading-relaxed">
-                يرجى البقاء في استراحة الفرع. عند قيام الكاونتر بتعيين طلب جديد لك، ستظهر تفاصيله وزر تأكيد الاستلام هنا فوراً.
+                يرجى البقاء في استراحة الفرع. عند قيام الكاونتر بتعيين طلب جديد
+                لك، ستظهر تفاصيله وزر تأكيد الاستلام هنا فوراً.
               </p>
             </div>
 
@@ -648,12 +665,14 @@ export default function DriverDashboard() {
                   موقعك الحالي في طابور الانطلاق 🛵
                 </span>
                 <p className="text-base font-black text-emerald-950">
-                  أنت رقم <span className="text-2xl text-emerald-600 font-extrabold mx-1">#{queuePosition}</span> في الدور من أصل {totalAvailableDrivers || 1} سائقين متاحين
+                  أنت رقم{" "}
+                  <span className="text-2xl text-emerald-600 font-extrabold mx-1">
+                    #{queuePosition}
+                  </span>{" "}
+                  في الدور من أصل {totalAvailableDrivers || 1} سائقين متاحين
                 </p>
               </div>
             )}
-
-
           </Card>
         )}
 
@@ -722,7 +741,8 @@ export default function DriverDashboard() {
                         : "طلب جديد بانتظار الاستلام من الكاونتر! 📦"}
                     </h3>
                     <p className="text-xs text-amber-100 font-medium">
-                      استلم الوجبات من كاونتر المطبخ ثم اضغط على زر تأكيد الاستلام
+                      استلم الوجبات من كاونتر المطبخ ثم اضغط على زر تأكيد
+                      الاستلام
                     </p>
                   </div>
                 </div>
@@ -732,9 +752,13 @@ export default function DriverDashboard() {
                   <Card className="rounded-3xl border border-gray-200 bg-white shadow-md overflow-hidden">
                     <CardHeader className="bg-gray-50 p-4 border-b border-gray-100 flex flex-row items-center justify-between">
                       <div>
-                        <p className="text-xs text-gray-500 font-bold">رقم الطلب</p>
+                        <p className="text-xs text-gray-500 font-bold">
+                          رقم الطلب
+                        </p>
                         <h3 className="text-2xl font-black text-red-700">
-                          #{currentActiveOrder.sequenceNumber || currentActiveOrder._id?.slice(-6)}
+                          #
+                          {currentActiveOrder.sequenceNumber ||
+                            currentActiveOrder._id?.slice(-6)}
                         </h3>
                       </div>
                       <Badge className="bg-amber-500 text-white font-bold">
@@ -747,7 +771,11 @@ export default function DriverDashboard() {
                       <div className="space-y-2 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
                         <div className="flex items-center gap-2 font-bold text-gray-900">
                           <User className="w-4 h-4 text-red-600" />
-                          <span>{currentActiveOrder.userDetails?.name || currentActiveOrder.userId?.name || "زبون"}</span>
+                          <span>
+                            {currentActiveOrder.userDetails?.name ||
+                              currentActiveOrder.userId?.name ||
+                              "زبون"}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-600">
                           <Phone className="w-4 h-4 text-gray-400" />
@@ -756,21 +784,29 @@ export default function DriverDashboard() {
                             className="font-mono text-red-700 underline font-bold"
                             dir="ltr"
                           >
-                            {currentActiveOrder.userDetails?.phone || currentActiveOrder.userId?.phone || "-"}
+                            {currentActiveOrder.userDetails?.phone ||
+                              currentActiveOrder.userId?.phone ||
+                              "-"}
                           </a>
                         </div>
                         <div className="flex items-start gap-2 text-xs text-gray-700 pt-1">
                           <MapPin className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                           <span className="font-medium">
-                            {currentActiveOrder.shippingAddress?.name || currentActiveOrder.shippingAddress?.area || currentActiveOrder.shippingAddress?.details || "عنوان الزبون"}
-                            {currentActiveOrder.userDetails?.apartment && ` (شقة/طابق: ${currentActiveOrder.userDetails.apartment})`}
+                            {currentActiveOrder.shippingAddress?.name ||
+                              currentActiveOrder.shippingAddress?.area ||
+                              currentActiveOrder.shippingAddress?.details ||
+                              "عنوان الزبون"}
+                            {currentActiveOrder.userDetails?.apartment &&
+                              ` (شقة/طابق: ${currentActiveOrder.userDetails.apartment})`}
                           </span>
                         </div>
                       </div>
 
                       {/* Items */}
                       <div className="space-y-1.5 border-t border-gray-100 pt-3">
-                        <p className="text-xs font-bold text-gray-500">محتويات الوجبة:</p>
+                        <p className="text-xs font-bold text-gray-500">
+                          محتويات الوجبة:
+                        </p>
                         <div className="space-y-1">
                           {currentActiveOrder.products?.map((item, idx) => (
                             <div
@@ -778,7 +814,10 @@ export default function DriverDashboard() {
                               className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded-xl"
                             >
                               <span className="font-bold text-gray-800">
-                                {item.quantity}× {item.productId?.name?.ar || item.name?.ar || "وجبة"}
+                                {item.quantity}×{" "}
+                                {item.productId?.name?.ar ||
+                                  item.name?.ar ||
+                                  "وجبة"}
                               </span>
                               <span className="text-gray-500 font-mono">
                                 {item.priceAtPurchase?.toFixed(2)} JOD
@@ -801,13 +840,17 @@ export default function DriverDashboard() {
                             ) : (
                               <>
                                 <Bike className="w-5 h-5 ml-2" />
-                                تأكيد استلام جميع الطلبات ({pendingPickupOrders.length} طلبات) وبدء الرحلة 🚀
+                                تأكيد استلام جميع الطلبات (
+                                {pendingPickupOrders.length} طلبات) وبدء الرحلة
+                                🚀
                               </>
                             )}
                           </Button>
                         ) : (
                           <Button
-                            onClick={() => handleConfirmPickup(currentActiveOrder._id)}
+                            onClick={() =>
+                              handleConfirmPickup(currentActiveOrder._id)
+                            }
                             disabled={confirmingPickup}
                             className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black py-6 rounded-2xl shadow-lg shadow-amber-200 text-base"
                           >
@@ -816,7 +859,10 @@ export default function DriverDashboard() {
                             ) : (
                               <>
                                 <Bike className="w-5 h-5 ml-2" />
-                                تأكيد استلام هذا الطلب (#{currentActiveOrder.sequenceNumber || currentActiveOrder._id?.slice(-4)}) وبدء التوصيل 🚗
+                                تأكيد استلام هذا الطلب (#
+                                {currentActiveOrder.sequenceNumber ||
+                                  currentActiveOrder._id?.slice(-4)}
+                                ) وبدء التوصيل 🚗
                               </>
                             )}
                           </Button>
@@ -827,10 +873,18 @@ export default function DriverDashboard() {
                 ) : (
                   <Card className="rounded-3xl border border-gray-200 bg-white p-6 text-center space-y-4">
                     <Package className="w-12 h-12 text-amber-500 mx-auto animate-bounce" />
-                    <h3 className="font-bold text-gray-800">تم تعيين طلب جديد لك!</h3>
-                    <p className="text-xs text-gray-500">جاري جلب تفاصيل الوجبة من السيرفر...</p>
+                    <h3 className="font-bold text-gray-800">
+                      تم تعيين طلب جديد لك!
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      جاري جلب تفاصيل الوجبة من السيرفر...
+                    </p>
                     <div className="flex gap-2 justify-center">
-                      <Button onClick={() => fetchDriverStatus(false)} variant="outline" className="rounded-xl text-xs font-bold">
+                      <Button
+                        onClick={() => fetchDriverStatus(false)}
+                        variant="outline"
+                        className="rounded-xl text-xs font-bold"
+                      >
                         <RefreshCw className="w-3.5 h-3.5 ml-1.5" />
                         تحديث الآن
                       </Button>
@@ -846,10 +900,16 @@ export default function DriverDashboard() {
                   <div className="flex items-center gap-3">
                     <Navigation className="w-7 h-7 flex-shrink-0 animate-spin-slow" />
                     <div>
-                      <h3 className="font-black text-base">في الطريق إلى الزبون</h3>
+                      <h3 className="font-black text-base">
+                        في الطريق إلى الزبون
+                      </h3>
                       <p className="text-xs text-blue-100">
-                        طلب #{currentActiveOrder?.sequenceNumber || currentActiveOrder?._id?.slice(-6) || "الحالي"}
-                        {activeOrders.length > 1 && ` (1 من ${activeOrders.length} طلبات)`}
+                        طلب #
+                        {currentActiveOrder?.sequenceNumber ||
+                          currentActiveOrder?._id?.slice(-6) ||
+                          "الحالي"}
+                        {activeOrders.length > 1 &&
+                          ` (1 من ${activeOrders.length} طلبات)`}
                       </p>
                     </div>
                   </div>
@@ -864,7 +924,9 @@ export default function DriverDashboard() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                          وجهة التوصيل للطلب #{currentActiveOrder.sequenceNumber || currentActiveOrder._id?.slice(-4)}
+                          وجهة التوصيل للطلب #
+                          {currentActiveOrder.sequenceNumber ||
+                            currentActiveOrder._id?.slice(-4)}
                         </p>
                         <span className="text-xs font-black text-red-600">
                           {currentActiveOrder.totalPrice?.toFixed(2)} JOD
@@ -873,10 +935,14 @@ export default function DriverDashboard() {
                       <div className="flex items-start gap-2 text-sm text-gray-900 font-bold">
                         <MapPin className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                         <span>
-                          {currentActiveOrder.shippingAddress?.name || currentActiveOrder.shippingAddress?.area || currentActiveOrder.shippingAddress?.details || "عنوان الزبون"}
+                          {currentActiveOrder.shippingAddress?.name ||
+                            currentActiveOrder.shippingAddress?.area ||
+                            currentActiveOrder.shippingAddress?.details ||
+                            "عنوان الزبون"}
                           {currentActiveOrder.userDetails?.apartment && (
                             <span className="block text-xs font-normal text-gray-500 mt-1">
-                              الطابق / الشقة: {currentActiveOrder.userDetails.apartment}
+                              الطابق / الشقة:{" "}
+                              {currentActiveOrder.userDetails.apartment}
                             </span>
                           )}
                         </span>
@@ -886,10 +952,13 @@ export default function DriverDashboard() {
                     {/* Pre-paid Notice (All orders are 100% pre-paid) */}
                     <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center gap-2.5 text-xs text-emerald-800 font-bold">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                      <span>الطلب مدفوع إلكترونياً مسبقاً بالكامل (لا تطلب أي مبالغ نقدية من الزبون) ✅</span>
+                      <span>
+                        الطلب مدفوع إلكترونياً مسبقاً بالكامل (لا تطلب أي مبالغ
+                        نقدية من الزبون) ✅
+                      </span>
                     </div>
 
-                    {/* Call Customer & Map Links */}
+                    {/* Call Customer */}
                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
                       <a
                         href={`tel:${currentActiveOrder.userDetails?.phone || currentActiveOrder.userId?.phone}`}
@@ -898,30 +967,6 @@ export default function DriverDashboard() {
                         <Phone className="w-4 h-4 text-emerald-600" />
                         اتصال بالزبون
                       </a>
-
-                      {currentActiveOrder.shippingAddress?.coordinates ? (
-                        <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${currentActiveOrder.shippingAddress.coordinates.lat},${currentActiveOrder.shippingAddress.coordinates.lng}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center justify-center gap-2 bg-blue-50 text-blue-800 hover:bg-blue-100 p-3 rounded-2xl font-bold text-xs border border-blue-200 transition-colors"
-                        >
-                          <ExternalLink className="w-4 h-4 text-blue-600" />
-                          خرائط Google
-                        </a>
-                      ) : (
-                        <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                            currentActiveOrder.shippingAddress?.area || "عمان"
-                          )}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center justify-center gap-2 bg-blue-50 text-blue-800 hover:bg-blue-100 p-3 rounded-2xl font-bold text-xs border border-blue-200 transition-colors"
-                        >
-                          <ExternalLink className="w-4 h-4 text-blue-600" />
-                          فتح الخريطة
-                        </a>
-                      )}
                     </div>
                   </Card>
                 )}
@@ -934,10 +979,13 @@ export default function DriverDashboard() {
 
                   <div>
                     <h3 className="text-xl font-black text-gray-900">
-                      رمز تأكيد الاستلام (OTP) للطلب #{currentActiveOrder?.sequenceNumber || currentActiveOrder?._id?.slice(-4)}
+                      رمز تأكيد الاستلام (OTP) للطلب #
+                      {currentActiveOrder?.sequenceNumber ||
+                        currentActiveOrder?._id?.slice(-4)}
                     </h3>
                     <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-                      اطلب رمز التحقق المكون من <strong>3 أرقام</strong> من الزبون عند تسليمه الطلب لإغلاق العملية
+                      اطلب رمز التحقق المكون من <strong>3 أرقام</strong> من
+                      الزبون عند تسليمه الطلب لإغلاق العملية
                     </p>
                   </div>
 
@@ -979,10 +1027,13 @@ export default function DriverDashboard() {
                       <div className="bg-amber-50 border border-amber-300 rounded-2xl p-3 text-right">
                         <div className="flex items-center gap-2 text-amber-900 font-bold text-xs mb-1">
                           <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                          <span>تعذر الوصول إلى الزبون (أكثر من 5 دقائق في الموقع)</span>
+                          <span>
+                            تعذر الوصول إلى الزبون (أكثر من 5 دقائق في الموقع)
+                          </span>
                         </div>
                         <p className="text-[11px] text-amber-700 leading-relaxed">
-                          إذا كان هاتف الزبون مغلقاً أو لم يقم بالرد بعد وصولك، يمكنك إنهاء الطلب قسرياً وإرجاع الوجبة إلى الفرع.
+                          إذا كان هاتف الزبون مغلقاً أو لم يقم بالرد بعد وصولك،
+                          يمكنك إنهاء الطلب قسرياً وإرجاع الوجبة إلى الفرع.
                         </p>
                       </div>
                       <Button
@@ -993,7 +1044,9 @@ export default function DriverDashboard() {
                         className="w-full border-2 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-700 font-black py-5 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-sm"
                       >
                         <AlertTriangle className="w-4 h-4 text-red-600" />
-                        <span>إغلاق الطلب قسرياً / تعذر الوصول للزبون (Force Submit)</span>
+                        <span>
+                          إغلاق الطلب قسرياً / تعذر الوصول للزبون (Force Submit)
+                        </span>
                       </Button>
                     </div>
                   )}
@@ -1020,7 +1073,8 @@ export default function DriverDashboard() {
                 تسجيل العودة للفرع
               </h3>
               <p className="text-xs text-gray-500 max-w-xs mx-auto mt-2 leading-relaxed">
-                عند وصولك إلى كاونتر الفرع، امسح رمز الـ QR لتسجيل وقت عودتك وحجز دورك في طابور الانتظار.
+                عند وصولك إلى كاونتر الفرع، امسح رمز الـ QR لتسجيل وقت عودتك
+                وحجز دورك في طابور الانتظار.
               </p>
             </div>
 
@@ -1034,7 +1088,7 @@ export default function DriverDashboard() {
               </Button>
 
               {/* Quick Check-in Button Fallback (in case camera is broken) */}
-              <Button
+              {/* <Button
                 variant="outline"
                 onClick={() => handleQrCheckIn(BRANCH_QR_CODE)}
                 disabled={checkingInQr}
@@ -1044,7 +1098,7 @@ export default function DriverDashboard() {
                 {checkingInQr
                   ? "جاري تسجيل العودة..."
                   : "تسجيل عودة سريع بالفرع (بدون كاميرا)"}
-              </Button>
+              </Button> */}
             </div>
           </Card>
         )}
@@ -1058,7 +1112,10 @@ export default function DriverDashboard() {
           setShowScannerModal(open);
         }}
       >
-        <DialogContent className="max-w-md rounded-3xl p-6 text-center" dir={isRtl ? "rtl" : "ltr"}>
+        <DialogContent
+          className="max-w-md rounded-3xl p-6 text-center"
+          dir={isRtl ? "rtl" : "ltr"}
+        >
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-gray-900">
               مسح رمز QR الفرع
@@ -1088,7 +1145,9 @@ export default function DriverDashboard() {
               disabled={checkingInQr}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm"
             >
-              {checkingInQr ? "جاري التحقق..." : "تأكيد مسح رمز الفرع الحالي 📍"}
+              {checkingInQr
+                ? "جاري التحقق..."
+                : "تأكيد مسح رمز الفرع الحالي 📍"}
             </Button>
           </div>
         </DialogContent>
