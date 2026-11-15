@@ -9,6 +9,7 @@ const {
   getDeliveryQueue,
   assignOrderToDriver,
   unassignOrder,
+  completePickupOrder,
   confirmPickup,
   verifyDeliveryOtp,
   qrCheckIn,
@@ -57,6 +58,14 @@ router.post(
   validateJWT,
   requireRole("admin", "employee", "cashier"),
   unassignOrder
+);
+
+// 2.2 Complete branch pickup order at counter
+router.post(
+  "/complete-pickup/:orderId",
+  validateJWT,
+  requireRole("admin", "employee", "cashier"),
+  completePickupOrder
 );
 
 // 6. Manual check-in override for a driver

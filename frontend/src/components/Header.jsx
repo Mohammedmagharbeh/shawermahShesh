@@ -41,6 +41,26 @@ function Header() {
   };
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
+  // Default / Primary route based on user role
+  const getPrimaryRoute = () => {
+    if (!isAuthenticated || !user) return "/";
+    const role = (user.role || "").toLowerCase();
+    switch (role) {
+      case "cashier":
+        return "/dispatch";
+      case "rider":
+      case "driver":
+        return "/rider";
+      case "admin":
+      case "employee":
+        return "/admin/dashboard";
+      case "hr":
+        return "/adminjobs";
+      default:
+        return "/products";
+    }
+  };
+
   return (
     <nav
       className={`fixed top-0 w-full bg-gradient-to-r from-white via-yellow-50/30 to-white backdrop-blur-md border-b-2 ${
@@ -51,7 +71,7 @@ function Header() {
         <div className="flex items-center justify-between gap-1 xs:gap-2 sm:gap-4 md:gap-6">
           {/* Logo */}
           <Link
-            to={isAuthenticated ? "/products" : "/"}
+            to={getPrimaryRoute()}
             className="flex-shrink-0 group min-w-0"
           >
             <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
@@ -129,11 +149,7 @@ function Header() {
               </Link>
             )}
 
-            {isAuthenticated &&
-              (user.role === "admin" ||
-                user.role === "employee" ||
-                user.role === "hr" ||
-                user.role === "cashier") && (
+            {isAuthenticated && user?.role === "admin" && (
                 <div className="hidden lg:block">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -274,9 +290,9 @@ function Header() {
                 </div>
               </div>
 
-              {/* Admin & User Links */}
+              {/* Admin Links */}
               <div className="pt-2 border-t border-gray-100">
-                {isAuthenticated && (
+                {isAuthenticated && user?.role === "admin" && (
                   <div className="grid grid-cols-1 gap-2 mt-2">
                     {ADMIN_LINKS.map(
                       (link) =>

@@ -212,6 +212,14 @@ function App() {
 
             {/* Staff Delivery Dispatch Queue */}
             <Route
+              path="/dispatch"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "employee", "cashier"]}>
+                  <DispatchQueue />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/dispatch"
               element={
                 <ProtectedRoute allowedRoles={["admin", "employee", "cashier"]}>

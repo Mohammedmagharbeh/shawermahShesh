@@ -69,7 +69,14 @@ function Login() {
       if (res.data.token) {
         login(res.data);
         toast.success(t("login_success"));
-        navigate("/");
+        const role = (res.data.user?.role || res.data.role || "").toLowerCase();
+        if (role === "rider") {
+          navigate("/rider");
+        } else if (role === "admin" || role === "employee") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/");
+        }
       } else if (res.data.msg === "OTP sent to your phone") {
         toast.success(t("otp_sent"));
         navigate("/otp-verification", { state: { phone: phone } });

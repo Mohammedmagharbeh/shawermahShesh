@@ -132,7 +132,6 @@
 // };
 
 import {
-  Bike,
   ChartNoAxesCombined,
   FileUser,
   Image,
@@ -163,12 +162,6 @@ export const ADMIN_LINKS = [
     label: "dashboard",
     icon: LayoutDashboard,
     roles: ["admin", "employee"],
-  },
-  {
-    to: "/admin/dispatch",
-    label: "dispatch_queue",
-    icon: Bike,
-    roles: ["admin", "employee", "cashier"],
   },
   {
     to: "/orders",

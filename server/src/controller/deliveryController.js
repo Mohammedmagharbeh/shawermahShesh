@@ -106,10 +106,9 @@ exports.getDeliveryQueue = async (req, res) => {
   try {
     const maxOrdersPerRider = await getMaxOrdersPerRider();
 
-    // 1. Fetch orders ready for delivery dispatch (Confirmed or ReadyForPickup, excluding external ishbek orders)
-    const orders = await Order.find({
+    // 1. Fetch active queue orders (Confirmed, ReadyForPickup) sorted FIFO (createdAt: 1)
+    const activeOrders = await Order.find({
       status: { $in: ["Confirmed", "ReadyForPickup"] },
-      orderType: "delivery",
       source: { $ne: "ishbek" },
     })
       .populate("products.productId", "name image basePrice")
@@ -119,36 +118,52 @@ exports.getDeliveryQueue = async (req, res) => {
       .sort({ createdAt: 1 })
       .lean();
 
-    // 2. Fetch active assigned orders per rider (Confirmed, ReadyForPickup, or Shipped)
-    const activeOrdersAgg = await Order.aggregate([
-      {
-        $match: {
-          status: { $in: ["Confirmed", "ReadyForPickup", "Shipped"] },
-          assignedRiderId: { $ne: null },
-        },
-      },
-      {
-        $group: {
-          _id: "$assignedRiderId",
-          count: { $sum: 1 },
-          orders: {
-            $push: {
-              _id: "$_id",
-              sequenceNumber: "$sequenceNumber",
-              status: "$status",
-              totalPrice: "$totalPrice",
-            },
-          },
-        },
-      },
-    ]);
+    // 1.1 Fetch other lifecycle orders (Shipped, OutForDelivery, Delivered, Submitted)
+    const otherOrders = await Order.find({
+      status: { $in: ["Shipped", "OutForDelivery", "Delivered", "Submitted"] },
+      source: { $ne: "ishbek" },
+    })
+      .populate("products.productId", "name image basePrice")
+      .populate("userId", "name username phone")
+      .populate("shippingAddress")
+      .populate("assignedRiderId", "_id name username phone driverStatus")
+      .sort({ submittedAt: -1, updatedAt: -1, createdAt: -1 })
+      .limit(200)
+      .lean();
+
+    const allQueueOrders = [...activeOrders, ...otherOrders];
+
+    // 2. Fetch active assigned orders per rider with full zone details
+    const activeAssignedOrders = await Order.find({
+      assignedRiderId: { $ne: null },
+      status: { $in: ["Processing", "Confirmed", "ReadyForPickup", "Shipped"] },
+    })
+      .populate("shippingAddress", "name area details")
+      .lean();
 
     const activeMap = {};
-    activeOrdersAgg.forEach((item) => {
-      activeMap[String(item._id)] = {
-        count: item.count,
-        orders: item.orders,
-      };
+    activeAssignedOrders.forEach((ord) => {
+      const rId = String(ord.assignedRiderId);
+      if (!activeMap[rId]) {
+        activeMap[rId] = { count: 0, orders: [] };
+      }
+      const zoneName =
+        ord.shippingAddress?.name ||
+        ord.shippingAddress?.area ||
+        ord.shippingAddress?.details?.split("-")[0]?.trim() ||
+        "المنطقة";
+
+      activeMap[rId].count += 1;
+      activeMap[rId].orders.push({
+        _id: ord._id,
+        sequenceNumber: ord.sequenceNumber,
+        status: ord.status,
+        totalPrice: ord.totalPrice,
+        zone: zoneName,
+        assignedAt: ord.assignedAt,
+        shippedAt: ord.shippedAt,
+        createdAt: ord.createdAt,
+      });
     });
 
     // 3. Fetch all riders for staff monitoring
@@ -156,6 +171,27 @@ exports.getDeliveryQueue = async (req, res) => {
       .select("_id name username phone driverStatus currentOrderId returnedAt")
       .sort({ returnedAt: 1 })
       .lean();
+
+    // Find latest delivered timestamp for returning drivers
+    const returningRiderIds = rawRiders
+      .filter((d) => d.driverStatus === "returning")
+      .map((d) => d._id);
+
+    const lastDeliveredOrders = await Order.find({
+      assignedRiderId: { $in: returningRiderIds },
+      status: { $in: ["Delivered", "Submitted"] },
+    })
+      .sort({ submittedAt: -1 })
+      .select("assignedRiderId submittedAt")
+      .lean();
+
+    const returningMap = {};
+    lastDeliveredOrders.forEach((o) => {
+      const rId = String(o.assignedRiderId);
+      if (!returningMap[rId]) {
+        returningMap[rId] = o.submittedAt;
+      }
+    });
 
     const allDrivers = rawRiders.map((d) => {
       const activeData = activeMap[String(d._id)] || { count: 0, orders: [] };
@@ -170,6 +206,8 @@ exports.getDeliveryQueue = async (req, res) => {
         activeOrders: activeData.orders,
         maxOrdersPerRider,
         canAcceptMoreOrders: canAcceptMore,
+        returningSince: returningMap[String(d._id)] || null,
+        shippedAt: activeData.orders.find((o) => o.status === "Shipped")?.shippedAt || null,
       };
     });
 
@@ -187,7 +225,8 @@ exports.getDeliveryQueue = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      orders,
+      orders: allQueueOrders,
+      completedOrders: otherOrders,
       availableDrivers,
       allDrivers,
       settings: {
@@ -237,7 +276,7 @@ exports.assignOrderToDriver = async (req, res) => {
       });
     }
 
-    const allowedStatuses = ["Confirmed", "ReadyForPickup"];
+    const allowedStatuses = ["Processing", "Confirmed", "ReadyForPickup"];
     if (!allowedStatuses.includes(order.status)) {
       return res.status(400).json({
         success: false,
@@ -1031,6 +1070,54 @@ exports.unassignOrder = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in unassignOrder:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * 2.2 POST /api/delivery/complete-pickup/:orderId
+ * Direct counter handover for branch pickup orders (no PIN / OTP required)
+ * Accessible by: admin, employee, cashier
+ */
+exports.completePickupOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "الطلب غير موجود" });
+    }
+
+    order.status = "Delivered";
+    order.submittedAt = new Date();
+    await order.save();
+
+    const populatedOrder = await Order.findById(order._id)
+      .populate("products.productId")
+      .populate("userId")
+      .populate("shippingAddress");
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("updatedOrder", populatedOrder);
+      io.emit("orderUpdated", populatedOrder);
+    }
+
+    // Push notification to customer
+    sendToUser(
+      populatedOrder,
+      "تم استلام طلبك 🍽️",
+      `تم استلام طلبك #${order.sequenceNumber} بنجاح من الفرع. بالهنا والشفا!`,
+      { orderId: String(order._id), status: "Delivered" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "تم تسليم الطلب للعميل بنجاح ✅",
+      order: populatedOrder,
+    });
+  } catch (error) {
+    console.error("Error in completePickupOrder:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

@@ -52,8 +52,13 @@ function OtpVerification() {
 
       toast.success(t("otp_verified"));
 
-      if (res.data.role === "employee") {
+      const role = (res.data.role || res.data.user?.role || "").toLowerCase();
+      if (role === "rider") {
+        navigate("/rider");
+      } else if (role === "employee" || role === "admin") {
         navigate("/admin/dashboard");
+      } else if (role === "cashier") {
+        navigate("/dispatch");
       } else {
         navigate("/products");
       }

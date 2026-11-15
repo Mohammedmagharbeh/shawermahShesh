@@ -57,6 +57,16 @@ export const deliveryService = {
     return data;
   },
 
+  // 2.2 Staff: Complete branch pickup order at counter
+  completePickupOrder: async (orderId, token) => {
+    const { data } = await axios.post(
+      `${API_URL}/delivery/complete-pickup/${orderId}`,
+      {},
+      getAuthHeaders(token)
+    );
+    return data;
+  },
+
   // 3. Driver: Confirm pickup from branch counter (single or bulk)
   confirmPickup: async (orderId, token, riderId = null, all = false) => {
     const { data } = await axios.post(
