@@ -109,7 +109,6 @@ exports.getDeliveryQueue = async (req, res) => {
     // 1. Fetch active queue orders (Confirmed, ReadyForPickup) sorted FIFO (createdAt: 1)
     const activeOrders = await Order.find({
       status: { $in: ["Confirmed", "ReadyForPickup"] },
-      source: { $ne: "ishbek" },
     })
       .populate("products.productId", "name image basePrice")
       .populate("userId", "name username phone")
@@ -121,7 +120,6 @@ exports.getDeliveryQueue = async (req, res) => {
     // 1.1 Fetch other lifecycle orders (Shipped, OutForDelivery, Delivered, Submitted)
     const otherOrders = await Order.find({
       status: { $in: ["Shipped", "OutForDelivery", "Delivered", "Submitted"] },
-      source: { $ne: "ishbek" },
     })
       .populate("products.productId", "name image basePrice")
       .populate("userId", "name username phone")
@@ -1104,7 +1102,7 @@ exports.completePickupOrder = async (req, res) => {
     }
 
     // Push notification to customer
-    sendToUser(
+    if (order.source !== "ishbek") sendToUser(
       populatedOrder,
       "تم استلام طلبك 🍽️",
       `تم استلام طلبك #${order.sequenceNumber} بنجاح من الفرع. بالهنا والشفا!`,

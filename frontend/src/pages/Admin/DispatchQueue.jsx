@@ -219,12 +219,12 @@ export default function DispatchQueue() {
         };
         setOrders(
           (data.orders || []).filter(
-            (o) => o.source !== "ishbek" && !isExcluded(o)
+            (o) => !isExcluded(o)
           )
         );
         setCompletedOrders(
           (data.completedOrders || []).filter(
-            (o) => o.source !== "ishbek" && !isExcluded(o)
+            (o) => !isExcluded(o)
           )
         );
         setAvailableDrivers(data.availableDrivers || []);
@@ -545,6 +545,10 @@ export default function DispatchQueue() {
 
   // Full Address Helper
   const getFullAddress = (order) => {
+    // طلبات اشبك: العنوان محفوظ بتفاصيل الطلب
+    if (order.source === "ishbek" && order.userDetails?.apartment) {
+      return order.userDetails.apartment;
+    }
     const parts = [];
     const area = order.shippingAddress?.name || order.shippingAddress?.area;
     if (area) parts.push(area);
@@ -1385,6 +1389,13 @@ export default function DispatchQueue() {
                       <span className="font-mono font-black text-sm sm:text-base text-gray-900 tracking-tight">
                         #{order.sequenceNumber || order._id.slice(-6)}
                       </span>
+
+                      {/* علامة طلبات (اشبك) */}
+                      {order.source === "ishbek" && (
+                        <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap">
+                          Talabat
+                        </span>
+                      )}
 
                       {/* Single Concise Status Badge */}
                       {renderOrderStatusBadge(order, isCompleted)}

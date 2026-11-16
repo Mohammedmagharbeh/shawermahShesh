@@ -51,6 +51,13 @@ const channelLabels = {
   TALABAT: "طلبات",
 };
 
+// طريقة الدفع المعروضة: طلبات اشبك (طلبات) دائماً بطاقة ومدفوعة
+const getPaymentMethod = (order) =>
+  order.source === "ishbek" ? "card" : order.payment?.method || "N/A";
+
+const getPaymentStatus = (order) =>
+  order.source === "ishbek" ? "paid" : order.payment?.status || "unpaid";
+
 function AdminDashboard() {
   const { t } = useTranslation();
   const selectedLanguage = localStorage.getItem("i18nextLng") || "ar";
@@ -103,7 +110,10 @@ function AdminDashboard() {
       // Exclude unpaid card orders — they're awaiting MontyPay callback.
       // Only show: cash orders (always visible) or already-paid card orders.
       const readyOrders = (data.data || []).filter(
-        (o) => o.payment?.method === "cash" || o.payment?.status === "paid",
+        (o) =>
+          o.source === "ishbek" ||
+          o.payment?.method === "cash" ||
+          o.payment?.status === "paid",
       );
       setIncomingOrder(readyOrders);
     } catch (error) {
@@ -232,7 +242,9 @@ function AdminDashboard() {
       // Hide unpaid card orders — they haven't been confirmed by MontyPay yet.
       // Cash orders are always visible; card orders must have payment.status === "paid".
       const matchesPayment =
-        order.payment?.method === "cash" || order.payment?.status === "paid";
+        order.source === "ishbek" ||
+        order.payment?.method === "cash" ||
+        order.payment?.status === "paid";
 
       const sTerm = searchTerm.toLowerCase();
       const matchesSearch =
@@ -278,10 +290,8 @@ function AdminDashboard() {
         [t("address")]:
           order.shippingAddress?.name || order.userDetails?.apartment || "N/A",
         [t("status")]: t(order.status?.toLowerCase()) || "N/A",
-        [t("payment_status")]: order.payment?.status
-          ? t(order.payment.status)
-          : "N/A",
-        [t("payment_method")]: order.payment?.method || "N/A",
+        [t("payment_status")]: t(getPaymentStatus(order)),
+        [t("payment_method")]: getPaymentMethod(order),
         "تفاصيل المنتجات": productsDetails, // سرد كامل للمنتجات مع إضافاتها
         [t("order_subtotal")]: (
           order.totalPrice -
@@ -583,7 +593,7 @@ function AdminDashboard() {
 
                   <div className="flex flex-col gap-3">
                     <Select
-                      value={order.payment?.status || "unpaid"}
+                      value={getPaymentStatus(order)}
                       onValueChange={(value) =>
                         handlePaymentStatusChange(order._id, value)
                       }
@@ -592,15 +602,12 @@ function AdminDashboard() {
                         <SelectValue>
                           <Badge
                             className={
-                              order.payment?.status === "paid"
+                              getPaymentStatus(order) === "paid"
                                 ? "bg-green-600 text-white"
                                 : "bg-secondary text-secondary-foreground"
                             }
                           >
-                            {order.payment?.status
-                              ? t(order.payment.status)
-                              : t("unpaid")}{" "}
-                            ({order.payment?.method || "N/A"})
+                            {t(getPaymentStatus(order))} ({getPaymentMethod(order)})
                           </Badge>
                         </SelectValue>
                       </SelectTrigger>
