@@ -20,9 +20,34 @@ const MONTY_BASE = process.env.MONTY_BASE;
 const MERCHANT_KEY = process.env.MERCHANT_KEY;
 const MERCHANT_PASSWORD = process.env.MERCHANT_PASSWORD;
 
+// const getUpperString = (value) =>
+  
+//   value == null ? "" : String(value).toUpperCase().trim();
+
 const getUpperString = (value) =>
   value == null ? "" : String(value).toUpperCase().trim();
 
+// ✅ دالة تسجيل استخدام البرومو كود (جديدة)
+const savePromo = async (order, orderData) => {
+  try {
+    const promo = orderData?.promoCode || order?.promoCode;
+    const userId = orderData?.userId || order?.userId?._id || order?.userId;
+    if (promo && userId) {
+      await recordPromoUsage(promo, userId, order._id);
+    }
+  } catch (e) {
+    console.error("Failed to record promo usage:", e.message);
+  }
+};
+
+const md5sha1 = (raw) =>
+  crypto
+    .createHash("sha1")
+    .update(crypto.createHash("md5").update(raw).digest("hex"))
+    .digest("hex");
+
+/**
+ * 
 const md5sha1 = (raw) =>
   crypto
     .createHash("sha1")
@@ -308,6 +333,7 @@ router.post("/callback", async (req, res) => {
                 `✅ Order ${updatedOrder._id} successfully created from CheckoutSession via callback.`,
               );
               await CheckoutSession.findByIdAndDelete(dbOrderId);
+              await savePromo(updatedOrder, session.orderData);
             } catch (createErr) {
               console.error(
                 "Failed creating order from session in callback:",
@@ -536,6 +562,7 @@ router.post("/verify", async (req, res) => {
           `✅ Order ${finalOrder._id} confirmed via /verify fallback.`,
         );
         await CheckoutSession.findByIdAndDelete(dbOrderId);
+        await savePromo(updatedOrder, session.orderData);
       } catch (err) {
         console.error("Failed creating order from session in verify:", err);
       }
@@ -742,6 +769,7 @@ router.post("/recurring", validateJWT, async (req, res) => {
             io,
           });
           await CheckoutSession.findByIdAndDelete(dbOrderId);
+          await savePromo(updatedOrder, session.orderData);
           return res.json({ success: true, dbOrderId: finalOrder._id });
         }
       } catch (directErr) {

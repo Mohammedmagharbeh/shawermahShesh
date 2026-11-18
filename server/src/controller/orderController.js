@@ -5,6 +5,7 @@ const Location = require("../models/locations");
 const counterModel = require("../models/counter");
 const Cart = require("../models/cart");
 const mongoose = require("mongoose");
+const { recordPromoUsage } = require("./promoCodeController");
 const {
   sendToUser,
   ORDER_STATUS_MESSAGES,

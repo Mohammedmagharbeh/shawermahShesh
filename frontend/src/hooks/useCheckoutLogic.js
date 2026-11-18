@@ -286,41 +286,111 @@ export const useCheckoutLogic = (t) => {
   [user?.token],
 );
 
-  const handleMontyPayFlow = useCallback(async () => {
-    if (formState.savedCardId) {
-      // Use recurring payment flow
-      const result = await PaymentService.montyPayRecurring({
-        cart,
-        formState,
-        user,
-        orderSummary,
-        savedCardId: formState.savedCardId,
-        token: user?.token,
-      });
+const handleMontyPayFlow = useCallback(async () => {
+  if (formState.savedCardId) {
+    const result = await PaymentService.montyPayRecurring({
+      cart,
+      formState,
+      user,
+      orderSummary,
+      savedCardId: formState.savedCardId,
+      token: user?.token,
+      promoCode: appliedPromo?.code || null,
+      discountAmount: orderSummary.promoDiscountAmount || 0,
+    });
 
-      if (result?.redirectUrl) {
-        window.location.href = result.redirectUrl;
-        return;
-      }
-
-      if (result?.dbOrderId) {
-        navigate(`/success?dbOrderId=${result.dbOrderId}`);
-      }
-    } else {
-      // Use standard checkout session flow
-      const redirectUrl = await PaymentService.montyPay({
-        cart,
-        formState,
-        user,
-        orderSummary,
-        isTestMode,
-        promoCode: appliedPromo?.code || null,
-      });
-      window.location.href = redirectUrl;
+    if (result?.redirectUrl) {
+      window.location.href = result.redirectUrl;
+      return;
     }
-  }, [cart, formState, user, orderSummary, isTestMode, appliedPromo, navigate]);
+
+    if (result?.dbOrderId) {
+      navigate(`/success?dbOrderId=${result.dbOrderId}`);
+    }
+  } else {
+    const redirectUrl = await PaymentService.montyPay({
+      cart,
+      formState,
+      user,
+      orderSummary,
+      isTestMode,
+      promoCode: appliedPromo?.code || null,
+      discountAmount: orderSummary.promoDiscountAmount || 0,
+    });
+    window.location.href = redirectUrl;
+  }
+}, [cart, formState, user, orderSummary, isTestMode, appliedPromo, navigate]);
+
+  // const handleMontyPayFlow = useCallback(async () => {
+  //   if (formState.savedCardId) {
+  //     // Use recurring payment flow
+  //     const result = await PaymentService.montyPayRecurring({
+  //       cart,
+  //       formState,
+  //       user,
+  //       orderSummary,
+  //       savedCardId: formState.savedCardId,
+  //       token: user?.token,
+  //     });
+
+  //     if (result?.redirectUrl) {
+  //       window.location.href = result.redirectUrl;
+  //       return;
+  //     }
+
+  //     if (result?.dbOrderId) {
+  //       navigate(`/success?dbOrderId=${result.dbOrderId}`);
+  //     }
+  //   } else {
+  //     // Use standard checkout session flow
+  //     const redirectUrl = await PaymentService.montyPay({
+  //       cart,
+  //       formState,
+  //       user,
+  //       orderSummary,
+  //       isTestMode,
+  //       promoCode: appliedPromo?.code || null,
+  //     });
+  //     window.location.href = redirectUrl;
+  //   }
+  // }, [cart, formState, user, orderSummary, isTestMode, appliedPromo, navigate]);
 
   // CliQ handlers
+//   const handleMontyPayFlow = useCallback(async () => {
+//   if (formState.savedCardId) {
+//     const result = await PaymentService.montyPayRecurring({
+//       cart,
+//       formState,
+//       user,
+//       orderSummary,
+//       savedCardId: formState.savedCardId,
+//       token: user?.token,
+//       promoCode: appliedPromo?.code || null,                       // ✅ جديد
+//       discountAmount: orderSummary.promoDiscountAmount || 0,       // ✅ جديد
+//     });
+
+//     if (result?.redirectUrl) {
+//       window.location.href = result.redirectUrl;
+//       return;
+//     }
+
+//     if (result?.dbOrderId) {
+//       navigate(`/success?dbOrderId=${result.dbOrderId}`);
+//     }
+//   } else {
+//     const redirectUrl = await PaymentService.montyPay({
+//       cart,
+//       formState,
+//       user,
+//       orderSummary,
+//       isTestMode,
+//       promoCode: appliedPromo?.code || null,
+//       discountAmount: orderSummary.promoDiscountAmount || 0,       // ✅ جديد
+//     });
+//     window.location.href = redirectUrl;
+//   }
+// }, [cart, formState, user, orderSummary, isTestMode, appliedPromo, navigate]);
+  
   const handleZainCashFlow = useCallback(async () => {
     setFormState((prev) => ({
       ...prev,

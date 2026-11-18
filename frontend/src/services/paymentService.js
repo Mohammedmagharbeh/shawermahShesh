@@ -72,6 +72,8 @@ export const initiateMontyPayPayment = async ({
   orderSummary,
   isTestMode,
   saveCard,
+   promoCode,        // ✅ جديد
+  discountAmount,   // ✅ جديد
 }) => {
   try {
     const amountValidation = validatePaymentAmount(orderSummary.total);
@@ -101,6 +103,8 @@ export const initiateMontyPayPayment = async ({
         orderType: formState.orderType,
         userDetails: formState.details,
         paymentMethod: "card",
+         promoCode: promoCode || null,           // ✅ جديد
+        discountAmount: discountAmount || 0,    // ✅ جديد
       }),
       saveCard: saveCard !== false, // Default to true unless explicitly false
     };
@@ -276,6 +280,8 @@ export const initiateRecurringPayment = async ({
   orderSummary,
   savedCardId,
   token,
+  promoCode,        // ✅ جديد
+  discountAmount,   // ✅ جديد
 }) => {
   try {
     if (!token) throw new Error("Authentication token is required");
@@ -300,6 +306,8 @@ export const initiateRecurringPayment = async ({
         orderType: formState.orderType,
         userDetails: formState.details,
         paymentMethod: "card",
+          promoCode: promoCode || null,           // ✅ جديد
+        discountAmount: discountAmount || 0,    // ✅ جديد
       }),
     };
 

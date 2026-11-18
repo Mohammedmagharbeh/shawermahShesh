@@ -418,18 +418,43 @@ exports.validatePromoCode = async (req, res) => {
  *     await recordPromoUsage(orderData.promoCode, userId, savedOrder._id);
  *   }
  */
+// exports.recordPromoUsage = async (code, userId, orderId = null) => {
+
+
+
+//   if (!code || !userId) return null;
+
+//   const promoCode = await PromoCode.findOne({ code: code.toUpperCase() });
+//   if (!promoCode) return null;
+
+//   const usage = await PromoCodeUsage.create({
+//     promoCode: promoCode._id,
+//     code: promoCode.code,
+//     userId,
+//     orderId,
+//   });
+
+//   return usage;
+// };
+
+
+
 exports.recordPromoUsage = async (code, userId, orderId = null) => {
   if (!code || !userId) return null;
 
   const promoCode = await PromoCode.findOne({ code: code.toUpperCase() });
   if (!promoCode) return null;
 
-  const usage = await PromoCodeUsage.create({
+  // ما تسجّل مرتين لنفس الطلب
+  if (orderId) {
+    const already = await PromoCodeUsage.findOne({ orderId });
+    if (already) return already;
+  }
+
+  return PromoCodeUsage.create({
     promoCode: promoCode._id,
     code: promoCode.code,
     userId,
     orderId,
   });
-
-  return usage;
 };
