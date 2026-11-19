@@ -724,7 +724,10 @@ router.post("/recurring", validateJWT, async (req, res) => {
     const cardTokenToUse = savedCard.card_token || savedCard.recurring_token;
 
     // 1) إذا كان فيه recurring_token حقيقي ومختلف عن الـ card_token وموجود init_trans_id، جرب الشحن المباشر
-    if (
+    // if (
+    //   savedCard.recurring_init_trans_id &&
+        if (
+      false && // ✅ معطّل: الشحن المباشر بدون CVV كان ينشئ الطلب قبل تأكيد الزبون
       savedCard.recurring_init_trans_id &&
       savedCard.recurring_token &&
       savedCard.recurring_token !== savedCard.card_token &&
