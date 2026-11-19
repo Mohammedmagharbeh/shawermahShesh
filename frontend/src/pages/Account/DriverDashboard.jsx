@@ -613,7 +613,7 @@ export default function DriverDashboard() {
                 ) : (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-red-600" />
-                    <span>تسجيل وصول يدوي سريع (بدون كاميرا)</span>
+                    {/* <span>تسجيل وصول يدوي سريع (بدون كاميرا)</span> */}
                   </>
                 )}
               </Button>
