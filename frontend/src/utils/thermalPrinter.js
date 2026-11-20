@@ -36,21 +36,57 @@ export const PRINTER_CONFIG = {
 };
 
 /**
+ * Product-specific overrides (takes precedence over category mapping):
+ * - Product "69d8f37b0d197335a04b3fc5" (فتة شيش): Shawarma printer
+ * - Product "69d8e8860d197335a04b3f52" (سناك بوكس): Snacks printer
+ */
+export const PRODUCT_PRINTER_OVERRIDES = {
+  "69d8f37b0d197335a04b3fc5": "shawermah", // فتة شيش
+  "69d8e8860d197335a04b3f52": "snack",     // سناك بوكس
+};
+
+/**
  * Category IDs assigned to specific station printers:
- * - Snacks: "69d8e98d0d197335a04b3f61" (سناكات)
- * - Burgers: "69d8ede10d197335a04b3f95" (برجر لحم), "69d8f0530d197335a04b3faa" (برجر دجاج), "69d8f3e20d197335a04b3fce" (وجبات الأطفال)
- * - Cafe: "6a4fb60b6774757996012c41" (كافية وحلويات شيش)
+ * - Snacks:
+ *    - "69d8e98d0d197335a04b3f61" (سناكات)
+ *    - "6a4556bb1d418c5cf3980821" (مأكولات بحرية)
+ *    - "69d8f3530d197335a04b3fc2" (اطباق شيش - ما عدا فتة شيش التي تطبع على طابعة الشاورما)
+ * - Burgers:
+ *    - "69d8ede10d197335a04b3f95" (برجر لحم)
+ *    - "69d8f0530d197335a04b3faa" (برجر دجاج)
+ *    - "69d8f3e20d197335a04b3fce" (وجبات الأطفال)
+ *    - "69d8e83f0d197335a04b3f4f" (وجبات جماعية - ما عدا سناك بوكس الذي يطبع على طابعة السناك)
+ * - Cafe:
+ *    - "6a4fb60b6774757996012c41" (كافية وحلويات شيش)
  * - Shawermah: All other category IDs
  */
 export const CATEGORY_PRINTER_MAPPING = {
-  snack: ["69d8e98d0d197335a04b3f61"],
+  snack: [
+    "69d8e98d0d197335a04b3f61", // سناكات
+    "6a4556bb1d418c5cf3980821", // مأكولات بحرية
+    "69d8f3530d197335a04b3fc2", // اطباق شيش (باستثناء فتة شيش)
+  ],
   burger: [
     "69d8ede10d197335a04b3f95", // برجر لحم
     "69d8f0530d197335a04b3faa", // برجر دجاج
     "69d8f3e20d197335a04b3fce", // وجبات الأطفال
+    "69d8e83f0d197335a04b3f4f", // وجبات جماعية (باستثناء سناك بوكس)
   ],
   cafe: ["6a4fb60b6774757996012c41"], // كافية وحلويات شيش
 };
+
+/**
+ * Extracts product ID from an order item
+ */
+export function getItemProductId(item) {
+  if (!item) return null;
+  const p = item.productId;
+  if (!p) return null;
+  if (typeof p === "object" && (p._id || p.id)) {
+    return String(p._id || p.id);
+  }
+  return String(p);
+}
 
 /**
  * Extracts category ID from an order item
@@ -84,11 +120,17 @@ export function getItemCategoryId(item) {
 
 /**
  * Classifies an item into: "snack", "burger", "cafe", or "shawermah" (default)
- * Strictly based on category IDs.
+ * Strictly based on product overrides and category IDs.
  */
 export function classifyItem(item) {
-  const catId = getItemCategoryId(item);
+  // 1. Check specific product overrides first
+  const prodId = getItemProductId(item);
+  if (prodId && PRODUCT_PRINTER_OVERRIDES[prodId]) {
+    return PRODUCT_PRINTER_OVERRIDES[prodId];
+  }
 
+  // 2. Check category mapping
+  const catId = getItemCategoryId(item);
   if (catId) {
     if (CATEGORY_PRINTER_MAPPING.snack.includes(catId)) {
       return "snack";
