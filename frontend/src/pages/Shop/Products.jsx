@@ -84,9 +84,7 @@ export default function Products() {
 
     socket.on("product:stockUpdated", ({ productId, inStock }) => {
       setProducts((prev) =>
-        prev.map((p) =>
-          p._id === productId ? { ...p, inStock } : p,
-        ),
+        prev.map((p) => (p._id === productId ? { ...p, inStock } : p)),
       );
     });
 
@@ -181,7 +179,7 @@ export default function Products() {
     >
       <div className="container mx-auto px-4 max-w-4xl">
         {/* --- Active Order Floating Notification Banner --- */}
-        <ActiveOrderBanner />
+        {/* <ActiveOrderBanner /> */}
 
         {/* --- Category Tabs (Sticky Mobile Header) --- */}
         <div className="sticky top-16 z-30 bg-gray-50/95 backdrop-blur-md py-3 -mx-4 px-4 mb-6 border-b border-gray-100 shadow-sm transition-all duration-300">
