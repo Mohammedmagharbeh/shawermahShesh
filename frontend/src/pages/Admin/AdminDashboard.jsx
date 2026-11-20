@@ -995,6 +995,11 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { toast } from "react-hot-toast";
 import product_placeholder from "@/assets/product_placeholder.jpeg";
+import { Printer } from "lucide-react";
+import {
+  autoPrintOrder,
+  checkPrintAgentStatus,
+} from "@/utils/thermalPrinter";
 import {
   Dialog,
   DialogContent,
@@ -1070,7 +1075,39 @@ function AdminDashboard() {
   const [soundAllowed, setSoundAllowed] = useState(false);
   const [sound, setSound] = useState(null);
   const [incomingOrder, setIncomingOrder] = useState([]);
+  const [printAgentOnline, setPrintAgentOnline] = useState(false);
   const { user } = useUser();
+
+  // ✅ فحص حالة برنامج الطباعة المحلي (Print Agent)
+  useEffect(() => {
+    let mounted = true;
+    const checkStatus = async () => {
+      const isOnline = await checkPrintAgentStatus();
+      if (mounted) setPrintAgentOnline(isOnline);
+    };
+    checkStatus();
+    const interval = setInterval(checkStatus, 15000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // ✅ استماع لأمر الطباعة التلقائية عبر Socket.IO (عند تأكيد أي طلب)
+  useEffect(() => {
+    const handleAutoPrint = (orderToPrint) => {
+      console.log(
+        "[AdminDashboard] Socket autoPrintOrder received:",
+        orderToPrint?._id,
+      );
+      autoPrintOrder(orderToPrint);
+    };
+
+    socket.on("autoPrintOrder", handleAutoPrint);
+    return () => {
+      socket.off("autoPrintOrder", handleAutoPrint);
+    };
+  }, []);
 
   useEffect(() => {
     getTodayOrders();
@@ -1197,6 +1234,14 @@ function AdminDashboard() {
       updatePayload.confirmedBy = user.name || user.username;
     }
     updateOrder(orderId, updatePayload);
+
+    // ✅ طباعة حرارية تلقائية صامتة على شبكة الطابعات
+    if (newStatus === "Confirmed") {
+      const orderToPrint = orders.find((o) => o._id === orderId);
+      if (orderToPrint) {
+        autoPrintOrder({ ...orderToPrint, status: "Confirmed" });
+      }
+    }
   };
 
   const handlePaymentStatusChange = (orderId, newPaymentStatus) => {
@@ -1333,9 +1378,34 @@ function AdminDashboard() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
           <div className="flex flex-col gap-2 w-full md:w-auto">
-            <h1 className="text-3xl font-bold text-foreground">
-              {t("order_management")}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-foreground">
+                {t("order_management")}
+              </h1>
+              {/* مؤشر حالة برنامج الطباعة */}
+              <div
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+                  printAgentOnline
+                    ? "bg-green-50 border-green-300 text-green-700"
+                    : "bg-amber-50 border-amber-300 text-amber-700"
+                }`}
+                title={
+                  printAgentOnline
+                    ? "برنامج الطباعة متصل ويعمل"
+                    : "برنامج الطباعة المحلي غير متصل (تأكد من تشغيل start.bat على جهاز الكاشير)"
+                }
+              >
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    printAgentOnline ? "bg-green-500 animate-pulse" : "bg-amber-500"
+                  }`}
+                />
+                <Printer className="h-3.5 w-3.5" />
+                <span>
+                  {printAgentOnline ? "طابعات الشبكة متصلة" : "طابعات الشبكة غير متصلة"}
+                </span>
+              </div>
+            </div>
             <p className="mt-1 text-muted-foreground">
               {t("total_orders")}
               <span className="font-semibold text-primary mx-1">
@@ -1442,6 +1512,8 @@ function AdminDashboard() {
                           if (user?.name || user?.username)
                             payload.confirmedBy = user.name || user.username;
                           updateOrder(o._id, payload);
+                          // ✅ طباعة حرارية تلقائية صامتة على شبكة الطابعات
+                          autoPrintOrder({ ...o, status: "Confirmed" });
                           setIncomingOrder((prev) =>
                             prev.filter((ord) => ord._id !== o._id),
                           );
@@ -1883,6 +1955,24 @@ function AdminDashboard() {
                       {t("delete_order")}
                     </Button>
                   )}
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 border-blue-300 text-blue-700 hover:bg-blue-50"
+                    onClick={async () => {
+                      const res = await autoPrintOrder(order);
+                      if (res.success) {
+                        toast.success("تم إرسال أمر الطباعة بنجاح");
+                      } else {
+                        toast.error(`تعذر الطباعة: ${res.reason || "خطأ"}`);
+                      }
+                    }}
+                    title="طباعة تلقائية صامتة على طابعات الشبكة"
+                  >
+                    <Printer className="h-4 w-4" />
+                    <span>طباعة الشبكة (تلقائي)</span>
+                  </Button>
 
                   <Button
                     variant="outline"

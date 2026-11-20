@@ -723,7 +723,10 @@ exports.updateOrder = async (req, res) => {
     const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
       new: true,
     })
-      .populate("products.productId")
+      .populate({
+        path: "products.productId",
+        populate: { path: "category" },
+      })
       .populate("userId")
       .populate("shippingAddress")
       .populate("assignedRiderId", "_id name username phone");
@@ -816,11 +819,45 @@ exports.updateOrder = async (req, res) => {
         status: updatedOrder.status,
         order: updatedOrder,
       });
+
+      // ✅ بث أمر الطباعة الحرارية عند تأكيد الطلب
+      if (updates.status === "Confirmed") {
+        io.emit("autoPrintOrder", updatedOrder);
+      }
     }
 
     res.status(200).json(updatedOrder);
   } catch (err) {
     console.error("updateOrder error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ✅ أمر إعادة طباعة طلب حرارياً (يدوي من لوحة التحكم)
+exports.printOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id)
+      .populate({
+        path: "products.productId",
+        populate: { path: "category" },
+      })
+      .populate("userId")
+      .populate("shippingAddress")
+      .populate("assignedRiderId", "_id name username phone");
+
+    if (!order) {
+      return res.status(404).json({ message: "الطلب غير موجود" });
+    }
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("autoPrintOrder", order);
+    }
+
+    res.status(200).json({ message: "تم إرسال أمر الطباعة بنجاح", order });
+  } catch (err) {
+    console.error("printOrder error:", err);
     res.status(500).json({ message: err.message });
   }
 };

@@ -1,0 +1,22 @@
+{
+  "port": 3456,
+  "socketUrl": "https://api.shawermasheesh.com.jo",
+  "localSocketFallback": "http://localhost:5000",
+  "printers": {
+    "shawermah": {
+      "name": "طابعة شاورما (كامل الفاتورة)",
+      "ip": "192.168.1.56",
+      "port": 9100
+    },
+    "burger": {
+      "name": "طابعة برجر",
+      "ip": "192.168.1.55",
+      "port": 9100
+    },
+    "snack": {
+      "name": "طابعة سناك",
+      "ip": "192.168.1.57",
+      "port": 9100
+    }
+  }
+}

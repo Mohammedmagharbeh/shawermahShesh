@@ -16,7 +16,9 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/contexts/UserContext";
-import { ChevronDown } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { Printer, ChevronDown } from "lucide-react";
+import { autoPrintOrder } from "@/utils/thermalPrinter";
 import {
   getOrderStatusOptions,
   getOrderStatusLabel,
@@ -613,7 +615,24 @@ function Orders() {
                     </div>
 
                     {/* زر طباعة الفاتورة */}
-                    <div className="mt-6 flex justify-end border-t pt-4">
+                    <div className="mt-6 flex justify-end gap-2 border-t pt-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1 border-blue-300 text-blue-700 hover:bg-blue-50"
+                        onClick={async () => {
+                          const res = await autoPrintOrder(order);
+                          if (res.success) {
+                            toast.success("تم إرسال أمر الطباعة بنجاح");
+                          } else {
+                            toast.error(`تعذر الطباعة: ${res.reason || "خطأ"}`);
+                          }
+                        }}
+                        title="طباعة تلقائية صامتة على طابعات الشبكة"
+                      >
+                        <Printer className="h-4 w-4" />
+                        <span>طباعة الشبكة (تلقائي)</span>
+                      </Button>
                       <Button
                         variant="outline"
                         className="border-primary text-primary"

@@ -11,6 +11,7 @@
     getOrdersByUserId,
     getMyActiveOrder,
     updateOrder,
+    printOrder,
   } = require("../controller/orderController.js");
 
   const router = express.Router();
@@ -24,6 +25,7 @@
   router.post("/post", validateJWT, createOrder);
   // router.put("/:id", validateJWT, updateOrder);
   router.put("/:id", updateOrder);
+  router.post("/:id/print", printOrder);
   router.delete("/:id", validateJWT, deleteOrder);
 
   module.exports = router;

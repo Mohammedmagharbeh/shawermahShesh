@@ -1,0 +1,598 @@
+// frontend/src/utils/thermalPrinter.js
+// Automatic ESC/POS Network Printing for Shawermah Sheesh (80mm Thermal Printers)
+
+export const PRINTER_CONFIG = {
+  agentUrl: "http://127.0.0.1:3456",
+  printers: {
+    shawermah: {
+      id: "shawermah",
+      name: "طابعة شاورما (الفاتورة كاملة)",
+      badge: "فاتورة الزبون / شاورما",
+      ip: "192.168.1.56",
+      port: 9100,
+    },
+    burger: {
+      id: "burger",
+      name: "طابعة برجر",
+      badge: "مطبخ البرجر",
+      ip: "192.168.1.55",
+      port: 9100,
+    },
+    snack: {
+      id: "snack",
+      name: "طابعة سناك",
+      badge: "محطة السناك",
+      ip: "192.168.1.57",
+      port: 9100,
+    },
+  },
+};
+
+/**
+ * Classifies an item into: "burger", "snack", or "shawermah" (everything else)
+ */
+export function classifyItem(item) {
+  const cat = item.productId?.category;
+  const catStr = [
+    cat?.name?.en,
+    cat?.name?.ar,
+    cat?.en,
+    cat?.ar,
+    item.category,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const nameStr = [
+    item.productId?.name?.en,
+    item.productId?.name?.ar,
+    item.name?.en,
+    item.name?.ar,
+    typeof item.name === "string" ? item.name : "",
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (/burger|برجر/.test(catStr) || /burger|برجر/.test(nameStr)) {
+    return "burger";
+  }
+
+  if (
+    /snack|سناك/.test(catStr) ||
+    /snack|سناك|بطاطا|fries|تندرز|tenders|أصابع|ناجتس|nuggets|ودجز|wedges|حلقات|rings/.test(
+      nameStr,
+    )
+  ) {
+    return "snack";
+  }
+
+  return "shawermah";
+}
+
+/**
+ * Splits the order into print jobs for the 3 printers according to the restaurant rules:
+ *  - 192.168.1.56 (Shawermah): Prints EVERYTHING including shawermah
+ *  - 192.168.1.55 (Burger): Prints all items under burger category
+ *  - 192.168.1.57 (Snack): Prints all items under snack category
+ */
+export function splitOrderForPrinters(order) {
+  const allProducts = Array.isArray(order?.products) ? order.products : [];
+
+  const burgerProducts = allProducts.filter((p) => classifyItem(p) === "burger");
+  const snackProducts = allProducts.filter((p) => classifyItem(p) === "snack");
+
+  const jobs = [];
+
+  // 1. Shawermah printer (192.168.1.56) -> Prints EVERYTHING
+  if (allProducts.length > 0) {
+    jobs.push({
+      printer: PRINTER_CONFIG.printers.shawermah,
+      products: allProducts,
+      isFullInvoice: true,
+      badge: PRINTER_CONFIG.printers.shawermah.badge,
+    });
+  }
+
+  // 2. Burger printer (192.168.1.55) -> Prints if order contains burger items
+  if (burgerProducts.length > 0) {
+    jobs.push({
+      printer: PRINTER_CONFIG.printers.burger,
+      products: burgerProducts,
+      isFullInvoice: false,
+      badge: PRINTER_CONFIG.printers.burger.badge,
+    });
+  }
+
+  // 3. Snack printer (192.168.1.57) -> Prints if order contains snack items
+  if (snackProducts.length > 0) {
+    jobs.push({
+      printer: PRINTER_CONFIG.printers.snack,
+      products: snackProducts,
+      isFullInvoice: false,
+      badge: PRINTER_CONFIG.printers.snack.badge,
+    });
+  }
+
+  return jobs;
+}
+
+/**
+ * Wraps text for canvas rendering
+ */
+function wrapText(ctx, text, maxWidth) {
+  const words = String(text || "").split(" ");
+  const lines = [];
+  let currentLine = "";
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const testWidth = ctx.measureText(testLine).width;
+    if (testWidth > maxWidth && i > 0) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
+/**
+ * Renders an invoice receipt onto an HTML5 Canvas with perfect Arabic typography
+ * Standard 80mm roll = 576 dots printable width
+ */
+export function renderReceiptToCanvas(order, job) {
+  const width = 576; // 80mm @ 203 DPI
+  const padding = 20;
+  const contentWidth = width - padding * 2;
+
+  // Measure content first to calculate dynamic canvas height
+  const offscreen = document.createElement("canvas");
+  offscreen.width = width;
+  const ctx = offscreen.getContext("2d");
+
+  const customerName = order.userDetails?.name || "N/A";
+  const customerPhone =
+    order.userId?.phone || order.userDetails?.phone || "N/A";
+  const deliveryType =
+    order.orderType === "delivery" ? "توصيل (Delivery)" : "استلام (Pickup)";
+  const area =
+    order.shippingAddress?.name || order.userDetails?.apartment || "";
+  const orderSource =
+    order.source === "ishbek" ? "طلبات (اشبك - Talabat)" : "تطبيق شاورما شيش";
+
+  // Pre-calculate height
+  let estimatedHeight = 360; // Header, info, titles, dividers
+  const products = job.products || [];
+
+  products.forEach((item) => {
+    estimatedHeight += 70; // Item name + Qty + Price line
+    if (item.selectedProtein) estimatedHeight += 24;
+    if (item.isSpicy) estimatedHeight += 24;
+    if (item.additions?.length > 0) estimatedHeight += 28;
+    if (item.notes || order.orderNote) estimatedHeight += 30;
+  });
+
+  estimatedHeight += 220; // Totals, barcode, footer
+
+  offscreen.height = estimatedHeight;
+
+  // Fill background with white
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, estimatedHeight);
+
+  // Text settings
+  ctx.fillStyle = "#000000";
+  ctx.textBaseline = "top";
+  ctx.direction = "rtl";
+
+  let y = 16;
+
+  // 1. Restaurant Header
+  ctx.font = "bold 32px Tahoma, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("شاورما شيش", width / 2, y);
+  y += 38;
+
+  ctx.font = "bold 18px Arial, sans-serif";
+  ctx.fillText("Shawarma Sheesh", width / 2, y);
+  y += 28;
+
+  // Station Badge Box
+  const badgeText = `[ ${job.badge || "فاتورة"} ]`;
+  ctx.font = "bold 22px Tahoma, Arial, sans-serif";
+  ctx.fillText(badgeText, width / 2, y);
+  y += 34;
+
+  // Order Number (Large and Prominent)
+  const seqNum = order.sequenceNumber != null ? `#${order.sequenceNumber}` : "#---";
+  ctx.font = "bold 36px Tahoma, Arial, sans-serif";
+  ctx.fillText(`طلب رقم: ${seqNum}`, width / 2, y);
+  y += 44;
+
+  // Date & Time
+  const now = new Date();
+  const dateStr = `${now.toLocaleDateString("en-CA")}  ${now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`;
+  ctx.font = "16px Tahoma, Arial, sans-serif";
+  ctx.fillText(dateStr, width / 2, y);
+  y += 28;
+
+  // Divider Line
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#000000";
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(padding, y);
+  ctx.lineTo(width - padding, y);
+  ctx.stroke();
+  y += 10;
+
+  // 2. Customer & Order Info
+  ctx.textAlign = "right";
+  ctx.font = "bold 18px Tahoma, Arial, sans-serif";
+
+  const drawInfoRow = (label, value) => {
+    if (!value) return;
+    ctx.font = "bold 17px Tahoma, Arial, sans-serif";
+    ctx.fillText(`${label}: `, width - padding, y);
+    const labelWidth = ctx.measureText(`${label}: `).width;
+    ctx.font = "17px Tahoma, Arial, sans-serif";
+    ctx.fillText(String(value), width - padding - labelWidth, y);
+    y += 26;
+  };
+
+  drawInfoRow("الزبون", customerName);
+  drawInfoRow("الهاتف", customerPhone);
+  drawInfoRow("نوع الطلب", deliveryType);
+  if (order.orderType === "delivery" && area) {
+    drawInfoRow("المنطقة", area);
+  }
+  drawInfoRow("المصدر", orderSource);
+
+  y += 6;
+
+  // Dashed Divider
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(padding, y);
+  ctx.lineTo(width - padding, y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  y += 12;
+
+  // 3. Products Table Header
+  ctx.font = "bold 18px Tahoma, Arial, sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText("الصنف", width - padding, y);
+
+  ctx.textAlign = "center";
+  ctx.fillText("العدد", width / 2 + 30, y);
+
+  ctx.textAlign = "left";
+  ctx.fillText("السعر", padding, y);
+  y += 26;
+
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padding, y);
+  ctx.lineTo(width - padding, y);
+  ctx.stroke();
+  y += 10;
+
+  // 4. Products List
+  products.forEach((item, idx) => {
+    const itemName =
+      item.productId?.name?.ar ||
+      item.name?.ar ||
+      item.productId?.name?.en ||
+      item.name?.en ||
+      item.name ||
+      "وجبة";
+
+    const itemPrice = (Number(item.priceAtPurchase || 0) * (item.quantity || 1)).toFixed(2);
+
+    // Item name wrapped
+    ctx.font = "bold 20px Tahoma, Arial, sans-serif";
+    ctx.textAlign = "right";
+    const nameLines = wrapText(ctx, itemName, contentWidth - 160);
+
+    nameLines.forEach((line, lIdx) => {
+      ctx.fillText(line, width - padding, y);
+      if (lIdx === 0) {
+        // Quantity on first line
+        ctx.textAlign = "center";
+        ctx.font = "bold 22px Arial, sans-serif";
+        ctx.fillText(String(item.quantity || 1), width / 2 + 30, y);
+
+        // Price on first line
+        ctx.textAlign = "left";
+        ctx.font = "bold 19px Arial, sans-serif";
+        ctx.fillText(`${itemPrice} JOD`, padding, y);
+
+        ctx.textAlign = "right";
+        ctx.font = "bold 20px Tahoma, Arial, sans-serif";
+      }
+      y += 24;
+    });
+
+    // Protein Choice
+    if (item.selectedProtein) {
+      ctx.font = "16px Tahoma, Arial, sans-serif";
+      ctx.fillText(`• البروتين: ${item.selectedProtein === "meat" ? "لحمة" : "دجاج"}`, width - padding - 15, y);
+      y += 22;
+    }
+
+    // Spicy
+    if (item.isSpicy) {
+      ctx.font = "bold 16px Tahoma, Arial, sans-serif";
+      ctx.fillText("• حار (Spicy) 🌶️", width - padding - 15, y);
+      y += 22;
+    }
+
+    // Additions
+    if (item.additions && item.additions.length > 0) {
+      const addText = item.additions
+        .map((a) => a.name?.ar || a.name?.en || a.name || "")
+        .filter(Boolean)
+        .join("، ");
+      if (addText) {
+        ctx.font = "16px Tahoma, Arial, sans-serif";
+        const addLines = wrapText(ctx, `• إضافات: ${addText}`, contentWidth - 30);
+        addLines.forEach((ln) => {
+          ctx.fillText(ln, width - padding - 15, y);
+          y += 22;
+        });
+      }
+    }
+
+    // Notes
+    const noteText = [item.notes, idx === 0 ? order.orderNote : ""]
+      .filter(Boolean)
+      .join(" - ");
+    if (noteText) {
+      ctx.font = "italic 16px Tahoma, Arial, sans-serif";
+      const noteLines = wrapText(ctx, `• ملاحظة: ${noteText}`, contentWidth - 30);
+      noteLines.forEach((ln) => {
+        ctx.fillText(ln, width - padding - 15, y);
+        y += 22;
+      });
+    }
+
+    y += 8;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    y += 10;
+  });
+
+  // 5. Totals Section
+  const subtotal = (
+    (order.totalPrice || 0) -
+    (order.shippingAddress?.deliveryCost || 0) +
+    (order.discountAmount || 0)
+  ).toFixed(2);
+
+  const drawTotalRow = (label, valStr, isBold = false, fontSize = 18) => {
+    ctx.font = `${isBold ? "bold " : ""}${fontSize}px Tahoma, Arial, sans-serif`;
+    ctx.textAlign = "right";
+    ctx.fillText(label, width - padding, y);
+    ctx.textAlign = "left";
+    ctx.fillText(valStr, padding, y);
+    y += fontSize + 8;
+  };
+
+  drawTotalRow("المجموع الفرعي:", `${subtotal} JOD`, false, 18);
+
+  if (order.discountAmount > 0) {
+    const promoLabel = `خصم الكود${order.promoCode ? ` (${order.promoCode})` : ""}:`;
+    drawTotalRow(promoLabel, `- ${Number(order.discountAmount).toFixed(2)} JOD`, false, 18);
+  }
+
+  if (order.orderType === "delivery") {
+    const delFee = Number(order.shippingAddress?.deliveryCost || 0).toFixed(2);
+    drawTotalRow("أجور التوصيل:", `${delFee} JOD`, false, 18);
+  }
+
+  y += 6;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(padding, y);
+  ctx.lineTo(width - padding, y);
+  ctx.stroke();
+  y += 10;
+
+  // Grand Total
+  drawTotalRow(
+    "المجموع الكلي:",
+    `${Number(order.totalPrice || 0).toFixed(2)} JOD`,
+    true,
+    28,
+  );
+
+  y += 12;
+
+  // 6. Footer
+  ctx.textAlign = "center";
+  ctx.font = "bold 20px Tahoma, Arial, sans-serif";
+  ctx.fillText("شكراً لطلبكم من شاورما شيش!", width / 2, y);
+  y += 28;
+
+  ctx.font = "15px Arial, sans-serif";
+  ctx.fillText("www.shawermasheesh.com.jo", width / 2, y);
+  y += 30;
+
+  // Crop canvas to actual rendered height
+  const actualHeight = Math.ceil(y);
+  const finalCanvas = document.createElement("canvas");
+  finalCanvas.width = width;
+  finalCanvas.height = actualHeight;
+  const finalCtx = finalCanvas.getContext("2d");
+  finalCtx.drawImage(offscreen, 0, 0, width, actualHeight, 0, 0, width, actualHeight);
+
+  return finalCanvas;
+}
+
+/**
+ * Converts a Canvas to standard ESC/POS Raster bitmap command (GS v 0) with Paper Cut
+ */
+export function canvasToEscPosRaster(canvas) {
+  const width = canvas.width;
+  const height = canvas.height;
+  const ctx = canvas.getContext("2d");
+  const imgData = ctx.getImageData(0, 0, width, height).data;
+
+  const widthBytes = Math.ceil(width / 8);
+
+  // ESC/POS Commands:
+  // ESC @: Initialize printer
+  // ESC a 1: Center align
+  // GS v 0 0: Raster image normal mode
+  const header = [
+    0x1b,
+    0x40,
+    0x1b,
+    0x61,
+    0x01,
+    0x1d,
+    0x76,
+    0x30,
+    0x00,
+    widthBytes & 0xff,
+    (widthBytes >> 8) & 0xff,
+    height & 0xff,
+    (height >> 8) & 0xff,
+  ];
+
+  const rasterBytes = new Uint8Array(widthBytes * height);
+
+  for (let y = 0; y < height; y++) {
+    for (let xByte = 0; xByte < widthBytes; xByte++) {
+      let byteVal = 0;
+      for (let bit = 0; bit < 8; bit++) {
+        const x = xByte * 8 + bit;
+        if (x < width) {
+          const idx = (y * width + x) * 4;
+          const r = imgData[idx];
+          const g = imgData[idx + 1];
+          const b = imgData[idx + 2];
+          // Grayscale threshold: darker than 185 is black dot (1)
+          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+          if (brightness < 185) {
+            byteVal |= 1 << (7 - bit);
+          }
+        }
+      }
+      rasterBytes[y * widthBytes + xByte] = byteVal;
+    }
+  }
+
+  // Footer: Feed 4 lines and Partial Cut (GS V B 0)
+  const footer = [0x1b, 0x64, 0x04, 0x1d, 0x56, 0x42, 0x00];
+
+  const totalLength = header.length + rasterBytes.length + footer.length;
+  const finalBuffer = new Uint8Array(totalLength);
+  finalBuffer.set(header, 0);
+  finalBuffer.set(rasterBytes, header.length);
+  finalBuffer.set(footer, header.length + rasterBytes.length);
+
+  return finalBuffer;
+}
+
+/**
+ * Converts Uint8Array to base64 string
+ */
+function uint8ToBase64(bytes) {
+  let binary = "";
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+
+/**
+ * Dispatches a raw print buffer to a printer IP via the local print agent
+ */
+export async function sendJobToPrinter(printerIp, rawUint8Array, orderNumber) {
+  const base64Data = uint8ToBase64(rawUint8Array);
+  const response = await fetch(`${PRINTER_CONFIG.agentUrl}/api/print-raw`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      printerIp,
+      port: 9100,
+      orderNumber,
+      data: base64Data,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to print to ${printerIp}: ${errorText}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Automatically prints an order across the 3 network printers:
+ *  - 192.168.1.55 (Shawermah): Prints EVERYTHING
+ *  - 192.168.1.56 (Burger): Prints burger items if present
+ *  - 192.168.1.57 (Snack): Prints snack items if present
+ *
+ * Each item has the same order sequence number.
+ */
+export async function autoPrintOrder(order) {
+  if (!order) return { success: false, message: "No order provided" };
+
+  const jobs = splitOrderForPrinters(order);
+  const results = [];
+
+  for (const job of jobs) {
+    try {
+      const canvas = renderReceiptToCanvas(order, job);
+      const rawBytes = canvasToEscPosRaster(canvas);
+      const res = await sendJobToPrinter(
+        job.printer.ip,
+        rawBytes,
+        order.sequenceNumber,
+      );
+      results.push({ printer: job.printer.id, ip: job.printer.ip, success: true, res });
+    } catch (err) {
+      console.error(`[ThermalPrint] Failed to print on ${job.printer.name}:`, err);
+      results.push({
+        printer: job.printer.id,
+        ip: job.printer.ip,
+        success: false,
+        error: err.message,
+      });
+    }
+  }
+
+  return { success: true, jobsCount: jobs.length, results };
+}
+
+/**
+ * Checks the status of the local print agent and network printers
+ */
+export async function checkPrintAgentStatus() {
+  try {
+    const res = await fetch(`${PRINTER_CONFIG.agentUrl}/api/status`, {
+      method: "GET",
+      signal: AbortSignal.timeout(3000),
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+    return { online: false, error: `HTTP ${res.status}` };
+  } catch (e) {
+    return { online: false, error: e.message };
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "shawermah-print-agent",
+  "version": "1.0.0",
+  "description": "Shawermah Sheesh Local ESC/POS Print Agent",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io-client": "^4.8.1"
+  }
+}
