@@ -94,7 +94,7 @@ exports.getAllOrders = async (req, res) => {
       Order.find(filter)
         .select("-__v")
         .populate("userId", "phone")
-        .populate("products.productId", "name image")
+        .populate("products.productId", "name image category")
         .populate("shippingAddress", "name deliveryCost")
         .lean()
         .sort({ createdAt: -1 })
@@ -250,7 +250,7 @@ exports.getTodayOrders = async (req, res) => {
       // Only fetch the sub-fields the dashboard UI renders
       .populate(
         "products.productId",
-        "name image additions basePrice prices discount",
+        "name image additions basePrice prices discount category",
       )
       .populate("userId", "phone")
       .populate("shippingAddress", "name deliveryCost")
@@ -577,7 +577,10 @@ exports.createOrderLogic = async ({
 
   // populate for response
   const populatedOrder = await newOrder.populate([
-    { path: "products.productId" },
+    {
+      path: "products.productId",
+      populate: { path: "category" },
+    },
     { path: "userId" },
     { path: "shippingAddress" },
   ]);

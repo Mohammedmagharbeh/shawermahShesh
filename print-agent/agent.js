@@ -190,10 +190,20 @@ app.get("/api/status", async (req, res) => {
 // 2. Direct Raw Print Endpoint (Base64 ESC/POS buffer from browser or cloud)
 app.post("/api/print-raw", async (req, res) => {
   try {
-    const { printerIp, port = 9100, data, orderNumber } = req.body;
+    const { printerIp, port = 9100, data, orderNumber, orderId, force = false } = req.body;
 
     if (!printerIp || !data) {
       return res.status(400).json({ error: "Missing printerIp or data" });
+    }
+
+    // Deduplication check per printer & order: e.g. "65abc_192.168.1.56"
+    const orderKey = orderId || orderNumber;
+    if (orderKey) {
+      const dedupeKey = `${orderKey}:${printerIp}`;
+      if (isDuplicate(dedupeKey, force)) {
+        console.log(`[PrintAgent] Order #${orderNumber || orderKey} already printed on ${printerIp} within 30s. Skipping duplicate.`);
+        return res.json({ success: true, skippedDuplicate: true, message: "Duplicate print skipped" });
+      }
     }
 
     const buffer = Buffer.from(data, "base64");
@@ -265,7 +275,7 @@ app.get("/", async (req, res) => {
     <p class="sub">متصل بالطابعات الشبكية ومستعد لاستقبال الفواتير تلقائياً عند قبول الطلب</p>
     
     <div class="status-banner">
-      ✓ خادم الطباعة يعمل ومستعد لإرسال الفواتير إلى طابعات المطعم: 192.168.1.55 / 192.168.1.56 / 192.168.1.57
+      ✓ خادم الطباعة يعمل ومستعد لإرسال الفواتير إلى طابعات المطعم: ${Object.values(config.printers).map(p => `${p.name} (${p.ip})`).join(" | ")}
     </div>
 
     <div class="grid">
@@ -307,9 +317,9 @@ app.get("/", async (req, res) => {
 // Start listening
 const server = app.listen(config.port, () => {
   console.log(`[PrintAgent] Running on http://127.0.0.1:${config.port}`);
-  console.log(`[PrintAgent] Shawermah Printer: ${config.printers.shawermah.ip}`);
-  console.log(`[PrintAgent] Burger Printer:    ${config.printers.burger.ip}`);
-  console.log(`[PrintAgent] Snack Printer:     ${config.printers.snack.ip}`);
+  for (const [key, p] of Object.entries(config.printers)) {
+    console.log(`[PrintAgent] ${p.name.padEnd(20)}: ${p.ip}:${p.port || 9100}`);
+  }
 });
 
 // Connect to Socket.IO Server (DigitalOcean or local)

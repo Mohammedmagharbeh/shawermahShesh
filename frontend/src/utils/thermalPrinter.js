@@ -6,8 +6,8 @@ export const PRINTER_CONFIG = {
   printers: {
     shawermah: {
       id: "shawermah",
-      name: "طابعة شاورما (الفاتورة كاملة)",
-      badge: "فاتورة الزبون / شاورما",
+      name: "طابعة شاورما",
+      badge: "قسم الشاورما",
       ip: "192.168.1.56",
       port: 9100,
     },
@@ -25,77 +25,114 @@ export const PRINTER_CONFIG = {
       ip: "192.168.1.57",
       port: 9100,
     },
+    cafe: {
+      id: "cafe",
+      name: "طابعة كافيه",
+      badge: "كافيه وحلويات شيش",
+      ip: "192.168.1.60",
+      port: 9100,
+    },
   },
 };
 
 /**
- * Classifies an item into: "burger", "snack", or "shawermah" (everything else)
+ * Category IDs assigned to specific station printers:
+ * - Snacks: "69d8e98d0d197335a04b3f61" (سناكات)
+ * - Burgers: "69d8ede10d197335a04b3f95" (برجر لحم), "69d8f0530d197335a04b3faa" (برجر دجاج), "69d8f3e20d197335a04b3fce" (وجبات الأطفال)
+ * - Cafe: "6a4fb60b6774757996012c41" (كافية وحلويات شيش)
+ * - Shawermah: All other category IDs
  */
-export function classifyItem(item) {
-  const cat = item.productId?.category;
-  const catStr = [
-    cat?.name?.en,
-    cat?.name?.ar,
-    cat?.en,
-    cat?.ar,
-    item.category,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+export const CATEGORY_PRINTER_MAPPING = {
+  snack: ["69d8e98d0d197335a04b3f61"],
+  burger: [
+    "69d8ede10d197335a04b3f95", // برجر لحم
+    "69d8f0530d197335a04b3faa", // برجر دجاج
+    "69d8f3e20d197335a04b3fce", // وجبات الأطفال
+  ],
+  cafe: ["6a4fb60b6774757996012c41"], // كافية وحلويات شيش
+};
 
-  const nameStr = [
-    item.productId?.name?.en,
-    item.productId?.name?.ar,
-    item.name?.en,
-    item.name?.ar,
-    typeof item.name === "string" ? item.name : "",
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+/**
+ * Extracts category ID from an order item
+ */
+export function getItemCategoryId(item) {
+  if (!item) return null;
 
-  if (/burger|برجر/.test(catStr) || /burger|برجر/.test(nameStr)) {
-    return "burger";
+  // 1. From item.productId.category (populated object or raw ObjectId)
+  const productCategory = item.productId?.category;
+  if (productCategory) {
+    if (typeof productCategory === "string") return productCategory;
+    if (productCategory._id) return String(productCategory._id);
+    if (productCategory.id) return String(productCategory.id);
+    return String(productCategory);
   }
 
-  if (
-    /snack|سناك/.test(catStr) ||
-    /snack|سناك|بطاطا|fries|تندرز|tenders|أصابع|ناجتس|nuggets|ودجز|wedges|حلقات|rings/.test(
-      nameStr,
-    )
-  ) {
-    return "snack";
+  // 2. From item.category (populated object or raw string/ObjectId)
+  if (item.category) {
+    if (typeof item.category === "string") return item.category;
+    if (item.category._id) return String(item.category._id);
+    if (item.category.id) return String(item.category.id);
+    return String(item.category);
+  }
+
+  // 3. Fallbacks if categoryId field exists directly
+  if (item.categoryId) return String(item.categoryId);
+  if (item.productId?.categoryId) return String(item.productId.categoryId);
+
+  return null;
+}
+
+/**
+ * Classifies an item into: "snack", "burger", "cafe", or "shawermah" (default)
+ * Strictly based on category IDs.
+ */
+export function classifyItem(item) {
+  const catId = getItemCategoryId(item);
+
+  if (catId) {
+    if (CATEGORY_PRINTER_MAPPING.snack.includes(catId)) {
+      return "snack";
+    }
+    if (CATEGORY_PRINTER_MAPPING.burger.includes(catId)) {
+      return "burger";
+    }
+    if (CATEGORY_PRINTER_MAPPING.cafe.includes(catId)) {
+      return "cafe";
+    }
+    return "shawermah";
   }
 
   return "shawermah";
 }
 
 /**
- * Splits the order into print jobs for the 3 printers according to the restaurant rules:
- *  - 192.168.1.56 (Shawermah): Prints EVERYTHING including shawermah
- *  - 192.168.1.55 (Burger): Prints all items under burger category
- *  - 192.168.1.57 (Snack): Prints all items under snack category
+ * Splits the order into print jobs for the 4 printers according to category IDs:
+ *  - 192.168.1.57 (Snack): Items under category "69d8e98d0d197335a04b3f61"
+ *  - 192.168.1.55 (Burger): Items under categories "69d8ede10d197335a04b3f95", "69d8f0530d197335a04b3faa", "69d8f3e20d197335a04b3fce"
+ *  - 192.168.1.60 (Cafe): Items under category "6a4fb60b6774757996012c41"
+ *  - 192.168.1.56 (Shawermah): Any other item under other category IDs
  */
 export function splitOrderForPrinters(order) {
   const allProducts = Array.isArray(order?.products) ? order.products : [];
 
-  const burgerProducts = allProducts.filter((p) => classifyItem(p) === "burger");
   const snackProducts = allProducts.filter((p) => classifyItem(p) === "snack");
+  const burgerProducts = allProducts.filter((p) => classifyItem(p) === "burger");
+  const cafeProducts = allProducts.filter((p) => classifyItem(p) === "cafe");
+  const shawermahProducts = allProducts.filter((p) => classifyItem(p) === "shawermah");
 
   const jobs = [];
 
-  // 1. Shawermah printer (192.168.1.56) -> Prints EVERYTHING
-  if (allProducts.length > 0) {
+  // 1. Shawermah printer (192.168.1.56) -> Prints other categories
+  if (shawermahProducts.length > 0) {
     jobs.push({
       printer: PRINTER_CONFIG.printers.shawermah,
-      products: allProducts,
-      isFullInvoice: true,
+      products: shawermahProducts,
+      isFullInvoice: false,
       badge: PRINTER_CONFIG.printers.shawermah.badge,
     });
   }
 
-  // 2. Burger printer (192.168.1.55) -> Prints if order contains burger items
+  // 2. Burger printer (192.168.1.55) -> Prints burger categories
   if (burgerProducts.length > 0) {
     jobs.push({
       printer: PRINTER_CONFIG.printers.burger,
@@ -105,13 +142,23 @@ export function splitOrderForPrinters(order) {
     });
   }
 
-  // 3. Snack printer (192.168.1.57) -> Prints if order contains snack items
+  // 3. Snack printer (192.168.1.57) -> Prints snack category
   if (snackProducts.length > 0) {
     jobs.push({
       printer: PRINTER_CONFIG.printers.snack,
       products: snackProducts,
       isFullInvoice: false,
       badge: PRINTER_CONFIG.printers.snack.badge,
+    });
+  }
+
+  // 4. Cafe printer (192.168.1.60) -> Prints cafe category
+  if (cafeProducts.length > 0) {
+    jobs.push({
+      printer: PRINTER_CONFIG.printers.cafe,
+      products: cafeProducts,
+      isFullInvoice: false,
+      badge: PRINTER_CONFIG.printers.cafe.badge,
     });
   }
 
@@ -517,10 +564,39 @@ function uint8ToBase64(bytes) {
   return window.btoa(binary);
 }
 
+// In-memory deduplication cache: maps orderKey (orderId or sequenceNumber) -> timestamp
+const recentlyPrintedCache = new Map();
+const COOLDOWN_MS = 30000; // 30 seconds cooldown between automatic duplicate prints
+
+export function isRecentlyPrinted(orderKey, force = false) {
+  if (force || !orderKey) return false;
+  const lastTime = recentlyPrintedCache.get(String(orderKey));
+  const now = Date.now();
+  if (lastTime && now - lastTime < COOLDOWN_MS) {
+    return true;
+  }
+  return false;
+}
+
+export function markRecentlyPrinted(orderKey) {
+  if (!orderKey) return;
+  const now = Date.now();
+  recentlyPrintedCache.set(String(orderKey), now);
+
+  // Clean old entries (older than 5 minutes)
+  if (recentlyPrintedCache.size > 200) {
+    for (const [key, time] of recentlyPrintedCache.entries()) {
+      if (now - time > 300000) {
+        recentlyPrintedCache.delete(key);
+      }
+    }
+  }
+}
+
 /**
  * Dispatches a raw print buffer to a printer IP via the local print agent
  */
-export async function sendJobToPrinter(printerIp, rawUint8Array, orderNumber) {
+export async function sendJobToPrinter(printerIp, rawUint8Array, orderNumber, orderId, force = false) {
   const base64Data = uint8ToBase64(rawUint8Array);
   const response = await fetch(`${PRINTER_CONFIG.agentUrl}/api/print-raw`, {
     method: "POST",
@@ -529,6 +605,8 @@ export async function sendJobToPrinter(printerIp, rawUint8Array, orderNumber) {
       printerIp,
       port: 9100,
       orderNumber,
+      orderId,
+      force,
       data: base64Data,
     }),
   });
@@ -542,15 +620,23 @@ export async function sendJobToPrinter(printerIp, rawUint8Array, orderNumber) {
 }
 
 /**
- * Automatically prints an order across the 3 network printers:
- *  - 192.168.1.55 (Shawermah): Prints EVERYTHING
- *  - 192.168.1.56 (Burger): Prints burger items if present
- *  - 192.168.1.57 (Snack): Prints snack items if present
- *
- * Each item has the same order sequence number.
+ * Automatically prints an order across the network printers with duplicate prevention.
+ * Pass options.force = true for manual button reprints.
  */
-export async function autoPrintOrder(order) {
+export async function autoPrintOrder(order, options = {}) {
   if (!order) return { success: false, message: "No order provided" };
+
+  const force = options.force === true;
+  const orderKey = String(order._id || order.sequenceNumber || "");
+
+  // Prevent double printing within cooldown
+  if (orderKey && !force) {
+    if (isRecentlyPrinted(orderKey)) {
+      console.log(`[ThermalPrint] Order #${order.sequenceNumber || orderKey} was already printed recently. Skipping duplicate.`);
+      return { success: true, skippedDuplicate: true, message: "تمت طباعة هذا الطلب بالفعل" };
+    }
+    markRecentlyPrinted(orderKey);
+  }
 
   const jobs = splitOrderForPrinters(order);
   const results = [];
@@ -563,6 +649,8 @@ export async function autoPrintOrder(order) {
         job.printer.ip,
         rawBytes,
         order.sequenceNumber,
+        order._id,
+        force,
       );
       results.push({ printer: job.printer.id, ip: job.printer.ip, success: true, res });
     } catch (err) {

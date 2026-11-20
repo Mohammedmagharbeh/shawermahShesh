@@ -1,7 +1,7 @@
 import Login from "./components/log";
 import EmployeeLogin from "./components/EmployeeLogin";
 import Home from "./pages/General/Home/Home";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Cart from "./pages/Shop/Cart/Cart";
 import Checkout from "./pages/Shop/Checkout";
 import ProductView from "./pages/Shop/ProductView";
@@ -188,6 +188,24 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <Orders />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin Default Redirects */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "employee"]}>
+                  <Navigate to="/products" replace />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/products"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <Navigate to="/products" replace />
                 </ProtectedRoute>
               }
             />

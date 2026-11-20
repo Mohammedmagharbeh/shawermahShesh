@@ -83,7 +83,9 @@ function EmployeeLogin() {
         toast.success(t("success_login"));
 
         // توجيه ذكي بناءً على الرول
-        if (userRole === "admin" || userRole === "employee") {
+        if (userRole === "admin") {
+          navigate("/products");
+        } else if (userRole === "employee") {
           navigate("/admin/dashboard");
         } else if (userRole === "rider") {
           navigate("/rider");

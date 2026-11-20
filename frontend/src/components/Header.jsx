@@ -52,6 +52,7 @@ function Header() {
       case "driver":
         return "/rider";
       case "admin":
+        return "/products";
       case "employee":
         return "/admin/dashboard";
       case "hr":

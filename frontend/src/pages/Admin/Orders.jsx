@@ -621,7 +621,7 @@ function Orders() {
                         variant="outline"
                         className="gap-1 border-blue-300 text-blue-700 hover:bg-blue-50"
                         onClick={async () => {
-                          const res = await autoPrintOrder(order);
+                          const res = await autoPrintOrder(order, { force: true });
                           if (res.success) {
                             toast.success("تم إرسال أمر الطباعة بنجاح");
                           } else {

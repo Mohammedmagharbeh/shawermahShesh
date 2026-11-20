@@ -55,7 +55,9 @@ function OtpVerification() {
       const role = (res.data.role || res.data.user?.role || "").toLowerCase();
       if (role === "rider") {
         navigate("/rider");
-      } else if (role === "employee" || role === "admin") {
+      } else if (role === "admin") {
+        navigate("/products");
+      } else if (role === "employee") {
         navigate("/admin/dashboard");
       } else if (role === "cashier") {
         navigate("/dispatch");

@@ -72,7 +72,9 @@ function Login() {
         const role = (res.data.user?.role || res.data.role || "").toLowerCase();
         if (role === "rider") {
           navigate("/rider");
-        } else if (role === "admin" || role === "employee") {
+        } else if (role === "admin") {
+          navigate("/products");
+        } else if (role === "employee") {
           navigate("/admin/dashboard");
         } else {
           navigate("/");
