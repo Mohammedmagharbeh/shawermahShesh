@@ -5,8 +5,6 @@
 const fs = require("fs");
 const path = require("path");
 const net = require("net");
-const os = require("os");
-const { execFile, exec } = require("child_process");
 
 // Resolve dependencies from local or parent project folders
 function resolveModule(name) {
@@ -146,67 +144,6 @@ function testPrinterConnection(ip, port = 9100, timeoutMs = 1500) {
   });
 }
 
-// Get list of installed Windows printers via PowerShell
-function getInstalledWindowsPrinters() {
-  return new Promise((resolve) => {
-    if (process.platform !== "win32") return resolve([]);
-    const cmd = `powershell.exe -NoProfile -Command "Add-Type -AssemblyName System.Drawing; [System.Drawing.Printing.PrinterSettings]::InstalledPrinters | ConvertTo-Json"`;
-    exec(cmd, { timeout: 4000 }, (err, stdout) => {
-      if (err || !stdout) return resolve([]);
-      try {
-        const parsed = JSON.parse(stdout.trim());
-        resolve(Array.isArray(parsed) ? parsed : [parsed]);
-      } catch (_) {
-        resolve([]);
-      }
-    });
-  });
-}
-
-// Print raw ESC/POS buffer directly to a local Windows / USB printer via spooler
-function printRawWindowsPrinter(printerName, buffer) {
-  return new Promise((resolve, reject) => {
-    const tempFile = path.join(
-      os.tmpdir(),
-      `receipt_${Date.now()}_${Math.random().toString(36).slice(2)}.bin`,
-    );
-    fs.writeFile(tempFile, buffer, (writeErr) => {
-      if (writeErr) return reject(writeErr);
-      const psScript = path.join(__dirname, "print-raw-windows.ps1");
-      execFile(
-        "powershell.exe",
-        [
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          psScript,
-          "-PrinterName",
-          printerName,
-          "-FilePath",
-          tempFile,
-        ],
-        { timeout: 8000 },
-        (err, stdout, stderr) => {
-          try {
-            fs.unlinkSync(tempFile);
-          } catch (_) {}
-          if (err || (stdout && stdout.includes("PRINT_FAILED"))) {
-            return reject(
-              new Error(
-                stderr ||
-                  stdout ||
-                  `Failed to print to Windows printer "${printerName}"`,
-              ),
-            );
-          }
-          resolve({ success: true, printerName });
-        },
-      );
-    });
-  });
-}
-
 // Generate simple test ESC/POS buffer
 function generateTestTicket(printerName, ip) {
   const init = Buffer.from([0x1b, 0x40, 0x1b, 0x61, 0x01]); // Init & Center
@@ -233,27 +170,12 @@ app.use(express.json({ limit: "50mb" }));
 // 1. Status Endpoint
 app.get("/api/status", async (req, res) => {
   const printerStatus = {};
-  const windowsPrinters = await getInstalledWindowsPrinters();
-
   for (const [key, p] of Object.entries(config.printers)) {
-    let isOnline = false;
-    const isUsb = Boolean(p.type === "usb" || p.printerName || p.ip === "usb");
-    if (isUsb) {
-      isOnline = p.printerName
-        ? windowsPrinters.some(
-            (wp) => wp.toLowerCase() === p.printerName.toLowerCase(),
-          )
-        : windowsPrinters.length > 0;
-    } else if (p.ip) {
-      isOnline = await testPrinterConnection(p.ip, p.port || 9100);
-    }
-
+    const isOnline = await testPrinterConnection(p.ip, p.port || 9100);
     printerStatus[key] = {
       name: p.name,
-      ip: p.ip || "USB",
+      ip: p.ip,
       port: p.port || 9100,
-      type: isUsb ? "usb" : "network",
-      printerName: p.printerName || null,
       online: isOnline,
     };
   }
@@ -262,104 +184,36 @@ app.get("/api/status", async (req, res) => {
     agent: "online",
     time: new Date().toISOString(),
     printers: printerStatus,
-    windowsPrinters,
   });
-});
-
-// List installed Windows printers endpoint
-app.get("/api/windows-printers", async (req, res) => {
-  const printers = await getInstalledWindowsPrinters();
-  res.json({ success: true, printers });
 });
 
 // 2. Direct Raw Print Endpoint (Base64 ESC/POS buffer from browser or cloud)
 app.post("/api/print-raw", async (req, res) => {
   try {
-    const {
-      printerIp,
-      port = 9100,
-      data,
-      orderNumber,
-      orderId,
-      force = false,
-      printerKey,
-      printerName,
-    } = req.body;
+    const { printerIp, port = 9100, data, orderNumber, orderId, force = false } = req.body;
 
-    if (!data) {
-      return res.status(400).json({ error: "Missing print data" });
+    if (!printerIp || !data) {
+      return res.status(400).json({ error: "Missing printerIp or data" });
     }
 
-    const configuredPrinter = printerKey ? config.printers[printerKey] : null;
-    const targetPrinterName =
-      printerName ||
-      configuredPrinter?.printerName ||
-      (printerIp === "usb" || printerIp === "windows"
-        ? config.printers.cashier?.printerName
-        : null);
-
-    const isUsb = Boolean(
-      targetPrinterName ||
-        configuredPrinter?.type === "usb" ||
-        printerIp === "usb" ||
-        printerIp === "windows",
-    );
-
-    // Deduplication check per printer & order
+    // Deduplication check per printer & order: e.g. "65abc_192.168.1.56"
     const orderKey = orderId || orderNumber;
-    const dedupeTarget = isUsb
-      ? `usb:${targetPrinterName || "cashier"}`
-      : printerIp;
-    if (orderKey && dedupeTarget) {
-      const dedupeKey = `${orderKey}:${dedupeTarget}`;
+    if (orderKey) {
+      const dedupeKey = `${orderKey}:${printerIp}`;
       if (isDuplicate(dedupeKey, force)) {
-        console.log(
-          `[PrintAgent] Order #${orderNumber || orderKey} already printed on ${dedupeTarget} within 60s. Skipping duplicate.`,
-        );
-        return res.json({
-          success: true,
-          skippedDuplicate: true,
-          message: "Duplicate print skipped",
-        });
+        console.log(`[PrintAgent] Order #${orderNumber || orderKey} already printed on ${printerIp} within 30s. Skipping duplicate.`);
+        return res.json({ success: true, skippedDuplicate: true, message: "Duplicate print skipped" });
       }
     }
 
     const buffer = Buffer.from(data, "base64");
-
-    if (isUsb) {
-      const pName =
-        targetPrinterName ||
-        config.printers.cashier?.printerName ||
-        (await getInstalledWindowsPrinters())[0];
-      if (!pName) {
-        throw new Error(
-          "USB printer requested but no printerName configured in config.json.",
-        );
-      }
-      console.log(
-        `[PrintAgent] Printing job for order #${orderNumber || "---"} -> USB Printer "${pName}" (${buffer.length} bytes)`,
-      );
-      await printRawWindowsPrinter(pName, buffer);
-      return res.json({
-        success: true,
-        message: `Printed successfully to USB printer "${pName}"`,
-      });
-    }
-
-    if (!printerIp) {
-      return res.status(400).json({ error: "Missing printerIp" });
-    }
-
     console.log(
       `[PrintAgent] Printing job for order #${orderNumber || "---"} -> ${printerIp}:${port} (${buffer.length} bytes)`,
     );
 
     await sendRawToPrinter(printerIp, port, buffer);
 
-    res.json({
-      success: true,
-      message: `Printed successfully to ${printerIp}`,
-    });
+    res.json({ success: true, message: `Printed successfully to ${printerIp}` });
   } catch (err) {
     console.error("[PrintAgent] Print error:", err.message);
     res.status(500).json({ success: false, error: err.message });
@@ -371,37 +225,13 @@ app.post("/api/test-print", async (req, res) => {
   const { printerKey } = req.body;
   const p = config.printers[printerKey];
   if (!p) {
-    return res
-      .status(400)
-      .json({ error: `Printer key "${printerKey}" not found in config` });
+    return res.status(400).json({ error: `Printer key "${printerKey}" not found in config` });
   }
 
   try {
-    const isUsb = Boolean(p.type === "usb" || p.printerName || p.ip === "usb");
-    const testBuf = generateTestTicket(
-      p.name,
-      isUsb ? `USB (${p.printerName || "Default"})` : p.ip,
-    );
-
-    if (isUsb) {
-      const pName = p.printerName || (await getInstalledWindowsPrinters())[0];
-      if (!pName) {
-        throw new Error(
-          `USB Printer "${p.name}" has no printerName set in config.json and no Windows printer found`,
-        );
-      }
-      await printRawWindowsPrinter(pName, testBuf);
-      return res.json({
-        success: true,
-        message: `Test ticket sent to USB Printer "${pName}"`,
-      });
-    }
-
+    const testBuf = generateTestTicket(p.name, p.ip);
     await sendRawToPrinter(p.ip, p.port || 9100, testBuf);
-    res.json({
-      success: true,
-      message: `Test ticket sent to ${p.name} (${p.ip})`,
-    });
+    res.json({ success: true, message: `Test ticket sent to ${p.name} (${p.ip})` });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -409,28 +239,16 @@ app.post("/api/test-print", async (req, res) => {
 
 // 4. Web Dashboard UI for Cashier / Admin PC
 app.get("/", async (req, res) => {
-  const windowsPrinters = await getInstalledWindowsPrinters();
   const printersList = Object.entries(config.printers)
-    .map(([key, p]) => {
-      const isUsb = Boolean(p.type === "usb" || p.printerName || p.ip === "usb");
-      return `
+    .map(
+      ([key, p]) => `
       <div class="card">
         <h3>${p.name}</h3>
-        <p><strong>النوع:</strong> ${isUsb ? `USB (${p.printerName || "غير محدد"})` : `شبكة (${p.ip}:${p.port || 9100})`}</p>
+        <p><strong>IP:</strong> ${p.ip}:${p.port || 9100}</p>
         <button onclick="testPrint('${key}')">طباعة تجريبية (Test Print)</button>
-      </div>`;
-    })
+      </div>`,
+    )
     .join("");
-
-  const wpBadges =
-    windowsPrinters.length > 0
-      ? windowsPrinters
-          .map(
-            (wp) =>
-              `<span style="display:inline-block; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:6px 12px; margin:4px; font-weight:bold; font-size:13px; color:#1e293b;">🖨️ ${wp}</span>`,
-          )
-          .join("")
-      : "<p style='color:#64748b;'>لم يتم العثور على طابعات USB معرفة على هذا الجهاز.</p>";
 
   const html = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -454,21 +272,15 @@ app.get("/", async (req, res) => {
 <body>
   <div class="container">
     <h1>خادم الطباعة المحلي - شاورما شيش</h1>
-    <p class="sub">متصل بالطابعات الشبكية و USB ومستعد لاستقبال الفواتير تلقائياً</p>
+    <p class="sub">متصل بالطابعات الشبكية ومستعد لاستقبال الفواتير تلقائياً عند قبول الطلب</p>
     
     <div class="status-banner">
-      ✓ خادم الطباعة يعمل ومستعد لإرسال الفواتير إلى طابعات المطعم: ${Object.values(config.printers).map(p => `${p.name} (${p.ip || p.printerName || "USB"})`).join(" | ")}
+      ✓ خادم الطباعة يعمل ومستعد لإرسال الفواتير إلى طابعات المطعم: ${Object.values(config.printers).map(p => `${p.name} (${p.ip})`).join(" | ")}
     </div>
 
     <div class="grid">
       ${printersList}
     </div>
-
-    <h3>طابعات الويندوز المكتشفة على هذا الجهاز (USB):</h3>
-    <div style="background:#f1f5f9; padding:12px; border-radius:8px; margin-bottom:20px;">
-      ${wpBadges}
-    </div>
-
     <h3>سجل الطباعة المباشر:</h3>
     <div id="log" class="log-box">Print agent is ready. Listening on port ${config.port}...</div>
   </div>
