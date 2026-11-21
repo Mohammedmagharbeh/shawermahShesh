@@ -26,7 +26,9 @@ try {
   const socketModule = resolveModule("socket.io-client");
   ioClient = socketModule.io || socketModule;
 } catch (e) {
-  console.warn("[PrintAgent] socket.io-client not found, running HTTP-only mode.");
+  console.warn(
+    "[PrintAgent] socket.io-client not found, running HTTP-only mode.",
+  );
 }
 
 // Load Configuration
@@ -36,9 +38,12 @@ let config = {
   socketUrl: "https://api.shawermasheesh.com.jo",
   localSocketFallback: "http://localhost:5000",
   printers: {
-    shawermah: { name: "طابعة شاورما (كامل الفاتورة)", ip: "192.168.1.56", port: 9100 },
+    shawermah: { name: "طابعة شاورما", ip: "192.168.1.56", port: 9100 },
     burger: { name: "طابعة برجر", ip: "192.168.1.55", port: 9100 },
     snack: { name: "طابعة سناك", ip: "192.168.1.57", port: 9100 },
+    cafe: { name: "طابعة كافيه", ip: "192.168.1.60", port: 9100 },
+    cashier: { name: "طابعة الكاشير 1", ip: "192.168.1.54", port: 9100 },
+    cashier2: { name: "طابعة الكاشير 2", ip: "192.168.1.53", port: 9100 },
   },
 };
 
@@ -190,7 +195,14 @@ app.get("/api/status", async (req, res) => {
 // 2. Direct Raw Print Endpoint (Base64 ESC/POS buffer from browser or cloud)
 app.post("/api/print-raw", async (req, res) => {
   try {
-    const { printerIp, port = 9100, data, orderNumber, orderId, force = false } = req.body;
+    const {
+      printerIp,
+      port = 9100,
+      data,
+      orderNumber,
+      orderId,
+      force = false,
+    } = req.body;
 
     if (!printerIp || !data) {
       return res.status(400).json({ error: "Missing printerIp or data" });
@@ -201,8 +213,14 @@ app.post("/api/print-raw", async (req, res) => {
     if (orderKey) {
       const dedupeKey = `${orderKey}:${printerIp}`;
       if (isDuplicate(dedupeKey, force)) {
-        console.log(`[PrintAgent] Order #${orderNumber || orderKey} already printed on ${printerIp} within 30s. Skipping duplicate.`);
-        return res.json({ success: true, skippedDuplicate: true, message: "Duplicate print skipped" });
+        console.log(
+          `[PrintAgent] Order #${orderNumber || orderKey} already printed on ${printerIp} within 30s. Skipping duplicate.`,
+        );
+        return res.json({
+          success: true,
+          skippedDuplicate: true,
+          message: "Duplicate print skipped",
+        });
       }
     }
 
@@ -213,7 +231,10 @@ app.post("/api/print-raw", async (req, res) => {
 
     await sendRawToPrinter(printerIp, port, buffer);
 
-    res.json({ success: true, message: `Printed successfully to ${printerIp}` });
+    res.json({
+      success: true,
+      message: `Printed successfully to ${printerIp}`,
+    });
   } catch (err) {
     console.error("[PrintAgent] Print error:", err.message);
     res.status(500).json({ success: false, error: err.message });
@@ -225,13 +246,18 @@ app.post("/api/test-print", async (req, res) => {
   const { printerKey } = req.body;
   const p = config.printers[printerKey];
   if (!p) {
-    return res.status(400).json({ error: `Printer key "${printerKey}" not found in config` });
+    return res
+      .status(400)
+      .json({ error: `Printer key "${printerKey}" not found in config` });
   }
 
   try {
     const testBuf = generateTestTicket(p.name, p.ip);
     await sendRawToPrinter(p.ip, p.port || 9100, testBuf);
-    res.json({ success: true, message: `Test ticket sent to ${p.name} (${p.ip})` });
+    res.json({
+      success: true,
+      message: `Test ticket sent to ${p.name} (${p.ip})`,
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -275,7 +301,11 @@ app.get("/", async (req, res) => {
     <p class="sub">متصل بالطابعات الشبكية ومستعد لاستقبال الفواتير تلقائياً عند قبول الطلب</p>
     
     <div class="status-banner">
-      ✓ خادم الطباعة يعمل ومستعد لإرسال الفواتير إلى طابعات المطعم: ${Object.values(config.printers).map(p => `${p.name} (${p.ip})`).join(" | ")}
+      ✓ خادم الطباعة يعمل ومستعد لإرسال الفواتير إلى طابعات المطعم: ${Object.values(
+        config.printers,
+      )
+        .map((p) => `${p.name} (${p.ip})`)
+        .join(" | ")}
     </div>
 
     <div class="grid">
@@ -338,18 +368,25 @@ if (ioClient) {
     });
 
     socket.on("connect_error", (err) => {
-      console.warn(`[PrintAgent] Socket connection error (${url}):`, err.message);
+      console.warn(
+        `[PrintAgent] Socket connection error (${url}):`,
+        err.message,
+      );
     });
 
     // Handle autoPrintOrder event
     socket.on("autoPrintOrder", async (order) => {
       if (!order || !order._id) return;
       if (isDuplicate(order._id, order.force)) {
-        console.log(`[PrintAgent] Order #${order.sequenceNumber} already printed recently, skipping duplicate.`);
+        console.log(
+          `[PrintAgent] Order #${order.sequenceNumber} already printed recently, skipping duplicate.`,
+        );
         return;
       }
 
-      console.log(`[PrintAgent] Received autoPrintOrder for Order #${order.sequenceNumber}`);
+      console.log(
+        `[PrintAgent] Received autoPrintOrder for Order #${order.sequenceNumber}`,
+      );
     });
 
     return socket;
