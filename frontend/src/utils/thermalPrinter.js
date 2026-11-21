@@ -760,9 +760,38 @@ export async function autoPrintOrder(order, options = {}) {
   return { success: true, jobsCount: jobs.length, results };
 }
 
+let currentDeviceCashierIp = "192.168.1.54";
+
+/**
+ * Updates the cached cashier IP for the current device (from print agent or localStorage)
+ */
+export function setDeviceCashierIp(ip) {
+  if (ip && typeof ip === "string") {
+    currentDeviceCashierIp = ip;
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("selected_cashier_printer_ip", ip);
+      } catch (e) {}
+    }
+  }
+}
+
+/**
+ * Returns the currently active cashier printer IP for this device
+ */
+export function getDeviceCashierIp() {
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem("selected_cashier_printer_ip");
+      if (saved) return saved;
+    } catch (e) {}
+  }
+  return currentDeviceCashierIp || "192.168.1.54";
+}
+
 /**
  * Prints the complete customer invoice (all items from all categories)
- * to the Cashier printer(s) (192.168.1.54 / 192.168.1.53).
+ * to ONLY the Cashier printer connected to the current device (never both).
  */
 export async function printCashierInvoice(order, options = {}) {
   if (!order) return { success: false, message: "No order provided" };
@@ -772,58 +801,53 @@ export async function printCashierInvoice(order, options = {}) {
     return { success: false, message: "الطلب لا يحتوي على أصناف" };
   }
 
-  // Determine target cashier printer(s): specified printer or all configured cashier printers
-  const targetPrinters = options.printer
-    ? [options.printer]
-    : [PRINTER_CONFIG.printers.cashier, PRINTER_CONFIG.printers.cashier2].filter(Boolean);
+  // Determine the single target cashier printer for the current device
+  let targetPrinter = null;
+  const desiredIp =
+    options.printerIp ||
+    (options.printer && options.printer.ip) ||
+    getDeviceCashierIp();
 
-  const force = options.force !== false; // manual print on cashier should always proceed
-  const results = [];
-  let atLeastOneSuccess = false;
+  targetPrinter = Object.values(PRINTER_CONFIG.printers).find((p) => p.ip === desiredIp);
 
-  for (const printer of targetPrinters) {
-    const cashierJob = {
-      printer,
-      products: allProducts,
-      isFullInvoice: true,
-      badge: printer.badge || "فاتورة الزبون",
-    };
-
-    try {
-      const canvas = renderReceiptToCanvas(order, cashierJob);
-      const rawBytes = canvasToEscPosRaster(canvas);
-      const res = await sendJobToPrinter(
-        printer.ip,
-        rawBytes,
-        order.sequenceNumber,
-        order._id,
-        force,
-      );
-      results.push({
-        success: true,
-        printer: printer.name,
-        ip: printer.ip,
-        res,
-      });
-      atLeastOneSuccess = true;
-    } catch (err) {
-      console.error(`[ThermalPrint] Failed to print cashier invoice on ${printer.name} (${printer.ip}):`, err);
-      results.push({
-        success: false,
-        printer: printer.name,
-        ip: printer.ip,
-        error: err.message,
-      });
-    }
+  if (!targetPrinter) {
+    targetPrinter = options.printer || PRINTER_CONFIG.printers.cashier;
   }
 
-  return {
-    success: atLeastOneSuccess,
-    results,
-    error: atLeastOneSuccess
-      ? null
-      : results.map((r) => `${r.printer} (${r.ip}): ${r.error}`).join(" | "),
+  const force = options.force !== false; // manual print on cashier should always proceed
+
+  const cashierJob = {
+    printer: targetPrinter,
+    products: allProducts,
+    isFullInvoice: true,
+    badge: targetPrinter.badge || "فاتورة الزبون",
   };
+
+  try {
+    const canvas = renderReceiptToCanvas(order, cashierJob);
+    const rawBytes = canvasToEscPosRaster(canvas);
+    const res = await sendJobToPrinter(
+      targetPrinter.ip,
+      rawBytes,
+      order.sequenceNumber,
+      order._id,
+      force,
+    );
+    return {
+      success: true,
+      printer: targetPrinter.name,
+      ip: targetPrinter.ip,
+      res,
+    };
+  } catch (err) {
+    console.error(`[ThermalPrint] Failed to print cashier invoice on ${targetPrinter.name} (${targetPrinter.ip}):`, err);
+    return {
+      success: false,
+      printer: targetPrinter.name,
+      ip: targetPrinter.ip,
+      error: err.message,
+    };
+  }
 }
 
 /**
@@ -836,7 +860,11 @@ export async function checkPrintAgentStatus() {
       signal: AbortSignal.timeout(3000),
     });
     if (res.ok) {
-      return await res.json();
+      const data = await res.json();
+      if (data?.deviceCashierIp) {
+        currentDeviceCashierIp = data.deviceCashierIp;
+      }
+      return data;
     }
     return { online: false, error: `HTTP ${res.status}` };
   } catch (e) {

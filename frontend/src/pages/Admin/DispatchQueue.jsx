@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import {
   printCashierInvoice,
   checkPrintAgentStatus,
+  getDeviceCashierIp,
+  setDeviceCashierIp,
 } from "@/utils/thermalPrinter";
 import {
   Bike,
@@ -150,8 +152,16 @@ export default function DispatchQueue() {
   // QR Code Modal
   const [showQrModal, setShowQrModal] = useState(false);
 
-  // Cashier Print Agent & Printer Status
+  // Cashier Print Agent & Printer Status for Current Device (192.168.1.54 or 192.168.1.53)
   const [printAgentOnline, setPrintAgentOnline] = useState(false);
+  const [selectedCashierIp, setSelectedCashierIp] = useState(() => getDeviceCashierIp());
+
+  const handleSelectCashierPrinter = (ip) => {
+    setSelectedCashierIp(ip);
+    setDeviceCashierIp(ip);
+    const label = ip === "192.168.1.53" ? "كاشير 2 (192.168.1.53)" : "كاشير 1 (192.168.1.54)";
+    toast.success(`تم تعيين ${label} كطابعة لهذا الجهاز 🖨️`);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -159,6 +169,11 @@ export default function DispatchQueue() {
       const res = await checkPrintAgentStatus();
       if (mounted) {
         setPrintAgentOnline(!!res?.online || !!res?.agent);
+        // If user hasn't explicitly overridden via localStorage, use the device's print agent configured IP
+        const saved = typeof window !== "undefined" ? localStorage.getItem("selected_cashier_printer_ip") : null;
+        if (!saved && res?.deviceCashierIp) {
+          setSelectedCashierIp(res.deviceCashierIp);
+        }
       }
     };
     checkStatus();
@@ -679,18 +694,17 @@ export default function DispatchQueue() {
     printWindow.close();
   };
 
-  // Print Invoice to Cashier Thermal Printer(s) (192.168.1.54 / 192.168.1.53) with browser fallback
+  // Print Invoice to Cashier Thermal Printer for CURRENT DEVICE ONLY with browser fallback
   const printOrderInvoice = async (order) => {
     if (!order) return;
     try {
-      const res = await printCashierInvoice(order, { force: true });
+      const res = await printCashierInvoice(order, { printerIp: selectedCashierIp, force: true });
       if (res?.success) {
-        const printerNames = res.results?.filter((r) => r.success).map((r) => r.printer).join(" و ") || "طابعة الكاشير";
-        toast.success(`تم إرسال الفاتورة #${order.sequenceNumber || order._id?.slice(-6)} إلى (${printerNames}) بنجاح 🖨️`);
+        toast.success(`تم إرسال الفاتورة #${order.sequenceNumber || order._id?.slice(-6)} لطابعة ${res.printer || "الكاشير"} (${res.ip || selectedCashierIp}) بنجاح 🖨️`);
         return;
       }
       console.warn("Thermal print agent failed or offline, falling back to browser print:", res?.error);
-      toast.error(`تعذر الطباعة المباشرة على طابعة الكاشير: ${res?.error || "تأكد من تشغيل start.bat"}. جاري الفتح عبر المتصفح...`);
+      toast.error(`تعذر الطباعة المباشرة على طابعة الكاشير (${selectedCashierIp}): ${res?.error || "تأكد من تشغيل start.bat"}. جاري الفتح عبر المتصفح...`);
       fallbackBrowserPrint(order);
     } catch (err) {
       console.error("Print error:", err);
@@ -912,6 +926,37 @@ export default function DispatchQueue() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Device Cashier Printer Switcher (One printer per device) */}
+            <div
+              className="flex items-center gap-0.5 bg-gray-100 p-1 rounded-xl border border-gray-200"
+              title="تحديد طابعة الكاشير الخاصة بهذا الجهاز (تطبع على طابعة هذا الجهاز فقط)"
+            >
+              <button
+                type="button"
+                onClick={() => handleSelectCashierPrinter("192.168.1.54")}
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                  selectedCashierIp === "192.168.1.54"
+                    ? "bg-white text-gray-900 shadow-xs border border-gray-200"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+                title="طابعة هذا الجهاز: كاشير 1 (192.168.1.54)"
+              >
+                كاشير 1 (.54)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSelectCashierPrinter("192.168.1.53")}
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                  selectedCashierIp === "192.168.1.53"
+                    ? "bg-white text-gray-900 shadow-xs border border-gray-200"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+                title="طابعة هذا الجهاز: كاشير 2 (192.168.1.53)"
+              >
+                كاشير 2 (.53)
+              </button>
+            </div>
+
             {/* Cashier Thermal Printer Status Badge */}
             <div
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
@@ -921,7 +966,7 @@ export default function DispatchQueue() {
               }`}
               title={
                 printAgentOnline
-                  ? "طابعات الكاشير متصلة (192.168.1.54 & 192.168.1.53)"
+                  ? `طابعة الكاشير لهذا الجهاز متصلة (${selectedCashierIp})`
                   : "برنامج الطباعة غير متصل (تأكد من تشغيل start.bat)"
               }
             >
@@ -932,7 +977,9 @@ export default function DispatchQueue() {
               />
               <Printer className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">
-                {printAgentOnline ? "طابعة الكاشير متصلة" : "طابعة الكاشير غير متصلة"}
+                {printAgentOnline
+                  ? `طابعة متصلة (${selectedCashierIp === "192.168.1.53" ? "كاشير 2" : "كاشير 1"})`
+                  : "طابعة غير متصلة"}
               </span>
             </div>
 

@@ -185,9 +185,12 @@ app.get("/api/status", async (req, res) => {
     };
   }
 
+  const deviceCashierIp = config.deviceCashierIp || config.printers.cashier?.ip || "192.168.1.54";
+
   res.json({
     agent: "online",
     time: new Date().toISOString(),
+    deviceCashierIp,
     printers: printerStatus,
   });
 });
