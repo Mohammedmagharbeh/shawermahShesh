@@ -777,8 +777,14 @@ exports.updateOrder = async (req, res) => {
           if (["Delivered", "Submitted"].includes(updates.status)) {
             if (!updatedOrder.submittedAt) {
               updatedOrder.submittedAt = new Date();
-              await updatedOrder.save();
             }
+            try {
+              const { stampOrderFinancialSnapshot } = require("./deliveryController");
+              await stampOrderFinancialSnapshot(updatedOrder);
+            } catch (err) {
+              console.error("Error in stampOrderFinancialSnapshot:", err);
+            }
+            await updatedOrder.save();
             rider.driverStatus = "returning";
             rider.currentOrderId = null;
             await rider.save();

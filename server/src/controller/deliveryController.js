@@ -1,41 +1,171 @@
 const Order = require("../models/orders");
 const User = require("../models/user");
 const DeliverySetting = require("../models/deliverySetting");
+const DriverPayout = require("../models/driverPayout");
+const Location = require("../models/locations");
 require("../models/products");
-require("../models/locations");
 const { BRANCH_QR_CODE } = require("../constants");
 const { sendToUser } = require("../utils/pushService");
 
-// Helper: fetch configured maxOrdersPerRider (capped at 5, min 1)
-const getMaxOrdersPerRider = async () => {
+// Helper: fetch configured delivery settings (maxOrdersPerRider & driverSharePercentage)
+const getGlobalDeliverySettings = async () => {
   try {
     let setting = await DeliverySetting.findOne({ key: "global" });
     if (!setting) {
       setting = await DeliverySetting.create({
         key: "global",
         maxOrdersPerRider: 3,
+        driverSharePercentage: 75,
       });
     }
-    return Math.min(Math.max(setting.maxOrdersPerRider || 3, 1), 5);
+    const maxOrdersPerRider = Math.min(Math.max(setting.maxOrdersPerRider || 3, 1), 5);
+    const driverSharePercentage =
+      typeof setting.driverSharePercentage === "number" && !isNaN(setting.driverSharePercentage)
+        ? Math.min(Math.max(setting.driverSharePercentage, 0), 100)
+        : 75;
+    return {
+      maxOrdersPerRider,
+      driverSharePercentage,
+      restaurantSharePercentage: Number((100 - driverSharePercentage).toFixed(2)),
+    };
   } catch (err) {
-    console.error("Error fetching maxOrdersPerRider:", err);
-    return 3;
+    console.error("Error fetching delivery settings:", err);
+    return {
+      maxOrdersPerRider: 3,
+      driverSharePercentage: 75,
+      restaurantSharePercentage: 25,
+    };
   }
+};
+
+// Helper: fetch configured maxOrdersPerRider (capped at 5, min 1)
+const getMaxOrdersPerRider = async () => {
+  const { maxOrdersPerRider } = await getGlobalDeliverySettings();
+  return maxOrdersPerRider;
+};
+
+// Helper: stamp immutable financial snapshot on order completion
+const stampOrderFinancialSnapshot = async (order) => {
+  try {
+    if (!order) return;
+    // 1. Resolve fee
+    let fee = 0;
+    if (order.shippingAddress) {
+      if (typeof order.shippingAddress === "object" && order.shippingAddress.deliveryCost !== undefined) {
+        fee = Number(order.shippingAddress.deliveryCost) || 0;
+      } else {
+        const loc = await Location.findById(order.shippingAddress).lean();
+        if (loc && loc.deliveryCost !== undefined) {
+          fee = Number(loc.deliveryCost) || 0;
+        }
+      }
+    }
+    if (!fee && order.deliveryFee !== undefined) {
+      fee = Number(order.deliveryFee) || 0;
+    }
+
+    // 2. Read global driverSharePercentage
+    const { driverSharePercentage } = await getGlobalDeliverySettings();
+
+    // 3. Zero-drift 2-decimal rounding
+    const driverShareAmount = Number(((fee * driverSharePercentage) / 100).toFixed(2));
+    const ownerShareAmount = Number((fee - driverShareAmount).toFixed(2));
+
+    // 4. Stamp onto order document
+    order.deliveryFeeSnapshot = fee;
+    order.driverSharePercentageSnapshot = driverSharePercentage;
+    order.driverShareAmount = driverShareAmount;
+    order.ownerShareAmount = ownerShareAmount;
+    if (!order.payoutStatus) {
+      order.payoutStatus = "UNPAID";
+    }
+    if (order.payoutId === undefined) {
+      order.payoutId = null;
+    }
+  } catch (err) {
+    console.error("Error stamping order financial snapshot:", err);
+  }
+};
+exports.stampOrderFinancialSnapshot = stampOrderFinancialSnapshot;
+
+// 4:00 AM Operational Business Day Cutoff
+// Shifts timestamp back by 4 hours to map [YYYY-MM-DD 04:00:00 -> (next day) 03:59:59.999] into YYYY-MM-DD
+const getBusinessDateKey = (date) => {
+  if (!date) return "unknown";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "unknown";
+  const shifted = new Date(d.getTime() - 4 * 60 * 60 * 1000);
+  const year = shifted.getFullYear();
+  const month = String(shifted.getMonth() + 1).padStart(2, "0");
+  const day = String(shifted.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getBusinessDayRange = (period = "all", customFrom = null, customTo = null) => {
+  if (!period || period === "all") {
+    return { start: null, end: null };
+  }
+
+  const now = new Date();
+  const todayShifted = new Date(now.getTime() - 4 * 60 * 60 * 1000);
+  const todayBusinessStart = new Date(
+    todayShifted.getFullYear(),
+    todayShifted.getMonth(),
+    todayShifted.getDate(),
+    4,
+    0,
+    0,
+    0
+  );
+  const todayBusinessEnd = new Date(todayBusinessStart.getTime() + 24 * 60 * 60 * 1000 - 1);
+
+  if (period === "today") {
+    return { start: todayBusinessStart, end: todayBusinessEnd };
+  }
+
+  if (period === "yesterday") {
+    const start = new Date(todayBusinessStart.getTime() - 24 * 60 * 60 * 1000);
+    const end = new Date(todayBusinessStart.getTime() - 1);
+    return { start, end };
+  }
+
+  if (period === "week") {
+    const start = new Date(todayBusinessStart.getTime() - 6 * 24 * 60 * 60 * 1000);
+    return { start, end: todayBusinessEnd };
+  }
+
+  if (period === "month") {
+    const start = new Date(todayBusinessStart.getTime() - 29 * 24 * 60 * 60 * 1000);
+    return { start, end: todayBusinessEnd };
+  }
+
+  if (period === "custom" && customFrom) {
+    const [fYear, fMonth, fDay] = customFrom.split("-").map(Number);
+    const start = new Date(fYear, fMonth - 1, fDay, 4, 0, 0, 0);
+    let end;
+    if (customTo) {
+      const [tYear, tMonth, tDay] = customTo.split("-").map(Number);
+      end = new Date(new Date(tYear, tMonth - 1, tDay, 4, 0, 0, 0).getTime() + 24 * 60 * 60 * 1000 - 1);
+    } else {
+      end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
+    }
+    return { start, end };
+  }
+
+  return { start: null, end: null };
 };
 
 /**
  * 0. GET /api/delivery/settings
- * Fetches delivery configurations (including maxOrdersPerRider)
+ * Fetches delivery configurations (maxOrdersPerRider, driverSharePercentage, restaurantSharePercentage)
  * Accessible by: admin, employee, cashier, rider
  */
 exports.getDeliverySettings = async (req, res) => {
   try {
-    const maxOrdersPerRider = await getMaxOrdersPerRider();
+    const settings = await getGlobalDeliverySettings();
     return res.status(200).json({
       success: true,
-      settings: {
-        maxOrdersPerRider,
-      },
+      settings,
     });
   } catch (error) {
     console.error("Error in getDeliverySettings:", error);
@@ -46,8 +176,8 @@ exports.getDeliverySettings = async (req, res) => {
 /**
  * 0.1 PUT /api/delivery/settings
  * Updates delivery configurations (ADMIN ONLY)
- * Body: { maxOrdersPerRider }
- * Accessible by: admin only (max value capped at 5)
+ * Body: { maxOrdersPerRider, driverSharePercentage }
+ * Accessible by: admin only
  */
 exports.updateDeliverySettings = async (req, res) => {
   try {
@@ -61,41 +191,58 @@ exports.updateDeliverySettings = async (req, res) => {
       });
     }
 
-    const rawMax = req.body.maxOrdersPerRider;
-    const parsedMax = parseInt(rawMax, 10);
-
-    if (isNaN(parsedMax) || parsedMax < 1 || parsedMax > 5) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "الحد الأقصى لعدد الطلبات لكل سائق يجب أن يكون رقماً صحيحاً بين 1 و 5 فقط",
-      });
-    }
-
     let setting = await DeliverySetting.findOne({ key: "global" });
     if (!setting) {
       setting = new DeliverySetting({
         key: "global",
-        maxOrdersPerRider: parsedMax,
+        maxOrdersPerRider: 3,
+        driverSharePercentage: 75,
       });
-    } else {
+    }
+
+    // Optional update maxOrdersPerRider
+    if (req.body.maxOrdersPerRider !== undefined) {
+      const parsedMax = parseInt(req.body.maxOrdersPerRider, 10);
+      if (isNaN(parsedMax) || parsedMax < 1 || parsedMax > 5) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "الحد الأقصى لعدد الطلبات لكل سائق يجب أن يكون رقماً صحيحاً بين 1 و 5 فقط",
+        });
+      }
       setting.maxOrdersPerRider = parsedMax;
     }
+
+    // Optional update driverSharePercentage
+    if (req.body.driverSharePercentage !== undefined) {
+      const parsedPct = parseFloat(req.body.driverSharePercentage);
+      if (isNaN(parsedPct) || parsedPct < 0 || parsedPct > 100) {
+        return res.status(400).json({
+          success: false,
+          message: "نسبة عمولة السائق يجب أن تكون رقماً بين 0 و 100",
+        });
+      }
+      setting.driverSharePercentage = Number(parsedPct.toFixed(2));
+    }
+
     await setting.save();
 
-    // Socket emission: Notify all dispatchers, cashiers, and drivers of setting change
     const io = req.app.get("io");
     if (io) {
       io.emit("deliverySettingsUpdated", {
-        maxOrdersPerRider: parsedMax,
+        maxOrdersPerRider: setting.maxOrdersPerRider,
+        driverSharePercentage: setting.driverSharePercentage,
+        restaurantSharePercentage: Number((100 - setting.driverSharePercentage).toFixed(2)),
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: `تم تحديث الحد الأقصى للطلبات لكل سائق إلى ${parsedMax} طلبات بنجاح`,
+      message: "تم تحديث إعدادات التوصيل بنجاح",
       settings: {
-        maxOrdersPerRider: parsedMax,
+        maxOrdersPerRider: setting.maxOrdersPerRider,
+        driverSharePercentage: setting.driverSharePercentage,
+        restaurantSharePercentage: Number((100 - setting.driverSharePercentage).toFixed(2)),
       },
     });
   } catch (error) {
@@ -616,6 +763,7 @@ exports.verifyDeliveryOtp = async (req, res) => {
     order.status = "Delivered";
     order.submittedAt = new Date();
     order.deliveryOtp = null;
+    await stampOrderFinancialSnapshot(order);
     await order.save();
 
     // Check remaining active orders for this rider
@@ -1311,7 +1459,7 @@ exports.getMyDriverStatus = async (req, res) => {
  */
 exports.getDriverAnalytics = async (req, res) => {
   try {
-    const { period, driverId } = req.query;
+    const { period = "all", driverId, from, to, settlementStatus } = req.query;
 
     // 1. Fetch drivers (role: "rider")
     const driversQuery = { role: "rider" };
@@ -1324,34 +1472,71 @@ exports.getDriverAnalytics = async (req, res) => {
 
     const driverIds = drivers.map((d) => d._id);
 
-    // 2. Build date filter for orders (excluding external ishbek orders)
+    // 2. Build 4:00 AM cutoff range
+    const { start: startDate, end: endDate } = getBusinessDayRange(period, from, to);
+
+    // Order filter for active period (excluding pickup orders and ishbek aggregator orders)
     const orderFilter = {
       assignedRiderId: { $in: driverIds },
       status: { $in: ["Delivered", "Submitted", "delivered", "submitted"] },
+      orderType: { $ne: "pickup" },
       source: { $ne: "ishbek" },
     };
 
-    if (period && period !== "all") {
-      const now = new Date();
-      let startDate;
-      if (period === "today") {
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      } else if (period === "week") {
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      } else if (period === "month") {
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      }
-      if (startDate) {
-        orderFilter.createdAt = { $gte: startDate };
-      }
+    if (startDate && endDate) {
+      orderFilter.$or = [
+        { submittedAt: { $gte: startDate, $lte: endDate } },
+        { submittedAt: null, createdAt: { $gte: startDate, $lte: endDate } },
+      ];
+    } else if (startDate) {
+      orderFilter.$or = [
+        { submittedAt: { $gte: startDate } },
+        { submittedAt: null, createdAt: { $gte: startDate } },
+      ];
     }
 
-    // 3. Fetch delivered orders for these drivers
+    // 3. Fetch delivered orders for the active period
     const orders = await Order.find(orderFilter)
       .populate("userId", "name username phone apartment")
       .populate("shippingAddress")
+      .populate("payoutId", "payoutCode paymentMethod paidAt status")
       .sort({ submittedAt: -1, createdAt: -1 })
       .lean();
+
+    // 4. Fetch prior unpaid orders for these drivers (if startDate exists)
+    // Orders whose completion falls BEFORE the active period start, and are still UNPAID
+    let priorUnpaidOrders = [];
+    if (startDate) {
+      priorUnpaidOrders = await Order.find({
+        assignedRiderId: { $in: driverIds },
+        status: { $in: ["Delivered", "Submitted", "delivered", "submitted"] },
+        orderType: { $ne: "pickup" },
+        source: { $ne: "ishbek" },
+        payoutStatus: { $ne: "PAID" },
+        $or: [
+          { submittedAt: { $lt: startDate } },
+          { submittedAt: null, createdAt: { $lt: startDate } },
+        ],
+      })
+        .populate("shippingAddress")
+        .lean();
+    }
+
+    // 5. Fetch most recent COMPLETED payout per driver for lastPaidAt
+    const recentPayouts = await DriverPayout.find({
+      driverId: { $in: driverIds },
+      status: "COMPLETED",
+    })
+      .sort({ paidAt: -1 })
+      .lean();
+
+    const driverLastPaidMap = {};
+    recentPayouts.forEach((p) => {
+      const dKey = String(p.driverId);
+      if (!driverLastPaidMap[dKey]) {
+        driverLastPaidMap[dKey] = p.paidAt;
+      }
+    });
 
     // Helper: calculate average of an array of numbers
     const calcAverage = (arr) => {
@@ -1360,9 +1545,8 @@ exports.getDriverAnalytics = async (req, res) => {
       return Math.round((sum / arr.length) * 10) / 10;
     };
 
-    // 4. Group orders and calculate durations per driver
+    // 6. Initialize stats map per driver
     const driverStatsMap = {};
-
     drivers.forEach((d) => {
       driverStatsMap[String(d._id)] = {
         driver: {
@@ -1374,7 +1558,16 @@ exports.getDriverAnalytics = async (req, res) => {
           returnedAt: d.returnedAt,
         },
         totalOrders: 0,
-        totalDeliveryFees: 0, // مجموع مستحقات السائق
+        totalDeliveryFees: 0,
+        totalDriverShare: 0,
+        totalRestaurantShare: 0,
+        paidDriverShare: 0,
+        unpaidDriverShare: 0,
+        unpaidOrderCount: 0,
+        priorUnpaidAmount: 0,
+        priorUnpaidOrderCount: 0,
+        lastPaidAt: driverLastPaidMap[String(d._id)] || null,
+        dailyEarnings: {}, // { [dateKey]: { totalFee, driverShare, restaurantShare, orderCount, paidAmount, unpaidAmount } }
         pickupDurations: [],
         deliveryDurations: [],
         returnDurations: [],
@@ -1382,6 +1575,29 @@ exports.getDriverAnalytics = async (req, res) => {
       };
     });
 
+    // Aggregate prior unpaid balances onto drivers
+    priorUnpaidOrders.forEach((pOrd) => {
+      const rId = String(pOrd.assignedRiderId);
+      if (!driverStatsMap[rId]) return;
+
+      const fee =
+        pOrd.deliveryFeeSnapshot !== null && pOrd.deliveryFeeSnapshot !== undefined
+          ? Number(pOrd.deliveryFeeSnapshot)
+          : Number(pOrd.shippingAddress?.deliveryCost) || Number(pOrd.deliveryFee) || 0;
+
+      let dShare = 0;
+      if (pOrd.driverShareAmount !== null && pOrd.driverShareAmount !== undefined) {
+        dShare = Number(pOrd.driverShareAmount);
+      } else {
+        dShare = Number(((fee * 75) / 100).toFixed(2));
+      }
+
+      driverStatsMap[rId].priorUnpaidAmount =
+        Number((driverStatsMap[rId].priorUnpaidAmount + dShare).toFixed(2));
+      driverStatsMap[rId].priorUnpaidOrderCount += 1;
+    });
+
+    // Process orders in active period
     orders.forEach((ord) => {
       const rId = String(ord.assignedRiderId);
       if (!driverStatsMap[rId]) return;
@@ -1389,15 +1605,72 @@ exports.getDriverAnalytics = async (req, res) => {
       const stats = driverStatsMap[rId];
       stats.totalOrders += 1;
 
-      // المنطقة وسعر التوصيل (من موديل locations)
       const zoneName =
         ord.shippingAddress?.name ||
         ord.shippingAddress?.area ||
         "منطقة غير محددة";
 
-      const deliveryFee = Number(ord.shippingAddress?.deliveryCost) || 0;
+      // Resolve delivery fee (snapshot first, fallback location.deliveryCost, then order.deliveryFee)
+      const deliveryFee =
+        ord.deliveryFeeSnapshot !== null && ord.deliveryFeeSnapshot !== undefined
+          ? Number(ord.deliveryFeeSnapshot)
+          : Number(ord.shippingAddress?.deliveryCost) || Number(ord.deliveryFee) || 0;
 
-      stats.totalDeliveryFees += deliveryFee;
+      // Resolve driver & restaurant share (snapshot first, fallback 75%/25%)
+      let driverShare = 0;
+      let restaurantShare = 0;
+      let pctSnapshot = 75;
+
+      if (
+        ord.driverShareAmount !== null &&
+        ord.driverShareAmount !== undefined &&
+        ord.ownerShareAmount !== null &&
+        ord.ownerShareAmount !== undefined
+      ) {
+        driverShare = Number(ord.driverShareAmount);
+        restaurantShare = Number(ord.ownerShareAmount);
+        pctSnapshot = ord.driverSharePercentageSnapshot || 75;
+      } else {
+        driverShare = Number(((deliveryFee * 75) / 100).toFixed(2));
+        restaurantShare = Number((deliveryFee - driverShare).toFixed(2));
+      }
+
+      const payoutStatus = ord.payoutStatus === "PAID" ? "PAID" : "UNPAID";
+      const isPaid = payoutStatus === "PAID";
+
+      stats.totalDeliveryFees = Number((stats.totalDeliveryFees + deliveryFee).toFixed(2));
+      stats.totalDriverShare = Number((stats.totalDriverShare + driverShare).toFixed(2));
+      stats.totalRestaurantShare = Number((stats.totalRestaurantShare + restaurantShare).toFixed(2));
+
+      if (isPaid) {
+        stats.paidDriverShare = Number((stats.paidDriverShare + driverShare).toFixed(2));
+      } else {
+        stats.unpaidDriverShare = Number((stats.unpaidDriverShare + driverShare).toFixed(2));
+        stats.unpaidOrderCount += 1;
+      }
+
+      // Group by 4:00 AM cutoff business day key
+      const dayKey = getBusinessDateKey(ord.submittedAt || ord.createdAt);
+      if (!stats.dailyEarnings[dayKey]) {
+        stats.dailyEarnings[dayKey] = {
+          totalFee: 0,
+          driverShare: 0,
+          restaurantShare: 0,
+          orderCount: 0,
+          paidAmount: 0,
+          unpaidAmount: 0,
+        };
+      }
+      const dayStat = stats.dailyEarnings[dayKey];
+      dayStat.totalFee = Number((dayStat.totalFee + deliveryFee).toFixed(2));
+      dayStat.driverShare = Number((dayStat.driverShare + driverShare).toFixed(2));
+      dayStat.restaurantShare = Number((dayStat.restaurantShare + restaurantShare).toFixed(2));
+      dayStat.orderCount += 1;
+      if (isPaid) {
+        dayStat.paidAmount = Number((dayStat.paidAmount + driverShare).toFixed(2));
+      } else {
+        dayStat.unpaidAmount = Number((dayStat.unpaidAmount + driverShare).toFixed(2));
+      }
 
       // Pickup Duration: from assignedAt / ready / createdAt to shippedAt
       const startPickupTime =
@@ -1405,7 +1678,7 @@ exports.getDriverAnalytics = async (req, res) => {
       let pickupMinutes = null;
       if (ord.shippedAt && startPickupTime) {
         const diffMs = new Date(ord.shippedAt) - new Date(startPickupTime);
-        if (diffMs > 0) {
+        if (diffMs > 0 && diffMs < 240 * 60000) {
           pickupMinutes = Math.round((diffMs / 60000) * 10) / 10;
           stats.pickupDurations.push(pickupMinutes);
         }
@@ -1415,7 +1688,7 @@ exports.getDriverAnalytics = async (req, res) => {
       let deliveryMinutes = null;
       if (ord.submittedAt && ord.shippedAt) {
         const diffMs = new Date(ord.submittedAt) - new Date(ord.shippedAt);
-        if (diffMs > 0) {
+        if (diffMs > 0 && diffMs < 300 * 60000) {
           deliveryMinutes = Math.round((diffMs / 60000) * 10) / 10;
           stats.deliveryDurations.push(deliveryMinutes);
         }
@@ -1430,7 +1703,7 @@ exports.getDriverAnalytics = async (req, res) => {
           : null);
       if (returnTime && ord.submittedAt) {
         const diffMs = new Date(returnTime) - new Date(ord.submittedAt);
-        if (diffMs > 0) {
+        if (diffMs > 0 && diffMs < 300 * 60000) {
           returnMinutes = Math.round((diffMs / 60000) * 10) / 10;
           stats.returnDurations.push(returnMinutes);
         }
@@ -1442,6 +1715,14 @@ exports.getDriverAnalytics = async (req, res) => {
         totalPrice: ord.totalPrice,
         zone: zoneName,
         deliveryFee,
+        driverShare,
+        restaurantShare,
+        driverShareAmount: driverShare,
+        ownerShareAmount: restaurantShare,
+        driverSharePercentageSnapshot: pctSnapshot,
+        payoutStatus,
+        payoutCode: ord.payoutId?.payoutCode || null,
+        payoutId: ord.payoutId?._id || ord.payoutId || null,
         createdAt: ord.createdAt,
         assignedAt: ord.assignedAt,
         shippedAt: ord.shippedAt,
@@ -1481,15 +1762,43 @@ exports.getDriverAnalytics = async (req, res) => {
       });
     });
 
-    // 5. Finalize summaries with averages
-    const result = Object.values(driverStatsMap).map((item) => {
+    // 7. Finalize summaries with averages and settlement states
+    let result = Object.values(driverStatsMap).map((item) => {
       const avgPickup = calcAverage(item.pickupDurations);
       const avgDelivery = calcAverage(item.deliveryDurations);
       const avgReturn = calcAverage(item.returnDurations);
 
+      let settlementState = "NONE";
+      if (item.totalOrders > 0) {
+        if (item.unpaidDriverShare === 0) {
+          settlementState = "SETTLED";
+        } else if (item.paidDriverShare > 0) {
+          settlementState = "PARTIAL";
+        } else {
+          settlementState = "UNPAID";
+        }
+      }
+
+      const dailyEarningsList = Object.entries(item.dailyEarnings)
+        .sort(([a], [b]) => b.localeCompare(a))
+        .map(([date, vals]) => {
+          let daySettlementState = "NONE";
+          if (vals.orderCount > 0) {
+            if (vals.unpaidAmount === 0) daySettlementState = "SETTLED";
+            else if (vals.paidAmount > 0) daySettlementState = "PARTIAL";
+            else daySettlementState = "UNPAID";
+          }
+          return {
+            date,
+            ...vals,
+            daySettlementState,
+          };
+        });
+
       return {
         ...item,
-        totalDeliveryFees: Math.round(item.totalDeliveryFees * 100) / 100,
+        settlementState,
+        dailyEarnings: dailyEarningsList,
         averagePickupMinutes: avgPickup,
         averageDeliveryMinutes: avgDelivery,
         averageReturnMinutes: avgReturn,
@@ -1500,7 +1809,16 @@ exports.getDriverAnalytics = async (req, res) => {
       };
     });
 
-    // Overall fleet averages
+    // Optional settlementStatus filtering
+    if (settlementStatus === "unpaid") {
+      result = result.filter(
+        (r) => r.unpaidDriverShare > 0 || r.priorUnpaidAmount > 0
+      );
+    } else if (settlementStatus === "settled") {
+      result = result.filter((r) => r.settlementState === "SETTLED");
+    }
+
+    // Overall fleet averages and financial totals
     const allDeliveryMins = result.flatMap((r) => r.deliveryDurations);
     const allPickupMins = result.flatMap((r) => r.pickupDurations);
     const allReturnMins = result.flatMap((r) => r.returnDurations);
@@ -1510,16 +1828,28 @@ exports.getDriverAnalytics = async (req, res) => {
     const fleetAvgPickup = calcAverage(allPickupMins);
     const fleetAvgReturn = calcAverage(allReturnMins);
 
+    const totalDeliveryFees =
+      Number(result.reduce((acc, r) => acc + r.totalDeliveryFees, 0).toFixed(2));
+    const totalDriverShare =
+      Number(result.reduce((acc, r) => acc + r.totalDriverShare, 0).toFixed(2));
+    const totalRestaurantShare =
+      Number(result.reduce((acc, r) => acc + r.totalRestaurantShare, 0).toFixed(2));
+    const totalPaidDriverShare =
+      Number(result.reduce((acc, r) => acc + r.paidDriverShare, 0).toFixed(2));
+    const totalUnpaidDriverShare =
+      Number(result.reduce((acc, r) => acc + r.unpaidDriverShare, 0).toFixed(2));
+
     return res.status(200).json({
       success: true,
       drivers: result,
       fleetSummary: {
         totalDrivers: drivers.length,
         totalDeliveredOrders: totalFleetOrders,
-        totalDeliveryFees:
-          Math.round(
-            result.reduce((acc, r) => acc + r.totalDeliveryFees, 0) * 100,
-          ) / 100,
+        totalDeliveryFees,
+        totalDriverShare,
+        totalRestaurantShare,
+        totalPaidDriverShare,
+        totalUnpaidDriverShare,
         fleetAverageDeliveryMinutes: fleetAvgDelivery,
         fleetAveragePickupMinutes: fleetAvgPickup,
         fleetAverageReturnMinutes: fleetAvgReturn,
@@ -1531,6 +1861,355 @@ exports.getDriverAnalytics = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in getDriverAnalytics:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * 9. POST /api/delivery/driver-payouts
+ * Creates a settlement payout record for a driver and marks matched orders as PAID.
+ * Body: { driverId, scope: "period" | "all_unpaid", from, to, paymentMethod, note }
+ * Accessible by: admin, employee, cashier
+ */
+exports.createDriverPayout = async (req, res) => {
+  try {
+    const { driverId, scope = "all_unpaid", from, to, paymentMethod = "CASH", note = "" } = req.body;
+
+    if (!driverId) {
+      return res.status(400).json({ success: false, message: "معرف السائق مطلوب" });
+    }
+
+    const driver = await User.findById(driverId);
+    if (!driver || driver.role !== "rider") {
+      return res.status(404).json({ success: false, message: "السائق غير موجود" });
+    }
+
+    // Build order query for UNPAID delivered orders
+    const query = {
+      assignedRiderId: driverId,
+      status: { $in: ["Delivered", "Submitted", "delivered", "submitted"] },
+      orderType: { $ne: "pickup" },
+      source: { $ne: "ishbek" },
+      payoutStatus: { $ne: "PAID" },
+    };
+
+    if (scope === "period" && from) {
+      const { start, end } = getBusinessDayRange("custom", from, to);
+      if (start && end) {
+        query.$or = [
+          { submittedAt: { $gte: start, $lte: end } },
+          { submittedAt: null, createdAt: { $gte: start, $lte: end } },
+        ];
+      }
+    }
+
+    const ordersToPay = await Order.find(query).populate("shippingAddress");
+
+    if (!ordersToPay || ordersToPay.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "لا توجد طلبات معلقة مستحقة للصرف لهذا السائق ضمن النطاق المحدد",
+      });
+    }
+
+    // Calculate sum of driverShareAmount (snapshot first, fallback fee * 0.75)
+    let totalAmount = 0;
+    const orderIds = [];
+
+    for (const ord of ordersToPay) {
+      orderIds.push(ord._id);
+      let dShare = 0;
+      if (ord.driverShareAmount !== null && ord.driverShareAmount !== undefined) {
+        dShare = Number(ord.driverShareAmount);
+      } else {
+        const fee =
+          ord.deliveryFeeSnapshot !== null && ord.deliveryFeeSnapshot !== undefined
+            ? Number(ord.deliveryFeeSnapshot)
+            : Number(ord.shippingAddress?.deliveryCost) || Number(ord.deliveryFee) || 0;
+        dShare = Number(((fee * 75) / 100).toFixed(2));
+        ord.driverShareAmount = dShare;
+        ord.ownerShareAmount = Number((fee - dShare).toFixed(2));
+        await ord.save();
+      }
+      totalAmount = Number((totalAmount + dShare).toFixed(2));
+    }
+
+    // Generate unique payoutCode: PAY-YYYYMMDD-XXXX
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const payoutCode = `PAY-${dateStr}-${randomSuffix}`;
+
+    const callerId = req.user._id || req.user.id;
+
+    // Create payout record
+    const payout = await DriverPayout.create({
+      payoutCode,
+      driverId: driver._id,
+      orderIds,
+      orderCount: ordersToPay.length,
+      totalAmount,
+      paymentMethod: ["CASH", "CLIQ"].includes(paymentMethod) ? paymentMethod : "CASH",
+      note: note ? String(note).trim() : "",
+      paidBy: callerId,
+      paidAt: new Date(),
+      status: "COMPLETED",
+    });
+
+    // Mark matched orders as PAID
+    await Order.updateMany(
+      { _id: { $in: orderIds } },
+      { $set: { payoutStatus: "PAID", payoutId: payout._id } }
+    );
+
+    const populatedPayout = await DriverPayout.findById(payout._id)
+      .populate("paidBy", "name username phone")
+      .populate("orderIds", "sequenceNumber totalPrice driverShareAmount submittedAt");
+
+    return res.status(200).json({
+      success: true,
+      message: `تم صرف مستحقات السائق بنجاح بمبلغ ${totalAmount.toFixed(2)} JOD (سند رقم: ${payoutCode})`,
+      payout: populatedPayout,
+    });
+  } catch (error) {
+    console.error("Error in createDriverPayout:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * 10. GET /api/delivery/driver-payouts/:driverId
+ * Returns settlement history receipts for a given driver
+ * Accessible by: admin, employee, cashier
+ */
+exports.getDriverPayouts = async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    const payouts = await DriverPayout.find({ driverId })
+      .populate("paidBy", "name username phone")
+      .populate("voidedBy", "name username phone")
+      .populate("orderIds", "sequenceNumber totalPrice driverShareAmount submittedAt")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      payouts,
+    });
+  } catch (error) {
+    console.error("Error in getDriverPayouts:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * 11. POST /api/delivery/driver-payouts/:payoutId/void
+ * Voids a payout and reverts all associated orders to UNPAID
+ * Accessible by: ADMIN ONLY
+ */
+exports.voidDriverPayout = async (req, res) => {
+  try {
+    const callerId = req.user._id || req.user.id;
+    const caller = await User.findById(callerId);
+    if (!caller || caller.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "غير مصرح لك بإلغاء سندات الصرف (مسموح للمدراء فقط)",
+      });
+    }
+
+    const { payoutId } = req.params;
+    const { voidReason } = req.body;
+
+    if (!voidReason || !String(voidReason).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "سبب إلغاء سند الصرف إجباري",
+      });
+    }
+
+    const payout = await DriverPayout.findById(payoutId);
+    if (!payout) {
+      return res.status(404).json({ success: false, message: "سند الصرف غير موجود" });
+    }
+
+    if (payout.status === "VOIDED") {
+      return res.status(400).json({
+        success: false,
+        message: "سند الصرف ملغي مسبقاً",
+      });
+    }
+
+    payout.status = "VOIDED";
+    payout.voidReason = String(voidReason).trim();
+    payout.voidedBy = caller._id;
+    payout.voidedAt = new Date();
+    await payout.save();
+
+    // Revert orders to UNPAID and clear payoutId
+    await Order.updateMany(
+      { _id: { $in: payout.orderIds } },
+      { $set: { payoutStatus: "UNPAID", payoutId: null } }
+    );
+
+    const populatedPayout = await DriverPayout.findById(payout._id)
+      .populate("paidBy", "name username phone")
+      .populate("voidedBy", "name username phone");
+
+    return res.status(200).json({
+      success: true,
+      message: `تم إلغاء سند الصرف ${payout.payoutCode} بنجاح وإعادة الطلبات إلى غير مدفوعة`,
+      payout: populatedPayout,
+    });
+  } catch (error) {
+    console.error("Error in voidDriverPayout:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * 12. GET /api/delivery/my-earnings
+ * Read-only rider earnings for the current 4:00 AM business day
+ * Accessible by: rider, admin
+ */
+exports.getMyEarnings = async (req, res) => {
+  try {
+    const callerId = req.user?._id || req.user?.id;
+    const caller = req.user || (callerId ? await User.findById(callerId) : null);
+
+    if (!caller || !["rider", "admin"].includes(caller.role)) {
+      return res.status(403).json({ success: false, message: "غير مصرح لك" });
+    }
+
+    const targetRiderId =
+      caller.role === "admin" && req.query.riderId
+        ? req.query.riderId
+        : (caller._id || callerId);
+
+    const rider = await User.findById(targetRiderId);
+    if (!rider) {
+      return res.status(404).json({ success: false, message: "السائق غير موجود" });
+    }
+
+    // 4:00 AM business day boundary for today
+    const { start: todayStart, end: todayEnd } = getBusinessDayRange("today");
+
+    // 1. Fetch today's completed orders
+    const todayOrders = await Order.find({
+      assignedRiderId: { $in: [rider._id, String(rider._id)] },
+      status: { $in: ["Delivered", "Submitted", "delivered", "submitted"] },
+      orderType: { $ne: "pickup" },
+      source: { $ne: "ishbek" },
+      $or: [
+        { submittedAt: { $gte: todayStart, $lte: todayEnd } },
+        { submittedAt: null, createdAt: { $gte: todayStart, $lte: todayEnd } },
+        { submittedAt: { $exists: false }, createdAt: { $gte: todayStart, $lte: todayEnd } },
+      ],
+    })
+      .populate("shippingAddress")
+      .sort({ submittedAt: -1, createdAt: -1 })
+      .lean();
+
+    // 2. Fetch prior unpaid orders (submitted before todayStart)
+    const priorUnpaidOrders = await Order.find({
+      assignedRiderId: { $in: [rider._id, String(rider._id)] },
+      status: { $in: ["Delivered", "Submitted", "delivered", "submitted"] },
+      orderType: { $ne: "pickup" },
+      source: { $ne: "ishbek" },
+      payoutStatus: { $ne: "PAID" },
+      $or: [
+        { submittedAt: { $lt: todayStart } },
+        { submittedAt: null, createdAt: { $lt: todayStart } },
+        { submittedAt: { $exists: false }, createdAt: { $lt: todayStart } },
+      ],
+    })
+      .populate("shippingAddress")
+      .lean();
+
+    let priorUnpaidAmount = 0;
+    priorUnpaidOrders.forEach((ord) => {
+      let dShare = 0;
+      if (ord.driverShareAmount !== null && ord.driverShareAmount !== undefined) {
+        dShare = Number(ord.driverShareAmount);
+      } else {
+        const fee =
+          ord.deliveryFeeSnapshot !== null && ord.deliveryFeeSnapshot !== undefined
+            ? Number(ord.deliveryFeeSnapshot)
+            : Number(ord.shippingAddress?.deliveryCost) || Number(ord.deliveryFee) || 0;
+        dShare = Number(((fee * 75) / 100).toFixed(2));
+      }
+      priorUnpaidAmount = Number((priorUnpaidAmount + dShare).toFixed(2));
+    });
+
+    // Compute today's earnings
+    let totalEarnedToday = 0;
+    let paidToday = 0;
+    let unpaidToday = 0;
+
+    const formattedTodayOrders = todayOrders.map((ord) => {
+      const fee =
+        ord.deliveryFeeSnapshot !== null && ord.deliveryFeeSnapshot !== undefined
+          ? Number(ord.deliveryFeeSnapshot)
+          : Number(ord.shippingAddress?.deliveryCost) || Number(ord.deliveryFee) || 0;
+
+      let dShare = 0;
+      if (ord.driverShareAmount !== null && ord.driverShareAmount !== undefined) {
+        dShare = Number(ord.driverShareAmount);
+      } else {
+        dShare = Number(((fee * 75) / 100).toFixed(2));
+      }
+
+      totalEarnedToday = Number((totalEarnedToday + dShare).toFixed(2));
+      const payoutStatus = ord.payoutStatus === "PAID" ? "PAID" : "UNPAID";
+      if (payoutStatus === "PAID") {
+        paidToday = Number((paidToday + dShare).toFixed(2));
+      } else {
+        unpaidToday = Number((unpaidToday + dShare).toFixed(2));
+      }
+
+      return {
+        _id: ord._id,
+        orderNumber: ord.sequenceNumber || String(ord._id).slice(-6),
+        submittedAt: ord.submittedAt || ord.createdAt,
+        deliveryFee: fee,
+        driverShareAmount: dShare,
+        payoutStatus,
+      };
+    });
+
+    let settlementState = "NONE";
+    if (todayOrders.length > 0) {
+      if (unpaidToday === 0) {
+        settlementState = "SETTLED";
+      } else if (paidToday > 0) {
+        settlementState = "PARTIAL";
+      } else {
+        settlementState = "UNPAID";
+      }
+    }
+
+    const earningsPayload = {
+      rider: {
+        _id: rider._id,
+        name: rider.name || rider.username,
+        driverStatus: rider.driverStatus,
+      },
+      completedOrderCount: todayOrders.length,
+      totalEarnedToday,
+      paidToday,
+      unpaidToday,
+      settlementState,
+      priorUnpaidAmount,
+      priorUnpaidOrderCount: priorUnpaidOrders.length,
+      todayOrders: formattedTodayOrders,
+    };
+
+    return res.status(200).json({
+      success: true,
+      ...earningsPayload,
+      earnings: earningsPayload,
+    });
+  } catch (error) {
+    console.error("Error in getMyEarnings:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

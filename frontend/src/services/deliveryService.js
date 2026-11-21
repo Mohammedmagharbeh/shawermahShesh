@@ -13,7 +13,7 @@ export const deliveryService = {
   getSettings: async (token) => {
     const { data } = await axios.get(
       `${API_URL}/delivery/settings`,
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -23,7 +23,7 @@ export const deliveryService = {
     const { data } = await axios.put(
       `${API_URL}/delivery/settings`,
       settings,
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -32,7 +32,7 @@ export const deliveryService = {
   getQueue: async (token) => {
     const { data } = await axios.get(
       `${API_URL}/delivery/queue`,
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -42,7 +42,7 @@ export const deliveryService = {
     const { data } = await axios.post(
       `${API_URL}/delivery/assign`,
       { orderId, riderId },
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -52,7 +52,7 @@ export const deliveryService = {
     const { data } = await axios.post(
       `${API_URL}/delivery/unassign/${orderId}`,
       {},
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -62,7 +62,7 @@ export const deliveryService = {
     const { data } = await axios.post(
       `${API_URL}/delivery/complete-pickup/${orderId}`,
       {},
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -72,20 +72,26 @@ export const deliveryService = {
     const { data } = await axios.post(
       `${API_URL}/delivery/confirm-pickup`,
       { orderId, riderId, all },
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
 
   // 4. Driver: Verify customer OTP (or Force Submit / Override)
   verifyOtp: async (
-    { orderId, otp, riderId = null, forceSubmit = false, overrideReason = null },
-    token
+    {
+      orderId,
+      otp,
+      riderId = null,
+      forceSubmit = false,
+      overrideReason = null,
+    },
+    token,
   ) => {
     const { data } = await axios.post(
       `${API_URL}/delivery/verify-otp`,
       { orderId, otp, riderId, forceSubmit, overrideReason },
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -95,7 +101,7 @@ export const deliveryService = {
     const { data } = await axios.post(
       `${API_URL}/delivery/qr-checkin`,
       { qrCode, riderId },
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -105,7 +111,7 @@ export const deliveryService = {
     const { data } = await axios.post(
       `${API_URL}/delivery/rider-logout`,
       { riderId },
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -115,7 +121,7 @@ export const deliveryService = {
     const { data } = await axios.post(
       `${API_URL}/delivery/manual-checkin/${riderId}`,
       {},
-      getAuthHeaders(token)
+      getAuthHeaders(token),
     );
     return data;
   },
@@ -130,9 +136,61 @@ export const deliveryService = {
   },
 
   // 8. Staff: Get driver analytics and KPIs
-  getDriverAnalytics: async (token, period = "all", driverId = null) => {
-    let url = `${API_URL}/delivery/driver-stats?period=${period}`;
-    if (driverId) url += `&driverId=${driverId}`;
+  getDriverAnalytics: async (token, params = "all", legacyDriverId = null) => {
+    let url = `${API_URL}/delivery/driver-stats`;
+    if (typeof params === "string") {
+      url += `?period=${params}`;
+      if (legacyDriverId) url += `&driverId=${legacyDriverId}`;
+    } else if (params && typeof params === "object") {
+      const queryParts = [];
+      if (params.period) queryParts.push(`period=${params.period}`);
+      if (params.driverId) queryParts.push(`driverId=${params.driverId}`);
+      if (params.from) queryParts.push(`from=${params.from}`);
+      if (params.to) queryParts.push(`to=${params.to}`);
+      if (params.settlementStatus)
+        queryParts.push(`settlementStatus=${params.settlementStatus}`);
+      if (queryParts.length > 0) {
+        url += `?${queryParts.join("&")}`;
+      }
+    }
+    const { data } = await axios.get(url, getAuthHeaders(token));
+    return data;
+  },
+
+  // 9. Staff: Settle driver payout
+  settleDriverPayout: async (payload, token) => {
+    const { data } = await axios.post(
+      `${API_URL}/delivery/driver-payouts`,
+      payload,
+      getAuthHeaders(token),
+    );
+    return data;
+  },
+
+  // 10. Staff: Get driver payout history
+  getDriverPayoutHistory: async (driverId, token) => {
+    const { data } = await axios.get(
+      `${API_URL}/delivery/driver-payouts/${driverId}`,
+      getAuthHeaders(token),
+    );
+    return data;
+  },
+
+  // 11. Admin: Void a driver payout
+  voidDriverPayout: async (payoutId, voidReason, token) => {
+    const { data } = await axios.post(
+      `${API_URL}/delivery/driver-payouts/${payoutId}/void`,
+      { voidReason },
+      getAuthHeaders(token),
+    );
+    return data;
+  },
+
+  // 12. Rider: Fetch my earnings today
+  getMyEarnings: async (token, riderId = null) => {
+    const url = riderId
+      ? `${API_URL}/delivery/my-earnings?riderId=${riderId}`
+      : `${API_URL}/delivery/my-earnings`;
     const { data } = await axios.get(url, getAuthHeaders(token));
     return data;
   },

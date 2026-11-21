@@ -90,6 +90,24 @@ const ordersSchema = new mongoose.Schema(
     submittedAt: { type: Date, default: null },
     returnedAt: { type: Date, default: null },
 
+    // Financial snapshot & settlement fields
+    deliveryFeeSnapshot: { type: Number, default: null },
+    driverSharePercentageSnapshot: { type: Number, default: null },
+    driverShareAmount: { type: Number, default: null },
+    ownerShareAmount: { type: Number, default: null },
+    payoutStatus: {
+      type: String,
+      enum: ["UNPAID", "PAID"],
+      default: "UNPAID",
+      index: true,
+    },
+    payoutId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DriverPayout",
+      default: null,
+      index: true,
+    },
+
     // مصدر الطلب، ورقم الطلب عند اشبك (لمنع تخزين نفس الطلب مرتين)
     source: {
       type: String,

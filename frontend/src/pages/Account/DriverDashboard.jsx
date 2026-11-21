@@ -24,6 +24,8 @@ import {
   Volume2,
   LogOut,
   ChevronDown,
+  ChevronUp,
+  DollarSign,
   Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -79,6 +81,26 @@ export default function DriverDashboard() {
   const [checkingInQr, setCheckingInQr] = useState(false);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+
+  // My Earnings Today state (4:00 AM business day cutoff, strictly read-only)
+  const [earningsData, setEarningsData] = useState(null);
+  const [showEarningsList, setShowEarningsList] = useState(false);
+
+  // Fetch driver earnings (today's 4:00 AM business day, read-only)
+  const fetchEarnings = async () => {
+    if (!user?.token) return;
+    try {
+      const res = await deliveryService.getMyEarnings(
+        user.token,
+        isAdmin && activeRiderId ? activeRiderId : null
+      );
+      if (res?.success) {
+        setEarningsData(res.earnings || res);
+      }
+    } catch (err) {
+      console.error("Failed to load driver earnings:", err);
+    }
+  };
 
   // Fetch driver's active status and assigned order
   const fetchDriverStatus = async (silent = false) => {
@@ -138,12 +160,14 @@ export default function DriverDashboard() {
 
   useEffect(() => {
     fetchDriverStatus();
+    fetchEarnings();
   }, [user?.token, activeRiderId]);
 
   // Periodic lightweight background sync (every 4 seconds) to guarantee freshness
   useEffect(() => {
     const timer = setInterval(() => {
       fetchDriverStatus(true);
+      fetchEarnings();
     }, 4000);
     return () => clearInterval(timer);
   }, [user?.token, activeRiderId]);
@@ -168,6 +192,7 @@ export default function DriverDashboard() {
           icon: "🛵",
         });
         fetchDriverStatus(true);
+        fetchEarnings();
       }
     });
 
@@ -189,6 +214,7 @@ export default function DriverDashboard() {
           }
         }
         fetchDriverStatus(true);
+        fetchEarnings();
       }
     });
 
@@ -197,18 +223,21 @@ export default function DriverDashboard() {
       const eventRider = String(data.riderId || data.rider?._id || "");
       if (!currentTarget || currentTarget === eventRider) {
         fetchDriverStatus(true);
+        fetchEarnings();
       }
     });
 
     socket.on("updatedOrder", (data) => {
       if (currentOrder && String(data._id) === String(currentOrder._id)) {
         fetchDriverStatus(true);
+        fetchEarnings();
       }
     });
 
     socket.on("orderUpdated", (data) => {
       if (currentOrder && String(data._id) === String(currentOrder._id)) {
         fetchDriverStatus(true);
+        fetchEarnings();
       }
     });
 
@@ -280,6 +309,7 @@ export default function DriverDashboard() {
             : "تم تأكيد استلام الطلب! توجه الآن إلى عنوان الزبون 🚗",
         );
         fetchDriverStatus(true);
+        fetchEarnings();
       }
     } catch (error) {
       console.error("Confirm pickup error:", error);
@@ -362,6 +392,7 @@ export default function DriverDashboard() {
           setDriver(res.rider);
         }
         fetchDriverStatus(true);
+        fetchEarnings();
       }
     } catch (error) {
       console.error("Verify OTP error:", error);
@@ -388,6 +419,7 @@ export default function DriverDashboard() {
         setShowScannerModal(false);
         stopCamera();
         fetchDriverStatus(true);
+        fetchEarnings();
       }
     } catch (error) {
       console.error("QR check-in error:", error);
@@ -570,6 +602,196 @@ export default function DriverDashboard() {
             </Button>
           </div>
         </div>
+
+        {/* ======================================================== */}
+        {/* أرباحي اليوم Panel (Read-only, 4:00 AM cutoff) */}
+        {/* ======================================================== */}
+        {(() => {
+          const defaultEarnings = {
+            completedOrderCount: 0,
+            totalEarnedToday: 0,
+            paidToday: 0,
+            unpaidToday: 0,
+            settlementState: "NONE",
+            priorUnpaidAmount: 0,
+            todayOrders: [],
+          };
+          const currentEarnings = earningsData || defaultEarnings;
+
+          return (
+            <div className="bg-white rounded-3xl border border-emerald-200/80 shadow-md p-5 space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
+                    <DollarSign className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-black text-gray-900">
+                        أرباحي اليوم
+                      </h3>
+                      <span className="text-[11px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                        دورة 4:00 ص
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 font-medium">
+                      ملخص أرباح وحصص التوصيل لليوم التشغيلي الحالي
+                    </p>
+                  </div>
+                </div>
+
+                {/* Settlement Status Badge */}
+                {currentEarnings.settlementState === "SETTLED" ? (
+                  <Badge className="bg-emerald-100 hover:bg-emerald-100 text-emerald-800 border-emerald-300 font-black px-3 py-1 rounded-full text-xs">
+                    تم الصرف بالكامل 🟢
+                  </Badge>
+                ) : currentEarnings.settlementState === "PARTIAL" ? (
+                  <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800 border-amber-300 font-black px-3 py-1 rounded-full text-xs">
+                    مستحق جزئياً 🟠
+                  </Badge>
+                ) : currentEarnings.settlementState === "UNPAID" ? (
+                  <Badge className="bg-rose-100 hover:bg-rose-100 text-rose-800 border-rose-300 font-black px-3 py-1 rounded-full text-xs">
+                    بانتظار الصرف 🔴
+                  </Badge>
+                ) : null}
+              </div>
+
+              {/* Prior Unpaid Banner (if prior unpaid balances exist) */}
+              {currentEarnings.priorUnpaidAmount > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-center gap-3 text-amber-900">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <div className="text-xs sm:text-sm">
+                    <span>رصيد سابق مستحق: </span>
+                    <span className="font-black text-amber-950">
+                      {(currentEarnings.priorUnpaidAmount || 0).toFixed(2)} JOD
+                    </span>
+                    <span className="text-amber-700 text-xs block sm:inline sm:mr-2">
+                      (طلبات من أيام سابقة بانتظار صرف الإدارة)
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* 3-KPI Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-gray-50/80 rounded-2xl p-4 border border-gray-100 flex flex-col justify-between">
+                  <span className="text-xs font-bold text-gray-500">
+                    الطلبات المسلمة اليوم
+                  </span>
+                  <span className="text-2xl font-black text-gray-800 mt-1">
+                    {currentEarnings.completedOrderCount || 0}
+                  </span>
+                </div>
+
+                <div className="bg-gray-50/80 rounded-2xl p-4 border border-gray-100 flex flex-col justify-between">
+                  <span className="text-xs font-bold text-gray-500">
+                    إجمالي أرباح اليوم
+                  </span>
+                  <span className="text-2xl font-black text-emerald-600 mt-1">
+                    {(currentEarnings.totalEarnedToday || 0).toFixed(2)}{" "}
+                    <span className="text-sm font-bold text-gray-500">JOD</span>
+                  </span>
+                </div>
+
+                <div className="bg-emerald-50/90 rounded-2xl p-4 border border-emerald-200/90 shadow-sm flex flex-col justify-between">
+                  <span className="text-xs font-bold text-emerald-800">
+                    المستحق للصرف الآن
+                  </span>
+                  <span className="text-2xl font-black text-emerald-700 mt-1">
+                    {(currentEarnings.unpaidToday || 0).toFixed(2)}{" "}
+                    <span className="text-sm font-bold text-emerald-600">JOD</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Expandable Order List Toggle */}
+              {currentEarnings.todayOrders && currentEarnings.todayOrders.length > 0 ? (
+                <div className="pt-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowEarningsList((prev) => !prev)}
+                    className="w-full text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl py-2 flex items-center justify-center gap-1.5 border border-dashed border-gray-200"
+                  >
+                    <span>
+                      {showEarningsList
+                        ? "إخفاء تفاصيل طلبات اليوم"
+                        : `عرض تفاصيل طلبات اليوم المسلمة (${currentEarnings.todayOrders.length})`}
+                    </span>
+                    {showEarningsList ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </Button>
+
+                  {showEarningsList && (
+                    <div className="mt-3 space-y-2 max-h-72 overflow-y-auto pr-1">
+                      {currentEarnings.todayOrders.map((ord) => (
+                        <div
+                          key={ord._id}
+                          className="bg-gray-50/70 border border-gray-100 hover:border-gray-200 rounded-2xl p-3 flex items-center justify-between transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center font-black text-xs text-gray-700">
+                              #{ord.orderNumber}
+                            </div>
+                            <div>
+                              <div className="text-xs font-semibold text-gray-500">
+                                {ord.submittedAt
+                                  ? new Date(ord.submittedAt).toLocaleTimeString(
+                                      "ar-JO",
+                                      {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      },
+                                    )
+                                  : "-"}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-0.5">
+                                أجرة التوصيل:{" "}
+                                <span className="font-semibold text-gray-700">
+                                  {(ord.deliveryFee || 0).toFixed(2)} JOD
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className="text-left rtl:text-right">
+                              <span className="text-[11px] text-gray-400 block">
+                                حصتك
+                              </span>
+                              <span className="text-sm font-black text-emerald-600">
+                                {(ord.driverShareAmount || 0).toFixed(2)} JOD
+                              </span>
+                            </div>
+
+                            <Badge
+                              className={`text-[11px] font-bold rounded-lg px-2 py-0.5 ${
+                                ord.payoutStatus === "PAID"
+                                  ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100"
+                                  : "bg-rose-100 text-rose-800 hover:bg-rose-100"
+                              }`}
+                            >
+                              {ord.payoutStatus === "PAID"
+                                ? "تم الصرف ✓"
+                                : "مستحق"}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-center text-xs text-gray-400 pt-1">
+                  لم يتم تسليم أي طلبات في دورة اليوم التشغيلية بعد
+                </p>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ======================================================== */}
         {/* STATE 0: UNAVAILABLE (غير متاح - يجب مسح QR للبدء) */}

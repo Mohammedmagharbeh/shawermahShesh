@@ -15,6 +15,14 @@ const deliverySettingSchema = new mongoose.Schema(
       max: 5,
       required: true,
     },
+    // Globally configurable driver share percentage (0 - 100, default 75)
+    driverSharePercentage: {
+      type: Number,
+      default: 75,
+      min: 0,
+      max: 100,
+      required: true,
+    },
   },
   { timestamps: true }
 );

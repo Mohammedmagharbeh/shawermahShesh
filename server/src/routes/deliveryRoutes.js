@@ -17,6 +17,10 @@ const {
   getMyDriverStatus,
   getDriverAnalytics,
   riderLogout,
+  createDriverPayout,
+  getDriverPayouts,
+  voidDriverPayout,
+  getMyEarnings,
 } = require("../controller/deliveryController");
 
 // ==========================================
@@ -84,10 +88,42 @@ router.get(
   getDriverAnalytics
 );
 
+// 9. Driver Payout Settlement: Create payout receipt (admin, employee, cashier)
+router.post(
+  "/driver-payouts",
+  validateJWT,
+  requireRole("admin", "employee", "cashier"),
+  createDriverPayout
+);
+
+// 10. Driver Payout History: Get payouts for a driver (admin, employee, cashier)
+router.get(
+  "/driver-payouts/:driverId",
+  validateJWT,
+  requireRole("admin", "employee", "cashier"),
+  getDriverPayouts
+);
+
+// 11. Void Driver Payout: Admin only voiding with reason
+router.post(
+  "/driver-payouts/:payoutId/void",
+  validateJWT,
+  requireRole("admin"),
+  voidDriverPayout
+);
+
 // ==========================================
 // Rider / Driver Mobile Workflow Routes
 // (rider, admin)
 // ==========================================
+
+// 12. Driver: Fetch my earnings for current 4:00 AM business day
+router.get(
+  "/my-earnings",
+  validateJWT,
+  requireRole("rider", "admin"),
+  getMyEarnings
+);
 
 // 7. Get rider's own status and current assigned order
 router.get(

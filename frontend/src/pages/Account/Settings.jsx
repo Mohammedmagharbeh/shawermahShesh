@@ -8,19 +8,66 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useState } from "react";
-import { User, Phone, Palette } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Phone, Palette, Percent, Bike, Check } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useUser } from "@/contexts/UserContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import deliveryService from "@/services/deliveryService";
+import toast from "react-hot-toast";
 
 function Settings() {
   const { user, updatePhone } = useUser();
   const [phone, setPhone] = useState(user?.phone || "");
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  // Admin Delivery Commission State
+  const isAdmin = user?.role === "admin";
+  const [driverSharePercentage, setDriverSharePercentage] = useState(75);
+  const [initialDriverShare, setInitialDriverShare] = useState(75);
+  const [savingCommission, setSavingCommission] = useState(false);
+
+  useEffect(() => {
+    if (isAdmin && user?.token) {
+      deliveryService
+        .getSettings(user.token)
+        .then((res) => {
+          if (res?.settings?.driverSharePercentage !== undefined) {
+            setDriverSharePercentage(res.settings.driverSharePercentage);
+            setInitialDriverShare(res.settings.driverSharePercentage);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load delivery settings:", err);
+        });
+    }
+  }, [isAdmin, user?.token]);
+
+  const handleUpdateCommission = async () => {
+    const val = parseFloat(driverSharePercentage);
+    if (isNaN(val) || val < 0 || val > 100) {
+      toast.error("يرجى إدخال نسبة صحيحة بين 0 و 100");
+      return;
+    }
+
+    setSavingCommission(true);
+    try {
+      await deliveryService.updateSettings(
+        { driverSharePercentage: val },
+        user.token
+      );
+      setInitialDriverShare(val);
+      toast.success(`تم تحديث نسبة السائق إلى ${val}% وحصة المطعم إلى ${(100 - val).toFixed(1)}% بنجاح`);
+    } catch (err) {
+      console.error("Failed to update commission:", err);
+      toast.error("فشل حفظ إعدادات العمولة");
+    } finally {
+      setSavingCommission(false);
+    }
+  };
 
   const handlePhoneChange = (value) => {
     setPhone(value);
@@ -118,6 +165,74 @@ function Settings() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Admin Delivery Commission Settings */}
+          {isAdmin && (
+            <Card className="border-amber-200 bg-amber-50/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-amber-900">
+                  <Percent className="size-5 text-amber-600" />
+                  إعدادات عمولة التوصيل للسائقين (Admin)
+                </CardTitle>
+                <CardDescription>
+                  تحديد النسبة المئوية لأجرة التوصيل المستحقة للسائق مقابل حصة المطعم
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                  <div className="space-y-2">
+                    <Label htmlFor="driverShare" className="flex items-center gap-2 font-bold text-gray-700">
+                      <Bike className="size-4 text-emerald-600" />
+                      نسبة عمولة السائق (%)
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="driverShare"
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={driverSharePercentage}
+                        onChange={(e) => setDriverSharePercentage(e.target.value)}
+                        className="bg-white font-mono font-bold text-base"
+                        placeholder="75"
+                      />
+                      <span className="text-sm font-bold text-gray-500">%</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-gray-700">
+                      حصة المطعم المحسوبة تلقائياً (%)
+                    </Label>
+                    <div className="bg-white rounded-xl border border-gray-200 p-2.5 flex items-center justify-between">
+                      <span className="text-xs font-bold text-blue-700">حصة المطعم:</span>
+                      <span className="font-mono font-black text-blue-900 text-lg">
+                        {Math.max(
+                          0,
+                          Math.min(100, (100 - (parseFloat(driverSharePercentage) || 0)).toFixed(1))
+                        )}
+                        %
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <Button
+                    onClick={handleUpdateCommission}
+                    disabled={
+                      savingCommission ||
+                      parseFloat(driverSharePercentage) === initialDriverShare
+                    }
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6"
+                  >
+                    {savingCommission ? "جاري الحفظ..." : "حفظ إعدادات العمولة"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
