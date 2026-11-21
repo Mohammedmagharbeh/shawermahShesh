@@ -37,6 +37,7 @@ export const PRINTER_CONFIG = {
       name: "طابعة الكاشير",
       badge: "فاتورة الزبون / كاشير",
       ip: "192.168.1.54",
+      printerName: "cashier",
       port: 9100,
     },
   },
@@ -678,7 +679,14 @@ export function markRecentlyPrinted(orderKey) {
 /**
  * Dispatches a raw print buffer to a printer IP via the local print agent
  */
-export async function sendJobToPrinter(printerIp, rawUint8Array, orderNumber, orderId, force = false) {
+export async function sendJobToPrinter(
+  printerIp,
+  rawUint8Array,
+  orderNumber,
+  orderId,
+  force = false,
+  extra = {},
+) {
   const base64Data = uint8ToBase64(rawUint8Array);
   const response = await fetch(`${PRINTER_CONFIG.agentUrl}/api/print-raw`, {
     method: "POST",
@@ -690,6 +698,8 @@ export async function sendJobToPrinter(printerIp, rawUint8Array, orderNumber, or
       orderId,
       force,
       data: base64Data,
+      printerKey: extra.printerKey,
+      printerName: extra.printerName,
     }),
   });
 
@@ -779,6 +789,10 @@ export async function printCashierInvoice(order, options = {}) {
       order.sequenceNumber,
       order._id,
       force,
+      {
+        printerKey: "cashier",
+        printerName: cashierJob.printer.printerName,
+      },
     );
     return {
       success: true,
