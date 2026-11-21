@@ -32,6 +32,13 @@ export const PRINTER_CONFIG = {
       ip: "192.168.1.60",
       port: 9100,
     },
+    cashier: {
+      id: "cashier",
+      name: "طابعة الكاشير",
+      badge: "فاتورة الزبون / كاشير",
+      ip: "192.168.1.54",
+      port: 9100,
+    },
   },
 };
 
@@ -254,19 +261,28 @@ export function renderReceiptToCanvas(order, job) {
   const orderSource =
     order.source === "ishbek" ? "طلبات (اشبك - Talabat)" : "تطبيق شاورما شيش";
 
+  // Kitchen preparation printers (shawarma, snacks, burger, cafe) do NOT display any prices or totals.
+  // Only the Cashier printer displays prices and financial totals.
+  const isCashierInvoice = Boolean(job.isFullInvoice || job.printer?.id === "cashier");
+  const showPrices = isCashierInvoice;
+
   // Pre-calculate height
   let estimatedHeight = 360; // Header, info, titles, dividers
   const products = job.products || [];
 
   products.forEach((item) => {
-    estimatedHeight += 70; // Item name + Qty + Price line
+    estimatedHeight += 70; // Item name + Qty line
     if (item.selectedProtein) estimatedHeight += 24;
     if (item.isSpicy) estimatedHeight += 24;
     if (item.additions?.length > 0) estimatedHeight += 28;
     if (item.notes || order.orderNote) estimatedHeight += 30;
   });
 
-  estimatedHeight += 220; // Totals, barcode, footer
+  if (showPrices) {
+    estimatedHeight += 220; // Totals (Subtotal, Discount, Delivery fee, Grand total)
+  } else {
+    estimatedHeight += 70; // Bottom divider and footer
+  }
 
   offscreen.height = estimatedHeight;
 
@@ -358,11 +374,17 @@ export function renderReceiptToCanvas(order, job) {
   ctx.textAlign = "right";
   ctx.fillText("الصنف", width - padding, y);
 
-  ctx.textAlign = "center";
-  ctx.fillText("العدد", width / 2 + 30, y);
+  if (showPrices) {
+    ctx.textAlign = "center";
+    ctx.fillText("العدد", width / 2 + 30, y);
 
-  ctx.textAlign = "left";
-  ctx.fillText("السعر", padding, y);
+    ctx.textAlign = "left";
+    ctx.fillText("السعر", padding, y);
+  } else {
+    // For kitchen tickets without prices: show "العدد" prominently on the left
+    ctx.textAlign = "left";
+    ctx.fillText("العدد", padding + 15, y);
+  }
   y += 26;
 
   ctx.lineWidth = 1;
@@ -384,23 +406,30 @@ export function renderReceiptToCanvas(order, job) {
 
     const itemPrice = (Number(item.priceAtPurchase || 0) * (item.quantity || 1)).toFixed(2);
 
-    // Item name wrapped
+    // Item name wrapped (wider area when prices are omitted)
     ctx.font = "bold 20px Tahoma, Arial, sans-serif";
     ctx.textAlign = "right";
-    const nameLines = wrapText(ctx, itemName, contentWidth - 160);
+    const nameLines = wrapText(ctx, itemName, showPrices ? contentWidth - 160 : contentWidth - 90);
 
     nameLines.forEach((line, lIdx) => {
       ctx.fillText(line, width - padding, y);
       if (lIdx === 0) {
-        // Quantity on first line
-        ctx.textAlign = "center";
-        ctx.font = "bold 22px Arial, sans-serif";
-        ctx.fillText(String(item.quantity || 1), width / 2 + 30, y);
+        if (showPrices) {
+          // Quantity on first line
+          ctx.textAlign = "center";
+          ctx.font = "bold 22px Arial, sans-serif";
+          ctx.fillText(String(item.quantity || 1), width / 2 + 30, y);
 
-        // Price on first line
-        ctx.textAlign = "left";
-        ctx.font = "bold 19px Arial, sans-serif";
-        ctx.fillText(`${itemPrice} JOD`, padding, y);
+          // Price on first line
+          ctx.textAlign = "left";
+          ctx.font = "bold 19px Arial, sans-serif";
+          ctx.fillText(`${itemPrice} JOD`, padding, y);
+        } else {
+          // Kitchen ticket without price: large prominent quantity on left
+          ctx.textAlign = "left";
+          ctx.font = "bold 26px Arial, sans-serif";
+          ctx.fillText(`x ${item.quantity || 1}`, padding + 15, y);
+        }
 
         ctx.textAlign = "right";
         ctx.font = "bold 20px Tahoma, Arial, sans-serif";
@@ -461,51 +490,62 @@ export function renderReceiptToCanvas(order, job) {
     y += 10;
   });
 
-  // 5. Totals Section
-  const subtotal = (
-    (order.totalPrice || 0) -
-    (order.shippingAddress?.deliveryCost || 0) +
-    (order.discountAmount || 0)
-  ).toFixed(2);
+  if (showPrices) {
+    // 5. Totals Section (Only for Cashier customer invoice)
+    const subtotal = (
+      (order.totalPrice || 0) -
+      (order.shippingAddress?.deliveryCost || 0) +
+      (order.discountAmount || 0)
+    ).toFixed(2);
 
-  const drawTotalRow = (label, valStr, isBold = false, fontSize = 18) => {
-    ctx.font = `${isBold ? "bold " : ""}${fontSize}px Tahoma, Arial, sans-serif`;
-    ctx.textAlign = "right";
-    ctx.fillText(label, width - padding, y);
-    ctx.textAlign = "left";
-    ctx.fillText(valStr, padding, y);
-    y += fontSize + 8;
-  };
+    const drawTotalRow = (label, valStr, isBold = false, fontSize = 18) => {
+      ctx.font = `${isBold ? "bold " : ""}${fontSize}px Tahoma, Arial, sans-serif`;
+      ctx.textAlign = "right";
+      ctx.fillText(label, width - padding, y);
+      ctx.textAlign = "left";
+      ctx.fillText(valStr, padding, y);
+      y += fontSize + 8;
+    };
 
-  drawTotalRow("المجموع الفرعي:", `${subtotal} JOD`, false, 18);
+    drawTotalRow("المجموع الفرعي:", `${subtotal} JOD`, false, 18);
 
-  if (order.discountAmount > 0) {
-    const promoLabel = `خصم الكود${order.promoCode ? ` (${order.promoCode})` : ""}:`;
-    drawTotalRow(promoLabel, `- ${Number(order.discountAmount).toFixed(2)} JOD`, false, 18);
+    if (order.discountAmount > 0) {
+      const promoLabel = `خصم الكود${order.promoCode ? ` (${order.promoCode})` : ""}:`;
+      drawTotalRow(promoLabel, `- ${Number(order.discountAmount).toFixed(2)} JOD`, false, 18);
+    }
+
+    if (order.orderType === "delivery") {
+      const delFee = Number(order.shippingAddress?.deliveryCost || 0).toFixed(2);
+      drawTotalRow("أجور التوصيل:", `${delFee} JOD`, false, 18);
+    }
+
+    y += 6;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    y += 10;
+
+    // Grand Total
+    drawTotalRow(
+      "المجموع الكلي:",
+      `${Number(order.totalPrice || 0).toFixed(2)} JOD`,
+      true,
+      28,
+    );
+
+    y += 12;
+  } else {
+    // Kitchen preparation tickets: no prices or totals, just a clean closing divider
+    y += 4;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    y += 14;
   }
-
-  if (order.orderType === "delivery") {
-    const delFee = Number(order.shippingAddress?.deliveryCost || 0).toFixed(2);
-    drawTotalRow("أجور التوصيل:", `${delFee} JOD`, false, 18);
-  }
-
-  y += 6;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(padding, y);
-  ctx.lineTo(width - padding, y);
-  ctx.stroke();
-  y += 10;
-
-  // Grand Total
-  drawTotalRow(
-    "المجموع الكلي:",
-    `${Number(order.totalPrice || 0).toFixed(2)} JOD`,
-    true,
-    28,
-  );
-
-  y += 12;
 
   // 6. Footer
   ctx.textAlign = "center";
@@ -707,6 +747,54 @@ export async function autoPrintOrder(order, options = {}) {
   }
 
   return { success: true, jobsCount: jobs.length, results };
+}
+
+/**
+ * Prints the complete customer invoice (all items from all categories)
+ * to the Cashier printer (192.168.1.54).
+ */
+export async function printCashierInvoice(order, options = {}) {
+  if (!order) return { success: false, message: "No order provided" };
+
+  const allProducts = Array.isArray(order?.products) ? order.products : [];
+  if (allProducts.length === 0) {
+    return { success: false, message: "الطلب لا يحتوي على أصناف" };
+  }
+
+  const cashierJob = {
+    printer: PRINTER_CONFIG.printers.cashier,
+    products: allProducts,
+    isFullInvoice: true,
+    badge: PRINTER_CONFIG.printers.cashier.badge,
+  };
+
+  const force = options.force !== false; // manual print on cashier should always proceed
+
+  try {
+    const canvas = renderReceiptToCanvas(order, cashierJob);
+    const rawBytes = canvasToEscPosRaster(canvas);
+    const res = await sendJobToPrinter(
+      cashierJob.printer.ip,
+      rawBytes,
+      order.sequenceNumber,
+      order._id,
+      force,
+    );
+    return {
+      success: true,
+      printer: cashierJob.printer.name,
+      ip: cashierJob.printer.ip,
+      res,
+    };
+  } catch (err) {
+    console.error(`[ThermalPrint] Failed to print cashier invoice on ${cashierJob.printer.name}:`, err);
+    return {
+      success: false,
+      printer: cashierJob.printer.name,
+      ip: cashierJob.printer.ip,
+      error: err.message,
+    };
+  }
 }
 
 /**

@@ -6,6 +6,10 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
+  printCashierInvoice,
+  checkPrintAgentStatus,
+} from "@/utils/thermalPrinter";
+import {
   Bike,
   Package,
   Clock,
@@ -145,6 +149,25 @@ export default function DispatchQueue() {
 
   // QR Code Modal
   const [showQrModal, setShowQrModal] = useState(false);
+
+  // Cashier Print Agent & Printer Status
+  const [printAgentOnline, setPrintAgentOnline] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const checkStatus = async () => {
+      const res = await checkPrintAgentStatus();
+      if (mounted) {
+        setPrintAgentOnline(!!res?.online || !!res?.agent);
+      }
+    };
+    checkStatus();
+    const interval = setInterval(checkStatus, 15000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   // Sound alert
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -557,8 +580,8 @@ export default function DispatchQueue() {
     return parts.length > 0 ? parts.join(" - ") : "العنوان غير محدد";
   };
 
-  // Print Invoice
-  const printOrderInvoice = (order) => {
+  // Fallback Browser Print (Used if Print Agent / Thermal Printer is offline)
+  const fallbackBrowserPrint = (order) => {
     const customerPhone =
       order.userId?.phone || order.userDetails?.phone || "N/A";
     const customerName =
@@ -654,6 +677,25 @@ export default function DispatchQueue() {
     printWindow.focus();
     printWindow.print();
     printWindow.close();
+  };
+
+  // Print Invoice to Cashier Thermal Printer (192.168.1.54) with browser fallback
+  const printOrderInvoice = async (order) => {
+    if (!order) return;
+    try {
+      const res = await printCashierInvoice(order, { force: true });
+      if (res?.success) {
+        toast.success(`تم إرسال الفاتورة #${order.sequenceNumber || order._id?.slice(-6)} لطابعة الكاشير بنجاح 🖨️`);
+        return;
+      }
+      console.warn("Thermal print agent failed or offline, falling back to browser print:", res?.error);
+      toast.error(`تعذر الطباعة المباشرة على طابعة الكاشير: ${res?.error || "تأكد من تشغيل start.bat"}. جاري الفتح عبر المتصفح...`);
+      fallbackBrowserPrint(order);
+    } catch (err) {
+      console.error("Print error:", err);
+      toast.error("حدث خطأ أثناء الطباعة، جاري الفتح عبر المتصفح...");
+      fallbackBrowserPrint(order);
+    }
   };
 
   // Helper status color/text
@@ -869,6 +911,30 @@ export default function DispatchQueue() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Cashier Thermal Printer Status Badge */}
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
+                printAgentOnline
+                  ? "bg-emerald-50 border-emerald-300 text-emerald-700"
+                  : "bg-amber-50 border-amber-300 text-amber-700"
+              }`}
+              title={
+                printAgentOnline
+                  ? "طابعة الكاشير متصلة (192.168.1.54)"
+                  : "برنامج الطباعة غير متصل (تأكد من تشغيل start.bat)"
+              }
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  printAgentOnline ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                }`}
+              />
+              <Printer className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                {printAgentOnline ? "طابعة الكاشير متصلة" : "طابعة الكاشير غير متصلة"}
+              </span>
+            </div>
+
             {/* Consolidated Board Settings Popover */}
             <div className="relative" ref={settingsPopoverRef}>
               <Button
