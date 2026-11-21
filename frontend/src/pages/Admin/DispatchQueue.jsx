@@ -679,13 +679,14 @@ export default function DispatchQueue() {
     printWindow.close();
   };
 
-  // Print Invoice to Cashier Thermal Printer (192.168.1.54) with browser fallback
+  // Print Invoice to Cashier Thermal Printer(s) (192.168.1.54 / 192.168.1.53) with browser fallback
   const printOrderInvoice = async (order) => {
     if (!order) return;
     try {
       const res = await printCashierInvoice(order, { force: true });
       if (res?.success) {
-        toast.success(`تم إرسال الفاتورة #${order.sequenceNumber || order._id?.slice(-6)} لطابعة الكاشير بنجاح 🖨️`);
+        const printerNames = res.results?.filter((r) => r.success).map((r) => r.printer).join(" و ") || "طابعة الكاشير";
+        toast.success(`تم إرسال الفاتورة #${order.sequenceNumber || order._id?.slice(-6)} إلى (${printerNames}) بنجاح 🖨️`);
         return;
       }
       console.warn("Thermal print agent failed or offline, falling back to browser print:", res?.error);
@@ -920,7 +921,7 @@ export default function DispatchQueue() {
               }`}
               title={
                 printAgentOnline
-                  ? "طابعة الكاشير متصلة (192.168.1.54)"
+                  ? "طابعات الكاشير متصلة (192.168.1.54 & 192.168.1.53)"
                   : "برنامج الطباعة غير متصل (تأكد من تشغيل start.bat)"
               }
             >

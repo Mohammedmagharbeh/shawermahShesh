@@ -34,9 +34,16 @@ export const PRINTER_CONFIG = {
     },
     cashier: {
       id: "cashier",
-      name: "طابعة الكاشير",
-      badge: "فاتورة الزبون / كاشير",
+      name: "طابعة الكاشير 1",
+      badge: "فاتورة الزبون / كاشير 1",
       ip: "192.168.1.54",
+      port: 9100,
+    },
+    cashier2: {
+      id: "cashier2",
+      name: "طابعة الكاشير 2",
+      badge: "فاتورة الزبون / كاشير 2",
+      ip: "192.168.1.53",
       port: 9100,
     },
   },
@@ -262,8 +269,12 @@ export function renderReceiptToCanvas(order, job) {
     order.source === "ishbek" ? "طلبات (اشبك - Talabat)" : "تطبيق شاورما شيش";
 
   // Kitchen preparation printers (shawarma, snacks, burger, cafe) do NOT display any prices or totals.
-  // Only the Cashier printer displays prices and financial totals.
-  const isCashierInvoice = Boolean(job.isFullInvoice || job.printer?.id === "cashier");
+  // Only Cashier printers display prices and financial totals.
+  const isCashierInvoice = Boolean(
+    job.isFullInvoice ||
+    job.printer?.id === "cashier" ||
+    job.printer?.id === "cashier2"
+  );
   const showPrices = isCashierInvoice;
 
   // Pre-calculate height
@@ -751,7 +762,7 @@ export async function autoPrintOrder(order, options = {}) {
 
 /**
  * Prints the complete customer invoice (all items from all categories)
- * to the Cashier printer (192.168.1.54).
+ * to the Cashier printer(s) (192.168.1.54 / 192.168.1.53).
  */
 export async function printCashierInvoice(order, options = {}) {
   if (!order) return { success: false, message: "No order provided" };
@@ -761,40 +772,58 @@ export async function printCashierInvoice(order, options = {}) {
     return { success: false, message: "الطلب لا يحتوي على أصناف" };
   }
 
-  const cashierJob = {
-    printer: PRINTER_CONFIG.printers.cashier,
-    products: allProducts,
-    isFullInvoice: true,
-    badge: PRINTER_CONFIG.printers.cashier.badge,
-  };
+  // Determine target cashier printer(s): specified printer or all configured cashier printers
+  const targetPrinters = options.printer
+    ? [options.printer]
+    : [PRINTER_CONFIG.printers.cashier, PRINTER_CONFIG.printers.cashier2].filter(Boolean);
 
   const force = options.force !== false; // manual print on cashier should always proceed
+  const results = [];
+  let atLeastOneSuccess = false;
 
-  try {
-    const canvas = renderReceiptToCanvas(order, cashierJob);
-    const rawBytes = canvasToEscPosRaster(canvas);
-    const res = await sendJobToPrinter(
-      cashierJob.printer.ip,
-      rawBytes,
-      order.sequenceNumber,
-      order._id,
-      force,
-    );
-    return {
-      success: true,
-      printer: cashierJob.printer.name,
-      ip: cashierJob.printer.ip,
-      res,
+  for (const printer of targetPrinters) {
+    const cashierJob = {
+      printer,
+      products: allProducts,
+      isFullInvoice: true,
+      badge: printer.badge || "فاتورة الزبون",
     };
-  } catch (err) {
-    console.error(`[ThermalPrint] Failed to print cashier invoice on ${cashierJob.printer.name}:`, err);
-    return {
-      success: false,
-      printer: cashierJob.printer.name,
-      ip: cashierJob.printer.ip,
-      error: err.message,
-    };
+
+    try {
+      const canvas = renderReceiptToCanvas(order, cashierJob);
+      const rawBytes = canvasToEscPosRaster(canvas);
+      const res = await sendJobToPrinter(
+        printer.ip,
+        rawBytes,
+        order.sequenceNumber,
+        order._id,
+        force,
+      );
+      results.push({
+        success: true,
+        printer: printer.name,
+        ip: printer.ip,
+        res,
+      });
+      atLeastOneSuccess = true;
+    } catch (err) {
+      console.error(`[ThermalPrint] Failed to print cashier invoice on ${printer.name} (${printer.ip}):`, err);
+      results.push({
+        success: false,
+        printer: printer.name,
+        ip: printer.ip,
+        error: err.message,
+      });
+    }
   }
+
+  return {
+    success: atLeastOneSuccess,
+    results,
+    error: atLeastOneSuccess
+      ? null
+      : results.map((r) => `${r.printer} (${r.ip}): ${r.error}`).join(" | "),
+  };
 }
 
 /**
