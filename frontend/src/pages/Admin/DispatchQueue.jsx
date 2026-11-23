@@ -827,41 +827,79 @@ export default function DispatchQueue() {
   }, [availableAreas, selectedArea]);
 
   // Orders displayed in the queue list
-  const displayedOrders = useMemo(() => {
-    return orders
-      .filter((order) => {
-        const norm = String(order.status || "").toLowerCase();
-        if (["processing", "pending", "cancelled", "canceled"].includes(norm)) {
-          return false;
-        }
-        if (!matchStatus(order.status, statusTab)) {
-          return false;
-        }
-        const isPickup = order.orderType === "pickup";
-        if (orderTypeFilter === "delivery" && isPickup) return false;
-        if (orderTypeFilter === "pickup" && !isPickup) return false;
+  // const displayedOrders = useMemo(() => {
+  //   return orders
+  //     .filter((order) => {
+  //       const norm = String(order.status || "").toLowerCase();
+  //       if (["processing", "pending", "cancelled", "canceled"].includes(norm)) {
+  //         return false;
+  //       }
+  //       if (!matchStatus(order.status, statusTab)) {
+  //         return false;
+  //       }
+  //       const isPickup = order.orderType === "pickup";
+  //       if (orderTypeFilter === "delivery" && isPickup) return false;
+  //       if (orderTypeFilter === "pickup" && !isPickup) return false;
 
-        // Area Filter
-        if (selectedArea !== "all") {
-          const areaName = getOrderAreaName(order);
-          if (areaName !== selectedArea) return false;
-        }
+  //       // Area Filter
+  //       if (selectedArea !== "all") {
+  //         const areaName = getOrderAreaName(order);
+  //         if (areaName !== selectedArea) return false;
+  //       }
 
-        return true;
-      })
-      .sort((a, b) => {
-        const normA = String(a.status || "").toLowerCase();
-        const normB = String(b.status || "").toLowerCase();
-        const isCompletedA = ["delivered", "submitted"].includes(normA);
-        const isCompletedB = ["delivered", "submitted"].includes(normB);
-        if (isCompletedA || isCompletedB) {
-          const timeA = new Date(a.submittedAt || a.updatedAt || a.createdAt).getTime();
-          const timeB = new Date(b.submittedAt || b.updatedAt || b.createdAt).getTime();
-          return timeB - timeA;
-        }
-        return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-      });
-  }, [orders, statusTab, orderTypeFilter, selectedArea]);
+  //       return true;
+  //     })
+  //     .sort((a, b) => {
+  //       const normA = String(a.status || "").toLowerCase();
+  //       const normB = String(b.status || "").toLowerCase();
+  //       const isCompletedA = ["delivered", "submitted"].includes(normA);
+  //       const isCompletedB = ["delivered", "submitted"].includes(normB);
+  //       if (isCompletedA || isCompletedB) {
+  //         const timeA = new Date(a.submittedAt || a.updatedAt || a.createdAt).getTime();
+  //         const timeB = new Date(b.submittedAt || b.updatedAt || b.createdAt).getTime();
+  //         return timeB - timeA;
+  //       }
+  //       return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+  //     });
+  // }, [orders, statusTab, orderTypeFilter, selectedArea]);
+
+  // Orders displayed in the queue list
+const displayedOrders = useMemo(() => {
+  return orders
+    .filter((order) => {
+      const norm = String(order.status || "").toLowerCase();
+      if (["processing", "pending", "cancelled", "canceled"].includes(norm)) {
+        return false;
+      }
+      if (!matchStatus(order.status, statusTab)) {
+        return false;
+      }
+      const isPickup = order.orderType === "pickup";
+      if (orderTypeFilter === "delivery" && isPickup) return false;
+      if (orderTypeFilter === "pickup" && !isPickup) return false;
+
+      // Area Filter
+      if (selectedArea !== "all") {
+        const areaName = getOrderAreaName(order);
+        if (areaName !== selectedArea) return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      const normA = String(a.status || "").toLowerCase();
+      const normB = String(b.status || "").toLowerCase();
+      const isCompletedA = ["delivered", "submitted"].includes(normA);
+      const isCompletedB = ["delivered", "submitted"].includes(normB);
+      if (isCompletedA || isCompletedB) {
+        const timeA = new Date(a.submittedAt || a.updatedAt || a.createdAt).getTime();
+        const timeB = new Date(b.submittedAt || b.updatedAt || b.createdAt).getTime();
+        return timeB - timeA;
+      }
+      // الأحدث أولاً
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+}, [orders, statusTab, orderTypeFilter, selectedArea]);
 
   // Check if any driver at the branch has an unacknowledged 3-minute pickup delay
   const hasAnyOverduePickup = useMemo(() => {
