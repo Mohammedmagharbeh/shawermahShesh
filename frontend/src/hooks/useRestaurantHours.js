@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 
 // وقت الإغلاق: من 2:30 صباحاً لغاية 10:00 صباحاً
 const CLOSE_START_MINUTES = 2 * 60 + 30; // 2:30 => 150
-const CLOSE_END_MINUTES = 10 * 60; // 10:00 => 600
-
+const CLOSE_END_MINUTES = 9 * 60; // 9:00 => 540
 function getIsOpenNow() {
   const now = new Date();
   const minutesSinceMidnight = now.getHours() * 60 + now.getMinutes();
