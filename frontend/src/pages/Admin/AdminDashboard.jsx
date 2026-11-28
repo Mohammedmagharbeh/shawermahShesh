@@ -313,7 +313,12 @@ function AdminDashboard() {
 
       return matchesDate && matchesStatus && matchesPayment && matchesSearch;
     })
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    .sort((a, b) => {
+  const seqA = Number(a.sequenceNumber) || 0;
+  const seqB = Number(b.sequenceNumber) || 0;
+  return seqB - seqA; // الأكبر رقماً (الأحدث) فوق
+});
 
   const exportToExcel = () => {
     const data = [];
